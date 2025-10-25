@@ -98,57 +98,82 @@ export default class ManagerDashboard extends Controller {
     }
 
     private loadManagerData(): void {
-        // For demo purposes, show all employees
-        // In real app, filter by manager's team
-        const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
-        
-        // Check if employees model is loaded
-        if (!employeesModel || !employeesModel.getData() || !employeesModel.getData().employees) {
-            // If not loaded, wait and try again
-            setTimeout(() => {
-                this.loadManagerData();
-            }, 500);
+        // Get current manager's information
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData();
+        const currentManagerName = currentUser?.name;
+
+        console.log("Current manager:", currentManagerName);
+
+        if (!currentManagerName) {
+            console.error("Manager name not found in currentUser model");
+            MessageToast.show("Manager information not available. Please login again.");
             return;
         }
+
+        // Get all employees and filter by manager
+        const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
+        const employeesData = employeesModel?.getData();
         
-        const employeesData = employeesModel.getData();
-        let employees = employeesData.employees || [];
+        console.log("Loading manager data...", employeesData);
         
-        // Enhance employees data with computed properties
+        let allEmployees = employeesData?.employees || [];
+        
+        // Filter employees who belong to this manager
+        // Only show actual employees (ID starts with EMP) who report to this manager
+        let employees = allEmployees.filter((emp: any) => {
+            const isEmployee = emp.id && emp.id.startsWith("EMP");
+            const hasManager = emp.manager && emp.manager.trim() !== "";
+            const reportsToThisManager = emp.manager === currentManagerName;
+            
+            console.log(`Checking ${emp.id} (${emp.name}): isEmployee=${isEmployee}, hasManager=${hasManager}, reportsTo=${emp.manager}, match=${reportsToThisManager}`);
+            
+            return isEmployee && hasManager && reportsToThisManager;
+        });
+
+        console.log(`Employees reporting to ${currentManagerName}:`, employees);
+
+        // Add totalSkills count from skills model
         employees = employees.map((emp: any) => {
             const empSkills = this.getEmployeeSkills(emp);
             return {
                 ...emp,
-                totalSkills: empSkills.length,
-                totalProjects: emp.totalProjects || Math.floor(Math.random() * 5) + 1,
-                skills: empSkills
+                totalSkills: empSkills.length
             };
         });
-        
-        // Update the model with enhanced data
-        employeesModel.setData({ employees });
-        
-        // Set the model on the view
-        this.getView()?.setModel(employeesModel, "employees");
-        
-        // Update analytics with enhanced data
+
+        // Sort employees by name alphabetically
+        employees.sort((a: any, b: any) => {
+            const nameA = (a.name || '').toUpperCase();
+            const nameB = (b.name || '').toUpperCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        console.log("Employees with skill counts (sorted):", employees);
+
+        // Create local model for employees
+        const localEmployeesModel = new JSONModel({ employees });
+        this.getView()?.setModel(localEmployeesModel, "managerEmployees");
+
+        // Update analytics for this manager's team
         this.updateAnalytics();
-        
-        console.log("Loaded employees data:", employees);
     }
 
     private updateAnalytics(): void {
-        const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
-        const employees = employeesModel?.getData()?.employees || [];
+        // Get employees from the manager-specific model (already filtered)
+        const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
+        const employees = managerEmployeesModel?.getData()?.employees || [];
         
-        console.log("Updating analytics with employees:", employees);
+        console.log("Updating analytics with manager's employees:", employees);
         
         if (employees.length === 0) {
             console.warn("No employees data available for analytics");
+            // Set default values when no employees
+            this.setAnalyticsDefaults();
             return;
         }
         
-        // Calculate statistics
+        // Calculate statistics for manager's team only
         const totalEmployees = employees.length;
         const availableEmployees = employees.filter((emp: any) => !emp.working_on_project).length;
         const busyEmployees = employees.filter((emp: any) => emp.working_on_project).length;
@@ -184,12 +209,64 @@ export default class ManagerDashboard extends Controller {
         const avgSkills = totalEmployees > 0 ? Math.round(totalSkills / totalEmployees) : 0;
         updateControl("avgSkillsPerEmployee", avgSkills.toString(), "setText");
         
-        // Calculate most common skill level (mock)
-        const skillLevels = ["Beginner", "Intermediate", "Proficient", "Expert"];
-        const randomLevel = skillLevels[Math.floor(Math.random() * skillLevels.length)];
-        updateControl("commonSkillLevel", randomLevel, "setText");
+        // Calculate most common skill level based on actual skill data
+        const skillsModel = this.getOwnerComponent()?.getModel("skills") as JSONModel;
+        const allSkills = skillsModel?.getData()?.skills || [];
+        const teamSkills = allSkills.filter((skill: any) => 
+            employees.some((emp: any) => emp.id === skill.employeeId)
+        );
+        const commonLevel = this.getCommonSkillLevel(teamSkills);
+        updateControl("commonSkillLevel", commonLevel, "setText");
         
-        console.log("Analytics updated:", { totalEmployees, availableEmployees, busyEmployees, totalSkills, utilizationRate, avgSkills });
+        console.log("Analytics updated for manager's team:", { 
+            totalEmployees, availableEmployees, busyEmployees, totalSkills, 
+            utilizationRate, avgSkills, commonLevel 
+        });
+    }
+
+    private setAnalyticsDefaults(): void {
+        const updateControl = (id: string, value: number | string, method: string = 'setNumber') => {
+            const control = this.byId(id) as any;
+            if (control) {
+                if (method === 'setNumber') {
+                    control.setNumber(value);
+                } else if (method === 'setText') {
+                    control.setText(value.toString());
+                } else if (method === 'setPercentValue') {
+                    control.setPercentValue(value);
+                }
+            }
+        };
+        
+        updateControl("totalEmployeesCount", 0);
+        updateControl("availableEmployeesCount", 0);
+        updateControl("busyEmployeesCount", 0);
+        updateControl("totalSkillsCount", 0);
+        updateControl("utilizationRate", "0%", "setText");
+        updateControl("utilizationProgress", 0, "setPercentValue");
+        updateControl("avgSkillsPerEmployee", "0", "setText");
+        updateControl("commonSkillLevel", "N/A", "setText");
+    }
+
+    private getCommonSkillLevel(skills: any[]): string {
+        if (skills.length === 0) return "N/A";
+        
+        const levelCounts: { [key: string]: number } = {};
+        skills.forEach((skill: any) => {
+            const level = skill.proficiencyLevel || "Beginner";
+            levelCounts[level] = (levelCounts[level] || 0) + 1;
+        });
+        
+        let maxLevel = "Beginner";
+        let maxCount = 0;
+        for (const [level, count] of Object.entries(levelCounts)) {
+            if (count > maxCount) {
+                maxCount = count;
+                maxLevel = level;
+            }
+        }
+        
+        return maxLevel;
     }
 
     public onViewEmployeeDetails(event: Event): void {
@@ -290,48 +367,96 @@ export default class ManagerDashboard extends Controller {
             return;
         }
 
-        // Get employee data for search
-        const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
-        const allEmployees = employeesModel?.getData()?.employees || [];
+        // Get current manager's name for filtering
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData();
+        const currentManagerName = currentUser?.name;
 
-        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel });
+        // Get employee data for search - filter by manager if scope is MyTeam
+        const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
+        let allEmployees = employeesModel?.getData()?.employees || [];
+        
+        // Filter by scope - ensure only actual employees (no managers)
+        if (searchScope === "MyTeam" && currentManagerName) {
+            allEmployees = allEmployees.filter((emp: any) => {
+                const isEmployee = emp.id && emp.id.startsWith("EMP");
+                const hasManager = emp.manager && emp.manager.trim() !== "";
+                const reportsToThisManager = emp.manager === currentManagerName;
+                return isEmployee && hasManager && reportsToThisManager;
+            });
+        } else {
+            // For "All" scope, only show actual employees
+            allEmployees = allEmployees.filter((emp: any) => 
+                emp.id && emp.id.startsWith("EMP")
+            );
+        }
+
+        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel, currentManagerName });
         console.log("Available employees for search:", allEmployees);
 
-        // Simulate search results with matching logic
-        const searchResults = this.performSkillSearch(allEmployees, searchSkills, searchScope, experienceLevel);
+        // Perform skill-based search using CSV data
+        const searchResults = this.performSkillSearch(allEmployees, searchSkills, experienceLevel);
         console.log("Search results generated:", searchResults);
 
         // Display results
         this.displaySearchResults(searchResults);
     }
 
-    private performSkillSearch(employees: any[], searchSkills: string[], scope: string, experienceLevel: string): any[] {
-        // This is a mock implementation - in real scenario, you'd call a backend service
+    private performSkillSearch(employees: any[], searchSkills: string[], experienceLevel: string): any[] {
+        // Get all skills from the skills model (loaded from CSV)
+        const skillsModel = this.getOwnerComponent()?.getModel("skills") as JSONModel;
+        const allSkills = skillsModel?.getData()?.skills || [];
+        
+        console.log("Searching with skills model:", allSkills);
+        
+        // Search employees who have matching skills in skills.csv
         const results = employees.filter(emp => {
-            // Apply scope filter (simplified for demo)
-            if (scope === "MyTeam" && emp.team !== "CSI") {
-                return false; // Assume current manager manages CSI team
-            }
-            
-            // Simulate skill matching (in real app, you'd check emp.skills array)
+            // Get this employee's skills from the skills CSV
             const empSkills = this.getEmployeeSkills(emp);
+            
+            // Check if employee has any of the searched skills
             const matchingSkills = empSkills.filter(skill => 
                 searchSkills.some(searchSkill => 
                     skill.toLowerCase().includes(searchSkill)
                 )
             );
             
-            // Apply experience filter if specified
-            if (experienceLevel && !this.matchesExperienceLevel(emp, experienceLevel)) {
-                return false;
+            if (matchingSkills.length === 0) {
+                return false; // No skill match
             }
             
-            return matchingSkills.length > 0;
+            // Apply experience filter if specified
+            if (experienceLevel) {
+                // Get the proficiency levels for matched skills
+                const empSkillObjects = allSkills.filter((s: any) => 
+                    s.employeeId === emp.id && 
+                    matchingSkills.some(ms => s.skillName.toLowerCase().includes(ms.toLowerCase()))
+                );
+                
+                // Check if any matched skill meets the experience requirement
+                const meetsExperience = empSkillObjects.some((skill: any) => 
+                    this.matchesExperienceRequirement(skill.proficiencyLevel, experienceLevel)
+                );
+                
+                return meetsExperience;
+            }
+            
+            return true; // Has matching skills
         }).map(emp => {
             const matchingSkillsArray = this.getMatchingSkills(emp, searchSkills);
+            
+            // Get proficiency levels for matched skills
+            const matchedSkillDetails = allSkills
+                .filter((s: any) => 
+                    s.employeeId === emp.id && 
+                    matchingSkillsArray.some(ms => s.skillName.toLowerCase() === ms.toLowerCase())
+                )
+                .map((s: any) => `${s.skillName} (${s.proficiencyLevel})`)
+                .join(", ");
+            
             const result = {
                 ...emp,
-                matchingSkills: matchingSkillsArray.join(", "),
+                matchingSkills: matchedSkillDetails || matchingSkillsArray.join(", "),
                 totalMatchingSkills: matchingSkillsArray.length,
                 matchScore: this.calculateMatchScore(emp, searchSkills)
             };
@@ -341,6 +466,21 @@ export default class ManagerDashboard extends Controller {
 
         // Sort by match score
         return results.sort((a, b) => b.matchScore - a.matchScore);
+    }
+
+    private matchesExperienceRequirement(proficiencyLevel: string, requiredLevel: string): boolean {
+        const levels: { [key: string]: number } = {
+            "Beginner": 1,
+            "Intermediate": 2,
+            "Proficient": 3,
+            "Advanced": 4,
+            "Expert": 5
+        };
+        
+        const skillLevel = levels[proficiencyLevel] || 1;
+        const reqLevel = levels[requiredLevel] || 1;
+        
+        return skillLevel >= reqLevel;
     }
 
     private getEmployeeSkills(employee: any): string[] {
@@ -370,25 +510,10 @@ export default class ManagerDashboard extends Controller {
         const empSkills = this.getEmployeeSkills(employee);
         const matchingSkills = this.getMatchingSkills(employee, searchSkills);
         const matchRatio = matchingSkills.length / searchSkills.length;
-        const skillDepth = matchingSkills.length / empSkills.length;
+        const skillDepth = empSkills.length > 0 ? matchingSkills.length / empSkills.length : 0;
         
         // Calculate score based on match ratio and skill depth
         return Math.round((matchRatio * 0.7 + skillDepth * 0.3) * 100);
-    }
-
-    private matchesExperienceLevel(employee: any, experienceLevel: string): boolean {
-        // Mock experience level matching based on totalSkills
-        const skillCount = employee.totalSkills || 0;
-        switch (experienceLevel) {
-            case "Beginner":
-                return skillCount <= 3;
-            case "Intermediate":
-                return skillCount >= 4 && skillCount <= 6;
-            case "Proficient":
-                return skillCount >= 7;
-            default:
-                return true;
-        }
     }
 
     private displaySearchResults(results: any[]): void {
