@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkillSphere Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .credentials { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>SkillSphere Login Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Credentials</h2>
+        
+        <h3>Manager Login:</h3>
+        <div class="credentials">
+            <strong>Manager ID:</strong> MGR001<br>
+            <strong>Password:</strong> manager123<br>
+            <strong>Name:</strong> Alice Johnson
+        </div>
+        
+        <div class="credentials">
+            <strong>Manager ID:</strong> MGR002<br>
+            <strong>Password:</strong> manager123<br>
+            <strong>Name:</strong> Bob Wilson
+        </div>
+        
+        <h3>Employee Login:</h3>
+        <div class="credentials">
+            <strong>Employee ID:</strong> EMP001<br>
+            <strong>Password:</strong> password123<br>
+            <strong>Name:</strong> John Doe
+        </div>
+        
+        <div class="credentials">
+            <strong>Employee ID:</strong> EMP002<br>
+            <strong>Password:</strong> password123<br>
+            <strong>Name:</strong> Jane Smith
+        </div>
+        
+        <div class="credentials">
+            <strong>Employee ID:</strong> EMP003<br>
+            <strong>Password:</strong> password123<br>
+            <strong>Name:</strong> Mike Johnson
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Application Links</h2>
+        <p><a href="webapp/index.html" target="_blank">Open SkillSphere Application</a></p>
+        <p><a href="webapp/index.html#/employee-login" target="_blank">Direct Employee Login</a></p>
+        <p><a href="webapp/index.html#/manager-login" target="_blank">Direct Manager Login</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Expected Behavior</h2>
+        <ul>
+            <li class="success">✓ Application should load without errors</li>
+            <li class="success">✓ Login forms should display correctly</li>
+            <li class="success">✓ Valid credentials should allow login</li>
+            <li class="success">✓ Invalid credentials should show error message</li>
+            <li class="success">✓ Successful login should navigate to dashboard</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Debugging Information</h2>
+        <p>Open browser developer tools (F12) and check the console for:</p>
+        <ul>
+            <li>CSV loading messages</li>
+            <li>User data parsing</li>
+            <li>Login attempt logs</li>
+            <li>Any error messages</li>
+        </ul>
+    </div>
+</body>
+</html>

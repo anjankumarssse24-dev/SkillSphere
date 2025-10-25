@@ -1,0 +1,213 @@
+<mvc:View
+    controllerName="skillsphere.controller.EmployeeDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:uxap="sap.uxap">
+
+    <uxap:ObjectPageLayout id="employeeObjectPage">
+        <uxap:headerTitle>
+            <uxap:ObjectPageHeader id="employeeHeader" objectTitle="{currentUser>/name}" objectSubtitle="Employee Dashboard">
+                <uxap:actions>
+                    <m:Button id="logoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
+                </uxap:actions>
+            </uxap:ObjectPageHeader>
+        </uxap:headerTitle>
+
+        <uxap:sections>
+            <!-- Profile Section -->
+            <uxap:ObjectPageSection id="profileSection" title="Profile Information" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="profileSubSection">
+                        <uxap:blocks>
+                            <f:Card id="profileCard" class="sapUiMediumMargin" width="94%">
+                                <f:content>
+                                    <m:VBox id="profileVBox" class="sapUiMediumMargin">
+                                        <m:HBox id="profileHBox1" class="sapUiSmallMarginBottom">
+                                            <m:Label id="empIdLabel" text="Employee ID: " class="sapUiSmallMarginEnd"/>
+                                            <m:Text id="empIdText" text="{currentUser>/id}"/>
+                                        </m:HBox>
+                                        <m:HBox id="profileHBox2" class="sapUiSmallMarginBottom">
+                                            <m:Label id="teamLabel" text="Team: " class="sapUiSmallMarginEnd"/>
+                                            <m:Text id="teamText" text="{currentUser>/team}"/>
+                                        </m:HBox>
+                                        <m:HBox id="profileHBox3" class="sapUiSmallMarginBottom">
+                                            <m:Label id="managerLabel" text="Manager: " class="sapUiSmallMarginEnd"/>
+                                            <m:Text id="managerText" text="{currentUser>/manager}"/>
+                                        </m:HBox>
+                                        <m:HBox id="profileHBox4">
+                                            <m:Label id="emailLabel" text="Email: " class="sapUiSmallMarginEnd"/>
+                                            <m:Text id="emailText" text="{currentUser>/email}"/>
+                                        </m:HBox>
+                                    </m:VBox>
+                                </f:content>
+                            </f:Card>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Employee Profile Management Section -->
+            <uxap:ObjectPageSection id="profileManagementSection" title="Profile Management" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="profileManagementSubSection">
+                        <uxap:blocks>
+                            <f:Card id="profileManagementCard" class="sapUiMediumMargin" width="94%">
+                                <f:content>
+                                    <m:VBox id="profileManagementVBox" class="sapUiMediumMargin">
+                                        <m:Title text="Update Your Professional Profile" level="H3" class="sapUiMediumMarginBottom"/>
+                                        
+                                        <!-- Specialization Field -->
+                                        <m:VBox id="specializationBox" class="sapUiSmallMarginBottom">
+                                            <m:Label id="specializationLabel" text="Specialization:" class="sapUiSmallMarginBottom" required="true"/>
+                                            <m:Select id="specializationSelect" selectedKey="{profile>/specialization}" width="100%">
+                                                <core:Item key="ABAP Developer" text="ABAP Developer"/>
+                                                <core:Item key="Data Science" text="Data Science"/>
+                                                <core:Item key="AI/Machine Learning" text="AI/Machine Learning"/>
+                                                <core:Item key="SAPUI5 Developer" text="SAPUI5 Developer"/>
+                                                <core:Item key="SAP HANA Developer" text="SAP HANA Developer"/>
+                                                <core:Item key="SAP BTP Developer" text="SAP BTP Developer"/>
+                                                <core:Item key="SAP Integration" text="SAP Integration"/>
+                                                <core:Item key="SAP Analytics" text="SAP Analytics"/>
+                                                <core:Item key="SAP Security" text="SAP Security"/>
+                                                <core:Item key="SAP Basis" text="SAP Basis"/>
+                                                <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                            </m:Select>
+                                        </m:VBox>
+
+                                        <!-- Current Working Status -->
+                                        <m:VBox id="workingStatusBox" class="sapUiSmallMarginBottom">
+                                            <m:CheckBox id="workingProjectCheckbox" 
+                                                text="Currently working on a project" 
+                                                selected="{profile>/working_on_project}"
+                                                select="onToggleProjectStatus"/>
+                                        </m:VBox>
+
+                                        <!-- Project Dates (shown only when working on project) -->
+                                        <m:VBox id="projectDatesBox" class="sapUiSmallMarginBottom" 
+                                            visible="{profile>/working_on_project}">
+                                            <m:Label id="projectStartLabel" text="Project Start Date:" class="sapUiSmallMarginBottom"/>
+                                            <m:DatePicker id="projectStartDate" 
+                                                value="{profile>/project_start_date}" 
+                                                width="100%" 
+                                                class="sapUiSmallMarginBottom"/>
+                                            
+                                            <m:Label id="projectEndLabel" text="Project End Date:" class="sapUiSmallMarginBottom"/>
+                                            <m:DatePicker id="projectEndDate" 
+                                                value="{profile>/project_end_date}" 
+                                                width="100%"/>
+                                        </m:VBox>
+
+                                        <!-- Save Button -->
+                                        <m:Button id="saveProfileBtn" 
+                                            text="Save Profile" 
+                                            type="Emphasized" 
+                                            icon="sap-icon://save" 
+                                            press="onSaveProfile" 
+                                            class="sapUiMediumMarginTop"/>
+                                    </m:VBox>
+                                </f:content>
+                            </f:Card>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Skills Section -->
+            <uxap:ObjectPageSection id="skillsSection" title="My Skills" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="skillsSubSection">
+                        <uxap:blocks>
+                            <m:VBox id="skillsVBox" class="sapUiMediumMargin">
+                                <m:Toolbar id="skillsToolbar">
+                                    <m:Title id="skillsTitle" text="Skills"/>
+                                    <m:ToolbarSpacer id="skillsToolbarSpacer"/>
+                                    <m:Button id="addSkillBtn" text="Add Skill" icon="sap-icon://add" type="Emphasized" press="onAddSkill"/>
+                                </m:Toolbar>
+                                
+                                <m:Table id="skillsTable" items="{skills>/skills}" class="sapUiSmallMarginTop">
+                                    <m:columns>
+                                        <m:Column id="skillNameCol">
+                                            <m:Text id="skillNameHeader" text="Skill Name"/>
+                                        </m:Column>
+                                        <m:Column id="proficiencyCol">
+                                            <m:Text id="proficiencyHeader" text="Proficiency Level"/>
+                                        </m:Column>
+                                        <m:Column id="skillActionsCol" width="150px">
+                                            <m:Text id="skillActionsHeader" text="Actions"/>
+                                        </m:Column>
+                                    </m:columns>
+                                    <m:items>
+                                        <m:ColumnListItem id="skillItem">
+                                            <m:Text id="skillNameText" text="{skills>skillName}"/>
+                                            <m:ObjectStatus id="proficiencyStatus" text="{skills>proficiencyLevel}" 
+                                                state="{path: 'skills>proficiencyLevel', formatter: '.formatProficiencyState'}"/>
+                                            <m:HBox id="skillActionsHBox">
+                                                <m:Button id="editSkillBtn" icon="sap-icon://edit" press="onEditSkill" tooltip="Edit Skill"/>
+                                                <m:Button id="deleteSkillBtn" icon="sap-icon://delete" type="Reject" press="onDeleteSkill" tooltip="Delete Skill"/>
+                                            </m:HBox>
+                                        </m:ColumnListItem>
+                                    </m:items>
+                                </m:Table>
+                            </m:VBox>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Projects Section -->
+            <uxap:ObjectPageSection id="projectsSection" title="My Projects" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="projectsSubSection">
+                        <uxap:blocks>
+                            <m:VBox id="projectsVBox" class="sapUiMediumMargin">
+                                <m:Toolbar id="projectsToolbar">
+                                    <m:Title id="projectsTitle" text="Projects"/>
+                                    <m:ToolbarSpacer id="projectsToolbarSpacer"/>
+                                    <m:Button id="addProjectBtn" text="Add Project" icon="sap-icon://add" type="Emphasized" press="onAddProject"/>
+                                </m:Toolbar>
+                                
+                                <m:Table id="projectsTable" items="{projects>/projects}" class="sapUiSmallMarginTop">
+                                    <m:columns>
+                                        <m:Column id="projectNameCol">
+                                            <m:Text id="projectNameHeader" text="Project Name"/>
+                                        </m:Column>
+                                        <m:Column id="roleCol">
+                                            <m:Text id="roleHeader" text="Role"/>
+                                        </m:Column>
+                                        <m:Column id="durationCol">
+                                            <m:Text id="durationHeader" text="Duration"/>
+                                        </m:Column>
+                                        <m:Column id="projectActionsCol" width="150px">
+                                            <m:Text id="projectActionsHeader" text="Actions"/>
+                                        </m:Column>
+                                    </m:columns>
+                                    <m:items>
+                                        <m:ColumnListItem id="projectItem">
+                                            <m:Text id="projectNameText" text="{projects>projectName}"/>
+                                            <m:Text id="roleText" text="{projects>role}"/>
+                                            <m:Text id="durationText" text="{projects>duration}"/>
+                                            <m:HBox id="projectActionsHBox">
+                                                <m:Button id="editProjectBtn" icon="sap-icon://edit" press="onEditProject" tooltip="Edit Project"/>
+                                                <m:Button id="deleteProjectBtn" icon="sap-icon://delete" type="Reject" press="onDeleteProject" tooltip="Delete Project"/>
+                                            </m:HBox>
+                                        </m:ColumnListItem>
+                                    </m:items>
+                                </m:Table>
+                            </m:VBox>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+
+    <!-- Dialogs -->
+    <core:Fragment fragmentName="skillsphere.view.dialogs.AddSkillDialog" type="XML"/>
+    <core:Fragment fragmentName="skillsphere.view.dialogs.EditSkillDialog" type="XML"/>
+    <core:Fragment fragmentName="skillsphere.view.dialogs.AddProjectDialog" type="XML"/>
+    <core:Fragment fragmentName="skillsphere.view.dialogs.EditProjectDialog" type="XML"/>
+
+</mvc:View>

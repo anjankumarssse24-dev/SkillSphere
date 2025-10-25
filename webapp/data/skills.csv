@@ -1,0 +1,12 @@
+skillId,skillName,category,employeeId,proficiencyLevel,yearsExperience,certificationStatus
+SKILL001,SAPUI5,Frontend Development,EMP001,Advanced,6,Certified
+SKILL001,SAPUI5,Frontend Development,EMP002,Intermediate,4,In Progress
+SKILL002,HANA,Database,EMP003,Advanced,8,Certified
+SKILL002,HANA,Database,EMP001,Intermediate,3,Not Certified
+SKILL003,Data Science,Analytics,EMP002,Expert,10,Certified
+SKILL003,Data Science,Analytics,EMP005,Advanced,7,Certified
+SKILL005,TypeScript,Frontend Development,EMP002,Intermediate,4,Certified
+SKILL006,BTP,Cloud Platform,EMP005,Advanced,6,Certified
+SKILL007,Testing,QA,EMP006,Intermediate,5,Certified
+SKL_1761405621261_pqh2w379m,Java,Technical,EMP001,Beginner,0,None
+SKL_1761408755646_fkrxn54ol,Python,Technical,EMP001,Proficient,0,None

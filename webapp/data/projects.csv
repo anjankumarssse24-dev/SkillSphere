@@ -1,0 +1,9 @@
+projectId,employeeId,projectName,role,startDate,endDate,status,description,duration
+PROJ001,EMP001,E-Commerce Platform,Frontend Developer,2024-01-15,2024-07-15,Completed,Developed responsive e-commerce platform using SAPUI5,6 months
+PROJ002,EMP001,CRM Integration,Full Stack Developer,2024-08-01,2024-12-01,Active,Integrating CRM system with SAP backend,4 months
+PROJ003,EMP002,Data Analytics Dashboard,Data Analyst,2024-02-01,2024-10-01,Completed,Built analytics dashboard for business intelligence,8 months
+PROJ004,EMP002,Reporting System,Senior Analyst,2024-10-15,2025-01-15,Active,Automated reporting system using Python and SQL,3 months
+PROJ005,EMP003,HANA Migration,HANA Developer,2024-03-01,2024-09-01,Completed,Migrated legacy database to SAP HANA,6 months
+PROJ006,EMP004,Procurement Module,Procurement Specialist,2024-05-01,2024-11-01,Active,Developed Ariba procurement module,6 months
+PROJ007,EMP005,BTP Cloud Migration,BTP Developer,2024-04-01,2024-10-01,Completed,Migrated applications to SAP BTP,6 months
+PROJ008,EMP006,Automated Testing Suite,Test Engineer,2024-06-01,2024-12-01,Active,Created comprehensive testing automation framework,6 months

@@ -1,0 +1,202 @@
+/* SkillSphere Custom Styles */
+
+/* Landing Page Styles */
+.skillSphereMainCard {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.skillSphereLoginCard {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* New Card Styles for Landing Page */
+.skillSphereCard {
+    margin: 1rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.skillSphereCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Dashboard Styles */
+.skillSphereDashboard {
+    background-color: #f7f7f7;
+}
+
+/* Button Styles */
+.skillSphereButton {
+    border-radius: 4px;
+}
+
+/* Enhanced Button Styling */
+.sapMBtn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.sapMBtnEmphasized {
+    background: linear-gradient(135deg, #0070f2, #005bb5);
+    border: none;
+    color: white;
+}
+
+.sapMBtnEmphasized:hover {
+    background: linear-gradient(135deg, #005bb5, #004494);
+    transform: translateY(-1px);
+}
+
+/* Table Styles */
+.skillSphereTable {
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+/* Color Theme */
+.skillSpherePrimary {
+    color: #0070f2;
+}
+
+.skillSphereSecondary {
+    color: #6c757d;
+}
+
+/* Icon Styling */
+.sapUiIcon {
+    transition: all 0.3s ease;
+}
+
+.sapUiIcon:hover {
+    transform: scale(1.1);
+}
+
+/* Panel Header Styling */
+.sapMPanelHdr {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-bottom: 2px solid #0070f2;
+    font-weight: 600;
+    color: #0070f2;
+}
+
+/* FlexBox Spacing */
+.sapMFlexBox > * {
+    margin: 0.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .skillSphereMainCard, .skillSphereCard {
+        width: 90% !important;
+        margin: 0.5rem auto;
+    }
+    
+    .skillSphereLoginCard {
+        width: 90% !important;
+        margin: 0 auto;
+    }
+    
+    .sapMFlexBox {
+        flex-direction: column !important;
+        align-items: center !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .skillSphereCard {
+        width: 95% !important;
+        margin: 0.25rem auto;
+    }
+}
+
+/* Fiori Theme Overrides */
+.sapMPage {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.sapMPanel {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+}
+
+/* Custom animations */
+.skillSphereAnimated {
+    transition: all 0.3s ease-in-out;
+}
+
+.skillSphereAnimated:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Status indicators */
+.skillSphereProficiencyBadge {
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.skillSphereProficiencyBadge.proficient {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.skillSphereProficiencyBadge.intermediate {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.skillSphereProficiencyBadge.beginner {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Loading states */
+.skillSphereLoading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Success/Error states */
+.skillSphereSuccess {
+    border-left: 4px solid #28a745;
+    background-color: #f8fff9;
+}
+
+.skillSphereError {
+    border-left: 4px solid #dc3545;
+    background-color: #fff8f8;
+}
+
+/* Custom spacing */
+.skillSphereSpacingSmall {
+    margin: 0.5rem;
+}
+
+.skillSphereSpacingMedium {
+    margin: 1rem;
+}
+
+.skillSphereSpacingLarge {
+    margin: 2rem;
+}
+
+/* Title Styling */
+.sapMTitle {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Text Styling */
+.sapMText {
+    color: #6c757d;
+    line-height: 1.5;
+}

@@ -1,0 +1,63 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Dialog
+        title="Edit Skill"
+        contentWidth="400px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Skill Name:" />
+                <Input
+                    value="{editSkill>/skillName}"
+                    placeholder="Enter skill name" />
+                
+                <Label text="Category:" />
+                <Input
+                    value="{editSkill>/category}"
+                    placeholder="Enter category (e.g., Technical, Soft Skills)" />
+                
+                <Label text="Proficiency Level:" required="true" />
+                <Select
+                    id="editProficiencySelect"
+                    selectedKey="{editSkill>/proficiency}"
+                    change="onEditProficiencyChange"
+                    width="100%">
+                    <core:Item key="" text="-- Select Proficiency Level --" />
+                    <core:Item key="Beginner" text="Beginner" />
+                    <core:Item key="Intermediate" text="Intermediate" />
+                    <core:Item key="Proficient" text="Proficient" />
+                </Select>
+                
+                <Label text="Years of Experience:" />
+                <Input
+                    id="editYearsInput"
+                    value="{editSkill>/yearsExperience}"
+                    type="Number"
+                    placeholder="Enter years of experience" />
+                
+                <Label text="Certification Status:" />
+                <Select
+                    id="editCertificationSelect"
+                    selectedKey="{editSkill>/certificationStatus}"
+                    change="onEditCertificationChange"
+                    width="100%">
+                    <core:Item key="" text="-- Select Status --" />
+                    <core:Item key="None" text="None" />
+                    <core:Item key="In Progress" text="In Progress" />
+                    <core:Item key="Certified" text="Certified" />
+                </Select>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onSaveEditedSkill" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseEditSkillDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

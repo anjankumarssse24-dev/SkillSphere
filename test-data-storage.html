@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkillSphere Data Storage Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .button { background: #0070f3; color: white; padding: 10px 20px; border: none; margin: 5px; cursor: pointer; }
+        .button:hover { background: #0051a2; }
+        .danger { background: #dc3545; }
+        .danger:hover { background: #a71e2a; }
+        .success { background: #28a745; }
+        .success:hover { background: #1e7e34; }
+        .code { background: #f5f5f5; padding: 10px; font-family: monospace; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>SkillSphere Data Storage Test</h1>
+    
+    <div class="test-section">
+        <h2>Data Storage System</h2>
+        <p>The SkillSphere application now uses <strong>persistent data storage</strong> that saves all changes to the browser's localStorage.</p>
+        
+        <h3>Key Features:</h3>
+        <ul>
+            <li>✅ <strong>Persistent</strong>: Data survives browser restarts</li>
+            <li>✅ <strong>Real-time</strong>: Changes are saved immediately</li>
+            <li>✅ <strong>Automatic</strong>: No manual save required</li>
+            <li>✅ <strong>Export/Import</strong>: Backup and restore data</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Data Storage</h2>
+        <p>Open the SkillSphere application and test these features:</p>
+        
+        <h3>1. Login and Add Data</h3>
+        <ol>
+            <li>Login with: <strong>EMP001</strong> / <strong>password123</strong></li>
+            <li>Navigate to any dashboard</li>
+            <li>Try adding new skills, projects, or users</li>
+            <li>Refresh the page - your data should persist!</li>
+        </ol>
+        
+        <h3>2. Test Data Persistence</h3>
+        <ol>
+            <li>Make changes in the application</li>
+            <li>Close the browser completely</li>
+            <li>Reopen the application</li>
+            <li>Your changes should still be there!</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>Browser Console Commands</h2>
+        <p>Open browser developer tools (F12) and try these commands:</p>
+        
+        <h3>Check Current Data</h3>
+        <div class="code">
+// View all stored data
+console.log(dataManager.loadData());
+
+// View specific data
+const data = dataManager.loadData();
+console.log('Users:', data.users);
+console.log('Skills:', data.skills);
+console.log('Projects:', data.projects);
+        </div>
+        
+        <h3>Add New Data</h3>
+        <div class="code">
+// Add new user
+dataManager.addUser({
+  id: "EMP007",
+  name: "Test User",
+  password: "password123",
+  role: "Employee",
+  team: "S4HANA",
+  subTeam: "Development",
+  manager: "Alice Johnson"
+});
+
+// Add new skill
+dataManager.addSkill({
+  id: "SKILL" + Date.now(),
+  employeeId: "EMP001",
+  skillName: "Test Skill",
+  proficiencyLevel: "Beginner",
+  category: "Technical",
+  yearsExperience: 1
+});
+        </div>
+        
+        <h3>Data Management</h3>
+        <div class="code">
+// Export data to JSON file
+dataManager.exportData();
+
+// Clear all data
+dataManager.clearAllData();
+
+// Check data size
+console.log('Data size:', JSON.stringify(dataManager.loadData()).length, 'bytes');
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Data Storage Location</h2>
+        <p>Your data is stored in:</p>
+        <ul>
+            <li><strong>Location</strong>: Browser's localStorage</li>
+            <li><strong>Key</strong>: <code>skillsphere_data</code></li>
+            <li><strong>Format</strong>: JSON object</li>
+            <li><strong>Persistence</strong>: Survives browser restarts</li>
+        </ul>
+        
+        <h3>View Stored Data</h3>
+        <p>To view your stored data:</p>
+        <ol>
+            <li>Open browser developer tools (F12)</li>
+            <li>Go to Application tab</li>
+            <li>Expand Local Storage</li>
+            <li>Click on your domain</li>
+            <li>Look for <code>skillsphere_data</code></li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>Data Structure</h2>
+        <p>The stored data follows this structure:</p>
+        <div class="code">
+{
+  "users": [
+    {
+      "id": "EMP001",
+      "name": "John Doe",
+      "password": "password123",
+      "role": "Employee",
+      "team": "S4HANA",
+      "subTeam": "Development",
+      "manager": "Alice Johnson"
+    }
+  ],
+  "employees": [...],
+  "skills": [...],
+  "projects": [...]
+}
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Important Notes</h2>
+        <ul>
+            <li>⚠️ <strong>Browser-specific</strong>: Data is stored per browser</li>
+            <li>⚠️ <strong>Local only</strong>: Data doesn't sync across devices</li>
+            <li>⚠️ <strong>No backup</strong>: Data is only stored locally</li>
+            <li>⚠️ <strong>Storage limit</strong>: localStorage has size limits</li>
+        </ul>
+        
+        <h3>Best Practices</h3>
+        <ul>
+            <li>✅ Export data regularly for backup</li>
+            <li>✅ Use the same browser for consistency</li>
+            <li>✅ Clear data if you encounter issues</li>
+            <li>✅ Check console for data storage logs</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Application Links</h2>
+        <p><a href="webapp/index.html" target="_blank">Open SkillSphere Application</a></p>
+        <p><a href="webapp/index.html#/employee-login" target="_blank">Employee Login</a></p>
+        <p><a href="webapp/index.html#/manager-login" target="_blank">Manager Login</a></p>
+    </div>
+</body>
+</html>

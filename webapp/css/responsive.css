@@ -1,0 +1,163 @@
+/* SkillSphere Responsive Design Enhancements */
+
+/* Mobile First Approach - Base styles for mobile */
+.skillsphere-responsive-container {
+    padding: 0.5rem;
+    margin: 0.25rem;
+}
+
+/* Responsive FlexBox enhancements */
+.skillsphere-flex-responsive {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.skillsphere-flex-item {
+    flex: 1 1 auto;
+    min-width: 250px;
+    max-width: 100%;
+}
+
+/* Analytics cards responsive behavior */
+.skillsphere-analytics-card {
+    flex: 1 1 auto;
+    min-width: 200px;
+    max-width: 300px;
+    margin: 0.5rem;
+}
+
+/* Search section responsive behavior */
+.skillsphere-search-field {
+    flex: 1 1 auto;
+    min-width: 200px;
+    margin: 0.25rem;
+}
+
+/* Table responsive enhancements */
+.skillsphere-responsive-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Panel responsive behavior */
+.skillsphere-responsive-panel {
+    margin: 0.5rem 0;
+    flex: 1 1 auto;
+    min-width: 300px;
+}
+
+/* Tablet and larger screens */
+@media (min-width: 768px) {
+    .skillsphere-responsive-container {
+        padding: 1rem;
+        margin: 0.5rem;
+    }
+    
+    .skillsphere-analytics-card {
+        min-width: 220px;
+        max-width: 280px;
+    }
+    
+    .skillsphere-search-field {
+        min-width: 250px;
+    }
+}
+
+/* Desktop and larger screens */
+@media (min-width: 1024px) {
+    .skillsphere-responsive-container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+    
+    .skillsphere-analytics-card {
+        min-width: 240px;
+        max-width: 320px;
+    }
+    
+    .skillsphere-search-field {
+        min-width: 300px;
+    }
+    
+    .skillsphere-responsive-panel {
+        min-width: 400px;
+    }
+}
+
+/* Large desktop screens */
+@media (min-width: 1200px) {
+    .skillsphere-analytics-card {
+        max-width: 350px;
+    }
+    
+    .skillsphere-responsive-panel {
+        min-width: 500px;
+    }
+}
+
+/* Extra large screens */
+@media (min-width: 1440px) {
+    .skillsphere-responsive-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .skillsphere-analytics-card {
+        max-width: 400px;
+    }
+}
+
+/* Accessibility and UI/UX enhancements */
+.skillsphere-responsive-container {
+    transition: all 0.3s ease-in-out;
+}
+
+.skillsphere-analytics-card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.skillsphere-analytics-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus and interaction states */
+.skillsphere-flex-item:focus-within {
+    outline: 2px solid #0854a0;
+    outline-offset: 2px;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+    .skillsphere-analytics-card:hover {
+        box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .skillsphere-responsive-container,
+    .skillsphere-analytics-card {
+        transition: none;
+    }
+    
+    .skillsphere-analytics-card:hover {
+        transform: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .skillsphere-responsive-container {
+        margin: 0;
+        padding: 0.5rem;
+    }
+    
+    .skillsphere-analytics-card {
+        break-inside: avoid;
+        margin: 0.25rem 0;
+    }
+}

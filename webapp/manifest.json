@@ -1,0 +1,154 @@
+{
+  "_version": "1.76.0",
+  "sap.app": {
+    "id": "skillsphere",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.18.6",
+      "toolsId": "fd101b39-cbcf-40fd-9970-2632c49b7ae7"
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.140.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.ui.table": {},
+        "sap.viz": {},
+        "sap.uxap": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "skillsphere.i18n.i18n"
+        }
+      },
+      "users": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/users.json"
+      },
+      "employees": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/employees.json"
+      },
+      "skills": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/skills.json"
+      },
+      "projects": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/projects.json"
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        },
+        {
+          "uri": "css/responsive.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "skillsphere.view",
+        "async": true
+      },
+      "routes": [
+        {
+          "name": "Landing",
+          "pattern": "",
+          "target": ["TargetLanding"]
+        },
+        {
+          "name": "EmployeeLogin",
+          "pattern": "employee-login",
+          "target": ["TargetEmployeeLogin"]
+        },
+        {
+          "name": "ManagerLogin",
+          "pattern": "manager-login",
+          "target": ["TargetManagerLogin"]
+        },
+        {
+          "name": "EmployeeDashboard",
+          "pattern": "employee-dashboard/{employeeId}",
+          "target": ["TargetEmployeeDashboard"]
+        },
+        {
+          "name": "ManagerDashboard",
+          "pattern": "manager-dashboard/{managerId}",
+          "target": ["TargetManagerDashboard"]
+        }
+      ],
+      "targets": {
+        "TargetLanding": {
+          "id": "Landing",
+          "name": "Landing"
+        },
+        "TargetEmployeeLogin": {
+          "id": "EmployeeLogin",
+          "name": "EmployeeLogin"
+        },
+        "TargetManagerLogin": {
+          "id": "ManagerLogin",
+          "name": "ManagerLogin"
+        },
+        "TargetEmployeeDashboard": {
+          "id": "EmployeeDashboard",
+          "name": "EmployeeDashboard"
+        },
+        "TargetManagerDashboard": {
+          "id": "ManagerDashboard",
+          "name": "ManagerDashboard"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "skillsphere.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}

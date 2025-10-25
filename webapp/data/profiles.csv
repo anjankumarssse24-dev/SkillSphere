@@ -1,0 +1,7 @@
+employeeId,specialization,working_on_project,project_start_date,project_end_date,lastUpdated
+EMP001,SAP BTP Developer,true,2024-08-13,2024-10-22,2025-10-25T15:56:04.206Z
+EMP002,Data Scientist,true,2024-10-15,2025-01-15,2024-10-25T10:30:00.000Z
+EMP003,HANA Developer,false,,,2024-10-25T10:30:00.000Z
+EMP004,Procurement Specialist,true,2024-05-01,2024-11-01,2024-10-25T10:30:00.000Z
+EMP005,BTP Developer,false,,,2024-10-25T10:30:00.000Z
+EMP006,Test Engineer,true,2024-06-01,2024-12-01,2024-10-25T10:30:00.000Z

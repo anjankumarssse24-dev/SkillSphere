@@ -1,0 +1,287 @@
+﻿<mvc:View
+    controllerName="skillsphere.controller.ManagerDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:uxap="sap.uxap">
+
+    <uxap:ObjectPageLayout id="managerObjectPage">
+        <uxap:headerTitle>
+            <uxap:ObjectPageHeader id="managerHeader" objectTitle="{currentUser>/name}" objectSubtitle="Manager Dashboard">
+                <uxap:actions>
+                    <m:Button id="managerLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
+                </uxap:actions>
+            </uxap:ObjectPageHeader>
+        </uxap:headerTitle>
+
+        <uxap:sections>
+            <!-- Employee Search Section -->
+            <uxap:ObjectPageSection id="searchSection" title="Employee Search" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="searchSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="searchPanel" headerText="Advanced Employee Search" width="95%" class="sapUiMediumMargin">
+                                <m:content>
+                                    <m:VBox class="sapUiMediumMargin">
+                                        <m:Label text="Skills (Enter multiple skills):" class="sapUiSmallMarginBottom"/>
+                                        <m:MultiInput id="skillsSearchInput" 
+                                            placeholder="e.g., JavaScript, Python, SAP UI5 - Press Enter to add each skill"
+                                            class="sapUiMediumMarginBottom"
+                                            width="100%"
+                                            tokenUpdate="onSkillTokenUpdate"
+                                            submit="onSkillSubmit"
+                                            liveChange="onSkillLiveChange"/>
+                                        
+                                        <m:FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                                            <m:VBox class="sapUiResponsiveMargin sapUiLargeMarginEnd" width="auto">
+                                                <m:Label text="Search Scope:" class="sapUiSmallMarginBottom"/>
+                                                <m:Select id="searchScope" selectedKey="MyTeam" width="15rem">
+                                                    <core:Item key="MyTeam" text="My Team"/>
+                                                    <core:Item key="OtherTeams" text="Other Teams"/>
+                                                    <core:Item key="EntireOrganization" text="Entire Organization"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                            <m:VBox class="sapUiResponsiveMargin" width="auto">
+                                                <m:Label text="Experience Level:" class="sapUiSmallMarginBottom"/>
+                                                <m:Select id="experienceLevel" width="15rem">
+                                                    <core:Item key="" text="Any Level"/>
+                                                    <core:Item key="Beginner" text="Beginner"/>
+                                                    <core:Item key="Intermediate" text="Intermediate"/>
+                                                    <core:Item key="Proficient" text="Proficient"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                        </m:FlexBox>
+                                        
+                                        <m:Button id="searchButton" text="Search Employees" type="Emphasized" icon="sap-icon://search" press="onSearchEmployees" class="sapUiSmallMarginTop"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- My Team Section -->
+            <uxap:ObjectPageSection id="teamSection" title="My Team" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="teamSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="teamPanel" headerText="Team Members" class="sapUiMediumMargin" width="95%">
+                                <m:content>
+                                    <m:Table id="teamTable" items="{employees>/employees}" class="sapUiResponsiveMargin" mode="SingleSelect" fixedLayout="false">
+                                        <m:columns>
+                                            <m:Column minScreenWidth="Phone" demandPopin="true">
+                                                <m:Text text="Employee Name"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                <m:Text text="Employee ID"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                <m:Text text="Team"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Desktop" demandPopin="true">
+                                                <m:Text text="Specialization"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Current Status"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Actions"/>
+                                            </m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem press="onViewEmployeeDetails">
+                                                <m:Text text="{employees>name}"/>
+                                                <m:Text text="{employees>id}"/>
+                                                <m:Text text="{employees>team}"/>
+                                                <m:Text text="{employees>specialization}"/>
+                                                <m:ObjectStatus 
+                                                    text="{path: 'employees>working_on_project', formatter: '.formatWorkingStatus'}"
+                                                    state="{path: 'employees>working_on_project', formatter: '.formatWorkingStatusState'}"/>
+                                                <m:Button text="View" icon="sap-icon://detail-view" press="onViewEmployeeDetails" type="Ghost"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Search Results Section -->
+            <uxap:ObjectPageSection id="searchResultsSection" title="Search Results" titleUppercase="false" visible="{searchResults>/visible}">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="searchResultsSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="searchResultsPanel" headerText="{searchResults>/headerText}" class="sapUiMediumMargin" width="95%">
+                                <m:content>
+                                    <m:Table id="searchResultsTable" items="{searchResults>/results}" class="sapUiResponsiveMargin" mode="SingleSelect" fixedLayout="false">
+                                        <m:columns>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Employee Name"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                <m:Text text="Employee ID"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                <m:Text text="Team"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Desktop" demandPopin="true">
+                                                <m:Text text="Matching Skills"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true">
+                                                <m:Text text="Status"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Match Score"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Actions"/>
+                                            </m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem press="onViewSearchResult">
+                                                <m:Text text="{searchResults>name}"/>
+                                                <m:Text text="{searchResults>id}"/>
+                                                <m:Text text="{searchResults>team}"/>
+                                                <m:Text text="{searchResults>matchingSkills}" class="sapThemeHighlight-asColor"/>
+                                                <m:ObjectStatus 
+                                                    text="{path: 'searchResults>working_on_project', formatter: '.formatWorkingStatus'}"
+                                                    state="{path: 'searchResults>working_on_project', formatter: '.formatWorkingStatusState'}"/>
+                                                <m:ProgressIndicator percentValue="{searchResults>matchScore}" displayValue="{searchResults>matchScore}%" width="80px"/>
+                                                <m:Button text="View Details" icon="sap-icon://detail-view" press="onViewSearchResult" type="Ghost"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Team Analytics Section -->
+            <uxap:ObjectPageSection id="analyticsSection" title="Team Analytics" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="analyticsSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="analyticsPanel" headerText="Team Analytics" class="sapUiMediumMargin" width="95%">
+                                <m:content>
+                                    <m:VBox class="sapUiMediumMargin">
+                                        <m:FlexBox wrap="Wrap" class="sapUiMediumMarginBottom" justifyContent="SpaceAround">
+                                            <m:Panel class="sapUiResponsiveMargin sapUiLargeMarginEnd sapUiMediumMarginBottom" width="auto" headerText="Total Team Members">
+                                                <m:content>
+                                                    <m:VBox class="sapUiMediumMargin" alignItems="Center" width="10rem">
+                                                        <m:ObjectNumber id="totalEmployeesCount" number="0" unit="employees" emphasized="true"/>
+                                                    </m:VBox>
+                                                </m:content>
+                                            </m:Panel>
+                                            
+                                            <m:Panel class="sapUiResponsiveMargin sapUiLargeMarginEnd sapUiMediumMarginBottom" width="auto" headerText="Available Resources">
+                                                <m:content>
+                                                    <m:VBox class="sapUiMediumMargin" alignItems="Center" width="10rem">
+                                                        <m:ObjectNumber id="availableEmployeesCount" number="0" unit="available" emphasized="true" state="Success"/>
+                                                    </m:VBox>
+                                                </m:content>
+                                            </m:Panel>
+                                            
+                                            <m:Panel class="sapUiResponsiveMargin sapUiMediumMarginBottom" width="auto" headerText="On Projects">
+                                                <m:content>
+                                                    <m:VBox class="sapUiMediumMargin" alignItems="Center" width="10rem">
+                                                        <m:ObjectNumber id="busyEmployeesCount" number="0" unit="working" emphasized="true" state="Error"/>
+                                                    </m:VBox>
+                                                </m:content>
+                                            </m:Panel>
+                                        </m:FlexBox>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+
+    <!-- Employee Details Dialog -->
+    <m:Dialog id="employeeDetailsDialog" title="Employee Details" contentWidth="700px" contentHeight="600px" resizable="true" draggable="true">
+        <m:content>
+            <m:VBox class="sapUiMediumMargin">
+                <!-- Basic Information Panel -->
+                <m:Panel class="sapUiSmallMarginBottom" headerText="Basic Information" expandable="false">
+                    <m:content>
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:FlexBox wrap="Wrap" class="sapUiTinyMarginBottom">
+                                <m:VBox class="sapUiMediumMarginEnd" width="48%">
+                                    <m:Label text="Name:" class="sapUiTinyMarginBottom sapUiMediumText"/>
+                                    <m:Text id="dialogEmployeeName" text="" class="sapUiMediumMarginBottom sapUiLargeText sapThemeHighlight-asTextColor"/>
+                                    <m:Label text="Employee ID:" class="sapUiTinyMarginBottom sapUiMediumText"/>
+                                    <m:Text id="dialogEmployeeId" text="" class="sapUiMediumMarginBottom sapUiMediumText"/>
+                                </m:VBox>
+                                <m:VBox width="48%">
+                                    <m:Label text="Team:" class="sapUiTinyMarginBottom sapUiMediumText"/>
+                                    <m:Text id="dialogEmployeeTeam" text="" class="sapUiMediumMarginBottom sapUiMediumText"/>
+                                    <m:Label text="Specialization:" class="sapUiTinyMarginBottom sapUiMediumText"/>
+                                    <m:Text id="dialogEmployeeSpecialization" text="" class="sapUiMediumMarginBottom sapUiMediumText sapThemeHighlight-asTextColor"/>
+                                </m:VBox>
+                            </m:FlexBox>
+                        </m:VBox>
+                    </m:content>
+                </m:Panel>
+                
+                <!-- Skills Information Panel -->
+                <m:Panel class="sapUiSmallMarginBottom" headerText="Skills Portfolio" expandable="false">
+                    <m:content>
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:Label text="Technical Skills:" class="sapUiTinyMarginBottom sapUiMediumText"/>
+                            <m:FlexBox id="dialogEmployeeSkills" class="sapUiTinyMarginBottom" wrap="Wrap"/>
+                            <m:FlexBox class="sapUiTinyMarginTop">
+                                <m:Label text="Total Skills: " class="sapUiMediumMarginEnd sapUiMediumText"/>
+                                <m:Text id="dialogTotalSkills" text="" class="sapUiMediumText sapUiLargeBold"/>
+                            </m:FlexBox>
+                        </m:VBox>
+                    </m:content>
+                </m:Panel>
+                
+                <!-- Current Status Panel -->
+                <m:Panel class="sapUiSmallMarginBottom" headerText="Current Status" expandable="false">
+                    <m:content>
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:FlexBox class="sapUiTinyMarginBottom" alignItems="Center">
+                                <m:Label text="Work Status: " class="sapUiMediumMarginEnd sapUiMediumText"/>
+                                <m:ObjectStatus id="dialogWorkStatus" text="" state="None"/>
+                            </m:FlexBox>
+                            <m:FlexBox class="sapUiTinyMarginBottom" alignItems="Center">
+                                <m:Label text="Active Projects: " class="sapUiMediumMarginEnd sapUiMediumText"/>
+                                <m:ObjectNumber id="dialogActiveProjects" number="0" unit="projects" emphasized="true"/>
+                            </m:FlexBox>
+                        </m:VBox>
+                    </m:content>
+                </m:Panel>
+                
+                <!-- Match Information Panel (for search results) -->
+                <m:Panel id="dialogMatchPanel" class="sapUiSmallMarginBottom" headerText="Search Match Details" visible="false" expandable="false">
+                    <m:content>
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:FlexBox class="sapUiTinyMarginBottom" alignItems="Center">
+                                <m:Label text="Match Score: " class="sapUiMediumMarginEnd sapUiMediumText"/>
+                                <m:ProgressIndicator id="dialogMatchScore" percentValue="0" displayValue="0%" width="150px" class="sapUiMediumMarginEnd"/>
+                                <m:Text text="{path: 'searchResults>matchScore', formatter: '.formatMatchScoreText'}" class="sapUiTinyText"/>
+                            </m:FlexBox>
+                            <m:FlexBox class="sapUiTinyMarginBottom">
+                                <m:Label text="Matching Skills: " class="sapUiMediumMarginEnd sapUiMediumText"/>
+                                <m:Text id="dialogMatchingSkills" text="" class="sapThemeHighlight-asTextColor"/>
+                            </m:FlexBox>
+                        </m:VBox>
+                    </m:content>
+                </m:Panel>
+            </m:VBox>
+        </m:content>
+        <m:buttons>
+            <m:Button text="Contact Employee" type="Emphasized" icon="sap-icon://email" press="onContactEmployee"/>
+            <m:Button text="Close" press="onCloseEmployeeDialog"/>
+        </m:buttons>
+    </m:Dialog>
+</mvc:View>

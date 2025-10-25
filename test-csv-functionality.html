@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SkillSphere CSV Functionality Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .button { background: #0070f3; color: white; padding: 10px 20px; border: none; margin: 5px; cursor: pointer; }
+        .button:hover { background: #0051a2; }
+        .success { color: green; }
+        .error { color: red; }
+        .code { background: #f5f5f5; padding: 10px; font-family: monospace; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>SkillSphere CSV Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2>CSV Data Loading System</h2>
+        <p>The SkillSphere application now supports <strong>both CSV and persistent data storage</strong>:</p>
+        
+        <h3>Data Loading Priority:</h3>
+        <ol>
+            <li>✅ <strong>First run</strong>: Loads from CSV files automatically</li>
+            <li>✅ <strong>Subsequent runs</strong>: Loads from localStorage (persistent data)</li>
+            <li>✅ <strong>Manual reload</strong>: Can reload from CSV files anytime</li>
+            <li>✅ <strong>Fallback</strong>: Uses default data if CSV fails</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>CSV File Structure</h2>
+        <p>Required CSV files in <code>webapp/data/</code> directory:</p>
+        
+        <h3>users.csv</h3>
+        <div class="code">
+id,name,password,role,team,subTeam,manager
+EMP001,John Doe,password123,Employee,S4HANA,Development,Alice Johnson
+EMP002,Jane Smith,password123,Employee,SuccessFactors,Analytics,Bob Wilson
+MGR001,Alice Johnson,manager123,Manager,S4HANA,Management,
+        </div>
+        
+        <h3>employees.csv</h3>
+        <div class="code">
+id,name,team,subTeam,manager,email,totalSkills,totalProjects,specialization
+EMP001,John Doe,S4HANA,Development,Alice Johnson,john.doe@company.com,5,3,SAPUI5 Developer
+EMP002,Jane Smith,SuccessFactors,Analytics,Bob Wilson,jane.smith@company.com,7,2,Data Scientist
+        </div>
+        
+        <h3>skills.csv</h3>
+        <div class="code">
+skillId,skillName,category,employeeId,proficiencyLevel,yearsExperience,certificationStatus
+SKILL001,SAPUI5,Frontend Development,EMP001,Advanced,6,Certified
+SKILL002,HANA,Database,EMP003,Advanced,8,Certified
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test CSV Functionality</h2>
+        <p>Open the SkillSphere application and test these features:</p>
+        
+        <h3>1. First Time Loading</h3>
+        <ol>
+            <li>Clear browser localStorage: <code>localStorage.clear()</code></li>
+            <li>Refresh the application</li>
+            <li>Check console for CSV loading messages</li>
+            <li>Verify data is loaded from CSV files</li>
+        </ol>
+        
+        <h3>2. Persistent Data Loading</h3>
+        <ol>
+            <li>Make changes in the application</li>
+            <li>Refresh the page</li>
+            <li>Data should persist (loaded from localStorage)</li>
+            <li>CSV files should not be loaded again</li>
+        </ol>
+        
+        <h3>3. Manual CSV Reload</h3>
+        <ol>
+            <li>Modify CSV files with new data</li>
+            <li>Use browser console commands to reload</li>
+            <li>Verify new data is loaded</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h2>Browser Console Commands</h2>
+        <p>Open browser developer tools (F12) and try these commands:</p>
+        
+        <h3>Check Current Data</h3>
+        <div class="code">
+// View all stored data
+console.log(dataManager.loadData());
+
+// Check if data is from CSV or localStorage
+const data = dataManager.loadData();
+console.log('Data source:', data ? 'localStorage' : 'CSV files');
+        </div>
+        
+        <h3>Reload from CSV</h3>
+        <div class="code">
+// Reload data from CSV files
+dataManager.reloadFromCSV().then(data => {
+    console.log('CSV data reloaded:', data);
+});
+
+// Clear data and reload from CSV
+dataManager.clearAllData();
+dataManager.reloadFromCSV();
+        </div>
+        
+        <h3>Check CSV File Status</h3>
+        <div class="code">
+// Check if CSV files are accessible
+fetch('data/users.csv')
+    .then(response => console.log('Users CSV:', response.ok))
+    .catch(error => console.error('Users CSV error:', error));
+
+fetch('data/employees.csv')
+    .then(response => console.log('Employees CSV:', response.ok))
+    .catch(error => console.error('Employees CSV error:', error));
+
+fetch('data/skills.csv')
+    .then(response => console.log('Skills CSV:', response.ok))
+    .catch(error => console.error('Skills CSV error:', error));
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Expected Console Output</h2>
+        <p>You should see these messages in the console:</p>
+        
+        <h3>First Time Loading</h3>
+        <div class="code">
+No persistent data found, loading from CSV files
+Loading data from CSV files...
+Raw CSV text (first 200 chars): id,name,password,role,team,subTeam,manager
+Parsed CSV data: [Array of objects]
+Processed users: [Array of user objects]
+Users loaded from CSV: 8
+Employees loaded from CSV: 8
+Skills loaded from CSV: 10
+Projects loaded from JSON: 5
+CSV data loaded and saved to persistent storage
+        </div>
+        
+        <h3>Subsequent Loading</h3>
+        <div class="code">
+Loaded persistent data from localStorage
+All models initialized
+Users: 8
+Employees: 8
+Skills: 10
+Projects: 5
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Troubleshooting</h2>
+        
+        <h3>CSV Files Not Found</h3>
+        <ul>
+            <li>Check if CSV files exist in <code>webapp/data/</code> directory</li>
+            <li>Verify file names: <code>users.csv</code>, <code>employees.csv</code>, <code>skills.csv</code></li>
+            <li>Check file permissions and accessibility</li>
+        </ul>
+        
+        <h3>CSV Parsing Errors</h3>
+        <ul>
+            <li>Verify CSV format and headers</li>
+            <li>Check for special characters and encoding</li>
+            <li>Ensure consistent line endings</li>
+        </ul>
+        
+        <h3>Empty Data After CSV Load</h3>
+        <ul>
+            <li>Check CSV file content</li>
+            <li>Verify headers match expected format</li>
+            <li>Check console for parsing errors</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h2>Application Links</h2>
+        <p><a href="webapp/index.html" target="_blank">Open SkillSphere Application</a></p>
+        <p><a href="webapp/index.html#/employee-login" target="_blank">Employee Login</a></p>
+        <p><a href="webapp/index.html#/manager-login" target="_blank">Manager Login</a></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>CSV Management Features</h2>
+        <ul>
+            <li>✅ <strong>Automatic loading</strong>: CSV data loaded on first run</li>
+            <li>✅ <strong>Persistent storage</strong>: Data saved to localStorage</li>
+            <li>✅ <strong>Manual reload</strong>: Can reload from CSV anytime</li>
+            <li>✅ <strong>Data export</strong>: Export current data to CSV</li>
+            <li>✅ <strong>Error handling</strong>: Graceful fallback to default data</li>
+            <li>✅ <strong>Status checking</strong>: Verify CSV file accessibility</li>
+        </ul>
+    </div>
+</body>
+</html>
