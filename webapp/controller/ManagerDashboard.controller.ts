@@ -154,7 +154,7 @@ export default class ManagerDashboard extends Controller {
         }
     }
 
-    private loadManagerData(): void {
+    private async loadManagerData(): Promise<void> {
         // Get current manager's information
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
@@ -190,14 +190,21 @@ export default class ManagerDashboard extends Controller {
 
         console.log(`Employees reporting to ${currentManagerName} (${currentManagerId}):`, employees);
 
-        // Add totalSkills count from skills model
-        employees = employees.map((emp: any) => {
+        // Load profile data for each employee and merge
+        employees = await Promise.all(employees.map(async (emp: any) => {
             const empSkills = this.getEmployeeSkills(emp);
+            
+            // Load profile data from API/CSV
+            let profileData = await this.loadEmployeeProfileData(emp.employeeId || emp.id);
+            
             return {
                 ...emp,
-                totalSkills: empSkills.length
+                totalSkills: empSkills.length,
+                working_on_project: profileData?.working_on_project || false,
+                project_start_date: profileData?.project_start_date || '',
+                project_end_date: profileData?.project_end_date || ''
             };
-        });
+        }));
 
         // Sort employees by name alphabetically
         employees.sort((a: any, b: any) => {
@@ -206,7 +213,7 @@ export default class ManagerDashboard extends Controller {
             return nameA.localeCompare(nameB);
         });
 
-        console.log("Employees with skill counts (sorted):", employees);
+        console.log("Employees with skill counts and profile data (sorted):", employees);
 
         // Create local model for employees
         const localEmployeesModel = new JSONModel({ employees });
@@ -214,6 +221,36 @@ export default class ManagerDashboard extends Controller {
 
         // Update analytics for this manager's team
         this.updateAnalytics();
+    }
+
+    /**
+     * Load employee profile data from API/CSV
+     */
+    private async loadEmployeeProfileData(employeeId: string): Promise<any> {
+        try {
+            // Try to load from API first
+            const response = await fetch(`http://localhost:3000/api/profiles/${employeeId}`);
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const profile = result.data;
+                    // Parse boolean string from CSV
+                    return {
+                        ...profile,
+                        working_on_project: profile.working_on_project === 'true' || profile.working_on_project === true
+                    };
+                }
+            }
+        } catch (error) {
+            console.log(`Profile not found for ${employeeId}, using defaults`);
+        }
+        
+        // Return default profile if not found
+        return {
+            working_on_project: false,
+            project_start_date: '',
+            project_end_date: ''
+        };
     }
 
     private updateAnalytics(): void {
