@@ -1,0 +1,3 @@
+managerId,name,team,subTeam,email,totalSkills,totalProjects,specialization
+MGR001,Alice Johnson,S4HANA,Management,alice.johnson@company.com,10,5,S4HANA Expert
+MGR002,Bob Wilson,SuccessFactors,Management,bob.wilson@company.com,12,6,SuccessFactors Lead

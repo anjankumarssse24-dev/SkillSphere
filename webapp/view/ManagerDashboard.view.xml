@@ -69,7 +69,7 @@
                         <uxap:blocks>
                             <m:Panel id="teamPanel" headerText="Team Members" class="sapUiMediumMargin" width="95%">
                                 <m:content>
-                                    <m:Table id="teamTable" items="{employees>/employees}" class="sapUiResponsiveMargin" mode="SingleSelect" fixedLayout="false">
+                                    <m:Table id="teamTable" items="{managerEmployees>/employees}" class="sapUiResponsiveMargin" mode="SingleSelect" fixedLayout="false">
                                         <m:columns>
                                             <m:Column minScreenWidth="Phone" demandPopin="true">
                                                 <m:Text text="Employee Name"/>
@@ -92,13 +92,13 @@
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem press="onViewEmployeeDetails">
-                                                <m:Text text="{employees>name}"/>
-                                                <m:Text text="{employees>id}"/>
-                                                <m:Text text="{employees>team}"/>
-                                                <m:Text text="{employees>specialization}"/>
+                                                <m:Text text="{managerEmployees>name}"/>
+                                                <m:Text text="{managerEmployees>employeeId}"/>
+                                                <m:Text text="{managerEmployees>team}"/>
+                                                <m:Text text="{managerEmployees>specialization}"/>
                                                 <m:ObjectStatus 
-                                                    text="{path: 'employees>working_on_project', formatter: '.formatWorkingStatus'}"
-                                                    state="{path: 'employees>working_on_project', formatter: '.formatWorkingStatusState'}"/>
+                                                    text="{path: 'managerEmployees>working_on_project', formatter: '.formatWorkingStatus'}"
+                                                    state="{path: 'managerEmployees>working_on_project', formatter: '.formatWorkingStatusState'}"/>
                                                 <m:Button text="View" icon="sap-icon://detail-view" press="onViewEmployeeDetails" type="Ghost"/>
                                             </m:ColumnListItem>
                                         </m:items>

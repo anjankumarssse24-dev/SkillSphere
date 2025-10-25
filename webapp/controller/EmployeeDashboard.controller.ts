@@ -113,23 +113,37 @@ export default class EmployeeDashboard extends Controller {
             // Load employee details from employees CSV and update currentUser model
             const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
             const allEmployees = employeesModel?.getData()?.employees || [];
-            const employee = allEmployees.find((e: any) => e.id === employeeId);
+            // Find by employeeId or id field for backward compatibility
+            const employee = allEmployees.find((e: any) => e.employeeId === employeeId || e.id === employeeId);
             
             if (employee) {
                 console.log('Employee details from CSV:', employee);
+                
+                // Get manager details if managerId exists
+                let managerName = employee.manager || '';
+                if (employee.managerId) {
+                    const managersModel = this.getOwnerComponent()?.getModel("managers") as JSONModel;
+                    const allManagers = managersModel?.getData()?.managers || [];
+                    const manager = allManagers.find((m: any) => m.managerId === employee.managerId);
+                    if (manager) {
+                        managerName = manager.name;
+                    }
+                }
+                
                 // Update currentUser model with employee details from CSV
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
                 const currentUserData = currentUserModel?.getData() || {};
                 currentUserModel?.setData({
                     ...currentUserData,
-                    id: employee.id,
+                    id: employee.employeeId || employee.id,
                     name: employee.name,
                     email: employee.email,
                     team: employee.team,
                     subTeam: employee.subTeam,
-                    manager: employee.manager,
+                    manager: managerName,
+                    managerId: employee.managerId,
                     role: 'Employee',
-                    employeeId: employee.id,
+                    employeeId: employee.employeeId || employee.id,
                     isLoggedIn: true
                 });
                 console.log('✅ Updated currentUser model with employee details');

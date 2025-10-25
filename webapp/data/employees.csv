@@ -1,10 +1,8 @@
-id,name,team,subTeam,manager,email,totalSkills,totalProjects,specialization
-EMP001,John Doe,S4HANA,Development,Alice Johnson,john.doe@company.com,5,3,SAPUI5 Developer
-EMP002,Jane Smith,SuccessFactors,Analytics,Bob Wilson,jane.smith@company.com,7,2,Data Scientist
-EMP003,Mike Johnson,CIS,Development,Alice Johnson,mike.johnson@company.com,4,4,HANA Developer
-EMP004,Sarah Brown,Ariba,Development,Alice Johnson,sarah.brown@company.com,6,2,Procurement Specialist
-EMP005,David Lee,BTP,Analytics,Bob Wilson,david.lee@company.com,8,3,BTP Developer
-EMP006,Tom Harris,S4HANA,Testing,Alice Johnson,tom.harris@company.com,5,4,Test Engineer
-MGR001,Alice Johnson,S4HANA,Management,,alice.johnson@company.com,10,5,Manager
-MGR002,Bob Wilson,SuccessFactors,Management,,bob.wilson@company.com,12,6,Manager
-EMP007,Lisa Garcia,S4HANA,Development,Alice Johnson,lisa.garcia@company.com,4,2,Developer
+employeeId,name,team,subTeam,managerId,email,totalSkills,totalProjects,specialization
+EMP001,John Doe,S4HANA,Development,MGR001,john.doe@company.com,5,3,SAPUI5 Developer
+EMP002,Jane Smith,SuccessFactors,Analytics,MGR002,jane.smith@company.com,7,2,Data Scientist
+EMP003,Mike Johnson,CIS,Development,MGR001,mike.johnson@company.com,4,4,HANA Developer
+EMP004,Sarah Brown,Ariba,Development,MGR001,sarah.brown@company.com,6,2,Procurement Specialist
+EMP005,David Lee,BTP,Analytics,MGR002,david.lee@company.com,8,3,BTP Developer
+EMP006,Tom Harris,S4HANA,Testing,MGR001,tom.harris@company.com,5,4,Test Engineer
+EMP007,Lisa Garcia,S4HANA,Development,MGR001,lisa.garcia@company.com,4,2,Developer

@@ -20,8 +20,9 @@ const csvWriter = new CSVWriter();
 
 // Define CSV headers for each entity
 const HEADERS = {
-    users: ['id', 'name', 'password', 'role', 'team', 'subTeam', 'manager'],
-    employees: ['id', 'name', 'team', 'subTeam', 'manager', 'email', 'totalSkills', 'totalProjects', 'specialization'],
+    users: ['id', 'name', 'password', 'role', 'team', 'subTeam', 'managerId'],
+    employees: ['employeeId', 'name', 'team', 'subTeam', 'managerId', 'email', 'totalSkills', 'totalProjects', 'specialization'],
+    managers: ['managerId', 'name', 'team', 'subTeam', 'email', 'totalSkills', 'totalProjects', 'specialization'],
     skills: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'],
     projects: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration'],
     profiles: ['employeeId', 'specialization', 'working_on_project', 'project_start_date', 'project_end_date', 'lastUpdated']
@@ -421,6 +422,85 @@ app.delete('/api/users/:id', async (req, res) => {
     }
 });
 
+// ============ MANAGERS ENDPOINTS ============
+
+/**
+ * GET /api/managers - Get all managers
+ */
+app.get('/api/managers', async (req, res) => {
+    try {
+        const managers = await csvWriter.getRecords('managers.csv');
+        res.json({ success: true, data: managers });
+    } catch (error) {
+        console.error('Error getting managers:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * GET /api/managers/:managerId - Get specific manager
+ */
+app.get('/api/managers/:managerId', async (req, res) => {
+    try {
+        const { managerId } = req.params;
+        const allManagers = await csvWriter.getRecords('managers.csv');
+        const manager = allManagers.find(m => m.managerId === managerId);
+        
+        if (!manager) {
+            return res.status(404).json({ success: false, error: 'Manager not found' });
+        }
+        
+        res.json({ success: true, data: manager });
+    } catch (error) {
+        console.error('Error getting manager:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/managers - Add a new manager
+ */
+app.post('/api/managers', async (req, res) => {
+    try {
+        const managerData = req.body;
+        const newManager = await csvWriter.addRecord('managers.csv', managerData, HEADERS.managers);
+        res.json({ success: true, data: newManager });
+    } catch (error) {
+        console.error('Error adding manager:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * PUT /api/managers/:managerId - Update a manager
+ */
+app.put('/api/managers/:managerId', async (req, res) => {
+    try {
+        const { managerId } = req.params;
+        const updatedData = req.body;
+        
+        const updatedManager = await csvWriter.updateRecord('managers.csv', managerId, updatedData, HEADERS.managers);
+        res.json({ success: true, data: updatedManager });
+    } catch (error) {
+        console.error('Error updating manager:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * DELETE /api/managers/:managerId - Delete a manager
+ */
+app.delete('/api/managers/:managerId', async (req, res) => {
+    try {
+        const { managerId } = req.params;
+        const result = await csvWriter.deleteRecord('managers.csv', managerId, HEADERS.managers);
+        res.json(result);
+    } catch (error) {
+        console.error('Error deleting manager:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ============ HEALTH CHECK ============
 
 app.get('/api/health', (req, res) => {
@@ -440,6 +520,7 @@ app.listen(PORT, () => {
     console.log(`   - GET/POST/PUT/DELETE /api/skills`);
     console.log(`   - GET/POST/PUT/DELETE /api/projects`);
     console.log(`   - GET/POST/PUT/DELETE /api/employees`);
+    console.log(`   - GET/POST/PUT/DELETE /api/managers`);
     console.log(`   - GET/POST/PUT/DELETE /api/users`);
     console.log(`   - GET/PUT /api/profiles/:employeeId`);
     console.log(`   - GET /api/health`);

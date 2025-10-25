@@ -1,9 +1,10 @@
-id,name,password,role,team,subTeam,manager
-EMP001,John Doe,password123,Employee,S4HANA,Development,Alice Johnson
-EMP002,Jane Smith,password123,Employee,SuccessFactors,Analytics,Bob Wilson
-EMP003,Mike Johnson,password123,Employee,CIS,Development,Alice Johnson
+id,name,password,role,team,subTeam,managerId
+EMP001,John Doe,password123,Employee,S4HANA,Development,MGR001
+EMP002,Jane Smith,password123,Employee,SuccessFactors,Analytics,MGR002
+EMP003,Mike Johnson,password123,Employee,CIS,Development,MGR001
+EMP004,Sarah Brown,password123,Employee,Ariba,Development,MGR001
+EMP005,David Lee,password123,Employee,BTP,Analytics,MGR002
+EMP006,Tom Harris,password123,Employee,S4HANA,Testing,MGR001
+EMP007,Lisa Garcia,password123,Employee,S4HANA,Development,MGR001
 MGR001,Alice Johnson,manager123,Manager,S4HANA,Management,
 MGR002,Bob Wilson,manager123,Manager,SuccessFactors,Management,
-EMP004,Sarah Brown,password123,Employee,Ariba,Development,Alice Johnson
-EMP005,David Lee,password123,Employee,BTP,Analytics,Bob Wilson
-EMP006,Tom Harris,password123,Employee,S4HANA,Testing,Alice Johnson

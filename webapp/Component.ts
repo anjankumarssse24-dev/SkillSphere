@@ -70,12 +70,14 @@ export default class Component extends BaseComponent {
         // Create models from CSV data
         const usersModel = new JSONModel({ users: csvData.users || [] });
         const employeesModel = new JSONModel({ employees: csvData.employees || [] });
+        const managersModel = new JSONModel({ managers: csvData.managers || [] });
         const skillsModel = new JSONModel({ skills: csvData.skills || [] });
         const projectsModel = new JSONModel({ projects: csvData.projects || [] });
 
         // Set models
         this.setModel(usersModel, "users");
         this.setModel(employeesModel, "employees");
+        this.setModel(managersModel, "managers");
         this.setModel(skillsModel, "skills");
         this.setModel(projectsModel, "projects");
 
@@ -85,6 +87,7 @@ export default class Component extends BaseComponent {
         console.log("All models initialized from CSV");
         console.log("Users:", csvData.users?.length || 0);
         console.log("Employees:", csvData.employees?.length || 0);
+        console.log("Managers:", csvData.managers?.length || 0);
         console.log("Skills:", csvData.skills?.length || 0);
         console.log("Projects:", csvData.projects?.length || 0);
     }
@@ -105,9 +108,17 @@ export default class Component extends BaseComponent {
             const users = await this.loadUsersFromCSV();
             console.log("Users loaded from CSV:", users.length);
             
+            // Load managers from CSV
+            const managers = await this.loadManagersFromCSV();
+            console.log("Managers loaded from CSV:", managers.length);
+            
             // Load employees from CSV
             const employees = await this.loadEmployeesFromCSV();
             console.log("Employees loaded from CSV:", employees.length);
+            
+            // Merge employees and managers with manager name resolution
+            const allEmployees = this.mergeEmployeesWithManagers(employees, managers);
+            console.log("Total employees (with manager names):", allEmployees.length);
             
             // Load skills from CSV
             const skills = await this.loadSkillsFromCSV();
@@ -119,13 +130,66 @@ export default class Component extends BaseComponent {
             
             return {
                 users,
-                employees,
+                employees: allEmployees,
+                managers,
                 skills,
                 projects
             };
         } catch (error) {
             console.error("Failed to load data from CSV:", error);
             return null;
+        }
+    }
+
+    /**
+     * Merge employees with manager data - resolve managerId to manager name
+     */
+    private mergeEmployeesWithManagers(employees: any[], managers: any[]): any[] {
+        return employees.map(emp => {
+            const manager = managers.find(m => m.managerId === emp.managerId);
+            return {
+                ...emp,
+                id: emp.employeeId, // Keep id for backward compatibility
+                manager: manager ? manager.name : '', // Resolve manager name
+                managerEmail: manager ? manager.email : ''
+            };
+        });
+    }
+
+    /**
+     * Load managers from CSV file
+     */
+    private async loadManagersFromCSV(): Promise<any[]> {
+        try {
+            const csvPath = window.location.pathname.includes('/test/') 
+                ? '../data/managers.csv' 
+                : 'data/managers.csv';
+            console.log("Loading managers from:", csvPath);
+            
+            const response = await fetch(csvPath);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const csvText = await response.text();
+            
+            const csvData = CSVParser.parseCSV(csvText);
+            const managers = csvData.map((row: any) => ({
+                managerId: row.managerId,
+                id: row.managerId, // For backward compatibility
+                name: row.name,
+                team: row.team,
+                subTeam: row.subTeam,
+                email: row.email,
+                totalSkills: parseInt(row.totalSkills) || 0,
+                totalProjects: parseInt(row.totalProjects) || 0,
+                specialization: row.specialization,
+                role: 'Manager'
+            }));
+            
+            return managers;
+        } catch (error) {
+            console.error("Failed to load managers from CSV:", error);
+            return [];
         }
     }
 
@@ -180,7 +244,19 @@ export default class Component extends BaseComponent {
             const csvText = await response.text();
             
             const csvData = CSVParser.parseCSV(csvText);
-            const employees = CSVParser.parseEmployeesCSV(csvData);
+            const employees = csvData.map((row: any) => ({
+                employeeId: row.employeeId,
+                id: row.employeeId, // For backward compatibility
+                name: row.name,
+                team: row.team,
+                subTeam: row.subTeam,
+                managerId: row.managerId,
+                email: row.email,
+                totalSkills: parseInt(row.totalSkills) || 0,
+                totalProjects: parseInt(row.totalProjects) || 0,
+                specialization: row.specialization,
+                role: 'Employee'
+            }));
             
             return employees;
         } catch (error) {

@@ -101,17 +101,18 @@ export default class ManagerDashboard extends Controller {
         // Get current manager's information
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
+        const currentManagerId = currentUser?.id; // Now using manager ID
         const currentManagerName = currentUser?.name;
 
-        console.log("Current manager:", currentManagerName);
+        console.log("Current manager ID:", currentManagerId, "Name:", currentManagerName);
 
-        if (!currentManagerName) {
-            console.error("Manager name not found in currentUser model");
+        if (!currentManagerId) {
+            console.error("Manager ID not found in currentUser model");
             MessageToast.show("Manager information not available. Please login again.");
             return;
         }
 
-        // Get all employees and filter by manager
+        // Get all employees and filter by managerId
         const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
         const employeesData = employeesModel?.getData();
         
@@ -119,19 +120,18 @@ export default class ManagerDashboard extends Controller {
         
         let allEmployees = employeesData?.employees || [];
         
-        // Filter employees who belong to this manager
-        // Only show actual employees (ID starts with EMP) who report to this manager
+        // Filter employees who belong to this manager using managerId
         let employees = allEmployees.filter((emp: any) => {
-            const isEmployee = emp.id && emp.id.startsWith("EMP");
-            const hasManager = emp.manager && emp.manager.trim() !== "";
-            const reportsToThisManager = emp.manager === currentManagerName;
+            const isEmployee = emp.employeeId && emp.employeeId.startsWith("EMP");
+            const hasManagerId = emp.managerId && emp.managerId.trim() !== "";
+            const reportsToThisManager = emp.managerId === currentManagerId;
             
-            console.log(`Checking ${emp.id} (${emp.name}): isEmployee=${isEmployee}, hasManager=${hasManager}, reportsTo=${emp.manager}, match=${reportsToThisManager}`);
+            console.log(`Checking ${emp.employeeId} (${emp.name}): isEmployee=${isEmployee}, hasManagerId=${hasManagerId}, managerId=${emp.managerId}, match=${reportsToThisManager}`);
             
-            return isEmployee && hasManager && reportsToThisManager;
+            return isEmployee && hasManagerId && reportsToThisManager;
         });
 
-        console.log(`Employees reporting to ${currentManagerName}:`, employees);
+        console.log(`Employees reporting to ${currentManagerName} (${currentManagerId}):`, employees);
 
         // Add totalSkills count from skills model
         employees = employees.map((emp: any) => {
@@ -271,9 +271,19 @@ export default class ManagerDashboard extends Controller {
 
     public onViewEmployeeDetails(event: Event): void {
         const source = event.getSource();
-        const bindingContext = (source as any).getBindingContext("employees");
-        const employee = bindingContext.getObject();
+        // Try to get binding context from managerEmployees model first, fallback to employees
+        let bindingContext = (source as any).getBindingContext("managerEmployees");
+        if (!bindingContext) {
+            bindingContext = (source as any).getBindingContext("employees");
+        }
         
+        if (!bindingContext) {
+            MessageToast.show("Unable to load employee details");
+            console.error("No binding context found for employee");
+            return;
+        }
+        
+        const employee = bindingContext.getObject();
         this.openEmployeeDetailsDialog(employee, false);
     }
 
@@ -370,28 +380,28 @@ export default class ManagerDashboard extends Controller {
         // Get current manager's name for filtering
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
-        const currentManagerName = currentUser?.name;
+        const currentManagerId = currentUser?.id;
 
         // Get employee data for search - filter by manager if scope is MyTeam
         const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
         let allEmployees = employeesModel?.getData()?.employees || [];
         
         // Filter by scope - ensure only actual employees (no managers)
-        if (searchScope === "MyTeam" && currentManagerName) {
+        if (searchScope === "MyTeam" && currentManagerId) {
             allEmployees = allEmployees.filter((emp: any) => {
-                const isEmployee = emp.id && emp.id.startsWith("EMP");
-                const hasManager = emp.manager && emp.manager.trim() !== "";
-                const reportsToThisManager = emp.manager === currentManagerName;
-                return isEmployee && hasManager && reportsToThisManager;
+                const isEmployee = emp.employeeId && emp.employeeId.startsWith("EMP");
+                const hasManagerId = emp.managerId && emp.managerId.trim() !== "";
+                const reportsToThisManager = emp.managerId === currentManagerId;
+                return isEmployee && hasManagerId && reportsToThisManager;
             });
         } else {
             // For "All" scope, only show actual employees
             allEmployees = allEmployees.filter((emp: any) => 
-                emp.id && emp.id.startsWith("EMP")
+                emp.employeeId && emp.employeeId.startsWith("EMP")
             );
         }
 
-        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel, currentManagerName });
+        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel, currentManagerId });
         console.log("Available employees for search:", allEmployees);
 
         // Perform skill-based search using CSV data
@@ -488,9 +498,10 @@ export default class ManagerDashboard extends Controller {
         const skillsModel = this.getOwnerComponent()?.getModel("skills") as JSONModel;
         const allSkills = skillsModel?.getData()?.skills || [];
         
-        // Filter skills for this employee
+        // Filter skills for this employee - use employeeId or id
+        const empId = employee.employeeId || employee.id;
         const employeeSkills = allSkills
-            .filter((skill: any) => skill.employeeId === employee.id)
+            .filter((skill: any) => skill.employeeId === empId)
             .map((skill: any) => skill.skillName);
         
         // Return unique skills
@@ -578,11 +589,17 @@ export default class ManagerDashboard extends Controller {
             return;
         }
 
+        // Use employeeId or id for backward compatibility
+        const empId = employee.employeeId || employee.id;
+        const empName = employee.name || '';
+        const empTeam = employee.team || '';
+        const empSpecialization = employee.specialization || '';
+
         // Populate basic information
-        (this.byId("dialogEmployeeName") as any).setText(employee.name);
-        (this.byId("dialogEmployeeId") as any).setText(employee.id);
-        (this.byId("dialogEmployeeTeam") as any).setText(employee.team);
-        (this.byId("dialogEmployeeSpecialization") as any).setText(employee.specialization);
+        (this.byId("dialogEmployeeName") as any).setText(empName);
+        (this.byId("dialogEmployeeId") as any).setText(empId);
+        (this.byId("dialogEmployeeTeam") as any).setText(empTeam);
+        (this.byId("dialogEmployeeSpecialization") as any).setText(empSpecialization);
 
         // Populate skills information
         const skillsContainer = this.byId("dialogEmployeeSkills") as any;

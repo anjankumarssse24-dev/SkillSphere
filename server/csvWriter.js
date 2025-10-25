@@ -133,7 +133,8 @@ class CSVWriter {
             record.id === id || 
             record.skillId === id || 
             record.projectId === id ||
-            record.employeeId === id
+            record.employeeId === id ||
+            record.managerId === id
         );
         
         if (index === -1) {
@@ -155,7 +156,8 @@ class CSVWriter {
             record.id !== id && 
             record.skillId !== id && 
             record.projectId !== id &&
-            record.employeeId !== id
+            record.employeeId !== id &&
+            record.managerId !== id
         );
         
         if (filteredData.length === data.length) {
