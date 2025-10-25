@@ -92,9 +92,66 @@ export default class ManagerDashboard extends Controller {
         MessageToast.show("You have been logged out");
     }
 
-    private onRouteMatched(event: Event): void {
+    private onRouteMatched(event: any): void {
+        // Get route parameters
+        const args: any = event.getParameter("arguments");
+        const managerId = args?.managerId;
+        
+        console.log("Route matched with managerId:", managerId);
+        
+        // Check if manager is already logged in
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData();
+        
+        // If no manager is logged in but we have a managerId from route, restore session
+        if ((!currentUser?.isLoggedIn || !currentUser?.id) && managerId) {
+            console.log("Restoring manager session from route parameter:", managerId);
+            this.restoreManagerSession(managerId);
+        } else if (!currentUser?.isLoggedIn && !managerId) {
+            // No session and no route parameter - redirect to login
+            console.log("No manager session found, redirecting to login");
+            MessageToast.show("Please login to access the dashboard");
+            this.getRouter().navTo("Landing");
+            return;
+        }
+        
         // Load manager-specific data
         this.loadManagerData();
+    }
+
+    /**
+     * Restore manager session from managerId
+     */
+    private restoreManagerSession(managerId: string): void {
+        console.log("Restoring manager session for:", managerId);
+        
+        // Load manager details from managers model
+        const managersModel = this.getOwnerComponent()?.getModel("managers") as JSONModel;
+        const allManagers = managersModel?.getData()?.managers || [];
+        
+        const manager = allManagers.find((m: any) => m.managerId === managerId);
+        
+        if (manager) {
+            console.log("Manager found in managers CSV:", manager);
+            
+            // Restore currentUser model
+            const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+            currentUserModel?.setData({
+                id: manager.managerId,
+                name: manager.name,
+                role: 'Manager',
+                team: manager.team,
+                subTeam: manager.subTeam,
+                email: manager.email,
+                isLoggedIn: true
+            });
+            
+            console.log("✅ Manager session restored successfully");
+        } else {
+            console.error("Manager not found in managers.csv:", managerId);
+            MessageToast.show("Manager information not found. Please login again.");
+            this.getRouter().navTo("Landing");
+        }
     }
 
     private loadManagerData(): void {
