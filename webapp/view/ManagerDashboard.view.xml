@@ -36,10 +36,16 @@
                                         <m:FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
                                             <m:VBox class="sapUiResponsiveMargin sapUiLargeMarginEnd" width="auto">
                                                 <m:Label text="Search Scope:" class="sapUiSmallMarginBottom"/>
-                                                <m:Select id="searchScope" selectedKey="MyTeam" width="15rem">
-                                                    <core:Item key="MyTeam" text="My Team"/>
-                                                    <core:Item key="OtherTeams" text="Other Teams"/>
+                                                <m:Select id="searchScope" selectedKey="MyTeam" width="15rem" change="onSearchScopeChange">
+                                                    <core:Item key="MyTeam" text="My Team Only"/>
+                                                    <core:Item key="ByManager" text="By Manager"/>
                                                     <core:Item key="EntireOrganization" text="Entire Organization"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                            <m:VBox id="managerSelectorBox" class="sapUiResponsiveMargin sapUiLargeMarginEnd" width="auto" visible="false">
+                                                <m:Label text="Select Manager:" class="sapUiSmallMarginBottom"/>
+                                                <m:Select id="managerSelector" width="15rem" items="{managers>/managers}">
+                                                    <core:Item key="{managers>managerId}" text="{managers>name} ({managers>team})"/>
                                                 </m:Select>
                                             </m:VBox>
                                             <m:VBox class="sapUiResponsiveMargin" width="auto">
@@ -49,6 +55,8 @@
                                                     <core:Item key="Beginner" text="Beginner"/>
                                                     <core:Item key="Intermediate" text="Intermediate"/>
                                                     <core:Item key="Proficient" text="Proficient"/>
+                                                    <core:Item key="Advanced" text="Advanced"/>
+                                                    <core:Item key="Expert" text="Expert"/>
                                                 </m:Select>
                                             </m:VBox>
                                         </m:FlexBox>
@@ -268,7 +276,7 @@
                             <m:FlexBox class="sapUiTinyMarginBottom" alignItems="Center">
                                 <m:Label text="Match Score: " class="sapUiMediumMarginEnd sapUiMediumText"/>
                                 <m:ProgressIndicator id="dialogMatchScore" percentValue="0" displayValue="0%" width="150px" class="sapUiMediumMarginEnd"/>
-                                <m:Text text="{path: 'searchResults>matchScore', formatter: '.formatMatchScoreText'}" class="sapUiTinyText"/>
+                                <m:ObjectStatus id="dialogMatchLevel" text="Low Match" state="Error"/>
                             </m:FlexBox>
                             <m:FlexBox class="sapUiTinyMarginBottom">
                                 <m:Label text="Matching Skills: " class="sapUiMediumMarginEnd sapUiMediumText"/>

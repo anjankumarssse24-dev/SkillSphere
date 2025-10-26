@@ -80,40 +80,76 @@
     </m:Page>
 
     <!-- Registration Dialog -->
-    <m:Dialog id="registrationDialog" title="Register New User" class="sapUiContentPadding" contentWidth="500px">
+    <m:Dialog id="registrationDialog" title="Register New User" class="sapUiContentPadding" contentWidth="600px" contentHeight="80%">
         <m:content>
             <m:VBox class="sapUiMediumMargin">
-                <m:Label text="User ID:" class="sapUiSmallMarginBottom"/>
-                <m:Input id="regUserId" placeholder="Enter User ID" class="sapUiMediumMarginBottom"/>
+                <!-- Role Selection First -->
+                <m:Label text="Register as:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:SegmentedButton id="regRoleSegmented" selectedKey="Employee" selectionChange="onRoleChange" class="sapUiLargeMarginBottom">
+                    <m:items>
+                        <m:SegmentedButtonItem key="Employee" text="Employee" icon="sap-icon://employee"/>
+                        <m:SegmentedButtonItem key="Manager" text="Manager" icon="sap-icon://manager"/>
+                    </m:items>
+                </m:SegmentedButton>
+
+                <!-- Basic Information -->
+                <m:Title text="Basic Information" level="H4" class="sapUiSmallMarginBottom"/>
                 
-                <m:Label text="Name:" class="sapUiSmallMarginBottom"/>
-                <m:Input id="regName" placeholder="Enter Full Name" class="sapUiMediumMarginBottom"/>
+                <m:Label text="Full Name:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regName" placeholder="e.g., John Smith" class="sapUiMediumMarginBottom" required="true"/>
                 
-                <m:Label text="Role:" class="sapUiSmallMarginBottom"/>
-                <m:Select id="regRole" class="sapUiMediumMarginBottom">
-                    <core:Item key="Employee" text="Employee"/>
-                    <core:Item key="Manager" text="Manager"/>
-                </m:Select>
+                <m:Label text="Email Address:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regEmail" placeholder="e.g., john.smith@company.com" type="Email" class="sapUiMediumMarginBottom" required="true"/>
                 
-                <m:Label text="Team:" class="sapUiSmallMarginBottom"/>
-                <m:Select id="regTeam" class="sapUiMediumMarginBottom">
+                <m:Label text="Team:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Select id="regTeam" class="sapUiMediumMarginBottom" required="true">
                     <core:Item key="S4HANA" text="SAP S/4HANA"/>
                     <core:Item key="SuccessFactors" text="SAP SuccessFactors"/>
                     <core:Item key="CIS" text="CIS"/>
-                    <core:Item key="CDS" text="CDS"/>
                     <core:Item key="Ariba" text="SAP Ariba"/>
-                    <core:Item key="Concur" text="SAP Concur"/>
-                    <core:Item key="CustomerExperience" text="SAP Customer Experience"/>
                     <core:Item key="BTP" text="SAP Business Technology Platform"/>
-                    <core:Item key="Analytics" text="SAP Analytics"/>
                 </m:Select>
                 
-                <m:Label text="Password:" class="sapUiSmallMarginBottom"/>
-                <m:Input id="regPassword" type="Password" placeholder="Enter Password"/>
+                <m:Label text="Sub Team:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Select id="regSubTeam" class="sapUiMediumMarginBottom" required="true">
+                    <core:Item key="Development" text="Development"/>
+                    <core:Item key="Analytics" text="Analytics"/>
+                    <core:Item key="Testing" text="Testing"/>
+                    <core:Item key="Management" text="Management"/>
+                </m:Select>
+
+                <!-- Employee Specific Fields -->
+                <m:VBox id="employeeSpecificFields" visible="true">
+                    <m:Label text="Manager:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:Select id="regManager" class="sapUiMediumMarginBottom" required="true" items="{managers>/managers}">
+                        <core:Item key="{managers>managerId}" text="{managers>name} ({managers>team} - {managers>specialization})"/>
+                    </m:Select>
+                    
+                    <m:Label text="Specialization:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:Input id="regSpecialization" placeholder="e.g., SAP UI5 Developer, Data Analyst" class="sapUiMediumMarginBottom"/>
+                </m:VBox>
+
+                <!-- Manager Specific Fields -->
+                <m:VBox id="managerSpecificFields" visible="false">
+                    <m:Label text="Management Area:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:Input id="regManagementArea" placeholder="e.g., S4HANA Development, Analytics Team" class="sapUiMediumMarginBottom"/>
+                    
+                    <m:Label text="Years of Experience:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:StepInput id="regExperience" min="0" max="50" value="5" class="sapUiMediumMarginBottom"/>
+                </m:VBox>
+
+                <!-- Account Security -->
+                <m:Title text="Account Security" level="H4" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+                
+                <m:Label text="Password:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regPassword" type="Password" placeholder="Enter password (min 6 characters)" class="sapUiMediumMarginBottom" required="true"/>
+                
+                <m:Label text="Confirm Password:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regConfirmPassword" type="Password" placeholder="Re-enter password" class="sapUiMediumMarginBottom" required="true"/>
             </m:VBox>
         </m:content>
         <m:buttons>
-            <m:Button text="Register" type="Emphasized" press="onRegisterUser"/>
+            <m:Button text="Register" type="Emphasized" icon="sap-icon://save" press="onRegisterUser"/>
             <m:Button text="Cancel" press="onCloseRegisterDialog"/>
         </m:buttons>
     </m:Dialog>

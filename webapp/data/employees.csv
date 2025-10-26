@@ -6,3 +6,21 @@ EMP004,Sarah Brown,Ariba,Development,MGR002,sarah.brown@company.com,6,2,Procurem
 EMP005,David Lee,BTP,Analytics,MGR002,david.lee@company.com,8,3,BTP Developer
 EMP006,Tom Harris,S4HANA,Testing,MGR001,tom.harris@company.com,5,4,Test Engineer
 EMP007,Lisa Garcia,S4HANA,Development,MGR001,lisa.garcia@company.com,4,2,Developer
+EMP008,Anjan Kumar S,CIS,Development,MGR003,anjan@sap.com,0,0,ABAP
+EMP009,Ganesh,CIS,Testing,MGR003,ganesh@sap.com,0,0,SAP UI5
+EMP010,Arun,CIS,Development,MGR003,arun@sap.com,0,0,BTP
+EMP011,Rahul Sharma,Ariba,Development,MGR004,rahul.sharma@company.com,6,3,Ariba Developer
+EMP012,Priya Patel,Ariba,Analytics,MGR004,priya.patel@company.com,5,2,Procurement Analyst
+EMP013,Amit Kumar,Ariba,Development,MGR004,amit.kumar@company.com,7,4,Ariba Integration Specialist
+EMP014,Sneha Reddy,Ariba,Testing,MGR004,sneha.reddy@company.com,4,2,Ariba QA Engineer
+EMP015,Karthik Rao,Ariba,Development,MGR004,karthik.rao@company.com,8,5,Ariba Solutions Architect
+EMP016,Vikram Singh,BTP,Development,MGR005,vikram.singh@company.com,9,4,BTP Full Stack Developer
+EMP017,Anjali Mehta,BTP,Development,MGR005,anjali.mehta@company.com,7,3,BTP CAP Developer
+EMP018,Rajesh Gupta,BTP,Analytics,MGR005,rajesh.gupta@company.com,8,5,BTP Integration Consultant
+EMP019,Pooja Desai,BTP,Development,MGR005,pooja.desai@company.com,6,3,BTP UI5 Developer
+EMP020,Suresh Nair,BTP,Testing,MGR005,suresh.nair@company.com,5,2,BTP DevOps Engineer
+EMP021,Kavita Joshi,Analytics,Analytics,MGR006,kavita.joshi@company.com,8,4,Data Analyst
+EMP022,Manoj Verma,Analytics,Analytics,MGR006,manoj.verma@company.com,9,5,Business Intelligence Developer
+EMP023,Deepa Iyer,Analytics,Development,MGR006,deepa.iyer@company.com,7,3,Analytics Cloud Developer
+EMP024,Naveen Kumar,Analytics,Analytics,MGR006,naveen.kumar@company.com,6,4,SAC Consultant
+EMP025,Swati Pillai,Analytics,Development,MGR006,swati.pillai@company.com,8,5,Data Warehouse Specialist

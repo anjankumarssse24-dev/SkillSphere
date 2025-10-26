@@ -18,7 +18,6 @@
                 
                 <Label text="Proficiency Level:" required="true" />
                 <Select
-                    id="editProficiencySelect"
                     selectedKey="{editSkill>/proficiency}"
                     change="onEditProficiencyChange"
                     width="100%">
@@ -26,18 +25,18 @@
                     <core:Item key="Beginner" text="Beginner" />
                     <core:Item key="Intermediate" text="Intermediate" />
                     <core:Item key="Proficient" text="Proficient" />
+                    <core:Item key="Advanced" text="Advanced" />
+                    <core:Item key="Expert" text="Expert" />
                 </Select>
                 
                 <Label text="Years of Experience:" />
                 <Input
-                    id="editYearsInput"
                     value="{editSkill>/yearsExperience}"
                     type="Number"
                     placeholder="Enter years of experience" />
                 
                 <Label text="Certification Status:" />
                 <Select
-                    id="editCertificationSelect"
                     selectedKey="{editSkill>/certificationStatus}"
                     change="onEditCertificationChange"
                     width="100%">

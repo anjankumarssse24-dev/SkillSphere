@@ -8,3 +8,25 @@ EMP006,Tom Harris,password123,Employee,S4HANA,Testing,MGR001
 EMP007,Lisa Garcia,password123,Employee,S4HANA,Development,MGR001
 MGR001,Alice Johnson,manager123,Manager,S4HANA,Management,
 MGR002,Bob Wilson,manager123,Manager,SuccessFactors,Management,
+MGR003,Puja K,manager123,Manager,CIS,Development,
+MGR004,Sachin,manager123,Manager,Ariba,Management,
+MGR005,Abhisheak,manager123,Manager,BTP,Management,
+MGR006,Fazal Ilahi,manager123,Manager,Analytics,Management,
+EMP008,Anjan Kumar S,password123,Employee,CIS,Development,MGR003
+EMP009,Ganesh,password123,Employee,CIS,Testing,MGR003
+EMP010,Arun,password123,Employee,CIS,Development,MGR003
+EMP011,Rahul Sharma,password123,Employee,Ariba,Development,MGR004
+EMP012,Priya Patel,password123,Employee,Ariba,Analytics,MGR004
+EMP013,Amit Kumar,password123,Employee,Ariba,Development,MGR004
+EMP014,Sneha Reddy,password123,Employee,Ariba,Testing,MGR004
+EMP015,Karthik Rao,password123,Employee,Ariba,Development,MGR004
+EMP016,Vikram Singh,password123,Employee,BTP,Development,MGR005
+EMP017,Anjali Mehta,password123,Employee,BTP,Development,MGR005
+EMP018,Rajesh Gupta,password123,Employee,BTP,Analytics,MGR005
+EMP019,Pooja Desai,password123,Employee,BTP,Development,MGR005
+EMP020,Suresh Nair,password123,Employee,BTP,Testing,MGR005
+EMP021,Kavita Joshi,password123,Employee,Analytics,Analytics,MGR006
+EMP022,Manoj Verma,password123,Employee,Analytics,Analytics,MGR006
+EMP023,Deepa Iyer,password123,Employee,Analytics,Development,MGR006
+EMP024,Naveen Kumar,password123,Employee,Analytics,Analytics,MGR006
+EMP025,Swati Pillai,password123,Employee,Analytics,Development,MGR006

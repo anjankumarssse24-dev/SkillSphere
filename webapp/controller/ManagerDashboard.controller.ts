@@ -76,6 +76,9 @@ export default class ManagerDashboard extends Controller {
     }
 
     public onLogout(): void {
+        // Clear search results before logout
+        this.clearSearchResults();
+        
         // Clear current user data
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         if (currentUserModel) {
@@ -98,6 +101,12 @@ export default class ManagerDashboard extends Controller {
         const managerId = args?.managerId;
         
         console.log("Route matched with managerId:", managerId);
+        
+        // ALWAYS scroll to top when dashboard loads
+        window.scrollTo({ top: 0, behavior: 'auto' });
+        
+        // Clear previous search results when switching managers
+        this.clearSearchResults();
         
         // Check if manager is already logged in
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
@@ -451,10 +460,29 @@ export default class ManagerDashboard extends Controller {
         }
     }
 
+    /**
+     * Handle search scope change - show/hide manager selector
+     */
+    public onSearchScopeChange(event: Event): void {
+        const select = event.getSource() as Select;
+        const selectedKey = select.getSelectedKey();
+        
+        const managerSelectorBox = this.byId("managerSelectorBox") as any;
+        
+        if (selectedKey === "ByManager") {
+            // Show manager selector dropdown
+            managerSelectorBox?.setVisible(true);
+        } else {
+            // Hide manager selector dropdown
+            managerSelectorBox?.setVisible(false);
+        }
+    }
+
     public onSearchEmployees(): void {
         const multiInput = this.byId("skillsSearchInput") as MultiInput;
         const scopeSelect = this.byId("searchScope") as Select;
         const experienceSelect = this.byId("experienceLevel") as Select;
+        const managerSelector = this.byId("managerSelector") as Select;
         
         if (!multiInput) {
             MessageToast.show("Search input not found");
@@ -471,31 +499,59 @@ export default class ManagerDashboard extends Controller {
             return;
         }
 
-        // Get current manager's name for filtering
+        // Get current manager's ID
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
         const currentManagerId = currentUser?.id;
 
-        // Get employee data for search - filter by manager if scope is MyTeam
+        // Get employee data for search
         const employeesModel = this.getOwnerComponent()?.getModel("employees") as JSONModel;
         let allEmployees = employeesModel?.getData()?.employees || [];
         
-        // Filter by scope - ensure only actual employees (no managers)
-        if (searchScope === "MyTeam" && currentManagerId) {
+        // Filter by scope
+        if (searchScope === "MyTeam") {
+            // Only show employees reporting to current manager
             allEmployees = allEmployees.filter((emp: any) => {
                 const isEmployee = emp.employeeId && emp.employeeId.startsWith("EMP");
                 const hasManagerId = emp.managerId && emp.managerId.trim() !== "";
                 const reportsToThisManager = emp.managerId === currentManagerId;
                 return isEmployee && hasManagerId && reportsToThisManager;
             });
-        } else {
-            // For "All" scope, only show actual employees
+            console.log(`Searching in My Team (${currentManagerId}): ${allEmployees.length} employees`);
+            
+        } else if (searchScope === "ByManager") {
+            // Search in selected manager's team
+            const selectedManagerId = managerSelector?.getSelectedKey();
+            
+            if (!selectedManagerId) {
+                MessageToast.show("Please select a manager to search their team");
+                return;
+            }
+            
+            allEmployees = allEmployees.filter((emp: any) => {
+                const isEmployee = emp.employeeId && emp.employeeId.startsWith("EMP");
+                const hasManagerId = emp.managerId && emp.managerId.trim() !== "";
+                const reportsToSelectedManager = emp.managerId === selectedManagerId;
+                return isEmployee && hasManagerId && reportsToSelectedManager;
+            });
+            
+            // Get manager name for display
+            const managersModel = this.getOwnerComponent()?.getModel("managers") as JSONModel;
+            const allManagers = managersModel?.getData()?.managers || [];
+            const selectedManager = allManagers.find((m: any) => m.managerId === selectedManagerId);
+            const managerName = selectedManager?.name || selectedManagerId;
+            
+            console.log(`Searching in ${managerName}'s Team (${selectedManagerId}): ${allEmployees.length} employees`);
+            
+        } else if (searchScope === "EntireOrganization") {
+            // Search across entire organization - all employees
             allEmployees = allEmployees.filter((emp: any) => 
                 emp.employeeId && emp.employeeId.startsWith("EMP")
             );
+            console.log(`Searching in Entire Organization: ${allEmployees.length} employees`);
         }
 
-        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel, currentManagerId });
+        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel });
         console.log("Available employees for search:", allEmployees);
 
         // Perform skill-based search using CSV data
@@ -533,7 +589,7 @@ export default class ManagerDashboard extends Controller {
             if (experienceLevel) {
                 // Get the proficiency levels for matched skills
                 const empSkillObjects = allSkills.filter((s: any) => 
-                    s.employeeId === emp.id && 
+                    s.employeeId === emp.employeeId && 
                     matchingSkills.some(ms => s.skillName.toLowerCase().includes(ms.toLowerCase()))
                 );
                 
@@ -547,28 +603,32 @@ export default class ManagerDashboard extends Controller {
             
             return true; // Has matching skills
         }).map(emp => {
+            const empId = emp.employeeId || emp.id;
             const matchingSkillsArray = this.getMatchingSkills(emp, searchSkills);
             
-            // Get proficiency levels for matched skills
+            // Get proficiency levels for matched skills with detailed formatting
             const matchedSkillDetails = allSkills
                 .filter((s: any) => 
-                    s.employeeId === emp.id && 
+                    s.employeeId === empId && 
                     matchingSkillsArray.some(ms => s.skillName.toLowerCase() === ms.toLowerCase())
                 )
                 .map((s: any) => `${s.skillName} (${s.proficiencyLevel})`)
                 .join(", ");
             
+            // Calculate match score using new proficiency-based algorithm
+            const matchScore = this.calculateMatchScore(emp, searchSkills);
+            
             const result = {
                 ...emp,
                 matchingSkills: matchedSkillDetails || matchingSkillsArray.join(", "),
                 totalMatchingSkills: matchingSkillsArray.length,
-                matchScore: this.calculateMatchScore(emp, searchSkills)
+                matchScore: matchScore
             };
-            console.log("Processed search result:", result);
+            console.log(`Employee ${empId} match score: ${matchScore}%`, result);
             return result;
         });
 
-        // Sort by match score
+        // Sort by match score (highest first)
         return results.sort((a, b) => b.matchScore - a.matchScore);
     }
 
@@ -611,14 +671,53 @@ export default class ManagerDashboard extends Controller {
         );
     }
 
+    /**
+     * Calculate match score based on proficiency levels
+     * Proficient = 100%, Intermediate = 75%, Beginner = 50%, Advanced = 90%, Expert = 100%
+     */
     private calculateMatchScore(employee: any, searchSkills: string[]): number {
-        const empSkills = this.getEmployeeSkills(employee);
-        const matchingSkills = this.getMatchingSkills(employee, searchSkills);
-        const matchRatio = matchingSkills.length / searchSkills.length;
-        const skillDepth = empSkills.length > 0 ? matchingSkills.length / empSkills.length : 0;
+        const skillsModel = this.getOwnerComponent()?.getModel("skills") as JSONModel;
+        const allSkills = skillsModel?.getData()?.skills || [];
         
-        // Calculate score based on match ratio and skill depth
-        return Math.round((matchRatio * 0.7 + skillDepth * 0.3) * 100);
+        // Get employee's skills that match search criteria
+        const empId = employee.employeeId || employee.id;
+        const matchedSkills = allSkills.filter((skill: any) => 
+            skill.employeeId === empId &&
+            searchSkills.some(searchSkill => 
+                skill.skillName.toLowerCase().includes(searchSkill.toLowerCase())
+            )
+        );
+        
+        if (matchedSkills.length === 0) {
+            return 0;
+        }
+        
+        // Map proficiency levels to percentage scores
+        const proficiencyScores: { [key: string]: number } = {
+            "Beginner": 50,
+            "Intermediate": 75,
+            "Proficient": 100,
+            "Advanced": 90,
+            "Expert": 100
+        };
+        
+        // Calculate total score for matched skills
+        let totalScore = 0;
+        matchedSkills.forEach((skill: any) => {
+            const proficiency = skill.proficiencyLevel || "Beginner";
+            totalScore += proficiencyScores[proficiency] || 50;
+        });
+        
+        // Average score across all searched skills (not just matched ones)
+        // This ensures employees with partial matches get lower scores
+        const averageScore = totalScore / searchSkills.length;
+        
+        // If employee has all skills searched for, give bonus
+        if (matchedSkills.length >= searchSkills.length) {
+            return Math.min(100, Math.round(averageScore * 1.1)); // 10% bonus for complete match
+        }
+        
+        return Math.round(averageScore);
     }
 
     private displaySearchResults(results: any[]): void {
@@ -652,6 +751,50 @@ export default class ManagerDashboard extends Controller {
         setTimeout(() => {
             searchResultsPanel.getDomRef()?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
+    }
+
+    /**
+     * Clear search results and reset search inputs
+     */
+    private clearSearchResults(): void {
+        console.log("Clearing previous search results");
+        
+        // Hide search results panel
+        const searchResultsPanel = this.byId("searchResultsPanel") as any;
+        if (searchResultsPanel) {
+            searchResultsPanel.setVisible(false);
+        }
+
+        // Clear search results model
+        const resultsModel = new JSONModel({ results: [] });
+        this.getView()?.setModel(resultsModel, "searchResults");
+
+        // Clear search input tokens
+        const multiInput = this.byId("skillsSearchInput") as MultiInput;
+        if (multiInput) {
+            multiInput.removeAllTokens();
+            multiInput.setValue("");
+        }
+
+        // Reset search scope to default (My Team)
+        const scopeSelect = this.byId("searchScope") as Select;
+        if (scopeSelect) {
+            scopeSelect.setSelectedKey("MyTeam");
+        }
+
+        // Hide manager selector box
+        const managerSelectorBox = this.byId("managerSelectorBox") as any;
+        if (managerSelectorBox) {
+            managerSelectorBox.setVisible(false);
+        }
+
+        // Reset experience level to default (empty)
+        const experienceSelect = this.byId("experienceLevel") as Select;
+        if (experienceSelect) {
+            experienceSelect.setSelectedKey("");
+        }
+        
+        console.log("✅ Search results cleared successfully");
     }
 
     public onViewSearchResult(event: Event): void {
@@ -721,22 +864,48 @@ export default class ManagerDashboard extends Controller {
             statusControl.setState(statusState);
         }
         
+        // Load and display active projects from CSV
+        const projectsModelGlobal = this.getOwnerComponent()?.getModel("projects") as JSONModel;
+        const allProjects = projectsModelGlobal?.getData()?.projects || [];
+        
+        // Filter projects for this employee and count Active ones
+        const employeeProjects = allProjects.filter((proj: any) => proj.employeeId === empId);
+        const activeProjects = employeeProjects.filter((proj: any) => 
+            proj.status === "Active" || proj.status === "active"
+        );
+        
+        console.log(`Employee ${empId} has ${employeeProjects.length} total projects, ${activeProjects.length} active`);
+        
         // Update active projects using ObjectNumber
         const activeProjectsControl = this.byId("dialogActiveProjects") as any;
         if (activeProjectsControl) {
-            activeProjectsControl.setNumber(employee.totalProjects || 0);
-            activeProjectsControl.setUnit("projects");
+            activeProjectsControl.setNumber(activeProjects.length);
+            activeProjectsControl.setUnit(activeProjects.length === 1 ? "project" : "projects");
         }
 
         // Handle match information for search results
         const matchPanel = this.byId("dialogMatchPanel") as any;
         if (isSearchResult && employee.matchScore !== undefined) {
             matchPanel.setVisible(true);
-            (this.byId("dialogMatchScore") as any)
-                .setPercentValue(employee.matchScore)
-                .setDisplayValue(employee.matchScore + "%")
-                .setState(this.formatMatchScoreState(employee.matchScore));
-            (this.byId("dialogMatchingSkills") as any).setText(employee.matchingSkills || "N/A");
+            
+            // Set match score progress indicator
+            const matchScoreControl = this.byId("dialogMatchScore") as any;
+            if (matchScoreControl) {
+                matchScoreControl.setPercentValue(employee.matchScore);
+                matchScoreControl.setDisplayValue(employee.matchScore + "%");
+                matchScoreControl.setState(this.formatMatchScoreState(employee.matchScore));
+            }
+            
+            // Set match level text (Excellent/Good/Partial/Low Match)
+            const matchLevelControl = this.byId("dialogMatchLevel") as any;
+            if (matchLevelControl) {
+                const matchLevelText = this.formatMatchScoreText(employee.matchScore);
+                matchLevelControl.setText(matchLevelText);
+                matchLevelControl.setState(this.formatMatchScoreState(employee.matchScore));
+            }
+            
+            // Set matching skills text
+            (this.byId("dialogMatchingSkills") as any)?.setText(employee.matchingSkills || "N/A");
         } else {
             matchPanel.setVisible(false);
         }

@@ -7,3 +7,60 @@ PROJ005,EMP003,HANA Migration,HANA Developer,2024-03-01,2024-09-01,Completed,Mig
 PROJ006,EMP004,Procurement Module,Procurement Specialist,2024-05-01,2024-11-01,Active,Developed Ariba procurement module,6 months
 PROJ007,EMP005,BTP Cloud Migration,BTP Developer,2024-04-01,2024-10-01,Completed,Migrated applications to SAP BTP,6 months
 PROJ008,EMP006,Automated Testing Suite,Test Engineer,2024-06-01,2024-12-01,Active,Created comprehensive testing automation framework,6 months
+PROJ_1761453745436_ousy636lr,EMP008,SkillSphere,Full Stack Developers,10/1/25,10/31/25,Active,,1 month
+PROJ_1761454093110_mocxptrlu,EMP009,ABAP Project,Developer,10/1/25,10/23/25,Completed,,22 days
+PROJ009,EMP011,Ariba Sourcing Portal,Ariba Developer,2024-09-01,2025-02-28,Active,Developing sourcing portal for procurement team,6 months
+PROJ010,EMP011,Supplier Management,Developer,2024-01-15,2024-06-30,Completed,Built supplier management system,5 months
+PROJ011,EMP011,Invoice Automation,Lead Developer,2023-10-01,2024-03-31,Completed,Automated invoice processing workflow,6 months
+PROJ012,EMP012,Spend Analysis,Procurement Analyst,2024-07-01,2024-12-31,Active,Analyzing procurement spend patterns,6 months
+PROJ013,EMP012,Vendor Performance,Analyst,2024-01-01,2024-05-31,Completed,Evaluated vendor performance metrics,5 months
+PROJ014,EMP013,ERP Integration,Integration Specialist,2024-07-15,2025-01-15,Active,Integrating Ariba with SAP ERP,6 months
+PROJ015,EMP013,API Gateway,Integration Developer,2024-02-01,2024-08-31,Completed,Built API gateway for Ariba services,7 months
+PROJ016,EMP013,Cloud Migration,Tech Lead,2023-09-01,2024-04-30,Completed,Migrated Ariba to cloud infrastructure,8 months
+PROJ017,EMP013,Data Sync,Developer,2023-05-01,2023-11-30,Completed,Implemented real-time data synchronization,7 months
+PROJ018,EMP014,Test Automation,QA Engineer,2024-10-01,2025-03-31,Active,Building automated test framework,6 months
+PROJ019,EMP014,Quality Assurance,QA Lead,2024-04-01,2024-09-30,Completed,Led QA efforts for Ariba deployment,6 months
+PROJ020,EMP015,Ariba Architecture Redesign,Solutions Architect,2024-06-01,2025-01-31,Active,Redesigning Ariba architecture for scalability,8 months
+PROJ021,EMP015,Platform Strategy,Architect,2023-12-01,2024-08-31,Completed,Defined platform strategy and roadmap,9 months
+PROJ022,EMP015,Integration Framework,Lead Architect,2023-06-01,2024-02-28,Completed,Designed enterprise integration framework,9 months
+PROJ023,EMP015,Technical Governance,Architect,2023-01-01,2023-07-31,Completed,Established technical governance model,7 months
+PROJ024,EMP015,Cloud Strategy,Chief Architect,2022-09-01,2023-05-31,Completed,Defined cloud adoption strategy,9 months
+PROJ025,EMP016,Microservices Platform,Full Stack Developer,2024-08-01,2025-01-31,Active,Building microservices on BTP,6 months
+PROJ026,EMP016,React Dashboard,Frontend Developer,2024-03-01,2024-09-30,Completed,Developed React dashboard for BTP,7 months
+PROJ027,EMP016,API Layer,Backend Developer,2023-11-01,2024-06-30,Completed,Created API layer for BTP services,8 months
+PROJ028,EMP016,DevOps Pipeline,DevOps Engineer,2023-05-01,2023-12-31,Completed,Set up CI/CD pipeline for BTP,8 months
+PROJ029,EMP017,CAP Application,CAP Developer,2024-09-15,2024-12-15,Active,Developing CAP application on BTP,3 months
+PROJ030,EMP017,Fiori App,UI5 Developer,2024-05-01,2024-11-30,Completed,Built Fiori application using CAP,7 months
+PROJ031,EMP017,OData Services,Developer,2024-01-01,2024-06-30,Completed,Created OData services for CAP,6 months
+PROJ032,EMP018,Integration Suite,Integration Consultant,2024-04-01,2024-11-30,Active,Implementing BTP Integration Suite,8 months
+PROJ033,EMP018,API Strategy,Consultant,2023-10-01,2024-05-31,Completed,Defined API management strategy,8 months
+PROJ034,EMP018,CPI Flows,Integration Developer,2023-05-01,2024-01-31,Completed,Developed CPI integration flows,9 months
+PROJ035,EMP018,Cloud Connectivity,Architect,2023-01-01,2023-09-30,Completed,Designed cloud connectivity architecture,9 months
+PROJ036,EMP018,Hybrid Integration,Lead Consultant,2022-08-01,2023-04-30,Completed,Implemented hybrid integration landscape,9 months
+PROJ037,EMP019,Fiori Elements App,UI5 Developer,2024-10-01,2025-02-28,Active,Developing Fiori Elements application,5 months
+PROJ038,EMP019,Custom Controls,Senior Developer,2024-05-01,2024-11-30,Completed,Created custom UI5 controls,7 months
+PROJ039,EMP019,Mobile App,Frontend Developer,2024-01-01,2024-07-31,Completed,Built responsive mobile application,7 months
+PROJ040,EMP020,Kubernetes Cluster,DevOps Engineer,2024-07-01,2024-12-31,Active,Setting up Kubernetes on BTP,6 months
+PROJ041,EMP020,CI/CD Pipeline,DevOps Lead,2024-02-01,2024-08-31,Completed,Implemented Jenkins CI/CD pipeline,7 months
+PROJ042,EMP021,Sales Analytics,Data Analyst,2024-07-01,2024-12-31,Active,Analyzing sales data and trends,6 months
+PROJ043,EMP021,Customer Insights,Analyst,2024-01-15,2024-08-31,Completed,Generated customer insights from data,7 months
+PROJ044,EMP021,Predictive Model,Data Scientist,2023-09-01,2024-04-30,Completed,Built predictive analytics model,8 months
+PROJ045,EMP021,Dashboard Creation,Analyst,2023-04-01,2023-11-30,Completed,Created executive dashboards,8 months
+PROJ046,EMP022,BI Platform,BI Developer,2024-06-01,2025-03-31,Active,Developing BI platform on SAP BW,10 months
+PROJ047,EMP022,Data Warehouse,DW Architect,2023-11-01,2024-08-31,Completed,Designed data warehouse architecture,10 months
+PROJ048,EMP022,Reporting Suite,Developer,2023-05-01,2024-02-28,Completed,Built comprehensive reporting suite,10 months
+PROJ049,EMP022,ETL Pipeline,ETL Developer,2023-01-01,2023-09-30,Completed,Created ETL data pipeline,9 months
+PROJ050,EMP022,Power BI Integration,BI Consultant,2022-08-01,2023-05-31,Completed,Integrated Power BI with SAP,10 months
+PROJ051,EMP023,SAC Dashboard,SAC Developer,2024-05-01,2024-12-31,Active,Building SAC analytics dashboard,8 months
+PROJ052,EMP023,Story Design,Designer,2024-01-01,2024-07-31,Completed,Designed SAC stories for executives,7 months
+PROJ053,EMP023,Data Model,Developer,2023-08-01,2024-03-31,Completed,Created data models in SAC,8 months
+PROJ054,EMP024,Planning Application,SAC Consultant,2024-08-15,2025-01-15,Active,Implementing SAC planning application,5 months
+PROJ055,EMP024,Forecasting Model,Consultant,2024-03-01,2024-10-31,Completed,Built forecasting model in SAC,8 months
+PROJ056,EMP024,Analytics Suite,Developer,2023-10-01,2024-06-30,Completed,Developed analytics suite,9 months
+PROJ057,EMP024,Predictive Analytics,Analyst,2023-04-01,2023-12-31,Completed,Implemented predictive analytics,9 months
+PROJ058,EMP025,Data Warehouse,DW Specialist,2024-09-01,2025-04-30,Active,Building enterprise data warehouse,8 months
+PROJ059,EMP025,ETL Framework,ETL Developer,2024-04-01,2024-12-31,Completed,Created ETL framework,9 months
+PROJ060,EMP025,Big Data Platform,Data Engineer,2023-11-01,2024-08-31,Completed,Set up big data platform,10 months
+PROJ061,EMP025,Data Migration,Migration Lead,2023-05-01,2024-02-28,Completed,Led data migration project,10 months
+PROJ062,EMP025,Database Optimization,DBA,2023-01-01,2023-09-30,Completed,Optimized database performance,9 months
+PROJ_1761454973426_0a1sbn0ne,EMP008,EMail Integartion,Developer,9/1/25,12/31/25,Active,,4 months

@@ -1,3 +1,7 @@
 managerId,name,team,subTeam,email,totalSkills,totalProjects,specialization
 MGR001,Alice Johnson,S4HANA,Management,alice.johnson@company.com,10,5,S4HANA Expert
 MGR002,Bob Wilson,SuccessFactors,Management,bob.wilson@company.com,12,6,SuccessFactors Lead
+MGR003,Puja K,CIS,Development,pujak@sap.com,24,12,Developement Manager
+MGR004,Sachin,Ariba,Management,sachin@company.com,18,9,Ariba Procurement Lead
+MGR005,Abhisheak,BTP,Management,abhisheak@company.com,20,10,BTP Platform Architect
+MGR006,Fazal Ilahi,Analytics,Management,fazal.ilahi@company.com,16,8,Analytics & Reporting Lead

@@ -395,9 +395,8 @@ export default class EmployeeDashboard extends Controller {
                 this.editSkillDialog = undefined;
             }
             
-            // Create new dialog
+            // Create new dialog WITHOUT id parameter to avoid duplicate ID issues
             this.editSkillDialog = await Fragment.load({
-                id: this.getView()?.getId(),
                 name: "skillsphere.view.dialogs.EditSkillDialog",
                 controller: this
             }) as Dialog;
@@ -523,9 +522,8 @@ export default class EmployeeDashboard extends Controller {
             });
             this.getView()?.setModel(newProjectModel, "newProject");
             
-            // Load add project dialog with unique ID
+            // Load add project dialog WITHOUT id to avoid duplicate IDs
             this.addProjectDialog = await Fragment.load({
-                id: this.getView()?.getId(),
                 name: "skillsphere.view.dialogs.AddProjectDialog",
                 controller: this
             }) as Dialog;
@@ -637,9 +635,8 @@ export default class EmployeeDashboard extends Controller {
                 this.editProjectDialog = undefined;
             }
             
-            // Create new dialog with correct namespace
+            // Create new dialog WITHOUT id to avoid duplicate IDs
             this.editProjectDialog = await Fragment.load({
-                id: this.getView()?.getId(),
                 name: "skillsphere.view.dialogs.EditProjectDialog",
                 controller: this
             }) as Dialog;
