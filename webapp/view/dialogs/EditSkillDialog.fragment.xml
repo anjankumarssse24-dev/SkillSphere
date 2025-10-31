@@ -1,41 +1,65 @@
 <core:FragmentDefinition
-    xmlns="sap.m"
-    xmlns:core="sap.ui.core">
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
     <Dialog
         title="Edit Skill"
-        contentWidth="400px">
+        contentWidth="450px">
         <content>
             <VBox class="sapUiMediumMargin">
-                <Label text="Skill Name:" />
-                <Input
-                    value="{editSkill>/skillName}"
-                    placeholder="Enter skill name" />
+                <Label text="Skill Category:" required="true" class="sapUiSmallMarginBottom"/>
+                <Select
+                    selectedKey="{editSkill>/category}"
+                    change="onEditSkillCategoryChange"
+                    width="100%">
+                    <core:Item key="" text="-- Select Skill Category --" />
+                    <core:Item key="Frontend" text="Frontend Development" />
+                    <core:Item key="Backend" text="Backend Development" />
+                    <core:Item key="FullStack" text="Full Stack Development" />
+                    <core:Item key="Database" text="Database and Data Management" />
+                    <core:Item key="Cloud" text="Cloud and Platform" />
+                    <core:Item key="Integration" text="Integration and Middleware" />
+                    <core:Item key="Analytics" text="Analytics and BI" />
+                    <core:Item key="Mobile" text="Mobile Development" />
+                    <core:Item key="DevOps" text="DevOps and CI/CD" />
+                    <core:Item key="Testing" text="Testing and QA" />
+                    <core:Item key="Security" text="Security and Compliance" />
+                    <core:Item key="Procurement" text="Procurement and Supply Chain" />
+                </Select>
                 
-                <Label text="Category:" />
-                <Input
-                    value="{editSkill>/category}"
-                    placeholder="Enter category (e.g., Technical, Soft Skills)" />
+                <Label text="Skill Name:" required="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+                <Select
+                    selectedKey="{editSkill>/skillName}"
+                    width="100%"
+                    enabled="{= ${editSkill>/category}.length &gt; 0 }"
+                    items="{
+                        path: 'editSkillCatalog>/skills',
+                        templateShareable: false
+                    }">
+                    <core:Item key="{editSkillCatalog>name}" text="{= ${editSkillCatalog>name} === '' ? '-- Select Skill --' : ${editSkillCatalog>name} }" />
+                </Select>
                 
-                <Label text="Proficiency Level:" required="true" />
+                <Label text="Proficiency Level:" required="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
                 <Select
                     selectedKey="{editSkill>/proficiency}"
                     change="onEditProficiencyChange"
                     width="100%">
                     <core:Item key="" text="-- Select Proficiency Level --" />
-                    <core:Item key="Beginner" text="Beginner" />
-                    <core:Item key="Intermediate" text="Intermediate" />
-                    <core:Item key="Proficient" text="Proficient" />
-                    <core:Item key="Advanced" text="Advanced" />
-                    <core:Item key="Expert" text="Expert" />
+                    <core:Item key="Beginner" text="Beginner (0-1 years)" />
+                    <core:Item key="Intermediate" text="Intermediate (1-3 years)" />
+                    <core:Item key="Proficient" text="Proficient (3-5 years)" />
+                    <core:Item key="Advanced" text="Advanced (5-8 years)" />
+                    <core:Item key="Expert" text="Expert (8+ years)" />
                 </Select>
                 
-                <Label text="Years of Experience:" />
-                <Input
+                <Label text="Years of Experience:" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+                <StepInput
                     value="{editSkill>/yearsExperience}"
-                    type="Number"
-                    placeholder="Enter years of experience" />
+                    min="0"
+                    max="30"
+                    step="1"
+                    width="100%" />
                 
-                <Label text="Certification Status:" />
+                <Label text="Certification Status:" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
                 <Select
                     selectedKey="{editSkill>/certificationStatus}"
                     change="onEditCertificationChange"

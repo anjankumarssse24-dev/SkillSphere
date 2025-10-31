@@ -132,8 +132,17 @@
                                         <m:Column id="skillNameCol">
                                             <m:Text id="skillNameHeader" text="Skill Name"/>
                                         </m:Column>
+                                        <m:Column id="categoryCol">
+                                            <m:Text id="categoryHeader" text="Category"/>
+                                        </m:Column>
                                         <m:Column id="proficiencyCol">
                                             <m:Text id="proficiencyHeader" text="Proficiency Level"/>
+                                        </m:Column>
+                                        <m:Column id="yearsCol">
+                                            <m:Text id="yearsHeader" text="Years"/>
+                                        </m:Column>
+                                        <m:Column id="certificationCol">
+                                            <m:Text id="certificationHeader" text="Certification"/>
                                         </m:Column>
                                         <m:Column id="skillActionsCol" width="150px">
                                             <m:Text id="skillActionsHeader" text="Actions"/>
@@ -142,8 +151,12 @@
                                     <m:items>
                                         <m:ColumnListItem id="skillItem">
                                             <m:Text id="skillNameText" text="{skills>skillName}"/>
+                                            <m:Text id="categoryText" text="{skills>category}"/>
                                             <m:ObjectStatus id="proficiencyStatus" text="{skills>proficiencyLevel}" 
                                                 state="{path: 'skills>proficiencyLevel', formatter: '.formatProficiencyState'}"/>
+                                            <m:Text id="yearsText" text="{skills>yearsExperience}"/>
+                                            <m:ObjectStatus id="certificationStatus" text="{skills>certificationStatus}"
+                                                state="{path: 'skills>certificationStatus', formatter: '.formatCertificationState'}"/>
                                             <m:HBox id="skillActionsHBox">
                                                 <m:Button id="editSkillBtn" icon="sap-icon://edit" press="onEditSkill" tooltip="Edit Skill"/>
                                                 <m:Button id="deleteSkillBtn" icon="sap-icon://delete" type="Reject" press="onDeleteSkill" tooltip="Delete Skill"/>
@@ -203,11 +216,5 @@
             </uxap:ObjectPageSection>
         </uxap:sections>
     </uxap:ObjectPageLayout>
-
-    <!-- Dialogs -->
-    <core:Fragment fragmentName="skillsphere.view.dialogs.AddSkillDialog" type="XML"/>
-    <core:Fragment fragmentName="skillsphere.view.dialogs.EditSkillDialog" type="XML"/>
-    <core:Fragment fragmentName="skillsphere.view.dialogs.AddProjectDialog" type="XML"/>
-    <core:Fragment fragmentName="skillsphere.view.dialogs.EditProjectDialog" type="XML"/>
 
 </mvc:View>

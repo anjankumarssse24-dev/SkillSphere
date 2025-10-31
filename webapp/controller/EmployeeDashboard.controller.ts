@@ -190,12 +190,27 @@ export default class EmployeeDashboard extends Controller {
 
     public formatProficiencyState(proficiency: string): string {
         switch (proficiency) {
+            case "Expert":
+            case "Advanced":
             case "Proficient":
                 return "Success";
             case "Intermediate":
                 return "Warning";
             case "Beginner":
                 return "Error";
+            default:
+                return "None";
+        }
+    }
+
+    public formatCertificationState(certification: string): string {
+        switch (certification) {
+            case "Certified":
+                return "Success";
+            case "In Progress":
+                return "Warning";
+            case "None":
+                return "None";
             default:
                 return "None";
         }
@@ -239,6 +254,12 @@ export default class EmployeeDashboard extends Controller {
                 certificationStatus: ""
             });
             this.getView()?.setModel(newSkillModel, "newSkill");
+
+            // Initialize skill catalog model with all available skills
+            const skillCatalogModel = new JSONModel({
+                skills: [] // Will be populated when category is selected
+            });
+            this.getView()?.setModel(skillCatalogModel, "skillCatalog");
 
             this.addSkillDialog.open();
         } catch (error) {
@@ -338,6 +359,189 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
+    public onSkillCategoryChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedCategory = select.getSelectedKey();
+        
+        console.log("Selected category:", selectedCategory);
+        
+        // Define SAP skill catalog by category
+        const sapSkillCatalog: { [key: string]: string[] } = {
+            "Frontend": [
+                "SAPUI5", "Fiori Elements", "SAP Fiori", "JavaScript", "TypeScript", 
+                "React", "Angular", "Vue.js", "HTML5", "CSS3", "SCSS"
+            ],
+            "Backend": [
+                "ABAP", "ABAP OO", "Java", "Node.js", "Python", "C#", ".NET", 
+                "Spring Boot", "Express.js", "CAP (Cloud Application Programming)"
+            ],
+            "FullStack": [
+                "SAP CAP", "MEAN Stack", "MERN Stack", "Full Stack JavaScript", 
+                "SAP BTP Full Stack", "Microservices Architecture"
+            ],
+            "Database": [
+                "SAP HANA", "HANA Cloud", "SQL", "HANA SQL", "HANA XS Advanced", 
+                "PostgreSQL", "MongoDB", "SQLScript", "CDS (Core Data Services)"
+            ],
+            "Cloud": [
+                "SAP BTP (Business Technology Platform)", "Cloud Foundry", "Kyma Runtime", 
+                "AWS", "Azure", "Google Cloud Platform", "SAP HANA Cloud", 
+                "Cloud Native Development", "Kubernetes", "Docker"
+            ],
+            "Integration": [
+                "SAP PI/PO (Process Integration)", "SAP CPI (Cloud Platform Integration)", 
+                "SAP Integration Suite", "REST API", "SOAP", "OData", "GraphQL", 
+                "API Management", "Event-Driven Architecture", "Message Queuing"
+            ],
+            "Analytics": [
+                "SAP Analytics Cloud (SAC)", "SAP BusinessObjects", "Power BI", 
+                "Tableau", "SAP BW/4HANA", "Data Warehouse", "SAP Datasphere", 
+                "Embedded Analytics", "Predictive Analytics", "Machine Learning"
+            ],
+            "Mobile": [
+                "SAP Mobile Services", "SAP Fiori for Mobile", "iOS Development", 
+                "Android Development", "React Native", "Flutter", "Progressive Web Apps (PWA)"
+            ],
+            "DevOps": [
+                "CI/CD", "Jenkins", "Git", "GitHub Actions", "SAP Cloud Transport Management", 
+                "Continuous Testing", "Infrastructure as Code", "Terraform", "Ansible"
+            ],
+            "Testing": [
+                "SAP Test Automation", "Selenium", "Jest", "Mocha", "Jasmine", 
+                "QUnit", "Postman", "JMeter", "Test-Driven Development (TDD)"
+            ],
+            "Security": [
+                "SAP Security", "OAuth", "SAML", "Identity & Access Management", 
+                "SAP Cloud Identity Services", "Data Privacy & Protection", 
+                "Penetration Testing", "Security Compliance"
+            ],
+            "Procurement": [
+                "SAP Ariba", "Ariba Procurement", "Ariba Sourcing", "Ariba Contracts", 
+                "Ariba Integration", "Supplier Management", "Procurement Analytics"
+            ]
+        };
+        
+        // Get skills for selected category
+        const categorySkills = sapSkillCatalog[selectedCategory] || [];
+        
+        // Update skill catalog model
+        const skillCatalogModel = this.getView()?.getModel("skillCatalog") as JSONModel;
+        if (skillCatalogModel) {
+            // Prepend "-- Select Skill --" option to the list
+            const skillsWithPlaceholder = [
+                { name: "" },  // Empty key for placeholder
+                ...categorySkills.map(skillName => ({ name: skillName }))
+            ];
+            skillCatalogModel.setData({
+                skills: skillsWithPlaceholder
+            });
+            console.log(`Loaded ${categorySkills.length} skills for category: ${selectedCategory}`);
+        }
+        
+        // Reset skill name selection
+        const newSkillModel = this.getView()?.getModel("newSkill") as JSONModel;
+        if (newSkillModel) {
+            const data = newSkillModel.getData();
+            data.skillName = ""; // Clear previous selection
+            data.category = selectedCategory; // Update category
+            newSkillModel.setData(data);
+        }
+    }
+
+    public onEditSkillCategoryChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedCategory = select.getSelectedKey();
+        
+        console.log("Edit dialog - Selected category:", selectedCategory);
+        
+        // Populate the catalog for edit dialog
+        this.populateEditSkillCatalog(selectedCategory);
+        
+        // Update the editSkill model with selected category
+        const editSkillModel = this.getView()?.getModel("editSkill") as JSONModel;
+        if (editSkillModel) {
+            const data = editSkillModel.getData();
+            data.category = selectedCategory;
+            data.skillName = ""; // Reset skill name when category changes
+            editSkillModel.setData(data);
+        }
+    }
+
+    private populateEditSkillCatalog(selectedCategory: string): void {
+        // Define SAP skill catalog by category (same as in onSkillCategoryChange)
+        const sapSkillCatalog: { [key: string]: string[] } = {
+            "Frontend": [
+                "SAPUI5", "Fiori Elements", "SAP Fiori", "JavaScript", "TypeScript", 
+                "React", "Angular", "Vue.js", "HTML5", "CSS3", "SCSS"
+            ],
+            "Backend": [
+                "ABAP", "ABAP OO", "Java", "Node.js", "Python", "C#", ".NET", 
+                "Spring Boot", "Express.js", "CAP (Cloud Application Programming)"
+            ],
+            "FullStack": [
+                "SAP CAP", "MEAN Stack", "MERN Stack", "Full Stack JavaScript", 
+                "SAP BTP Full Stack", "Microservices Architecture"
+            ],
+            "Database": [
+                "SAP HANA", "HANA Cloud", "SQL", "HANA SQL", "HANA XS Advanced", 
+                "PostgreSQL", "MongoDB", "SQLScript", "CDS (Core Data Services)"
+            ],
+            "Cloud": [
+                "SAP BTP (Business Technology Platform)", "Cloud Foundry", "Kyma Runtime", 
+                "AWS", "Azure", "Google Cloud Platform", "SAP HANA Cloud", 
+                "Cloud Native Development", "Kubernetes", "Docker"
+            ],
+            "Integration": [
+                "SAP PI/PO (Process Integration)", "SAP CPI (Cloud Platform Integration)", 
+                "SAP Integration Suite", "REST API", "SOAP", "OData", "GraphQL", 
+                "API Management", "Event-Driven Architecture", "Message Queuing"
+            ],
+            "Analytics": [
+                "SAP Analytics Cloud (SAC)", "SAP BusinessObjects", "Power BI", 
+                "Tableau", "SAP BW/4HANA", "Data Warehouse", "SAP Datasphere", 
+                "Embedded Analytics", "Predictive Analytics", "Machine Learning"
+            ],
+            "Mobile": [
+                "SAP Mobile Services", "SAP Fiori for Mobile", "iOS Development", 
+                "Android Development", "React Native", "Flutter", "Progressive Web Apps (PWA)"
+            ],
+            "DevOps": [
+                "CI/CD", "Jenkins", "Git", "GitHub Actions", "SAP Cloud Transport Management", 
+                "Continuous Testing", "Infrastructure as Code", "Terraform", "Ansible"
+            ],
+            "Testing": [
+                "SAP Test Automation", "Selenium", "Jest", "Mocha", "Jasmine", 
+                "QUnit", "Postman", "JMeter", "Test-Driven Development (TDD)"
+            ],
+            "Security": [
+                "SAP Security", "OAuth", "SAML", "Identity & Access Management", 
+                "SAP Cloud Identity Services", "Data Privacy & Protection", 
+                "Penetration Testing", "Security Compliance"
+            ],
+            "Procurement": [
+                "SAP Ariba", "Ariba Procurement", "Ariba Sourcing", "Ariba Contracts", 
+                "Ariba Integration", "Supplier Management", "Procurement Analytics"
+            ]
+        };
+        
+        // Get skills for selected category
+        const categorySkills = sapSkillCatalog[selectedCategory] || [];
+        
+        // Update edit skill catalog model
+        const editSkillCatalogModel = this.getView()?.getModel("editSkillCatalog") as JSONModel;
+        if (editSkillCatalogModel) {
+            // Prepend "-- Select Skill --" option to the list
+            const skillsWithPlaceholder = [
+                { name: "" },  // Empty key for placeholder
+                ...categorySkills.map(skillName => ({ name: skillName }))
+            ];
+            editSkillCatalogModel.setData({
+                skills: skillsWithPlaceholder
+            });
+            console.log(`Edit dialog - Loaded ${categorySkills.length} skills for category: ${selectedCategory}`);
+        }
+    }
+
     public onCertificationChange(event: Event): void {
         const select = event.getSource() as any;
         const selectedKey = select.getSelectedKey();
@@ -389,6 +593,12 @@ export default class EmployeeDashboard extends Controller {
             const editSkillModel = new JSONModel(editData);
             this.getView()?.setModel(editSkillModel, "editSkill");
             
+            // Initialize skill catalog model for edit dialog (will be populated when category is loaded)
+            const editSkillCatalogModel = new JSONModel({
+                skills: []
+            });
+            this.getView()?.setModel(editSkillCatalogModel, "editSkillCatalog");
+            
             // Destroy existing dialog to prevent duplicate IDs
             if (this.editSkillDialog) {
                 this.editSkillDialog.destroy();
@@ -401,6 +611,11 @@ export default class EmployeeDashboard extends Controller {
                 controller: this
             }) as Dialog;
             this.getView()?.addDependent(this.editSkillDialog);
+            
+            // Populate the skill catalog based on the current category
+            if (editData.category) {
+                this.populateEditSkillCatalog(editData.category);
+            }
             
             this.editSkillDialog.open();
         } catch (error) {
