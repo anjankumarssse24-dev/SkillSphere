@@ -58,46 +58,104 @@
                                     <m:VBox id="profileManagementVBox" class="sapUiMediumMargin">
                                         <m:Title text="Update Your Professional Profile" level="H3" class="sapUiMediumMarginBottom"/>
                                         
-                                        <!-- Specialization Field -->
-                                        <m:VBox id="specializationBox" class="sapUiSmallMarginBottom">
-                                            <m:Label id="specializationLabel" text="Specialization:" class="sapUiSmallMarginBottom" required="true"/>
-                                            <m:Select id="specializationSelect" selectedKey="{profile>/specialization}" width="100%">
-                                                <core:Item key="ABAP Developer" text="ABAP Developer"/>
-                                                <core:Item key="Data Science" text="Data Science"/>
-                                                <core:Item key="AI/Machine Learning" text="AI/Machine Learning"/>
-                                                <core:Item key="SAPUI5 Developer" text="SAPUI5 Developer"/>
-                                                <core:Item key="SAP HANA Developer" text="SAP HANA Developer"/>
-                                                <core:Item key="SAP BTP Developer" text="SAP BTP Developer"/>
-                                                <core:Item key="SAP Integration" text="SAP Integration"/>
-                                                <core:Item key="SAP Analytics" text="SAP Analytics"/>
-                                                <core:Item key="SAP Security" text="SAP Security"/>
-                                                <core:Item key="SAP Basis" text="SAP Basis"/>
-                                                <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
-                                                <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
-                                            </m:Select>
-                                        </m:VBox>
+                                        <!-- 2x2 Grid Layout -->
+                                        <m:HBox id="profileRow1" class="sapUiSmallMarginBottom">
+                                            <!-- Role Field -->
+                                            <m:VBox id="roleBox" class="sapUiSmallMarginEnd" width="48%">
+                                                <m:Label id="roleLabel" text="Role:" class="sapUiSmallMarginBottom" required="true"/>
+                                                <m:Select id="roleSelect" selectedKey="{profile>/role}" width="100%">
+                                                    <core:Item key="" text="-- Select Role --"/>
+                                                    <core:Item key="Developer" text="Developer"/>
+                                                    <core:Item key="Architect" text="Architect"/>
+                                                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                                                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                                                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                                                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                                    <core:Item key="QA Engineer" text="QA Engineer"/>
+                                                    <core:Item key="Solution Architect" text="Solution Architect"/>
+                                                </m:Select>
+                                            </m:VBox>
 
-                                        <!-- Current Working Status -->
-                                        <m:VBox id="workingStatusBox" class="sapUiSmallMarginBottom">
-                                            <m:CheckBox id="workingProjectCheckbox" 
-                                                text="Currently working on a project" 
-                                                selected="{profile>/working_on_project}"
-                                                select="onToggleProjectStatus"/>
-                                        </m:VBox>
+                                            <!-- Location Field -->
+                                            <m:VBox id="locationBox" width="48%">
+                                                <m:Label id="locationLabel" text="Location:" class="sapUiSmallMarginBottom" required="true"/>
+                                                <m:Select id="locationSelect" selectedKey="{profile>/location}" width="100%">
+                                                    <core:Item key="" text="-- Select Location --"/>
+                                                    <core:Item key="Whitefield, Bangalore" text="Whitefield, Bangalore"/>
+                                                    <core:Item key="Devanahalli Campuses, Bangalore" text="Devanahalli Campuses, Bangalore"/>
+                                                    <core:Item key="Gurugram" text="Gurugram"/>
+                                                    <core:Item key="Mumbai" text="Mumbai"/>
+                                                    <core:Item key="Pune" text="Pune"/>
+                                                    <core:Item key="Hyderabad" text="Hyderabad"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                        </m:HBox>
 
-                                        <!-- Project Dates (shown only when working on project) -->
-                                        <m:VBox id="projectDatesBox" class="sapUiSmallMarginBottom" 
-                                            visible="{profile>/working_on_project}">
-                                            <m:Label id="projectStartLabel" text="Project Start Date:" class="sapUiSmallMarginBottom"/>
-                                            <m:DatePicker id="projectStartDate" 
-                                                value="{profile>/project_start_date}" 
-                                                width="100%" 
-                                                class="sapUiSmallMarginBottom"/>
+                                        <m:HBox id="profileRow2" class="sapUiSmallMarginBottom">
+                                            <!-- T Level Field -->
+                                            <m:VBox id="tLevelBox" class="sapUiSmallMarginEnd" width="48%">
+                                                <m:Label id="tLevelLabel" text="T Level:" class="sapUiSmallMarginBottom" required="true"/>
+                                                <m:Select id="tLevelSelect" selectedKey="{profile>/tLevel}" width="100%">
+                                                    <core:Item key="" text="-- Select T Level --"/>
+                                                    <core:Item key="T1" text="T1"/>
+                                                    <core:Item key="T2" text="T2"/>
+                                                    <core:Item key="T3" text="T3"/>
+                                                    <core:Item key="T4" text="T4"/>
+                                                </m:Select>
+                                            </m:VBox>
                                             
-                                            <m:Label id="projectEndLabel" text="Project End Date:" class="sapUiSmallMarginBottom"/>
-                                            <m:DatePicker id="projectEndDate" 
-                                                value="{profile>/project_end_date}" 
-                                                width="100%"/>
+                                            <!-- Specialization Field -->
+                                            <m:VBox id="specializationBox" width="48%">
+                                                <m:Label id="specializationLabel" text="Specialization:" class="sapUiSmallMarginBottom" required="true"/>
+                                                <m:Select id="specializationSelect" selectedKey="{profile>/specialization}" width="100%">
+                                                    <core:Item key="ABAP Developer" text="ABAP Developer"/>
+                                                    <core:Item key="Data Science" text="Data Science"/>
+                                                    <core:Item key="AI/Machine Learning" text="AI/Machine Learning"/>
+                                                    <core:Item key="SAPUI5 Developer" text="SAPUI5 Developer"/>
+                                                    <core:Item key="SAP HANA Developer" text="SAP HANA Developer"/>
+                                                    <core:Item key="SAP BTP Developer" text="SAP BTP Developer"/>
+                                                    <core:Item key="SAP Integration" text="SAP Integration"/>
+                                                    <core:Item key="SAP Analytics" text="SAP Analytics"/>
+                                                    <core:Item key="SAP Security" text="SAP Security"/>
+                                                    <core:Item key="SAP Basis" text="SAP Basis"/>
+                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                        </m:HBox>
+
+                                        <!-- Current Working Status Section (at the end) -->
+                                        <m:VBox id="workingStatusSection" class="sapUiMediumMarginTop">
+                                            <m:Title text="Current Project Status" level="H4" class="sapUiSmallMarginBottom"/>
+                                            
+                                            <m:VBox id="workingStatusBox" class="sapUiSmallMarginBottom">
+                                                <m:CheckBox id="workingProjectCheckbox" 
+                                                    text="Currently working on a project" 
+                                                    selected="{profile>/working_on_project}"
+                                                    select="onToggleProjectStatus"/>
+                                            </m:VBox>
+
+                                            <!-- Project Dates (shown only when working on project) -->
+                                            <m:VBox id="projectDatesBox" class="sapUiSmallMarginBottom" 
+                                                visible="{profile>/working_on_project}">
+                                                <m:HBox id="projectDatesRow">
+                                                    <m:VBox id="startDateBox" class="sapUiSmallMarginEnd" width="48%">
+                                                        <m:Label id="projectStartLabel" text="Project Start Date:" class="sapUiSmallMarginBottom"/>
+                                                        <m:DatePicker id="projectStartDate" 
+                                                            value="{profile>/project_start_date}" 
+                                                            width="100%"/>
+                                                    </m:VBox>
+                                                    
+                                                    <m:VBox id="endDateBox" width="48%">
+                                                        <m:Label id="projectEndLabel" text="Project End Date:" class="sapUiSmallMarginBottom"/>
+                                                        <m:DatePicker id="projectEndDate" 
+                                                            value="{profile>/project_end_date}" 
+                                                            width="100%"/>
+                                                    </m:VBox>
+                                                </m:HBox>
+                                            </m:VBox>
                                         </m:VBox>
 
                                         <!-- Save Button -->

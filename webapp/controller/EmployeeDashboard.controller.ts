@@ -974,6 +974,21 @@ export default class EmployeeDashboard extends Controller {
             const profileData = profileModel?.getData();
 
             // Validate required fields
+            if (!profileData?.role) {
+                MessageToast.show("Please select your role");
+                return;
+            }
+            
+            if (!profileData?.location) {
+                MessageToast.show("Please select your location");
+                return;
+            }
+            
+            if (!profileData?.tLevel) {
+                MessageToast.show("Please select your T Level");
+                return;
+            }
+            
             if (!profileData?.specialization) {
                 MessageToast.show("Please select your specialization");
                 return;
@@ -1048,6 +1063,9 @@ export default class EmployeeDashboard extends Controller {
             
             // Initialize profile model with default values
             const defaultProfile = {
+                role: "",
+                location: "",
+                tLevel: "",
                 specialization: "",
                 working_on_project: false,
                 project_start_date: null,
@@ -1087,6 +1105,9 @@ export default class EmployeeDashboard extends Controller {
             console.error('❌ Error loading employee profile:', error);
             // Still set default profile on error
             const profileModel = new JSONModel({
+                role: "",
+                location: "",
+                tLevel: "",
                 specialization: "",
                 working_on_project: false,
                 project_start_date: null,

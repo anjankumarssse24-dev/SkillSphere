@@ -21,11 +21,11 @@ const csvWriter = new CSVWriter();
 // Define CSV headers for each entity
 const HEADERS = {
     users: ['id', 'name', 'password', 'role', 'team', 'subTeam', 'managerId'],
-    employees: ['employeeId', 'name', 'team', 'subTeam', 'managerId', 'email', 'totalSkills', 'totalProjects', 'specialization'],
+    employees: ['employeeId', 'name', 'team', 'subTeam', 'managerId', 'email', 'totalSkills', 'totalProjects', 'specialization', 'role', 'location', 'tLevel'],
     managers: ['managerId', 'name', 'team', 'subTeam', 'email', 'totalSkills', 'totalProjects', 'specialization'],
     skills: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'],
     projects: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration'],
-    profiles: ['employeeId', 'specialization', 'working_on_project', 'project_start_date', 'project_end_date', 'lastUpdated']
+    profiles: ['employeeId', 'specialization', 'role', 'location', 'tLevel', 'working_on_project', 'project_start_date', 'project_end_date', 'lastUpdated']
 };
 
 // ============ SKILLS ENDPOINTS ============
