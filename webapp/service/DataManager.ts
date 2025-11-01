@@ -370,7 +370,11 @@ export class DataManager {
                     endDate: project.endDate || '',
                     status: project.status || 'Active',
                     description: project.description || '',
-                    duration: project.duration || ''
+                    duration: project.duration || '',
+                    projectManager: project.projectManager || '',
+                    accountExecutiveManager: project.accountExecutiveManager || '',
+                    lineManagerPOC: project.lineManagerPOC || '',
+                    projectOrchestrator: project.projectOrchestrator || ''
                 })
             });
             
@@ -424,7 +428,11 @@ export class DataManager {
                     status: updatedProject.status,
                     description: updatedProject.description,
                     duration: updatedProject.duration,
-                    employeeId: updatedProject.employeeId
+                    employeeId: updatedProject.employeeId,
+                    projectManager: updatedProject.projectManager || '',
+                    accountExecutiveManager: updatedProject.accountExecutiveManager || '',
+                    lineManagerPOC: updatedProject.lineManagerPOC || '',
+                    projectOrchestrator: updatedProject.projectOrchestrator || ''
                 })
             });
             

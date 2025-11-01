@@ -89,11 +89,14 @@ class CSVWriter {
             // Use provided headers or extract from first object
             const csvHeaders = headers || Object.keys(data[0]);
             
+            console.log(`📊 Writing ${filename} with headers:`, csvHeaders);
+            console.log(`📊 Last row data:`, data[data.length - 1]);
+            
             // Build CSV content
             let csvContent = csvHeaders.join(',') + '\n';
             
             // Add data rows
-            data.forEach(row => {
+            data.forEach((row, index) => {
                 const values = csvHeaders.map(header => {
                     let value = row[header] !== undefined ? row[header] : '';
                     // Quote values that contain commas or quotes
@@ -103,6 +106,11 @@ class CSVWriter {
                     return value;
                 });
                 csvContent += values.join(',') + '\n';
+                
+                // Log the last row to debug
+                if (index === data.length - 1) {
+                    console.log(`📊 Last row CSV values:`, values);
+                }
             });
             
             // Write to file

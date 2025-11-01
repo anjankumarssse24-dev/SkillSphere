@@ -24,7 +24,7 @@ const HEADERS = {
     employees: ['employeeId', 'name', 'team', 'subTeam', 'managerId', 'email', 'totalSkills', 'totalProjects', 'specialization', 'role', 'location', 'tLevel'],
     managers: ['managerId', 'name', 'team', 'subTeam', 'email', 'totalSkills', 'totalProjects', 'specialization'],
     skills: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'],
-    projects: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration'],
+    projects: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration', 'projectManager', 'accountExecutiveManager', 'lineManagerPOC', 'projectOrchestrator'],
     profiles: ['employeeId', 'specialization', 'role', 'location', 'tLevel', 'working_on_project', 'project_start_date', 'project_end_date', 'lastUpdated']
 };
 
@@ -244,6 +244,8 @@ app.post('/api/projects', async (req, res) => {
     try {
         const projectData = req.body;
         
+        console.log('📝 POST /api/projects - Received project data:', projectData);
+        
         // Generate unique projectId if not provided
         if (!projectData.projectId) {
             projectData.projectId = `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -264,8 +266,17 @@ app.post('/api/projects', async (req, res) => {
         projectData.status = projectData.status || 'Active';
         projectData.description = projectData.description || '';
         projectData.duration = projectData.duration || '';
+        projectData.projectManager = projectData.projectManager || '';
+        projectData.accountExecutiveManager = projectData.accountExecutiveManager || '';
+        projectData.lineManagerPOC = projectData.lineManagerPOC || '';
+        projectData.projectOrchestrator = projectData.projectOrchestrator || '';
+        
+        console.log('💾 Saving project with data:', projectData);
         
         const newProject = await csvWriter.addRecord('projects.csv', projectData, HEADERS.projects);
+        
+        console.log('✅ Project saved successfully:', newProject);
+        
         res.json({ success: true, data: newProject });
     } catch (error) {
         console.error('Error adding project:', error);

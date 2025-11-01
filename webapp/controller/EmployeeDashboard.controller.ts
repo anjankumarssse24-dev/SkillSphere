@@ -733,7 +733,11 @@ export default class EmployeeDashboard extends Controller {
                 startDate: null,
                 endDate: null,
                 status: "Active",
-                description: ""
+                description: "",
+                projectManager: "",
+                accountExecutiveManager: "",
+                lineManagerPOC: "",
+                projectOrchestrator: ""
             });
             this.getView()?.setModel(newProjectModel, "newProject");
             
@@ -766,6 +770,12 @@ export default class EmployeeDashboard extends Controller {
             const newProjectModel = this.getView()?.getModel("newProject") as JSONModel;
             const projectData = newProjectModel?.getData();
             
+            console.log('🔍 RAW projectData from model:', JSON.stringify(projectData, null, 2));
+            console.log('🔍 projectManager:', projectData?.projectManager);
+            console.log('🔍 accountExecutiveManager:', projectData?.accountExecutiveManager);
+            console.log('🔍 lineManagerPOC:', projectData?.lineManagerPOC);
+            console.log('🔍 projectOrchestrator:', projectData?.projectOrchestrator);
+            
             // Validate required fields
             if (!projectData || !projectData.projectName || !projectData.role) {
                 MessageToast.show("Please fill in all required fields: Project Name and Role");
@@ -782,7 +792,11 @@ export default class EmployeeDashboard extends Controller {
                 endDate: projectData.endDate || "",
                 status: projectData.status || "Active",
                 description: projectData.description || "",
-                duration: this.calculateDuration(projectData.startDate, projectData.endDate)
+                duration: this.calculateDuration(projectData.startDate, projectData.endDate),
+                projectManager: projectData.projectManager || "",
+                accountExecutiveManager: projectData.accountExecutiveManager || "",
+                lineManagerPOC: projectData.lineManagerPOC || "",
+                projectOrchestrator: projectData.projectOrchestrator || ""
             };
             
             console.log('Adding project data:', newProject);
@@ -827,7 +841,11 @@ export default class EmployeeDashboard extends Controller {
                 startDate: null,
                 endDate: null,
                 status: "Active",
-                description: ""
+                description: "",
+                projectManager: "",
+                accountExecutiveManager: "",
+                lineManagerPOC: "",
+                projectOrchestrator: ""
             };
             this.getView()?.setModel(new JSONModel(emptyProject), "newProject");
         }

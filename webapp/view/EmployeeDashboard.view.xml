@@ -251,6 +251,18 @@
                                         <m:Column id="durationCol">
                                             <m:Text id="durationHeader" text="Duration"/>
                                         </m:Column>
+                                        <m:Column id="projectManagerCol">
+                                            <m:Text id="projectManagerHeader" text="Project Manager"/>
+                                        </m:Column>
+                                        <m:Column id="aemCol">
+                                            <m:Text id="aemHeader" text="AEM"/>
+                                        </m:Column>
+                                        <m:Column id="lineManagerCol">
+                                            <m:Text id="lineManagerHeader" text="Line Manager/POC"/>
+                                        </m:Column>
+                                        <m:Column id="orchestratorCol">
+                                            <m:Text id="orchestratorHeader" text="Project Orchestrator"/>
+                                        </m:Column>
                                         <m:Column id="projectActionsCol" width="150px">
                                             <m:Text id="projectActionsHeader" text="Actions"/>
                                         </m:Column>
@@ -260,6 +272,10 @@
                                             <m:Text id="projectNameText" text="{projects>projectName}"/>
                                             <m:Text id="roleText" text="{projects>role}"/>
                                             <m:Text id="durationText" text="{projects>duration}"/>
+                                            <m:Text id="projectManagerText" text="{projects>projectManager}"/>
+                                            <m:Text id="aemText" text="{projects>accountExecutiveManager}"/>
+                                            <m:Text id="lineManagerText" text="{projects>lineManagerPOC}"/>
+                                            <m:Text id="orchestratorText" text="{projects>projectOrchestrator}"/>
                                             <m:HBox id="projectActionsHBox">
                                                 <m:Button id="editProjectBtn" icon="sap-icon://edit" press="onEditProject" tooltip="Edit Project"/>
                                                 <m:Button id="deleteProjectBtn" icon="sap-icon://delete" type="Reject" press="onDeleteProject" tooltip="Delete Project"/>

@@ -319,7 +319,11 @@ export default class Component extends BaseComponent {
                 endDate: row.endDate,
                 status: row.status,
                 description: row.description,
-                duration: row.duration
+                duration: row.duration,
+                projectManager: row.projectManager || "",
+                accountExecutiveManager: row.accountExecutiveManager || "",
+                lineManagerPOC: row.lineManagerPOC || "",
+                projectOrchestrator: row.projectOrchestrator || ""
             }));
             
             return projects;

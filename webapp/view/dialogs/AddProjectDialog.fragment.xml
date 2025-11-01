@@ -3,20 +3,56 @@
     xmlns="sap.m">
     <Dialog
         title="Add New Project"
-        contentWidth="500px">
+        contentWidth="600px">
         <content>
             <VBox class="sapUiMediumMargin">
-                <Label text="Project Name:" />
+                <Label text="Project Name:" required="true" />
                 <Input
                     value="{newProject>/projectName}"
                     placeholder="Enter project name" />
                 
-                <Label text="Role:" />
-                <Input
-                    value="{newProject>/role}"
-                    placeholder="Enter your role in the project" />
+                <Label text="Role:" required="true" />
+                <Select selectedKey="{newProject>/role}" width="100%">
+                    <core:Item key="" text="-- Select Role --"/>
+                    <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Architect" text="Architect"/>
+                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                    <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                    <core:Item key="Data Analyst" text="Data Analyst"/>
+                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                    <core:Item key="QA Engineer" text="QA Engineer"/>
+                    <core:Item key="Test Engineer" text="Test Engineer"/>
+                    <core:Item key="Solution Architect" text="Solution Architect"/>
+                    <core:Item key="Integration Specialist" text="Integration Specialist"/>
+                    <core:Item key="Tech Lead" text="Tech Lead"/>
+                    <core:Item key="Project Manager" text="Project Manager"/>
+                </Select>
                 
-                <Label text="Start Date:" />
+                <!-- New Project Management Fields -->
+                <Label text="Project Manager:" class="sapUiSmallMarginTop" />
+                <Input
+                    value="{newProject>/projectManager}"
+                    placeholder="Oversees complete project planning, execution, and delivery" />
+                
+                <Label text="Account Executive Manager (AEM):" />
+                <Input
+                    value="{newProject>/accountExecutiveManager}"
+                    placeholder="Represents business stakeholders and validates project outcomes" />
+                
+                <Label text="Line Manager / POC:" />
+                <Input
+                    value="{newProject>/lineManagerPOC}"
+                    placeholder="Supervises daily tasks, assigns sprint work, and mentors interns" />
+                
+                <Label text="Project Orchestrator:" />
+                <Input
+                    value="{newProject>/projectOrchestrator}"
+                    placeholder="Coordinates frontend-backend integration and sprint alignment" />
+                
+                <Label text="Start Date:" class="sapUiSmallMarginTop" />
                 <DatePicker
                     value="{newProject>/startDate}"
                     placeholder="Select start date" />
