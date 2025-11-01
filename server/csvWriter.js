@@ -142,7 +142,10 @@ class CSVWriter {
             record.skillId === id || 
             record.projectId === id ||
             record.employeeId === id ||
-            record.managerId === id
+            record.managerId === id ||
+            record.currentProjectId === id ||
+            record.caiaId === id ||
+            record.pocId === id
         );
         
         if (index === -1) {
@@ -165,7 +168,10 @@ class CSVWriter {
             record.skillId !== id && 
             record.projectId !== id &&
             record.employeeId !== id &&
-            record.managerId !== id
+            record.managerId !== id &&
+            record.currentProjectId !== id &&
+            record.caiaId !== id &&
+            record.pocId !== id
         );
         
         if (filteredData.length === data.length) {

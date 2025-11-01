@@ -1,0 +1,56 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Mark CAIA (Internal) Utilization"
+        contentWidth="500px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Task Name -->
+                <Label text="Task Name:" required="true" />
+                <Input
+                    value="{caiaDialog>/taskName}"
+                    placeholder="e.g., Training, Team Meeting, Code Review"
+                    width="100%"/>
+                
+                <!-- Start Date -->
+                <Label text="Start Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{caiaDialog>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- End Date -->
+                <Label text="End Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{caiaDialog>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- Hours per Day Input -->
+                <Label text="Hours per Day:" required="true" class="sapUiSmallMarginTop" />
+                <StepInput
+                    value="{caiaDialog>/hoursPerDay}"
+                    min="0"
+                    max="24"
+                    step="0.5"
+                    displayValuePrecision="1"
+                    width="100%"
+                    description="hours"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onSaveCAIA" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseCAIADialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

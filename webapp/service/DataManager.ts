@@ -664,4 +664,256 @@ export class DataManager {
             return null;
         }
     }
+
+    // ==================== Current Project Utilization Methods ====================
+
+    public async addCurrentProject(data: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/currentProjects`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Current project added:', result);
+            return result;
+        } catch (error) {
+            console.error('Error adding current project:', error);
+            throw error;
+        }
+    }
+
+    public async updateCurrentProject(currentProjectId: string, data: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/currentProjects/${currentProjectId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Current project updated:', result);
+            return result;
+        } catch (error) {
+            console.error('Error updating current project:', error);
+            throw error;
+        }
+    }
+
+    public async deleteCurrentProject(currentProjectId: string): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/currentProjects/${currentProjectId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Current project deleted:', result);
+            return result;
+        } catch (error) {
+            console.error('Error deleting current project:', error);
+            throw error;
+        }
+    }
+
+    public async getCurrentProjectsByEmployee(employeeId: string): Promise<any[]> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/currentProjects/${employeeId}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Current projects retrieved:', result);
+            return result.data || [];
+        } catch (error) {
+            console.error('Error getting current projects:', error);
+            return [];
+        }
+    }
+
+    // ==================== CAIA Utilization Methods ====================
+
+    public async addCAIA(data: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/caia`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('CAIA added:', result);
+            return result;
+        } catch (error) {
+            console.error('Error adding CAIA:', error);
+            throw error;
+        }
+    }
+
+    public async updateCAIA(caiaId: string, data: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/caia/${caiaId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('CAIA updated:', result);
+            return result;
+        } catch (error) {
+            console.error('Error updating CAIA:', error);
+            throw error;
+        }
+    }
+
+    public async deleteCAIA(caiaId: string): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/caia/${caiaId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('CAIA deleted:', result);
+            return result;
+        } catch (error) {
+            console.error('Error deleting CAIA:', error);
+            throw error;
+        }
+    }
+
+    public async getCAIAByEmployee(employeeId: string): Promise<any[]> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/caia/${employeeId}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('CAIA retrieved:', result);
+            return result.data || [];
+        } catch (error) {
+            console.error('Error getting CAIA:', error);
+            return [];
+        }
+    }
+
+    // ==================== POC Utilization Methods ====================
+
+    public async addPOC(data: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/poc`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('POC added:', result);
+            return result;
+        } catch (error) {
+            console.error('Error adding POC:', error);
+            throw error;
+        }
+    }
+
+    public async updatePOC(pocId: string, data: any): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/poc/${pocId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('POC updated:', result);
+            return result;
+        } catch (error) {
+            console.error('Error updating POC:', error);
+            throw error;
+        }
+    }
+
+    public async deletePOC(pocId: string): Promise<any> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/poc/${pocId}`, {
+                method: 'DELETE'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('POC deleted:', result);
+            return result;
+        } catch (error) {
+            console.error('Error deleting POC:', error);
+            throw error;
+        }
+    }
+
+    public async getPOCByEmployee(employeeId: string): Promise<any[]> {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/poc/${employeeId}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('POC retrieved:', result);
+            return result.data || [];
+        } catch (error) {
+            console.error('Error getting POC:', error);
+            return [];
+        }
+    }
 }

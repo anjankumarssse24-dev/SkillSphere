@@ -25,7 +25,10 @@ const HEADERS = {
     managers: ['managerId', 'name', 'team', 'subTeam', 'email', 'totalSkills', 'totalProjects', 'specialization'],
     skills: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'],
     projects: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration', 'projectManager', 'accountExecutiveManager', 'lineManagerPOC', 'projectOrchestrator'],
-    profiles: ['employeeId', 'specialization', 'role', 'location', 'tLevel', 'working_on_project', 'project_start_date', 'project_end_date', 'lastUpdated']
+    profiles: ['employeeId', 'specialization', 'role', 'location', 'tLevel', 'lastUpdated'],
+    currentProjects: ['currentProjectId', 'employeeId', 'projectName', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'],
+    caiaUtilization: ['caiaId', 'employeeId', 'taskName', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'],
+    pocUtilization: ['pocId', 'employeeId', 'pocTitle', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated']
 };
 
 // ============ SKILLS ENDPOINTS ============
@@ -512,6 +515,216 @@ app.delete('/api/managers/:managerId', async (req, res) => {
     }
 });
 
+// ============ CURRENT PROJECTS UTILIZATION ENDPOINTS ============
+
+/**
+ * GET /api/currentProjects/:employeeId - Get current projects for specific employee
+ */
+app.get('/api/currentProjects/:employeeId', async (req, res) => {
+    try {
+        const { employeeId } = req.params;
+        const allProjects = await csvWriter.getRecords('currentProjects.csv');
+        const employeeProjects = allProjects.filter(p => p.employeeId === employeeId);
+        res.json({ success: true, data: employeeProjects });
+    } catch (error) {
+        console.error('Error getting current projects:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/currentProjects - Add new current project utilization
+ */
+app.post('/api/currentProjects', async (req, res) => {
+    try {
+        const projectData = req.body;
+        
+        if (!projectData.currentProjectId) {
+            projectData.currentProjectId = `CP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+        
+        projectData.createdAt = new Date().toISOString();
+        projectData.lastUpdated = new Date().toISOString();
+        
+        const newProject = await csvWriter.addRecord('currentProjects.csv', projectData, HEADERS.currentProjects);
+        res.json({ success: true, data: newProject });
+    } catch (error) {
+        console.error('Error adding current project:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * PUT /api/currentProjects/:id - Update current project utilization
+ */
+app.put('/api/currentProjects/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedData = req.body;
+        updatedData.lastUpdated = new Date().toISOString();
+        
+        const updated = await csvWriter.updateRecord('currentProjects.csv', id, updatedData, HEADERS.currentProjects);
+        res.json({ success: true, data: updated });
+    } catch (error) {
+        console.error('Error updating current project:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * DELETE /api/currentProjects/:id - Delete current project utilization
+ */
+app.delete('/api/currentProjects/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await csvWriter.deleteRecord('currentProjects.csv', id, HEADERS.currentProjects);
+        res.json(result);
+    } catch (error) {
+        console.error('Error deleting current project:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============ CAIA UTILIZATION ENDPOINTS ============
+
+/**
+ * GET /api/caia/:employeeId - Get CAIA utilization for specific employee
+ */
+app.get('/api/caia/:employeeId', async (req, res) => {
+    try {
+        const { employeeId } = req.params;
+        const allCaia = await csvWriter.getRecords('caiaUtilization.csv');
+        const employeeCaia = allCaia.filter(c => c.employeeId === employeeId);
+        res.json({ success: true, data: employeeCaia });
+    } catch (error) {
+        console.error('Error getting CAIA utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/caia - Add new CAIA utilization
+ */
+app.post('/api/caia', async (req, res) => {
+    try {
+        const caiaData = req.body;
+        
+        if (!caiaData.caiaId) {
+            caiaData.caiaId = `CAIA_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+        
+        caiaData.createdAt = new Date().toISOString();
+        caiaData.lastUpdated = new Date().toISOString();
+        
+        const newCaia = await csvWriter.addRecord('caiaUtilization.csv', caiaData, HEADERS.caiaUtilization);
+        res.json({ success: true, data: newCaia });
+    } catch (error) {
+        console.error('Error adding CAIA utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * PUT /api/caia/:id - Update CAIA utilization
+ */
+app.put('/api/caia/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedData = req.body;
+        updatedData.lastUpdated = new Date().toISOString();
+        
+        const updated = await csvWriter.updateRecord('caiaUtilization.csv', id, updatedData, HEADERS.caiaUtilization);
+        res.json({ success: true, data: updated });
+    } catch (error) {
+        console.error('Error updating CAIA utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * DELETE /api/caia/:id - Delete CAIA utilization
+ */
+app.delete('/api/caia/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await csvWriter.deleteRecord('caiaUtilization.csv', id, HEADERS.caiaUtilization);
+        res.json(result);
+    } catch (error) {
+        console.error('Error deleting CAIA utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============ POC UTILIZATION ENDPOINTS ============
+
+/**
+ * GET /api/poc/:employeeId - Get POC utilization for specific employee
+ */
+app.get('/api/poc/:employeeId', async (req, res) => {
+    try {
+        const { employeeId } = req.params;
+        const allPoc = await csvWriter.getRecords('pocUtilization.csv');
+        const employeePoc = allPoc.filter(p => p.employeeId === employeeId);
+        res.json({ success: true, data: employeePoc });
+    } catch (error) {
+        console.error('Error getting POC utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * POST /api/poc - Add new POC utilization
+ */
+app.post('/api/poc', async (req, res) => {
+    try {
+        const pocData = req.body;
+        
+        if (!pocData.pocId) {
+            pocData.pocId = `POC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+        
+        pocData.createdAt = new Date().toISOString();
+        pocData.lastUpdated = new Date().toISOString();
+        
+        const newPoc = await csvWriter.addRecord('pocUtilization.csv', pocData, HEADERS.pocUtilization);
+        res.json({ success: true, data: newPoc });
+    } catch (error) {
+        console.error('Error adding POC utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * PUT /api/poc/:id - Update POC utilization
+ */
+app.put('/api/poc/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedData = req.body;
+        updatedData.lastUpdated = new Date().toISOString();
+        
+        const updated = await csvWriter.updateRecord('pocUtilization.csv', id, updatedData, HEADERS.pocUtilization);
+        res.json({ success: true, data: updated });
+    } catch (error) {
+        console.error('Error updating POC utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * DELETE /api/poc/:id - Delete POC utilization
+ */
+app.delete('/api/poc/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await csvWriter.deleteRecord('pocUtilization.csv', id, HEADERS.pocUtilization);
+        res.json(result);
+    } catch (error) {
+        console.error('Error deleting POC utilization:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ============ HEALTH CHECK ============
 
 app.get('/api/health', (req, res) => {
@@ -534,6 +747,9 @@ app.listen(PORT, () => {
     console.log(`   - GET/POST/PUT/DELETE /api/managers`);
     console.log(`   - GET/POST/PUT/DELETE /api/users`);
     console.log(`   - GET/PUT /api/profiles/:employeeId`);
+    console.log(`   - GET/POST/PUT/DELETE /api/currentProjects`);
+    console.log(`   - GET/POST/PUT/DELETE /api/caia`);
+    console.log(`   - GET/POST/PUT/DELETE /api/poc`);
     console.log(`   - GET /api/health`);
     console.log(`===========================================\n`);
 });

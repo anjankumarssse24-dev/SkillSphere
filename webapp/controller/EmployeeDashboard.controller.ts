@@ -17,6 +17,9 @@ export default class EmployeeDashboard extends Controller {
     private editSkillDialog?: Dialog;
     private addProjectDialog?: Dialog;
     private editProjectDialog?: Dialog;
+    private currentProjectDialog?: Dialog;
+    private caiaDialog?: Dialog;
+    private pocDialog?: Dialog;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -25,6 +28,11 @@ export default class EmployeeDashboard extends Controller {
         // Initialize DataManager
         this.dataManager = DataManager.getInstance();
         this.initializeLocalStorage();
+        
+        // Initialize utilization models with empty data
+        this.getView()?.setModel(new JSONModel({ data: [] }), "currentProjects");
+        this.getView()?.setModel(new JSONModel({ data: [] }), "caia");
+        this.getView()?.setModel(new JSONModel({ data: [] }), "poc");
     }
     
     // localStorage helper methods for data persistence
@@ -38,6 +46,15 @@ export default class EmployeeDashboard extends Controller {
             }
             if (!localStorage.getItem('employees')) {
                 localStorage.setItem('employees', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('currentProjects')) {
+                localStorage.setItem('currentProjects', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('caia')) {
+                localStorage.setItem('caia', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('poc')) {
+                localStorage.setItem('poc', JSON.stringify([]));
             }
             console.log('LocalStorage initialized for data persistence');
         } catch (error) {
@@ -181,6 +198,11 @@ export default class EmployeeDashboard extends Controller {
 
             // Load employee profile from CSV via DataManager
             await this.loadEmployeeProfile(employeeId);
+            
+            // Load utilization data
+            await this.loadCurrentProjects(employeeId);
+            await this.loadCAIA(employeeId);
+            await this.loadPOC(employeeId);
             
         } catch (error: any) {
             console.error('Failed to load employee data:', error);
@@ -964,20 +986,6 @@ export default class EmployeeDashboard extends Controller {
     }
 
     // Profile Management Methods
-    public onToggleProjectStatus(): void {
-        // This method is called when the working project checkbox is toggled
-        // The binding will automatically update the model
-        const profileModel = this.getView()?.getModel("profile") as JSONModel;
-        const profileData = profileModel?.getData();
-        
-        // If project status is set to false, clear the dates
-        if (profileData && !profileData.working_on_project) {
-            profileData.project_start_date = null;
-            profileData.project_end_date = null;
-            profileModel.setData(profileData);
-        }
-    }
-
     public async onSaveProfile(): Promise<void> {
         try {
             const currentEmployeeModel = this.getView()?.getModel("currentEmployee") as JSONModel;
@@ -1010,35 +1018,6 @@ export default class EmployeeDashboard extends Controller {
             if (!profileData?.specialization) {
                 MessageToast.show("Please select your specialization");
                 return;
-            }
-
-            // Validate dates if working on project
-            if (profileData.working_on_project) {
-                if (!profileData.project_start_date) {
-                    MessageToast.show("Please enter project start date");
-                    return;
-                }
-                if (!profileData.project_end_date) {
-                    MessageToast.show("Please enter project end date");
-                    return;
-                }
-                
-                // Validate that start date is before end date
-                const startDate = new Date(profileData.project_start_date);
-                const endDate = new Date(profileData.project_end_date);
-                
-                if (startDate >= endDate) {
-                    MessageToast.show("Project start date must be before end date");
-                    return;
-                }
-            }
-
-            // Format dates for saving
-            if (profileData.project_start_date) {
-                profileData.project_start_date = this.formatDateForSaving(profileData.project_start_date);
-            }
-            if (profileData.project_end_date) {
-                profileData.project_end_date = this.formatDateForSaving(profileData.project_end_date);
             }
 
             // Add employeeId to profile data
@@ -1096,19 +1075,6 @@ export default class EmployeeDashboard extends Controller {
             console.log('Profile received from DataManager:', profile);
             
             if (profile) {
-                // Parse boolean value from CSV string
-                if (typeof profile.working_on_project === 'string') {
-                    profile.working_on_project = profile.working_on_project === 'true';
-                }
-                
-                // Parse dates if they're strings
-                if (profile.project_start_date === '') {
-                    profile.project_start_date = null;
-                }
-                if (profile.project_end_date === '') {
-                    profile.project_end_date = null;
-                }
-                
                 Object.assign(defaultProfile, profile);
                 console.log('✅ Profile loaded from CSV successfully:', defaultProfile);
             } else {
@@ -1126,10 +1092,7 @@ export default class EmployeeDashboard extends Controller {
                 role: "",
                 location: "",
                 tLevel: "",
-                specialization: "",
-                working_on_project: false,
-                project_start_date: null,
-                project_end_date: null
+                specialization: ""
             });
             this.getView()?.setModel(profileModel, "profile");
         }
@@ -1185,6 +1148,348 @@ export default class EmployeeDashboard extends Controller {
             } else {
                 return `${years} year${years > 1 ? 's' : ''}`;
             }
+        }
+    }
+
+    // ==================== Current Project Utilization Methods ====================
+    
+    public async onMarkCurrentProject(): Promise<void> {
+        if (!this.currentProjectDialog) {
+            this.currentProjectDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.CurrentProjectDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.currentProjectDialog);
+        }
+
+        // Initialize dialog model with empty data
+        const dialogModel = new JSONModel({
+            projectName: "",
+            startDate: null,
+            endDate: null,
+            hoursPerDay: 0
+        });
+        this.getView()?.setModel(dialogModel, "currentProjectDialog");
+        
+        this.currentProjectDialog.open();
+    }
+
+    public async onSaveCurrentProject(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("currentProjectDialog") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.getView()?.getModel("currentEmployee")?.getProperty("/employeeId");
+
+        // Validation
+        if (!data.projectName || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        const currentProjectData: any = {
+            employeeId: employeeId,
+            projectName: data.projectName,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            hoursPerDay: data.hoursPerDay,
+            lastUpdated: new Date().toISOString()
+        };
+
+        try {
+            if (data.currentProjectId) {
+                // Update existing record
+                await this.dataManager.updateCurrentProject(data.currentProjectId, currentProjectData);
+                MessageToast.show("Current project utilization updated successfully");
+            } else {
+                // Add new record
+                currentProjectData.createdAt = new Date().toISOString();
+                await this.dataManager.addCurrentProject(currentProjectData);
+                MessageToast.show("Current project utilization marked successfully");
+            }
+            this.currentProjectDialog?.close();
+            this.loadCurrentProjects(employeeId);
+        } catch (error) {
+            MessageToast.show("Error saving current project utilization");
+            console.error("Error saving current project:", error);
+        }
+    }
+
+    public onCloseCurrentProjectDialog(): void {
+        this.currentProjectDialog?.close();
+    }
+
+    public async onEditCurrentProject(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("currentProjects");
+        const currentProject = bindingContext?.getObject();
+
+        if (!this.currentProjectDialog) {
+            this.currentProjectDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.CurrentProjectDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.currentProjectDialog);
+        }
+
+        const dialogModel = new JSONModel(currentProject);
+        this.getView()?.setModel(dialogModel, "currentProjectDialog");
+        
+        this.currentProjectDialog.open();
+    }
+
+    public async onDeleteCurrentProject(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("currentProjects");
+        const currentProject = bindingContext?.getObject();
+
+        try {
+            await this.dataManager.deleteCurrentProject(currentProject.currentProjectId);
+            MessageToast.show("Current project utilization deleted successfully");
+            const employeeId = this.getView()?.getModel("currentEmployee")?.getProperty("/employeeId");
+            this.loadCurrentProjects(employeeId);
+        } catch (error) {
+            MessageToast.show("Error deleting current project utilization");
+            console.error("Error deleting current project:", error);
+        }
+    }
+
+    private async loadCurrentProjects(employeeId: string): Promise<void> {
+        try {
+            const currentProjects = await this.dataManager.getCurrentProjectsByEmployee(employeeId);
+            const model = new JSONModel({ data: currentProjects });
+            this.getView()?.setModel(model, "currentProjects");
+        } catch (error) {
+            console.error("Error loading current projects:", error);
+            this.getView()?.setModel(new JSONModel({ data: [] }), "currentProjects");
+        }
+    }
+
+    // ==================== CAIA Utilization Methods ====================
+    
+    public async onMarkCAIA(): Promise<void> {
+        if (!this.caiaDialog) {
+            this.caiaDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.CAIADialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.caiaDialog);
+        }
+
+        // Initialize dialog model with empty data
+        const dialogModel = new JSONModel({
+            taskName: "",
+            startDate: null,
+            endDate: null,
+            hoursPerDay: 0
+        });
+        this.getView()?.setModel(dialogModel, "caiaDialog");
+        
+        this.caiaDialog.open();
+    }
+
+    public async onSaveCAIA(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("caiaDialog") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.getView()?.getModel("currentEmployee")?.getProperty("/employeeId");
+
+        // Validation
+        if (!data.taskName || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        const caiaData: any = {
+            employeeId: employeeId,
+            taskName: data.taskName,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            hoursPerDay: data.hoursPerDay,
+            lastUpdated: new Date().toISOString()
+        };
+
+        try {
+            if (data.caiaId) {
+                // Update existing record
+                await this.dataManager.updateCAIA(data.caiaId, caiaData);
+                MessageToast.show("CAIA utilization updated successfully");
+            } else {
+                // Add new record
+                caiaData.createdAt = new Date().toISOString();
+                await this.dataManager.addCAIA(caiaData);
+                MessageToast.show("CAIA utilization marked successfully");
+            }
+            this.caiaDialog?.close();
+            this.loadCAIA(employeeId);
+        } catch (error) {
+            MessageToast.show("Error saving CAIA utilization");
+            console.error("Error saving CAIA:", error);
+        }
+    }
+
+    public onCloseCAIADialog(): void {
+        this.caiaDialog?.close();
+    }
+
+    public async onEditCAIA(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("caia");
+        const caia = bindingContext?.getObject();
+
+        if (!this.caiaDialog) {
+            this.caiaDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.CAIADialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.caiaDialog);
+        }
+
+        const dialogModel = new JSONModel(caia);
+        this.getView()?.setModel(dialogModel, "caiaDialog");
+        
+        this.caiaDialog.open();
+    }
+
+    public async onDeleteCAIA(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("caia");
+        const caia = bindingContext?.getObject();
+
+        try {
+            await this.dataManager.deleteCAIA(caia.caiaId);
+            MessageToast.show("CAIA utilization deleted successfully");
+            const employeeId = this.getView()?.getModel("currentEmployee")?.getProperty("/employeeId");
+            this.loadCAIA(employeeId);
+        } catch (error) {
+            MessageToast.show("Error deleting CAIA utilization");
+            console.error("Error deleting CAIA:", error);
+        }
+    }
+
+    private async loadCAIA(employeeId: string): Promise<void> {
+        try {
+            const caia = await this.dataManager.getCAIAByEmployee(employeeId);
+            const model = new JSONModel({ data: caia });
+            this.getView()?.setModel(model, "caia");
+        } catch (error) {
+            console.error("Error loading CAIA:", error);
+            this.getView()?.setModel(new JSONModel({ data: [] }), "caia");
+        }
+    }
+
+    // ==================== POC Utilization Methods ====================
+    
+    public async onMarkPOC(): Promise<void> {
+        if (!this.pocDialog) {
+            this.pocDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.POCDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.pocDialog);
+        }
+
+        // Initialize dialog model with empty data
+        const dialogModel = new JSONModel({
+            pocTitle: "",
+            startDate: null,
+            endDate: null,
+            hoursPerDay: 0
+        });
+        this.getView()?.setModel(dialogModel, "pocDialog");
+        
+        this.pocDialog.open();
+    }
+
+    public async onSavePOC(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("pocDialog") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.getView()?.getModel("currentEmployee")?.getProperty("/employeeId");
+
+        // Validation
+        if (!data.pocTitle || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        const pocData: any = {
+            employeeId: employeeId,
+            pocTitle: data.pocTitle,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            hoursPerDay: data.hoursPerDay,
+            lastUpdated: new Date().toISOString()
+        };
+
+        try {
+            if (data.pocId) {
+                // Update existing record
+                await this.dataManager.updatePOC(data.pocId, pocData);
+                MessageToast.show("POC utilization updated successfully");
+            } else {
+                // Add new record
+                pocData.createdAt = new Date().toISOString();
+                await this.dataManager.addPOC(pocData);
+                MessageToast.show("POC utilization marked successfully");
+            }
+            this.pocDialog?.close();
+            this.loadPOC(employeeId);
+        } catch (error) {
+            MessageToast.show("Error saving POC utilization");
+            console.error("Error saving POC:", error);
+        }
+    }
+
+    public onClosePOCDialog(): void {
+        this.pocDialog?.close();
+    }
+
+    public async onEditPOC(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("poc");
+        const poc = bindingContext?.getObject();
+
+        if (!this.pocDialog) {
+            this.pocDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.POCDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.pocDialog);
+        }
+
+        const dialogModel = new JSONModel(poc);
+        this.getView()?.setModel(dialogModel, "pocDialog");
+        
+        this.pocDialog.open();
+    }
+
+    public async onDeletePOC(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("poc");
+        const poc = bindingContext?.getObject();
+
+        try {
+            await this.dataManager.deletePOC(poc.pocId);
+            MessageToast.show("POC utilization deleted successfully");
+            const employeeId = this.getView()?.getModel("currentEmployee")?.getProperty("/employeeId");
+            this.loadPOC(employeeId);
+        } catch (error) {
+            MessageToast.show("Error deleting POC utilization");
+            console.error("Error deleting POC:", error);
+        }
+    }
+
+    private async loadPOC(employeeId: string): Promise<void> {
+        try {
+            const poc = await this.dataManager.getPOCByEmployee(employeeId);
+            const model = new JSONModel({ data: poc });
+            this.getView()?.setModel(model, "poc");
+        } catch (error) {
+            console.error("Error loading POC:", error);
+            this.getView()?.setModel(new JSONModel({ data: [] }), "poc");
         }
     }
 }

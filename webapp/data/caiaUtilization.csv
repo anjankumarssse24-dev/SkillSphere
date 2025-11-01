@@ -1,0 +1,3 @@
+caiaId,employeeId,taskName,startDate,endDate,hoursPerDay,createdAt,lastUpdated
+CAIA_1730000002000_sample1,EMP001,Team Training Sessions,10/16/25,10/30/25,3,2025-10-15T09:00:00.000Z,2025-11-01T16:18:35.213Z
+CAIA_1730000003000_sample2,EMP001,Code Review Activities,10/21/25,10/27/25,3,2025-10-22T09:00:00.000Z,2025-11-01T16:19:08.004Z

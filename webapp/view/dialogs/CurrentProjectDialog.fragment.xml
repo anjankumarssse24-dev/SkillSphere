@@ -1,0 +1,56 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Mark Current Project Utilization"
+        contentWidth="500px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Project Name -->
+                <Label text="Project Name:" required="true" />
+                <Input
+                    value="{currentProjectDialog>/projectName}"
+                    placeholder="Enter project name"
+                    width="100%"/>
+                
+                <!-- Start Date -->
+                <Label text="Start Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{currentProjectDialog>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- End Date -->
+                <Label text="End Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{currentProjectDialog>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- Hours per Day Input -->
+                <Label text="Hours per Day:" required="true" class="sapUiSmallMarginTop" />
+                <StepInput
+                    value="{currentProjectDialog>/hoursPerDay}"
+                    min="0"
+                    max="24"
+                    step="0.5"
+                    displayValuePrecision="1"
+                    width="100%"
+                    description="hours"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onSaveCurrentProject" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseCurrentProjectDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
