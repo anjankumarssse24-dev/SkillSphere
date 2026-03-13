@@ -1,0 +1,36 @@
+{
+  "projects": [
+    {
+      "id": "1",
+      "employeeId": "EMP001",
+      "projectName": "E-Commerce Platform",
+      "role": "Frontend Developer",
+      "duration": "6 months",
+      "skillsUsed": ["JavaScript", "SAP UI5", "CSS"]
+    },
+    {
+      "id": "2",
+      "employeeId": "EMP001", 
+      "projectName": "CRM Integration",
+      "role": "Full Stack Developer",
+      "duration": "4 months",
+      "skillsUsed": ["Node.js", "JavaScript", "SQL"]
+    },
+    {
+      "id": "3",
+      "employeeId": "EMP002",
+      "projectName": "Data Analytics Dashboard",
+      "role": "Data Analyst",
+      "duration": "8 months", 
+      "skillsUsed": ["Python", "SAP HANA", "SQL"]
+    },
+    {
+      "id": "4",
+      "employeeId": "EMP002",
+      "projectName": "Reporting System",
+      "role": "Senior Analyst",
+      "duration": "3 months",
+      "skillsUsed": ["Python", "SQL", "Power BI"]
+    }
+  ]
+}

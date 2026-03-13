@@ -1,0 +1,44 @@
+<mvc:View
+    controllerName="skillsphere.controller.SeniorManagerLogin"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
+
+    <m:Page id="seniorManagerLoginPage" title="Senior Manager / VP Login" showNavButton="true" navButtonPress="onNavBack">
+        <m:content>
+            <m:VBox alignItems="Center" justifyContent="Center" class="sapUiLargeMarginTop">
+                <!-- Login Panel -->
+                <m:Panel class="skillSphereLoginCard" width="350px" headerText="Senior Manager / VP Login">
+                    <m:content>
+                        <m:VBox class="sapUiMediumMargin">
+                            <core:Icon src="sap-icon://management-review" size="3rem" color="#dc3545" class="sapUiSmallMarginBottom"/>
+                            <m:Label text="Manager ID:" class="sapUiSmallMarginBottom"/>
+                            <m:Input 
+                                id="seniorManagerId" 
+                                placeholder="Enter your Manager ID (e.g., MGR001)"
+                                class="sapUiMediumMarginBottom"
+                                submit="onSeniorManagerLogin"/>
+                            
+                            <m:Label text="Password:" class="sapUiSmallMarginBottom"/>
+                            <m:Input 
+                                id="seniorManagerPassword" 
+                                type="Password"
+                                placeholder="Enter your Password"
+                                class="sapUiMediumMarginBottom"
+                                submit="onSeniorManagerLogin"/>
+                            
+                            <m:Button 
+                                text="Login"
+                                type="Emphasized"
+                                icon="sap-icon://log"
+                                width="100%"
+                                press="onSeniorManagerLogin"/>
+                        </m:VBox>
+                    </m:content>
+                </m:Panel>
+            </m:VBox>
+        </m:content>
+    </m:Page>
+
+</mvc:View>

@@ -1,0 +1,159 @@
+_schema-version: 3.3.0
+ID: skillsphere
+version: 1.0.0
+description: "SkillSphere - Employee Skill Matrix Management System built with SAPUI5/Fiori"
+parameters:
+  enable-parallel-deployments: true
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+
+modules:
+  # CAP Service Module
+  - name: skillsphere-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 1024M
+    build-parameters:
+      builder: npm
+      ignore:
+        - "node_modules/"
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: skillsphere-db
+      - name: skillsphere-auth
+      - name: skillsphere-destination
+
+  # HANA Database Deployer
+  - name: skillsphere-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 1024M
+    requires:
+      - name: skillsphere-db
+
+  # HTML5 App Deployer (deploys UI to HTML5 App Repository)
+  - name: skillsphere-app-deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: skillsphere-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: skillsphere-ui
+          artifacts:
+            - skillsphere.zip
+          target-path: app/
+
+  # UI5 Application
+  - name: skillsphere-ui
+    type: html5
+    path: webapp
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build:ui
+      supported-platforms:
+        []
+
+  # Destination Content (for managed app router)
+  - name: skillsphere-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: skillsphere-destination
+        parameters:
+          content-target: true
+      - name: skillsphere-html5-repo-host
+        parameters:
+          service-key:
+            name: skillsphere-html5-repo-host-key
+      - name: skillsphere-auth
+        parameters:
+          service-key:
+            name: skillsphere-auth-key
+    parameters:
+      content:
+        instance:
+          destinations:
+            - Name: skillsphere_html5_repo_host
+              ServiceInstanceName: skillsphere-html5-repo-host
+              ServiceKeyName: skillsphere-html5-repo-host-key
+              sap.cloud.service: skillsphere
+            - Name: skillsphere_auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: skillsphere-auth
+              ServiceKeyName: skillsphere-auth-key
+              sap.cloud.service: skillsphere
+          existing_destinations_policy: update
+    build-parameters:
+      no-source: true
+
+resources:
+  # HANA HDI Container
+  - name: skillsphere-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  # XSUAA Service
+  - name: skillsphere-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: skillsphere-${org}-${space}
+        tenant-mode: dedicated
+        oauth2-configuration:
+          redirect-uris:
+            - https://*.cfapps.*.hana.ondemand.com/**
+            - https://*.applicationstudio.cloud.sap/**
+
+  # Destination Service
+  - name: skillsphere-destination
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Name: skillsphere-srv-api
+                URL: ~{srv-api/srv-url}
+                Authentication: NoAuthentication
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
+            existing_destinations_policy: update
+    requires:
+      - name: srv-api
+
+  # HTML5 Application Repository Host
+  - name: skillsphere-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host

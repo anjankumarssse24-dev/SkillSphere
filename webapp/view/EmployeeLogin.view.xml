@@ -1,0 +1,41 @@
+<mvc:View
+    controllerName="skillsphere.controller.EmployeeLogin"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f">
+
+    <m:Page id="employeeLoginPage" title="Employee Login" showNavButton="true" navButtonPress="onNavBack">
+        <m:content>
+            <m:VBox alignItems="Center" justifyContent="Center" class="sapUiLargeMarginTop">
+                <!-- Login Panel -->
+                <m:Panel class="skillSphereLoginCard" width="350px" headerText="Employee Login">
+                    <m:content>
+                        <m:VBox class="sapUiMediumMargin">
+                            <m:Label text="Employee ID:" class="sapUiSmallMarginBottom"/>
+                            <m:Input 
+                                id="employeeId" 
+                                placeholder="Enter your Employee ID"
+                                class="sapUiMediumMarginBottom"
+                                submit="onEmployeeLogin"/>
+                            
+                            <m:Label text="Password:" class="sapUiSmallMarginBottom"/>
+                            <m:Input 
+                                id="employeePassword" 
+                                type="Password"
+                                placeholder="Enter your Password"
+                                class="sapUiMediumMarginBottom"
+                                submit="onEmployeeLogin"/>
+                            
+                            <m:Button 
+                                text="Login"
+                                type="Emphasized"
+                                width="100%"
+                                press="onEmployeeLogin"/>
+                        </m:VBox>
+                    </m:content>
+                </m:Panel>
+            </m:VBox>
+        </m:content>
+    </m:Page>
+
+</mvc:View>

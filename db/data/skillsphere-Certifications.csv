@@ -1,0 +1,7 @@
+certificationId,employeeId,name,code,dateOfCompletion,description,level
+CERT_001_I770144,I770144,SAP Certified Development Associate - SAP BTP,C_BTP_01,2025-06-15,BTP Development,Associate
+CERT_002_I770144,I770144,SAP Certified Development Professional - SAP UI5,C_UI5_02,2025-08-20,UI5 Development,Professional
+CERT_011_I770151,I770151,SAP Certified Application Associate - SAP CAP,C_CAP_2408,2025-07-10,CAP Application Development,Associate
+CERT_012_I770152,I770152,SAP Certified Associate - Back-End Developer,C_BACKEND_03,2025-09-05,Backend Development,Associate
+CERT_013_I749085,I749085,ABAP Backend Associate,C_ABAP_2507,2026-08-26,Backend Development,Intermediate
+CERT_014_I755719,I755719,HANA Modeling and Implementations,C_HANAIMP_11,2016-12-01,Database,Advanced

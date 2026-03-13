@@ -1,0 +1,12 @@
+
+<!-- This view is no longer used - replaced by SkillSphere views -->
+<mvc:View
+    controllerName="skillsphere.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <m:Page id="page" title="View1 - Deprecated">
+        <m:Text id="deprecatedText" text="This view has been replaced by the SkillSphere application views"/>
+    </m:Page>
+</mvc:View>

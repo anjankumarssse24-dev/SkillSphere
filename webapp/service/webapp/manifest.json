@@ -1,0 +1,13 @@
+{
+  "_version": "1.49.0",
+  "sap.app": {
+    "id": "skillsphere",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "type": "application",
+    "title": "",
+    "description": "SkillSphere - Employee Skill Matrix Management System built with SAPUI5&#x2F;Fiori",
+    "i18n": "i18n/i18n.properties"
+  }
+}

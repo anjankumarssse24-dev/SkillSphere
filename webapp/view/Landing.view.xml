@@ -1,0 +1,199 @@
+<mvc:View
+    controllerName="skillsphere.controller.Landing"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core">
+
+    <m:Page id="landingPage" title="SkillSphere - Employee Skill Matrix" class="sapUiResponsiveContentPadding">
+        <m:content>
+            <m:VBox alignItems="Center" justifyContent="Center" class="sapUiLargeMarginTop">
+                <!-- Header -->
+                <m:Title text="Welcome to SkillSphere" level="H1" class="sapUiLargeMarginBottom"/>
+                <m:Text text="Manage your skills and projects efficiently" class="sapUiMediumMarginBottom" textAlign="Center"/>
+                
+                <!-- Three Main Panels in Parallel -->
+                <m:FlexBox wrap="Wrap" justifyContent="Center" alignItems="Start" class="sapUiLargeMarginTop">
+                    
+                    <!-- Registration Panel -->
+                    <m:Panel class="skillSphereCard" width="300px" headerText="Registration" backgroundDesign="Solid">
+                        <m:content>
+                            <m:VBox alignItems="Center" class="sapUiMediumMargin">
+                                <core:Icon src="sap-icon://add-employee" size="4rem" color="#0070f2" class="sapUiMediumMarginBottom"/>
+                                <m:Title text="Create Account" level="H3" textAlign="Center" class="sapUiSmallMarginBottom"/>
+                                <m:Text text="Register as Employee or Manager" textAlign="Center" class="sapUiMediumMarginBottom"/>
+                                
+                                <!-- Single Registration Button -->
+                                <m:Button 
+                                    id="registerBtn"
+                                    text="Register"
+                                    type="Emphasized"
+                                    icon="sap-icon://add-employee"
+                                    width="100%"
+                                    press="onRegisterPress"/>
+                                    
+                            </m:VBox>
+                        </m:content>
+                    </m:Panel>
+                    
+                    <!-- Employee Login Panel -->
+                    <m:Panel class="skillSphereCard" width="300px" headerText="Employee Access" backgroundDesign="Solid">
+                        <m:content>
+                            <m:VBox alignItems="Center" class="sapUiMediumMargin">
+                                <core:Icon src="sap-icon://employee" size="4rem" color="#28a745" class="sapUiMediumMarginBottom"/>
+                                <m:Title text="Employee Login" level="H3" textAlign="Center" class="sapUiSmallMarginBottom"/>
+                                <m:Text text="Access your skills and projects" textAlign="Center" class="sapUiMediumMarginBottom"/>
+                                
+                                <m:Button 
+                                    id="employeeLoginBtn"
+                                    text="Login as Employee"
+                                    type="Emphasized"
+                                    icon="sap-icon://log"
+                                    width="100%"
+                                    press="onEmployeeLoginPress"/>
+                            </m:VBox>
+                        </m:content>
+                    </m:Panel>
+                    
+                    <!-- Manager Login Panel -->
+                    <m:Panel class="skillSphereCard" width="300px" headerText="Manager Access" backgroundDesign="Solid">
+                        <m:content>
+                            <m:VBox alignItems="Center" class="sapUiMediumMargin">
+                                <core:Icon src="sap-icon://manager" size="4rem" color="#dc3545" class="sapUiMediumMarginBottom"/>
+                                <m:Title text="Manager Login" level="H3" textAlign="Center" class="sapUiSmallMarginBottom"/>
+                                <m:Text text="Manage your team and analytics" textAlign="Center" class="sapUiMediumMarginBottom"/>
+                                
+                                <m:Button 
+                                    id="managerLoginBtn"
+                                    text="Login as Manager"
+                                    type="Emphasized"
+                                    icon="sap-icon://log"
+                                    width="100%"
+                                    press="onManagerLoginPress"/>
+                            </m:VBox>
+                        </m:content>
+                    </m:Panel>
+                    
+                </m:FlexBox>
+            </m:VBox>
+        </m:content>
+    </m:Page>
+
+    <!-- Manager Role Selection Dialog -->
+    <m:Dialog id="managerRoleDialog" title="Select Manager Role" class="sapUiContentPadding" contentWidth="400px">
+        <m:content>
+            <m:VBox alignItems="Center" class="sapUiLargeMargin">
+                <m:Text text="Please select your management level:" class="sapUiMediumMarginBottom" textAlign="Center"/>
+                
+                <!-- Manager Option -->
+                <m:Button 
+                    text="Login as Manager"
+                    icon="sap-icon://manager"
+                    type="Emphasized"
+                    width="100%"
+                    class="sapUiMediumMarginBottom"
+                    press="onSelectManagerRole"/>
+                
+                <!-- Senior Manager Option -->
+                <m:Button 
+                    text="Login as Senior Manager / VP"
+                    icon="sap-icon://management-review"
+                    type="Emphasized"
+                    width="100%"
+                    class="sapUiMediumMarginBottom"
+                    press="onSelectSeniorManagerRole"/>
+                
+            </m:VBox>
+        </m:content>
+        <m:buttons>
+            <m:Button text="Cancel" press="onCloseManagerRoleDialog"/>
+        </m:buttons>
+    </m:Dialog>
+
+    <!-- Registration Dialog -->
+    <m:Dialog id="registrationDialog" title="Register New User" class="sapUiContentPadding" contentWidth="600px" contentHeight="80%">
+        <m:content>
+            <m:VBox class="sapUiMediumMargin">
+                <!-- Role Selection First -->
+                <m:Label text="Register as:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:SegmentedButton id="regRoleSegmented" selectedKey="Employee" selectionChange="onRoleChange" class="sapUiLargeMarginBottom">
+                    <m:items>
+                        <m:SegmentedButtonItem key="Employee" text="Employee" icon="sap-icon://employee"/>
+                        <m:SegmentedButtonItem key="Manager" text="Manager" icon="sap-icon://manager"/>
+                    </m:items>
+                </m:SegmentedButton>
+
+                <!-- Basic Information -->
+                <m:Title text="Basic Information" level="H4" class="sapUiSmallMarginBottom"/>
+                
+                <!-- Employee ID First -->
+                <m:VBox id="employeeIdSection" visible="true">
+                    <m:Label text="Employee ID:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:Input id="regEmployeeId" placeholder="e.g., I770144" class="sapUiMediumMarginBottom" required="true"/>
+                </m:VBox>
+                
+                <m:Label text="Employee Name:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regName" placeholder="Enter your name" class="sapUiMediumMarginBottom" required="true"/>
+                
+                <m:Label text="Email:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regEmail" placeholder="Enter your email" type="Email" class="sapUiMediumMarginBottom" required="true"/>
+                
+                <!-- Experience Field -->
+                <m:Label text="Experience (Years):" required="true" class="sapUiSmallMarginBottom"/>
+                <m:StepInput id="regExperience" value="0" min="0" max="50" step="1" class="sapUiMediumMarginBottom" required="true"/>
+                
+                <m:Label text="Team:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Select id="regTeam" class="sapUiMediumMarginBottom" required="true">
+                    <core:Item key="S4HANA" text="SAP S/4HANA"/>
+                    <core:Item key="SuccessFactors" text="SAP SuccessFactors"/>
+                    <core:Item key="CIS" text="CIS"/>
+                    <core:Item key="Ariba" text="SAP Ariba"/>
+                    <core:Item key="BTP" text="SAP Business Technology Platform"/>
+                </m:Select>
+                
+                <m:Label text="Sub Team:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Select id="regSubTeam" class="sapUiMediumMarginBottom" required="true">
+                    <core:Item key="Team1" text="Team1"/>
+                    <core:Item key="Team2" text="Team2"/>
+                    <core:Item key="Team3" text="Team3"/>
+                    <core:Item key="Team4" text="Team4"/>
+                    <core:Item key="Team5" text="Team5"/>
+                    <core:Item key="Team6" text="Team6"/>
+                    <core:Item key="Team7" text="Team7"/>
+                    <core:Item key="Team8" text="Team8"/>
+                </m:Select>
+
+                <!-- Employee Specific Fields -->
+                <m:VBox id="employeeSpecificFields" visible="true">
+                    <m:Label text="Manager:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:Select id="regManager" class="sapUiMediumMarginBottom" required="true" items="{managers>/managers}">
+                        <core:Item key="{managers>managerId}" text="{managers>name} ({managers>team} - {managers>specialization})"/>
+                    </m:Select>
+                </m:VBox>
+
+                <!-- Manager Specific Fields -->
+                <m:VBox id="managerSpecificFields" visible="false">
+                    <m:Label text="Management Area:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:Input id="regManagementArea" placeholder="e.g., S4HANA Development, Analytics Team" class="sapUiMediumMarginBottom"/>
+                    
+                    <m:Label text="Years of Management Experience:" required="true" class="sapUiSmallMarginBottom"/>
+                    <m:StepInput id="regManagerExperience" value="0" min="0" max="50" step="1" class="sapUiMediumMarginBottom"/>
+                </m:VBox>
+
+                <!-- Account Security -->
+                <m:Title text="Account Security" level="H4" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+                
+                <m:Label text="Password:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regPassword" type="Password" placeholder="Enter password (min 6 characters)" class="sapUiMediumMarginBottom" required="true"/>
+                
+                <m:Label text="Confirm Password:" required="true" class="sapUiSmallMarginBottom"/>
+                <m:Input id="regConfirmPassword" type="Password" placeholder="Re-enter password" class="sapUiMediumMarginBottom" required="true"/>
+            </m:VBox>
+        </m:content>
+        <m:buttons>
+            <m:Button text="Register" type="Emphasized" icon="sap-icon://save" press="onRegisterUser"/>
+            <m:Button text="Cancel" press="onCloseRegisterDialog"/>
+        </m:buttons>
+    </m:Dialog>
+
+</mvc:View>

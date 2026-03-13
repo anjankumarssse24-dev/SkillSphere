@@ -1,0 +1,78 @@
+{
+  "name": "skillsphere",
+  "version": "1.0.0",
+  "description": "SkillSphere - Employee Skill Matrix Management System built with SAPUI5/Fiori",
+  "keywords": [
+    "ui5",
+    "openui5",
+    "sapui5"
+  ],
+  "main": "webapp/index.html",
+  "dependencies": {
+    "@cap-js/hana": "^2",
+    "@sap-cloud-sdk/connectivity": "^3.9.0",
+    "@sap-cloud-sdk/http-client": "^3.9.0",
+    "@sap-cloud-sdk/util": "^3.9.0",
+    "@sap/cds": "^8.9.9",
+    "axios": "^1.13.2",
+    "express": "^4",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap-ux/eslint-plugin-fiori-tools": "^0.4.0",
+    "@sap/cds-dk": "^8",
+    "@sap/ux-ui5-tooling": "1",
+    "@sapui5/types": "~1.140.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "@typescript-eslint/parser": "^7.1.1",
+    "@ui5/cli": "^4.0.33",
+    "concurrently": "^8.2.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "ui5-tooling-transpile": "^3.3.7"
+  },
+  "scripts": {
+    "start": "cds watch",
+    "start-ui": "fiori run --open \"test/flp.html#app-preview\"",
+    "start-with-ui": "concurrently \"npm run start\" \"npm run start-ui\"",
+    "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flp.html#app-preview\"",
+    "build": "cds build --production",
+    "build:ui": "cd webapp && npm run build:ui",
+    "deploy": "cds deploy --to sqlite",
+    "deploy:hana": "cds deploy --to hana",
+    "lint": "eslint ./",
+    "ts-typecheck": "tsc --noEmit",
+    "prestart": "npm run ts-typecheck",
+    "prebuild": "npm run ts-typecheck",
+    "start-noflp": "fiori run --open \"/index.html?sap-ui-xx-viewCache=false\"",
+    "int-test": "fiori run --open \"test/integration/opaTests.qunit.html\"",
+    "start-variants-management": "fiori run --open \"/preview.html#app-preview\"",
+    "unit-test": "fiori run --open \"test/unit/unitTests.qunit.html\"",
+    "undeploy": "cf undeploy skillsphere --delete-services --delete-service-keys"
+  },
+  "sapuxLayer": "CUSTOMER_BASE",
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "hana",
+        "model": "db"
+      },
+      "[production]": {
+        "db": {
+          "kind": "hana"
+        },
+        "auth": "xsuaa"
+      },
+      "aicore": {
+        "kind": "rest",
+        "credentials": {
+          "url": "https://api.ai.intprod-eu12.eu-central-1.aws.ml.hana.ondemand.com",
+          "clientid": "sb-a50c590e-3530-432e-8790-d564cc1cf0db!b1308080|xsuaa_std!b318061",
+          "clientsecret": "e3a742ce-4b27-4b5c-b19e-9a03edb005a0$0j23iciCI6nIpKxknwcokkdMoxT2EB4kbIafdtWcdNA=",
+          "tokenurl": "https://buildteam8-dev.authentication.eu12.hana.ondemand.com/oauth/token"
+        }
+      }
+    }
+  }
+}

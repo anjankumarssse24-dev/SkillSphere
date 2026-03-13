@@ -1,0 +1,16 @@
+managerId,name,team,subTeam,email,totalSkills,totalProjects,specialization
+MGR001,Jain Pawan,CIS,Team1,jain.pawan@company.com,15,8,Manager
+MGR002,V B Adhithya,CIS,Team2,adhithya@company.com,16,8,Manager
+MGR003,Puja K,CIS,Team1,pujak@sap.com,24,12,Manager
+MGR006,Fazal Ilahi,CIS,Team1,fazal.ilahi@company.com,16,8,Manager
+MGR007,Arumugam Surendren,CIS,Team3,arumugam.surendren@company.com,14,7,Manager
+MGR008,Singh Agya Pal,CIS,Team4,singh.agyapal@company.com,17,9,Manager
+MGR009,Kumar Rakesh,CIS,Team5,kumar.rakesh@company.com,13,7,Manager
+MGR010,Garg Abhishek,CIS,Team6,garg.abhishek@company.com,19,10,Manager
+MGR011,Ramanathan Srinivasan,CIS,Team7,ramanathan.srinivasan@company.com,15,8,Manager
+MGR012,Kumar V Chendil,CIS,Team8,kumar.chendil@company.com,16,8,Manager
+MGR013,Tadse Sachin Muralidhar,CIS,Team1,tadse.sachin@company.com,20,10,Manager
+MGR014,Ram Deepak,CIS,Team1,ram.deepak@company.com,18,9,Manager
+MGR015,Janawa Hemlata,CIS,Team1,janawa.hemlata@company.com,17,9,Manager
+MGR016,Mohamed Inayath,CIS,Team1,mohamed.inayath@company.com,14,7,Manager
+SMGR01,Nirmala Shettar,Corporate,Executive,nirmala.shettar@company.com,0,0,Vice President

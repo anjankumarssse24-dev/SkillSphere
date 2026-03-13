@@ -1,0 +1,178 @@
+id,name,password,role,team,subTeam,managerId
+I770144,Anjan Kumar,password123,Employee,CIS,Team8,MGR003
+MGR001,Jain Pawan,manager123,Manager,CIS,Team1,SMGR01
+MGR002,V B Adhithya,manager123,Manager,CIS,Team2,SMGR01
+MGR003,Puja K,manager123,Manager,CIS,Team1,SMGR01
+MGR006,Fazal Ilahi,manager123,Manager,CIS,Team1,SMGR01
+MGR007,Arumugam Surendren,manager123,Manager,CIS,Team3,SMGR01
+MGR008,Singh Agya Pal,manager123,Manager,CIS,Team4,SMGR01
+MGR009,Kumar Rakesh,manager123,Manager,CIS,Team5,SMGR01
+MGR010,Garg Abhishek,manager123,Manager,CIS,Team6,SMGR01
+MGR011,Ramanathan Srinivasan,manager123,Manager,CIS,Team7,SMGR01
+MGR012,Kumar V Chendil,manager123,Manager,CIS,Team8,SMGR01
+MGR013,Tadse Sachin Muralidhar,manager123,Manager,CIS,Team1,SMGR01
+MGR014,Ram Deepak,manager123,Manager,CIS,Team1,SMGR01
+MGR015,Janawa Hemlata,manager123,Manager,CIS,Team1,SMGR01
+MGR016,Mohamed Inayath,manager123,Manager,CIS,Team1,SMGR01
+I770151,Anjan Kumar S,password123,Employee,CIS,Team5,MGR003
+I770152,Ganesh,password123,Employee,CIS,Team4,MGR003
+I770153,Arun,password123,Employee,CIS,Team1,MGR003
+I770164,Kavita Joshi,password123,Employee,CIS,Team2,MGR006
+I770165,Manoj Verma,password123,Employee,CIS,Team2,MGR006
+I770166,Deepa Iyer,password123,Employee,CIS,Team3,MGR006
+I770167,Naveen Kumar,password123,Employee,CIS,Team2,MGR006
+I770168,Swati Pillai,password123,Employee,CIS,Team5,MGR006
+I750145,Sreeja Reddy,password123,Employee,CIS,Team8,MGR003
+I346659,Rubal Gupta,password123,Employee,CIS,Team8,MGR003
+I769086,Lakshmi Priya,password123,Employee,CIS,Team8,MGR003
+I763161,Shrikrushna Kulkarni,password123,Employee,CIS,Team8,MGR003
+I755736,Farooque Abdullah,password123,Employee,CIS,Team8,MGR003
+I749085,Shajith Mujipurrahuman,password123,Employee,CIS,Team8,MGR003
+I753890,Bhargavi Sami,password123,Employee,CIS,Team8,MGR003
+I755719,Swapnil Joshi,password123,Employee,CIS,Team8,MGR003
+I763266,Dinkar Shinde,password123,Employee,CIS,Team8,MGR003
+I773926,Siddhanth Srivastava,password123,Employee,CIS,Team8,MGR003
+I774156,Arushi Mittal,password123,Employee,CIS,Team8,MGR003
+I780001,Singh Anurag,password123,Employee,CIS,Team1,MGR001
+I780002,Kale Shreyas,password123,Employee,CIS,Team1,MGR001
+I780003,Prasad Priya,password123,Employee,CIS,Team1,MGR001
+I780004,Valiyaparambil Abhay,password123,Employee,CIS,Team1,MGR001
+I780005,Singh Sehaj,password123,Employee,CIS,Team1,MGR001
+I780006,Singhal Richa,password123,Employee,CIS,Team1,MGR001
+I780007,Bhateja Rohan,password123,Employee,CIS,Team1,MGR001
+I780008,Gupta Anushka,password123,Employee,CIS,Team1,MGR001
+I780009,Srivastav Anshi,password123,Employee,CIS,Team1,MGR001
+I780010,Mahajan Palak,password123,Employee,CIS,Team1,MGR001
+I780011,Pandey Pratibha,password123,Employee,CIS,Team1,MGR001
+I780012,Tandon Prabhav,password123,Employee,CIS,Team1,MGR001
+I780013,Batra Puneet,password123,Employee,CIS,Team1,MGR001
+I780014,Abhinav Kumar,password123,Employee,CIS,Team1,MGR001
+I780015,Sehrawat Prachi,password123,Employee,CIS,Team1,MGR001
+I780016,Gaurav Arman,password123,Employee,CIS,Team1,MGR001
+I780017,Goswami Pratiksha,password123,Employee,CIS,Team1,MGR001
+I780018,Gupta Shourya,password123,Employee,CIS,Team1,MGR001
+I780019,Gupta Sonu,password123,Employee,CIS,Team1,MGR001
+I780020,Nagpal Sumita,password123,Employee,CIS,Team1,MGR001
+I780021,Jha Aakash,password123,Employee,CIS,Team1,MGR001
+I780022,Agrawal Ishita,password123,Employee,CIS,Team6,MGR010
+I780023,Kashyap Vikas,password123,Employee,CIS,Team6,MGR010
+I780024,Rathor Ajay,password123,Employee,CIS,Team6,MGR010
+I780025,Omer Madhu,password123,Employee,CIS,Team6,MGR010
+I780026,Aggarwal Komal,password123,Employee,CIS,Team6,MGR010
+I780027,Patel Vikas,password123,Employee,CIS,Team6,MGR010
+I780028,Gupta Anshul,password123,Employee,CIS,Team6,MGR010
+I780029,Jain Akansha,password123,Employee,CIS,Team6,MGR010
+I780030,Gupta Vibhor,password123,Employee,CIS,Team6,MGR010
+I780031,Gupta Nidhi,password123,Employee,CIS,Team6,MGR010
+I780032,Gill Kanwardeep Singh,password123,Employee,CIS,Team6,MGR010
+I780033,Dimri Yogesh,password123,Employee,CIS,Team6,MGR010
+I780034,Sethi Arpita,password123,Employee,CIS,Team6,MGR010
+I780035,Pandey Vaishnavi,password123,Employee,CIS,Team6,MGR010
+I780036,Patel Dhyani,password123,Employee,CIS,Team6,MGR010
+I780037,Sikka Tanvi,password123,Employee,CIS,Team6,MGR010
+I780038,Jain Nihar,password123,Employee,CIS,Team6,MGR010
+I780039,Mohit,password123,Employee,CIS,Team6,MGR010
+I780040,Agrawal Ankit,password123,Employee,CIS,Team6,MGR010
+I780041,Agrawal Doyel,password123,Employee,CIS,Team6,MGR010
+I780042,Verma Sushant,password123,Employee,CIS,Team6,MGR010
+I780043,Bakshi Kanishk,password123,Employee,CIS,Team4,MGR008
+I780044,Sinha Manish Kumar,password123,Employee,CIS,Team4,MGR008
+I780045,Sardana Garima,password123,Employee,CIS,Team4,MGR008
+I780046,Khandelwal Anumeha,password123,Employee,CIS,Team4,MGR008
+I780047,Sondhi Hema,password123,Employee,CIS,Team4,MGR008
+I780048,Verma Lokesh,password123,Employee,CIS,Team4,MGR008
+I780049,Kumar Sachin,password123,Employee,CIS,Team4,MGR008
+I780050,Chaturvedi Shikha,password123,Employee,CIS,Team4,MGR008
+I780051,Vijay Kapil,password123,Employee,CIS,Team4,MGR008
+I780052,Mohan Shikha,password123,Employee,CIS,Team4,MGR008
+I780053,Sethi Manish,password123,Employee,CIS,Team4,MGR008
+I780054,Gupta Kapil Kumar,password123,Employee,CIS,Team4,MGR008
+I780055,Shrivastava Sumit Kumar,password123,Employee,CIS,Team4,MGR008
+I780056,Kaleswaram Sumanth,password123,Employee,CIS,Team1,MGR013
+I780057,K Anushya,password123,Employee,CIS,Team1,MGR013
+I780058,Verma Chhavi,password123,Employee,CIS,Team1,MGR013
+I780059,Sirdeshpande Manjunath,password123,Employee,CIS,Team1,MGR013
+I780060,Mamta,password123,Employee,CIS,Team1,MGR013
+I780061,Kuncham Vamsi Krishna,password123,Employee,CIS,Team1,MGR013
+I780062,VK Vishal,password123,Employee,CIS,Team1,MGR013
+I780063,Veeraraj Vijaya Kumar,password123,Employee,CIS,Team1,MGR013
+I780064,Narasimha Murthy,password123,Employee,CIS,Team1,MGR013
+I780065,Kumar Prabhanjan,password123,Employee,CIS,Team1,MGR013
+I780066,Annambira Kushalappa,password123,Employee,CIS,Team1,MGR013
+I780067,Quadros Climus,password123,Employee,CIS,Team1,MGR013
+I780068,Tiwari Kritika,password123,Employee,CIS,Team1,MGR013
+I780069,Rawat Ajay,password123,Employee,CIS,Team1,MGR013
+I780070,Tiwari Arvind Kumar,password123,Employee,CIS,Team1,MGR013
+I780071,Kuswaha Vikas,password123,Employee,CIS,Team1,MGR013
+I780072,Bhardwaj Anay,password123,Employee,CIS,Team1,MGR013
+I780073,RS Puneetha,password123,Employee,CIS,Team1,MGR013
+I780074,Padibandla Dayakar,password123,Employee,CIS,Team1,MGR013
+I780075,P Harshitha,password123,Employee,CIS,Team1,MGR013
+I780076,M Abishek,password123,Employee,CIS,Team1,MGR013
+I780077,Ganta Srinivas,password123,Employee,CIS,Team1,MGR013
+I780078,Nagaraju Sanjaykumar,password123,Employee,CIS,Team1,MGR013
+I780079,Oberoi Ameesha,password123,Employee,Analytics,Team1,MGR006
+I780080,Komal,password123,Employee,Analytics,Team1,MGR006
+I780081,Kanne Akhileshwar,password123,Employee,Analytics,Team1,MGR006
+I780082,Thiyagarajan Sridhar,password123,Employee,Analytics,Team1,MGR006
+I780083,Dey Gourab,password123,Employee,Analytics,Team1,MGR006
+I780084,Channooru Raghava,password123,Employee,Analytics,Team1,MGR006
+I780085,Hiregange Venkatraman,password123,Employee,Analytics,Team1,MGR006
+I780086,H Divyashree,password123,Employee,Analytics,Team1,MGR006
+I780087,Jayaprakash Devika,password123,Employee,Analytics,Team1,MGR006
+I780088,Nath Mayukh,password123,Employee,Analytics,Team1,MGR006
+I780089,Kumar K Suchendra,password123,Employee,Analytics,Team1,MGR006
+I780090,Adavi Vinayak,password123,Employee,Analytics,Team1,MGR006
+I780091,Nagavelli Shashidhar,password123,Employee,Analytics,Team1,MGR006
+I780092,Kaipravan Meethalevee,password123,Employee,Analytics,Team1,MGR006
+I780093,Patel Motishree,password123,Employee,Analytics,Team1,MGR006
+I780094,Agarwal Sanchari,password123,Employee,Analytics,Team1,MGR006
+I780095,Kejriwal Saurabh,password123,Employee,Analytics,Team1,MGR006
+I780096,Aredath Sithara V,password123,Employee,Analytics,Team1,MGR006
+I780097,Kumari Ruchi,password123,Employee,Analytics,Team1,MGR006
+I780098,Sarkar Shubhojit,password123,Employee,Analytics,Team1,MGR006
+I780099,Pandey Aman,password123,Employee,Analytics,Team1,MGR006
+I780100,Jain Harsh,password123,Employee,Analytics,Team1,MGR006
+I780101,Asapu Madhumita,password123,Employee,Analytics,Team1,MGR006
+I780102,Taj Naveen,password123,Employee,CIS,Team1,MGR014
+I780103,Atchyutuni Dutta Avinash,password123,Employee,CIS,Team1,MGR014
+I780104,Khandelwal Avijit,password123,Employee,CIS,Team1,MGR014
+I780105,Dubey Tripty,password123,Employee,CIS,Team1,MGR014
+I780106,Bedre Shital,password123,Employee,CIS,Team1,MGR014
+I780107,Murugesan Karthiheyan,password123,Employee,CIS,Team1,MGR014
+I780108,Ojha Rupam,password123,Employee,CIS,Team1,MGR014
+I780109,Shrivastva Nancy,password123,Employee,CIS,Team1,MGR014
+I780110,Saxena Praveen,password123,Employee,CIS,Team1,MGR014
+I780111,Mittal Yash,password123,Employee,CIS,Team1,MGR014
+I780112,Anil Chaithra,password123,Employee,CIS,Team1,MGR014
+I780113,M D Athira,password123,Employee,CIS,Team1,MGR014
+I780114,Pandey Toolika,password123,Employee,CIS,Team1,MGR014
+I780115,Dutta Tanuja,password123,Employee,CIS,Team1,MGR014
+I780116,Kulkarni Vikas Dayanand,password123,Employee,CIS,Team1,MGR014
+I780117,Ghosh Apurba,password123,Employee,CIS,Team1,MGR014
+I780118,Shenoy Ravindranath,password123,Employee,CIS,Team1,MGR014
+I780119,Krishnan Gokul Gowri,password123,Employee,CIS,Team1,MGR014
+I780120,Vijayan Nair Lajilekha,password123,Employee,CIS,Team1,MGR014
+I780121,M Santhosh,password123,Employee,CIS,Team1,MGR014
+I780122,Rawat Aman,password123,Employee,CIS,Team1,MGR015
+I780123,Patnaik Nidhi,password123,Employee,CIS,Team1,MGR015
+I780124,Kaur Amritpal,password123,Employee,CIS,Team1,MGR015
+I780125,Kaur Simran,password123,Employee,CIS,Team1,MGR015
+I780126,Miglani Nipunn,password123,Employee,CIS,Team1,MGR015
+I780127,Singh Dharambir,password123,Employee,CIS,Team1,MGR015
+I780128,Tayal Shubham,password123,Employee,CIS,Team1,MGR015
+I780129,Gupta Vanshika,password123,Employee,CIS,Team1,MGR015
+I780130,K S Nikhila,password123,Employee,CIS,Team1,MGR015
+I780131,Varshney Atul,password123,Employee,CIS,Team1,MGR015
+I780132,Kondaveeti Venkata M,password123,Employee,CIS,Team1,MGR015
+I780133,Sankhla Akshita,password123,Employee,CIS,Team1,MGR015
+I780134,Aggarwal Priyanka,password123,Employee,CIS,Team1,MGR015
+I780135,Rajpurohit Aayush,password123,Employee,CIS,Team1,MGR015
+I780136,Jain Deepesh,password123,Employee,CIS,Team1,MGR015
+I780137,Singh Jasmeet,password123,Employee,CIS,Team1,MGR015
+I780138,Ranjan Rishav,password123,Employee,CIS,Team1,MGR015
+I780139,Bhamra Navjot,password123,Employee,CIS,Team1,MGR015
+I780140,Goel Rishabh,password123,Employee,CIS,Team1,MGR015
+I780141,Kulshreshtha Sachin,password123,Employee,CIS,Team1,MGR015
+I780142,Pandey Ashish,password123,Employee,CIS,Team1,MGR015
+SMGR01,Nirmala Shettar,manager123,Manager,Corporate,Executive,

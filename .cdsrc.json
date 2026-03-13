@@ -1,0 +1,22 @@
+{
+  "build": {
+    "target": "."
+  },
+  "hana": {
+    "deploy-format": "hdbtable"
+  },
+  "requires": {
+    "db": {
+      "kind": "hana"
+    }
+  },
+  "odata": {
+    "version": "v4"
+  },
+  "features": {
+    "fetch_csrf": true
+  },
+  "folders": {
+    "app": "webapp"
+  }
+}

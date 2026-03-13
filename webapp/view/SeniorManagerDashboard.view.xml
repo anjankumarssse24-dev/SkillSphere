@@ -1,0 +1,845 @@
+<mvc:View
+    controllerName="skillsphere.controller.SeniorManagerDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:f="sap.f"
+    xmlns:core="sap.ui.core"
+    xmlns:uxap="sap.uxap"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+    xmlns:viz.data="sap.viz.ui5.data"
+    displayBlock="true">
+
+    <uxap:ObjectPageLayout id="seniorManagerObjectPage">
+        <uxap:headerTitle>
+            <uxap:ObjectPageHeader id="seniorManagerHeader" objectTitle="{currentUser>/name}" objectSubtitle="Senior Manager / VP Dashboard">
+                <uxap:actions>
+                    <m:Button id="seniorManagerLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
+                </uxap:actions>
+            </uxap:ObjectPageHeader>
+        </uxap:headerTitle>
+
+        <uxap:sections>
+            <!-- Executive Overview Section -->
+            <uxap:ObjectPageSection id="overviewSection" title="Executive Overview" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="overviewSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="overviewPanel" headerText="Organization Metrics" width="95%" class="sapUiMediumMargin">
+                                <m:content>
+                                    <m:VBox class="sapUiMediumMargin">
+                                        <m:FlexBox wrap="Wrap" justifyContent="SpaceAround" class="sapUiMediumMarginBottom">
+                                            <!-- Total Managers Card -->
+                                            <m:VBox class="sapUiResponsiveMargin analyticsCard" width="15rem">
+                                                <m:Panel headerText="Total Managers" backgroundDesign="Solid" class="clickablePanel">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <core:Icon src="sap-icon://manager" size="3rem" color="#0070f2"/>
+                                                            <m:ObjectNumber id="totalManagersCount" number="0" unit="managers" emphasized="true" class="sapUiSmallMarginTop"/>
+                                                            <m:Button text="View All" icon="sap-icon://detail-view" type="Transparent" press="onViewAllManagers" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+                                            
+                                            <!-- Total Employees Card -->
+                                            <m:VBox class="sapUiResponsiveMargin analyticsCard" width="15rem">
+                                                <m:Panel headerText="Total Employees" backgroundDesign="Solid" class="clickablePanel">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <core:Icon src="sap-icon://employee" size="3rem" color="#28a745"/>
+                                                            <m:ObjectNumber id="orgTotalEmployeesCount" number="0" unit="employees" emphasized="true" class="sapUiSmallMarginTop"/>
+                                                            <m:Button text="View All" icon="sap-icon://detail-view" type="Transparent" press="onViewAllEmployees" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+                                            
+                                            <!-- Total Skills Card -->
+                                            <m:VBox class="sapUiResponsiveMargin analyticsCard" width="15rem">
+                                                <m:Panel headerText="Unique Skills" backgroundDesign="Solid" class="clickablePanel">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <core:Icon src="sap-icon://badge" size="3rem" color="#ffc107"/>
+                                                            <m:ObjectNumber id="uniqueSkillsCount" number="0" unit="skills" emphasized="true" class="sapUiSmallMarginTop"/>
+                                                            <m:Button text="View All" icon="sap-icon://detail-view" type="Transparent" press="onViewAllSkills" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+                                            
+                                            <!-- Avg Experience Card -->
+                                            <m:VBox class="sapUiResponsiveMargin analyticsCard" width="15rem">
+                                                <m:Panel headerText="Avg Experience" backgroundDesign="Solid">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <core:Icon src="sap-icon://chart-axis" size="3rem" color="#17a2b8"/>
+                                                            <m:ObjectNumber id="avgExperienceCount" number="0" unit="years" emphasized="true" class="sapUiSmallMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+
+                                            <!-- On Project Card -->
+                                            <m:VBox class="sapUiResponsiveMargin analyticsCard" width="15rem">
+                                                <m:Panel headerText="Working on Project" backgroundDesign="Solid" class="clickablePanel">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <core:Icon src="sap-icon://workflow-tasks" size="3rem" color="#28a745"/>
+                                                            <m:ObjectNumber id="onProjectCount" number="0" unit="employees" emphasized="true" state="Success" class="sapUiSmallMarginTop"/>
+                                                            <m:Button text="View All" icon="sap-icon://detail-view" type="Transparent" press="onViewOnProjectEmployees" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+
+                                            <!-- On Bench Card -->
+                                            <m:VBox class="sapUiResponsiveMargin analyticsCard" width="15rem">
+                                                <m:Panel headerText="Available" backgroundDesign="Solid" class="clickablePanel">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <core:Icon src="sap-icon://person-placeholder" size="3rem" color="#e67e22"/>
+                                                            <m:ObjectNumber id="onBenchCount" number="0" unit="employees" emphasized="true" state="Warning" class="sapUiSmallMarginTop"/>
+                                                            <m:Button text="View All" icon="sap-icon://detail-view" type="Transparent" press="onViewAvailableEmployees" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+                                        </m:FlexBox>
+
+                                        <!-- Top Skills Across Organization -->
+                                        <m:Panel headerText="Top 10 Skills Across Organization" class="sapUiMediumMarginTop" backgroundDesign="Translucent">
+                                            <m:content>
+                                                <m:Table id="topSkillsTable"
+                                                    items="{orgMetrics>/topSkills}"
+                                                    mode="None"
+                                                    showSeparators="Inner"
+                                                    alternateRowColors="true"
+                                                    noDataText="Loading skills...">
+                                                    <m:columns>
+                                                        <m:Column width="4rem" hAlign="Center"><m:Text text="#"/></m:Column>
+                                                        <m:Column><m:Text text="Skill Name"/></m:Column>
+                                                        <m:Column hAlign="End" width="10rem"><m:Text text="Employees"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:cells>
+                                                                <m:ObjectNumber number="{orgMetrics>rank}" emphasized="false" state="Information"/>
+                                                                <m:ObjectIdentifier title="{orgMetrics>skillName}"/>
+                                                                <m:ObjectNumber number="{orgMetrics>count}" unit="emp" emphasized="false"/>
+                                                            </m:cells>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:content>
+                                        </m:Panel>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Manager Overview Section -->
+            <uxap:ObjectPageSection id="managersSection" title="Manager Overview" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="managersSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="managersPanel" headerText="All Managers" class="sapUiMediumMargin" width="95%">
+                                <m:content>
+                                    <m:Table id="managersTable" items="{allManagers>/managers}" class="sapUiResponsiveMargin" mode="SingleSelectMaster" selectionChange="onManagerSelect">
+                                        <m:columns>
+                                            <m:Column>
+                                                <m:Text text="Manager Name"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Manager ID"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Team"/>
+                                            </m:Column>
+                                            <m:Column hAlign="Center">
+                                                <m:Text text="Team Size"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Specialization"/>
+                                            </m:Column>
+                                            <m:Column hAlign="End" width="8rem">
+                                                <m:Text text="Actions"/>
+                                            </m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem type="Active">
+                                                <m:cells>
+                                                    <m:ObjectIdentifier title="{allManagers>name}"/>
+                                                    <m:Text text="{allManagers>managerId}"/>
+                                                    <m:Text text="{allManagers>team}"/>
+                                                    <m:ObjectNumber number="{allManagers>teamSize}" unit="employees"/>
+                                                    <m:Text text="{allManagers>specialization}"/>
+                                                    <m:Button text="View Team" icon="sap-icon://group" type="Emphasized" press="onViewManagerTeam"/>
+                                                </m:cells>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Workforce Availability Section -->
+            <uxap:ObjectPageSection id="availabilitySection" title="Workforce Availability" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="availabilitySubSection">
+                        <uxap:blocks>
+                            <m:Panel id="benchPanel" headerText="Available Employees — Not on Any Active Project" class="sapUiMediumMargin" width="95%">
+                                <m:content>
+                                    <m:VBox class="sapUiMediumMargin">
+                                        <m:Text id="benchCountText" text="Loading availability data..." class="sapUiSmallMarginBottom" wrapping="true"/>
+                                        <m:Table id="benchTable"
+                                            items="{benchReport>/employees}"
+                                            mode="None"
+                                            alternateRowColors="true"
+                                            noDataText="All employees are currently assigned to projects">
+                                            <m:columns>
+                                                <m:Column><m:Text text="Employee Name"/></m:Column>
+                                                <m:Column><m:Text text="Employee ID"/></m:Column>
+                                                <m:Column><m:Text text="Team"/></m:Column>
+                                                <m:Column><m:Text text="Sub Team"/></m:Column>
+                                                <m:Column hAlign="Center"><m:Text text="Experience"/></m:Column>
+                                                <m:Column hAlign="Center"><m:Text text="Skills"/></m:Column>
+                                                <m:Column><m:Text text="Manager ID"/></m:Column>
+                                            </m:columns>
+                                            <m:items>
+                                                <m:ColumnListItem>
+                                                    <m:cells>
+                                                        <m:ObjectIdentifier title="{benchReport>name}"/>
+                                                        <m:Text text="{benchReport>employeeId}"/>
+                                                        <m:Text text="{benchReport>team}"/>
+                                                        <m:Text text="{benchReport>subTeam}"/>
+                                                        <m:ObjectNumber number="{benchReport>experience}" unit="yrs"/>
+                                                        <m:ObjectNumber number="{benchReport>skillCount}" unit="skills"/>
+                                                        <m:Text text="{benchReport>managerId}"/>
+                                                    </m:cells>
+                                                </m:ColumnListItem>
+                                            </m:items>
+                                        </m:Table>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Organization-Wide Search Section -->
+            <uxap:ObjectPageSection id="orgSearchSection" title="Organization-Wide Search" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="orgSearchSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="orgSearchPanel" headerText="Search Employees Across Organization" width="95%" class="sapUiMediumMargin">
+                                <m:content>
+                                    <m:VBox class="sapUiMediumMargin">
+                                        <m:Label text="Skills:" class="sapUiSmallMarginBottom"/>
+                                        <m:MultiInput id="orgSkillsSearch" 
+                                            placeholder="Type a skill and press Enter to add (e.g., JavaScript, Python)"
+                                            class="sapUiMediumMarginBottom"
+                                            width="100%"
+                                            tokenUpdate="onOrgSkillTokenUpdate"
+                                            submit="onOrgSkillSubmit"
+                                            liveChange="onOrgSkillLiveChange"/>
+                                        
+                                        <m:FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                                            <m:VBox class="sapUiResponsiveMargin" width="auto">
+                                                <m:Label text="Manager:" class="sapUiSmallMarginBottom"/>
+                                                <m:Select id="orgManagerFilter" width="15rem">
+                                                    <core:Item key="" text="All Managers"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                            <m:VBox class="sapUiResponsiveMargin" width="auto">
+                                                <m:Label text="Team:" class="sapUiSmallMarginBottom"/>
+                                                <m:Select id="orgTeamFilter" width="15rem">
+                                                    <core:Item key="" text="All Teams"/>
+                                                    <core:Item key="S4HANA" text="SAP S/4HANA"/>
+                                                    <core:Item key="SuccessFactors" text="SAP SuccessFactors"/>
+                                                    <core:Item key="CIS" text="CIS"/>
+                                                    <core:Item key="Ariba" text="SAP Ariba"/>
+                                                    <core:Item key="BTP" text="SAP BTP"/>
+                                                    <core:Item key="Analytics" text="Analytics"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                            <m:VBox class="sapUiResponsiveMargin" width="auto">
+                                                <m:Label text="Experience Level:" class="sapUiSmallMarginBottom"/>
+                                                <m:Select id="orgExperienceLevel" width="15rem">
+                                                    <core:Item key="" text="Any Level"/>
+                                                    <core:Item key="Beginner" text="Beginner"/>
+                                                    <core:Item key="Intermediate" text="Intermediate"/>
+                                                    <core:Item key="Proficient" text="Proficient"/>
+                                                    <core:Item key="Advanced" text="Advanced"/>
+                                                    <core:Item key="Expert" text="Expert"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                        </m:FlexBox>
+                                        
+                                        <m:Button text="Search" type="Emphasized" icon="sap-icon://search" press="onOrgSearch" class="sapUiSmallMarginTop"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Search Results Section -->
+            <uxap:ObjectPageSection id="orgSearchResultsSection" title="Search Results" titleUppercase="false" visible="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="orgSearchResultsSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="orgSearchResultsPanel" headerText="Search Results" class="sapUiMediumMargin" width="95%">
+                                <m:content>
+                                    <m:Table id="orgSearchResultsTable" items="{orgSearchResults>/results}" class="sapUiResponsiveMargin" mode="None">
+                                        <m:columns>
+                                            <m:Column>
+                                                <m:Text text="Employee Name"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Employee ID"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Manager"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Team"/>
+                                            </m:Column>
+                                            <m:Column>
+                                                <m:Text text="Matching Skills"/>
+                                            </m:Column>
+                                            <m:Column hAlign="Center">
+                                                <m:Text text="Match %"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Actions"/>
+                                            </m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem type="Active" press="onViewOrgSearchResult">
+                                                <m:cells>
+                                                    <m:Text text="{orgSearchResults>name}"/>
+                                                    <m:Text text="{orgSearchResults>employeeId}"/>
+                                                    <m:Text text="{orgSearchResults>managerName}"/>
+                                                    <m:Text text="{orgSearchResults>team}"/>
+                                                    <m:Text text="{orgSearchResults>matchingSkills}"/>
+                                                    <m:ObjectNumber number="{orgSearchResults>matchScore}" unit="%" state="{orgSearchResults>matchState}"/>
+                                                    <m:Button text="View Details" icon="sap-icon://detail-view" press="onViewOrgSearchResult" type="Ghost"/>
+                                                </m:cells>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+
+    <!-- Manager Team Details Dialog -->
+    <m:Dialog id="managerTeamDialog" title="Manager Team Details" contentWidth="900px" contentHeight="700px" resizable="true" draggable="true">
+        <m:content>
+            <m:VBox class="sapUiSmallMargin">
+                <m:ObjectHeader 
+                    id="teamDialogHeader"
+                    title="{managerTeamDetails>/managerName}"
+                    intro="{managerTeamDetails>/managerId}"
+                    class="sapUiSmallMarginBottom"/>
+                
+                <m:Table id="teamMembersTable" items="{managerTeamDetails>/employees}" class="sapUiResponsiveMargin" mode="None">
+                    <m:columns>
+                        <m:Column>
+                            <m:Text text="Employee Name"/>
+                        </m:Column>
+                        <m:Column>
+                            <m:Text text="Employee ID"/>
+                        </m:Column>
+                        <m:Column>
+                            <m:Text text="Role"/>
+                        </m:Column>
+                        <m:Column hAlign="Center">
+                            <m:Text text="Experience"/>
+                        </m:Column>
+                        <m:Column>
+                            <m:Text text="Skills Count"/>
+                        </m:Column>
+                    </m:columns>
+                    <m:items>
+                        <m:ColumnListItem>
+                            <m:cells>
+                                <m:Text text="{managerTeamDetails>name}"/>
+                                <m:Text text="{managerTeamDetails>employeeId}"/>
+                                <m:Text text="{managerTeamDetails>role}"/>
+                                <m:ObjectNumber number="{managerTeamDetails>experience}" unit="years"/>
+                                <m:ObjectNumber number="{managerTeamDetails>totalSkills}" unit="skills"/>
+                            </m:cells>
+                        </m:ColumnListItem>
+                    </m:items>
+                </m:Table>
+            </m:VBox>
+        </m:content>
+        <m:buttons>
+            <m:Button text="Close" press="onCloseManagerTeamDialog"/>
+        </m:buttons>
+    </m:Dialog>
+
+    <!-- Org Metrics Detail Dialog -->
+    <m:Dialog id="orgMetricsDetailDialog" contentWidth="800px" contentHeight="600px" resizable="true" draggable="true">
+        <m:customHeader>
+            <m:Bar>
+                <m:contentLeft>
+                    <m:Title id="orgMetricsDialogTitle" text="Details" level="H2"/>
+                </m:contentLeft>
+                <m:contentRight>
+                    <m:Button icon="sap-icon://decline" type="Transparent" press="onCloseOrgMetricsDialog"/>
+                </m:contentRight>
+            </m:Bar>
+        </m:customHeader>
+        <m:content>
+            <m:VBox class="sapUiSmallMargin">
+                <!-- Employees table (managers / all employees / on-project / available) -->
+                <m:Table id="orgMetricsDetailTable"
+                    items="{orgMetricsDetail>/rows}"
+                    mode="None"
+                    alternateRowColors="true"
+                    sticky="ColumnHeaders"
+                    visible="{= ${orgMetricsDetail>/type} !== 'skills' }">
+                    <m:columns>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} === 'managers' }">
+                            <m:Text text="Manager ID"/>
+                        </m:Column>
+                        <m:Column><m:Text text="Name"/></m:Column>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} === 'managers' }">
+                            <m:Text text="Team"/>
+                        </m:Column>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} !== 'managers' }">
+                            <m:Text text="Employee ID"/>
+                        </m:Column>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} !== 'managers' }">
+                            <m:Text text="Team"/>
+                        </m:Column>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} !== 'managers' }" hAlign="Center">
+                            <m:Text text="Experience"/>
+                        </m:Column>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} !== 'managers' }" hAlign="Center">
+                            <m:Text text="Skills"/>
+                        </m:Column>
+                        <m:Column visible="{= ${orgMetricsDetail>/type} !== 'managers' }">
+                            <m:Text text="Manager"/>
+                        </m:Column>
+                    </m:columns>
+                    <m:items>
+                        <m:ColumnListItem>
+                            <m:cells>
+                                <!-- manager-only: managerId -->
+                                <m:Text text="{orgMetricsDetail>managerId}"/>
+                                <!-- shared: name -->
+                                <m:ObjectIdentifier title="{orgMetricsDetail>name}"/>
+                                <!-- manager-only: team -->
+                                <m:Text text="{orgMetricsDetail>team}"/>
+                                <!-- employee-only: employeeId -->
+                                <m:Text text="{orgMetricsDetail>employeeId}"/>
+                                <!-- employee-only: team -->
+                                <m:Text text="{orgMetricsDetail>team}"/>
+                                <!-- employee-only: experience -->
+                                <m:ObjectNumber number="{orgMetricsDetail>experience}" unit="yrs"/>
+                                <!-- employee-only: skillCount -->
+                                <m:ObjectNumber number="{orgMetricsDetail>skillCount}" unit="skills"/>
+                                <!-- employee-only: managerId -->
+                                <m:Text text="{orgMetricsDetail>managerId}"/>
+                            </m:cells>
+                        </m:ColumnListItem>
+                    </m:items>
+                </m:Table>
+
+                <!-- Skills table -->
+                <m:Table id="orgMetricsSkillsTable"
+                    items="{orgMetricsDetail>/rows}"
+                    mode="None"
+                    alternateRowColors="true"
+                    sticky="ColumnHeaders"
+                    visible="{= ${orgMetricsDetail>/type} === 'skills' }">
+                    <m:columns>
+                        <m:Column width="4rem" hAlign="Center"><m:Text text="#"/></m:Column>
+                        <m:Column><m:Text text="Skill Name"/></m:Column>
+                        <m:Column><m:Text text="Category"/></m:Column>
+                        <m:Column hAlign="Center"><m:Text text="Employees"/></m:Column>
+                    </m:columns>
+                    <m:items>
+                        <m:ColumnListItem>
+                            <m:cells>
+                                <m:ObjectNumber number="{orgMetricsDetail>rank}" emphasized="false" state="Information"/>
+                                <m:ObjectIdentifier title="{orgMetricsDetail>skillName}"/>
+                                <m:Text text="{orgMetricsDetail>category}"/>
+                                <m:ObjectNumber number="{orgMetricsDetail>count}" unit="emp"/>
+                            </m:cells>
+                        </m:ColumnListItem>
+                    </m:items>
+                </m:Table>
+            </m:VBox>
+        </m:content>
+        <m:buttons>
+            <m:Button text="Close" press="onCloseOrgMetricsDialog"/>
+        </m:buttons>
+    </m:Dialog>
+
+    <!-- Employee Details Dialog (org search) -->
+    <m:Dialog id="smgrEmpDetailsDialog" title="Employee Complete Profile" contentWidth="900px" contentHeight="700px" resizable="true" draggable="true">
+        <m:content>
+            <m:IconTabBar id="smgrDetailsIconTabBar" class="sapUiResponsiveContentPadding">
+                <m:items>
+                    <!-- Profile Tab -->
+                    <m:IconTabFilter icon="sap-icon://employee" text="Profile" key="profile">
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Basic Information" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:FlexBox wrap="Wrap" class="sapUiTinyMarginBottom">
+                                            <m:VBox class="sapUiMediumMarginEnd" width="45%">
+                                                <m:Label text="Name:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeName" text="" class="sapUiMediumMarginBottom sapUiLargeText sapThemeHighlight-asTextColor"/>
+                                                <m:Label text="Employee ID:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeId" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Email:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeEmail" text="" class="sapUiMediumMarginBottom"/>
+                                            </m:VBox>
+                                            <m:VBox width="45%">
+                                                <m:Label text="Team:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeTeam" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Specialization:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeSpecialization" text="" class="sapUiMediumMarginBottom sapThemeHighlight-asTextColor"/>
+                                                <m:Label text="Manager:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeManager" text="" class="sapUiMediumMarginBottom"/>
+                                            </m:VBox>
+                                        </m:FlexBox>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Professional Details" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:FlexBox wrap="Wrap" class="sapUiTinyMarginBottom">
+                                            <m:VBox class="sapUiMediumMarginEnd" width="45%">
+                                                <m:Label text="Role:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeRole" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Location:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeLocation" text="" class="sapUiMediumMarginBottom"/>
+                                            </m:VBox>
+                                            <m:VBox width="45%">
+                                                <m:Label text="T-Level:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeTLevel" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Last Updated:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeLastUpdated" text="" class="sapUiMediumMarginBottom"/>
+                                            </m:VBox>
+                                        </m:FlexBox>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Current Work Status" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:FlexBox class="sapUiTinyMarginBottom" alignItems="Center">
+                                            <m:Label text="Status: " class="sapUiMediumMarginEnd"/>
+                                            <m:ObjectStatus id="smgrDialogWorkStatus" text="" state="None"/>
+                                        </m:FlexBox>
+                                        <m:FlexBox class="sapUiTinyMarginBottom" alignItems="Center">
+                                            <m:Label text="Active Projects: " class="sapUiMediumMarginEnd"/>
+                                            <m:ObjectNumber id="smgrDialogActiveProjects" number="0" unit="projects" emphasized="true"/>
+                                        </m:FlexBox>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
+                    </m:IconTabFilter>
+
+                    <!-- Skills Tab -->
+                    <m:IconTabFilter icon="sap-icon://learning-assistant" text="Skills" key="skills">
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Technical Skills Portfolio" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                            <m:Label text="Total Skills: " class="sapUiMediumMarginEnd"/>
+                                            <m:ObjectNumber id="smgrDialogTotalSkills" number="0" unit="skills" emphasized="true"/>
+                                        </m:FlexBox>
+                                        <m:Table id="smgrDialogSkillsTable" items="{employeeDetails>/skills}" class="sapUiSmallMarginTop">
+                                            <m:columns>
+                                                <m:Column><m:Text text="Skill Name"/></m:Column>
+                                                <m:Column><m:Text text="Proficiency Level"/></m:Column>
+                                                <m:Column><m:Text text="Category"/></m:Column>
+                                                <m:Column><m:Text text="Years of Experience"/></m:Column>
+                                                <m:Column><m:Text text="Certification Status"/></m:Column>
+                                            </m:columns>
+                                            <m:items>
+                                                <m:ColumnListItem>
+                                                    <m:Text text="{employeeDetails>skillName}"/>
+                                                    <m:ObjectStatus text="{employeeDetails>proficiencyLevel}" state="{path: 'employeeDetails>proficiencyLevel', formatter: '.formatProficiencyState'}"/>
+                                                    <m:Text text="{employeeDetails>category}"/>
+                                                    <m:Text text="{employeeDetails>yearsExperience}"/>
+                                                    <m:ObjectStatus text="{employeeDetails>certificationStatus}" state="{path: 'employeeDetails>certificationStatus', formatter: '.formatCertificationState'}"/>
+                                                </m:ColumnListItem>
+                                            </m:items>
+                                        </m:Table>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                            <m:Panel class="sapUiSmallMarginTop" headerText="Professional Certifications" expandable="true" expanded="true">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                            <m:Label text="Total Certifications: " class="sapUiMediumMarginEnd"/>
+                                            <m:ObjectNumber id="smgrDialogTotalCertifications" number="0" unit="certifications" emphasized="true"/>
+                                        </m:FlexBox>
+                                        <m:Table id="smgrDialogCertificationsTable" items="{employeeDetails>/certifications}" class="sapUiSmallMarginTop">
+                                            <m:columns>
+                                                <m:Column><m:Text text="Certification Name"/></m:Column>
+                                                <m:Column><m:Text text="Code"/></m:Column>
+                                                <m:Column><m:Text text="Date of Completion"/></m:Column>
+                                                <m:Column><m:Text text="Level"/></m:Column>
+                                                <m:Column minScreenWidth="Desktop" demandPopin="true"><m:Text text="Description"/></m:Column>
+                                            </m:columns>
+                                            <m:items>
+                                                <m:ColumnListItem>
+                                                    <m:Text text="{employeeDetails>name}"/>
+                                                    <m:Text text="{employeeDetails>code}"/>
+                                                    <m:Text text="{employeeDetails>dateOfCompletion}"/>
+                                                    <m:ObjectStatus text="{employeeDetails>level}" state="Success"/>
+                                                    <m:Text text="{employeeDetails>description}"/>
+                                                </m:ColumnListItem>
+                                            </m:items>
+                                        </m:Table>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
+                    </m:IconTabFilter>
+
+                    <!-- Projects Tab -->
+                    <m:IconTabFilter icon="sap-icon://project-definition-triangle" text="Projects" key="projects">
+                        <m:Panel class="sapUiSmallMargin" headerText="Project History" expandable="false">
+                            <m:content>
+                                <m:VBox class="sapUiSmallMargin">
+                                    <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                        <m:Label text="Total Projects: " class="sapUiMediumMarginEnd"/>
+                                        <m:ObjectNumber id="smgrDialogTotalProjects" number="0" unit="projects" emphasized="true"/>
+                                    </m:FlexBox>
+                                    <m:Table id="smgrDialogProjectsTable" items="{employeeDetails>/projects}" class="sapUiSmallMarginTop">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Project Name"/></m:Column>
+                                            <m:Column><m:Text text="Role"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Duration"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{employeeDetails>projectName}"/>
+                                                <m:Text text="{employeeDetails>role}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{employeeDetails>duration}"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:VBox>
+                            </m:content>
+                        </m:Panel>
+                    </m:IconTabFilter>
+
+                    <!-- Utilization Tab -->
+                    <m:IconTabFilter icon="sap-icon://chart-table-view" text="Utilization" key="utilization">
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Current Projects" expandable="true" expanded="true">
+                                <m:content>
+                                    <m:Table id="smgrDialogCurrentProjectsTable" items="{employeeDetails>/currentProjects}">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Project Name"/></m:Column>
+                                            <m:Column><m:Text text="Project Manager"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{employeeDetails>projectName}"/>
+                                                <m:Text text="{employeeDetails>projectManager}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="CAIA Activities" expandable="true" expanded="false">
+                                <m:content>
+                                    <m:Table id="smgrDialogCAIATable" items="{employeeDetails>/caiaUtilization}">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Task Name"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{employeeDetails>taskName}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="POC Projects" expandable="true" expanded="false">
+                                <m:content>
+                                    <m:Table id="smgrDialogPOCTable" items="{employeeDetails>/pocUtilization}">
+                                        <m:columns>
+                                            <m:Column><m:Text text="POC Title"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{employeeDetails>pocTitle}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
+                    </m:IconTabFilter>
+
+                    <!-- Match Details Tab -->
+                    <m:IconTabFilter id="smgrDialogMatchTab" icon="sap-icon://compare" text="Match Details" key="match" visible="false">
+                        <m:Panel class="sapUiSmallMargin" headerText="Search Match Analysis" expandable="false">
+                            <m:content>
+                                <m:VBox class="sapUiSmallMargin">
+                                    <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                        <m:Label text="Match Score: " class="sapUiMediumMarginEnd"/>
+                                        <m:ProgressIndicator id="smgrDialogMatchScore" percentValue="0" displayValue="0%" width="200px" class="sapUiMediumMarginEnd"/>
+                                        <m:ObjectStatus id="smgrDialogMatchLevel" text="Low Match" state="Error"/>
+                                    </m:FlexBox>
+                                    <m:FlexBox class="sapUiMediumMarginBottom" direction="Column">
+                                        <m:Label text="Matching Skills:" class="sapUiTinyMarginBottom"/>
+                                        <m:Text id="smgrDialogMatchingSkills" text="" class="sapThemeHighlight-asTextColor"/>
+                                    </m:FlexBox>
+                                </m:VBox>
+                            </m:content>
+                        </m:Panel>
+                    </m:IconTabFilter>
+                </m:items>
+            </m:IconTabBar>
+        </m:content>
+        <m:buttons>
+            <m:Button text="Contact Employee" type="Emphasized" icon="sap-icon://email" press="onContactEmployee"/>
+            <m:Button text="Close" press="onCloseEmployeeDialog"/>
+        </m:buttons>
+    </m:Dialog>
+
+    <!-- AI Assistant Floating Button -->
+    <m:Button
+        icon="sap-icon://message-assistant"
+        text="AI Assistant"
+        type="Emphasized"
+        press="onOpenAIAssistant"
+        class="aiAssistantFloatingButton"
+        tooltip="Open AI Assistant"/>
+    
+    <!-- AI Assistant Dialog -->
+    <m:Dialog
+        id="aiAssistantDialogSeniorManager"
+        title="SkillSphere AI Assistant - Senior Manager"
+        contentWidth="600px"
+        contentHeight="700px"
+        resizable="true"
+        draggable="true">
+        
+        <m:customHeader>
+            <m:Bar>
+                <m:contentLeft>
+                    <core:Icon src="sap-icon://discussion" size="1.5rem" class="sapUiTinyMarginBegin"/>
+                    <m:Title text="AI Assistant" class="sapUiTinyMarginBegin"/>
+                </m:contentLeft>
+                <m:contentRight>
+                    <m:Button icon="sap-icon://decline" press="onCloseAIDialog" tooltip="Close"/>
+                </m:contentRight>
+            </m:Bar>
+        </m:customHeader>
+        
+        <m:content>
+            <m:VBox height="100%" justifyContent="SpaceBetween">
+                
+                <!-- Chat Messages Area -->
+                <m:ScrollContainer
+                    id="chatContainerSeniorManager"
+                    height="520px"
+                    vertical="true"
+                    class="sapUiSmallMargin">
+                    <m:VBox id="messagesContainerSeniorManager" class="sapUiSmallMargin"/>
+                </m:ScrollContainer>
+                
+                <!-- Quick Action Buttons for Senior Manager -->
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                    <m:Button 
+                        text="Org Insights" 
+                        icon="sap-icon://org-chart"
+                        press="onQuickAction"
+                        class="sapUiTinyMarginEnd"
+                        type="Emphasized"/>
+                    <m:Button 
+                        text="Resource Plan" 
+                        icon="sap-icon://work-history"
+                        press="onQuickAction"
+                        class="sapUiTinyMarginEnd"
+                        type="Emphasized"/>
+                    <m:Button 
+                        text="Skill Gaps" 
+                        icon="sap-icon://learning-assistant"
+                        press="onQuickAction"
+                        type="Emphasized"/>
+                </m:HBox>
+                
+                <!-- Input Area -->
+                <m:Bar>
+                    <m:contentLeft>
+                        <m:Input
+                            id="messageInputSeniorManager"
+                            placeholder="Ask me about your organization..."
+                            width="100%"
+                            submit="onSendMessage"
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                    </m:contentLeft>
+                    <m:contentRight>
+                        <m:Button
+                            icon="sap-icon://paper-plane"
+                            type="Emphasized"
+                            press="onSendMessage"
+                            tooltip="Send Message"/>
+                    </m:contentRight>
+                </m:Bar>
+            </m:VBox>
+        </m:content>
+        
+        <m:beginButton>
+            <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
+        </m:beginButton>
+        
+    </m:Dialog>
+
+</mvc:View>

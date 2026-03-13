@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "3.1"
+metadata:
+  name: skillsphere
+type: application
+framework:
+  name: SAPUI5
+  version: "1.140.0"
+  libraries:
+    - name: sap.m
+    - name: sap.ui.core
+    - name: sap.f
+    - name: sap.ui.table
+    - name: sap.viz
+    - name: sap.uxap
+builder:
+  bundles:
+    - bundleDefinition:
+        name: skillsphere/Component-preload.js
+        defaultFileTypes:
+          - ".js"
+          - ".fragment.xml"
+          - ".view.xml"
+          - ".properties"
+          - ".json"
+        sections:
+          - mode: preload
+            filters:
+              - "skillsphere/"
+            resolve: false
+            resolveConditional: false
+  customTasks:
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+      configuration:
+        debug: true
+        transformModulesToUI5:
+          overridesToOverride: true
+resources:
+  configuration:
+    paths:
+      webapp: .
