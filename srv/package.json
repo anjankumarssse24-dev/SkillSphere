@@ -1,0 +1,30 @@
+{
+  "name": "skillsphere-srv",
+  "version": "1.0.0",
+  "description": "SkillSphere CAP service",
+  "engines": {
+    "node": "^22.0.0",
+    "npm": "^10.0.0"
+  },
+  "dependencies": {
+    "@cap-js/hana": "^2.7.0",
+    "@sap-cloud-sdk/connectivity": "^3.9.0",
+    "@sap-cloud-sdk/http-client": "^3.9.0",
+    "@sap-cloud-sdk/util": "^3.9.0",
+    "@sap/cds": "^9.8.0",
+    "@sap/xssec": "^4",
+    "axios": "^1.13.2",
+    "express": "^4"
+  },
+  "scripts": {
+    "start": "cds-serve gen/srv/csn.json"
+  },
+  "cds": {
+    "requires": {
+      "auth": "dummy",
+      "[production]": {
+        "auth": "dummy"
+      }
+    }
+  }
+}

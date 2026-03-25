@@ -25,7 +25,7 @@ entity Employees {
   subTeam : String;
   managerId : String;
   email : String;
-  experience : Integer default 0;
+  experience : Decimal(5,2) default 0;
   totalSkills : Integer default 0;
   totalProjects : Integer default 0;
   role : String;
@@ -65,7 +65,7 @@ entity Skills {
   category : String;
   employeeId : String;
   proficiencyLevel : String;
-  yearsExperience : Integer default 0;
+  yearsExperience : Decimal(5,2) default 0;
   certificationStatus : String default 'None';
   employee : Association to Employees on employee.employeeId = employeeId;
 }

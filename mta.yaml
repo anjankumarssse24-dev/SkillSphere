@@ -16,7 +16,7 @@ modules:
   # CAP Service Module
   - name: skillsphere-srv
     type: nodejs
-    path: srv/gen
+    path: srv
     parameters:
       buildpack: nodejs_buildpack
       memory: 256M
@@ -31,12 +31,13 @@ modules:
           srv-url: ${default-url}
     requires:
       - name: skillsphere-db
-      - name: skillsphere-auth
+      # - name: skillsphere-auth
       - name: skillsphere-destination
 
   # HANA Database Deployer
   - name: skillsphere-db-deployer
     type: hdb
+    path: db
     path: db
     parameters:
       buildpack: nodejs_buildpack
@@ -73,6 +74,9 @@ modules:
         - npx bestzip skillsphere.zip dist/*
       supported-platforms:
         []
+      ignore:
+        - "node_modules/"
+        - "dist/"
 
   # Destination Content (for managed app router)
   - name: skillsphere-destination-content
@@ -128,6 +132,9 @@ resources:
           redirect-uris:
             - https://*.cfapps.*.hana.ondemand.com/**
             - https://*.applicationstudio.cloud.sap/**
+          credential-types:
+            - "binding-secret"
+            - "x509"
 
   # Destination Service
   - name: skillsphere-destination

@@ -11,8 +11,14 @@ module.exports = cds.service.impl(async function() {
     CurrentProjects, CAIAUtilization, POCUtilization, Certifications
   } = this.entities;
 
-  console.log('🚀 Initializing SkillSphere with Real AI Core (GPT-4o)...');
-  const aiClient = new AICoreClient();
+  console.log('🚀 Initializing SkillSphere...');
+  let aiClient = null;
+  function getAIClient() {
+    if (!aiClient) {
+      aiClient = new AICoreClient();
+    }
+    return aiClient;
+  }
 
   /**
    * AI Assistant for EMPLOYEES - with personal context
@@ -68,7 +74,7 @@ ${projects.length ? projects.map(p =>
 `;
 
       console.log('📤 Sending employee AI request...');
-      const answer = await aiClient.chatCompletion({
+      const answer = await getAIClient().chatCompletion({
         systemPrompt,
         userPrompt
       });
@@ -139,7 +145,7 @@ ${projects.map(p =>
 `;
 
       console.log('📤 Sending manager AI request...');
-      const answer = await aiClient.chatCompletion({
+      const answer = await getAIClient().chatCompletion({
         systemPrompt,
         userPrompt
       });
@@ -254,7 +260,7 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
 `;
 
       console.log('📤 Sending request to AI...');
-      const answer = await aiClient.chatCompletion({
+      const answer = await getAIClient().chatCompletion({
         systemPrompt,
         userPrompt
       });
@@ -279,7 +285,7 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     if (user) {
       // Clear chat history for this user on login to start fresh
       const userId = user.role === 'Employee' ? user.username : user.username;
-      aiClient.clearUserChat(userId);
+      try { getAIClient().clearUserChat(userId); } catch(_) {}
       console.log(`🔐 User logged in: ${user.username} (${user.role}), chat cleared`);
       
       return { success: true, user, message: 'Login successful' };
@@ -298,7 +304,7 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     }
     
     try {
-      aiClient.clearUserChat(userId);
+      getAIClient().clearUserChat(userId);
       console.log(`🗑️ Chat cleared for user: ${userId}`);
       return { success: true, message: 'Chat history cleared successfully' };
     } catch (error) {

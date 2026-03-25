@@ -15,6 +15,13 @@ framework:
     - name: sap.viz
     - name: sap.uxap
 builder:
+  resources:
+    excludes:
+      - "**/node_modules/**"
+      - "**/test/**"
+      - "**/example/**"
+      - "**/bin/**"
+      - "dist/**"
   bundles:
     - bundleDefinition:
         name: skillsphere/Component-preload.js
@@ -35,12 +42,14 @@ builder:
     - name: ui5-tooling-transpile-task
       afterTask: replaceVersion
       configuration:
-        debug: true
+        debug: false
+        transformModulesToUI5: false
         excludePatterns:
-          - "node_modules/**"
-          - "**/node_modules/**"
-        transformModulesToUI5:
-          overridesToOverride: true
+          - "/resources/skillsphere/node_modules/**"
+          - "/resources/skillsphere/**/test/**"
+          - "/resources/skillsphere/**/example/**"
+          - "/resources/skillsphere/**/bin/**"
+          - "/resources/skillsphere/**/dist/**"
 resources:
   configuration:
     paths:

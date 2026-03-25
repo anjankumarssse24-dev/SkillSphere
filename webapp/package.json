@@ -4,8 +4,9 @@
   "description": "SkillSphere UI5 Application",
   "private": true,
   "scripts": {
-    "build": "ui5 build --clean-dest --dest dist --exclude-task=generateComponentPreload",
-    "build:ui": "ui5 build --clean-dest --dest dist && cd dist && npx bestzip ../skillsphere.zip *",
+    "build": "ui5 build --clean-dest --dest dist",
+    "build:ui": "npm run clean && npm run build && npm run zip",
+    "zip": "cd dist && npx bestzip skillsphere.zip *",
     "clean": "rimraf dist skillsphere.zip"
   }
 }
