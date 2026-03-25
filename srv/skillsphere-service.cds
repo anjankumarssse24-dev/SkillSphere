@@ -20,6 +20,7 @@ service SkillSphereService {
   
   // Utilization Tracking
   entity CurrentProjects as projection on skillsphere.CurrentProjects;
+  entity Initiatives as projection on skillsphere.Initiatives;
   entity CAIAUtilization as projection on skillsphere.CAIAUtilization;
   entity POCUtilization as projection on skillsphere.POCUtilization;
   

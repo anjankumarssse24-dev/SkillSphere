@@ -208,10 +208,10 @@
                                             <m:Title text="Visualization Controls" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:Label text="Year:" class="sapUiTinyMarginEnd"/>
-                                            <m:Select id="mtvYearFilter" selectedKey="{visualization>/selectedYear}" width="8rem">
-                                                <core:Item key="2024" text="2024"/>
-                                                <core:Item key="2025" text="2025"/>
-                                                <core:Item key="2026" text="2026"/>
+                                            <m:Select id="mtvYearFilter" selectedKey="{visualization>/selectedYear}" width="8rem" change="onYearFilterChange">
+                                                <core:Item key="2024" text="2024 (Last Year)"/>
+                                                <core:Item key="2025" text="2025 (Last Year)"/>
+                                                <core:Item key="2026" text="2026 (Current Year)"/>
                                             </m:Select>
                                             <m:Label text="Quarter:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
                                             <m:Select id="mtvQuarterFilter" selectedKey="{visualization>/selectedQuarter}" width="8rem">

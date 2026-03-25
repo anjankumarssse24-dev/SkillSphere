@@ -307,12 +307,14 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     padding: 0 0.5rem;
+    border: 1px solid #ccc;
 }
 
 .ganttBar:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    z-index: 10;
+    z-index: 20 !important;
+    opacity: 1 !important;
 }
 
 .ganttBar.ongoing {
@@ -334,6 +336,32 @@
     font-size: 0.7rem;
     font-weight: 500;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Overlapping Gantt Bar Styles */
+.ganttBar[data-overlapping="true"] {
+    opacity: 0.8;
+    border: 2px solid #0070f2;
+    background: linear-gradient(135deg, #87ceeb 25%, transparent 25%, transparent 50%, #87ceeb 50%, #87ceeb 75%, transparent 75%, transparent) !important;
+    background-size: 20px 20px;
+    background-position: 0 0;
+}
+
+.ganttBar[data-overlapping="true"]:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 255, 255, 0.1) 10px,
+        rgba(255, 255, 255, 0.1) 20px
+    );
+    border-radius: 4px;
 }
 
 /* Utilization Chart Styles */

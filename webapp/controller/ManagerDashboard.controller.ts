@@ -1,3 +1,4 @@
+import Fragment from "sap/ui/core/Fragment";
 import Controller from "sap/ui/core/mvc/Controller";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
@@ -22,6 +23,8 @@ import Dialog from "sap/m/Dialog";
 export default class ManagerDashboard extends Controller {
 
     private currentManagerId: string | null = null;
+    private currentDialogEmployeeId: string = "";
+    private managerAddProjectDialog?: Dialog;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -445,8 +448,7 @@ export default class ManagerDashboard extends Controller {
             availabilityForecast: [],
             utilizationData: {
                 currentProjects: { utilized: 0, available: 0 },
-                caia: { utilized: 0, available: 0 },
-                poc: { utilized: 0, available: 0 }
+                initiatives: { utilized: 0, available: 0 }
             },
             ganttData: []
         });
@@ -476,8 +478,7 @@ export default class ManagerDashboard extends Controller {
             const utilizationPromises = employees.map(async (emp: any) => ({
                 employee: emp,
                 currentProjects: await this.getCurrentProjects(emp.employeeId),
-                caiaUtilization: await this.getCAIAUtilization(emp.employeeId),
-                pocUtilization: await this.getPOCUtilization(emp.employeeId),
+                initiatives: await this.getInitiatives(emp.employeeId),
                 projects: await this.getEmployeeProjects(emp.employeeId)
             }));
 
@@ -540,14 +541,12 @@ export default class ManagerDashboard extends Controller {
 
         // Calculate total hours utilized in current month for each type
         let currentProjectsHours = 0;
-        let caiaHours = 0;
-        let pocHours = 0;
+        let initiativesHours = 0;
 
         allData.forEach(empData => {
             console.log(`📊 Processing ${empData.employee?.employeeId}:`, {
                 currentProjects: empData.currentProjects?.length || 0,
-                caia: empData.caiaUtilization?.length || 0,
-                poc: empData.pocUtilization?.length || 0
+                initiatives: empData.initiatives?.length || 0
             });
             
             // Current Projects - convert hoursPerDay to monthly hours (hoursPerDay * 20 working days)
@@ -562,37 +561,24 @@ export default class ManagerDashboard extends Controller {
                 }
             });
 
-            // CAIA Utilization - convert hoursPerDay to monthly hours
-            empData.caiaUtilization.forEach((caia: any) => {
-                const isActive = this.isActiveInPeriod(caia.startDate, caia.endDate, selectedYear, monthsToInclude);
-                const hoursPerDay = parseFloat(caia.hoursPerDay) || 0;
-                const activeMonths = this.countActiveMonths(caia.startDate, caia.endDate, selectedYear, monthsToInclude);
+            // Initiatives - convert hoursPerDay to monthly hours
+            empData.initiatives.forEach((initiative: any) => {
+                const isActive = this.isActiveInPeriod(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
+                const hoursPerDay = parseFloat(initiative.hoursPerDay) || 0;
+                const activeMonths = this.countActiveMonths(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
                 const totalHours = hoursPerDay * 20 * activeMonths;
-                console.log(`  🔬 CAIA: ${caia.taskName}, Active: ${isActive}, Months: ${activeMonths}, Hours/Day: ${hoursPerDay}, Total Hours: ${totalHours}`);
+                console.log(`  🎯 Initiative: ${initiative.initiativeName}, Active: ${isActive}, Months: ${activeMonths}, Hours/Day: ${hoursPerDay}, Total Hours: ${totalHours}`);
                 if (isActive) {
-                    caiaHours += totalHours;
-                }
-            });
-
-            // POC Utilization - convert hoursPerDay to monthly hours
-            empData.pocUtilization.forEach((poc: any) => {
-                const isActive = this.isActiveInPeriod(poc.startDate, poc.endDate, selectedYear, monthsToInclude);
-                const hoursPerDay = parseFloat(poc.hoursPerDay) || 0;
-                const activeMonths = this.countActiveMonths(poc.startDate, poc.endDate, selectedYear, monthsToInclude);
-                const totalHours = hoursPerDay * 20 * activeMonths;
-                console.log(`  💡 POC: ${poc.pocTitle}, Active: ${isActive}, Months: ${activeMonths}, Hours/Day: ${hoursPerDay}, Total Hours: ${totalHours}`);
-                if (isActive) {
-                    pocHours += totalHours;
+                    initiativesHours += totalHours;
                 }
             });
         });
 
         // Calculate percentages based on total available hours
         const currentProjectsUtilized = Math.min(100, Math.round((currentProjectsHours / totalAvailableHours) * 100));
-        const caiaUtilized = Math.min(100, Math.round((caiaHours / totalAvailableHours) * 100));
-        const pocUtilized = Math.min(100, Math.round((pocHours / totalAvailableHours) * 100));
+        const initiativesUtilized = Math.min(100, Math.round((initiativesHours / totalAvailableHours) * 100));
 
-        console.log(`📊 Hours: CP=${currentProjectsHours}h (${currentProjectsUtilized}%), CAIA=${caiaHours}h (${caiaUtilized}%), POC=${pocHours}h (${pocUtilized}%) of ${totalAvailableHours}h total`);
+        console.log(`📊 Hours: CP=${currentProjectsHours}h (${currentProjectsUtilized}%), Initiatives=${initiativesHours}h (${initiativesUtilized}%) of ${totalAvailableHours}h total`);
 
         // Update visualization model
         const vizModel = this.getView()?.getModel("visualization") as JSONModel;
@@ -602,15 +588,10 @@ export default class ManagerDashboard extends Controller {
                 available: 100 - currentProjectsUtilized,
                 hours: currentProjectsHours
             },
-            caia: {
-                utilized: caiaUtilized,
-                available: 100 - caiaUtilized,
-                hours: caiaHours
-            },
-            poc: {
-                utilized: pocUtilized,
-                available: 100 - pocUtilized,
-                hours: pocHours
+            initiatives: {
+                utilized: initiativesUtilized,
+                available: 100 - initiativesUtilized,
+                hours: initiativesHours
             },
             totalAvailableHours: totalAvailableHours
         });
@@ -793,7 +774,7 @@ export default class ManagerDashboard extends Controller {
                 projects: []
             };
             
-            // Only show Current Projects (Utilization data)
+            // Include Current Projects
             d.currentProjects.forEach((cp: any) => {
                 if (!cp.startDate || !cp.endDate) return;
                 
@@ -808,30 +789,98 @@ export default class ManagerDashboard extends Controller {
                 // Determine project status based on dates
                 let status = "scheduled";
                 if (endDate < today) {
-                    status = "finished"; // Completed projects - Blue
+                    status = "finished"; // Completed projects
                 } else if (startDate <= today && endDate >= today) {
-                    status = "ongoing"; // Ongoing projects - Green
+                    status = "ongoing"; // Ongoing projects
                 } else if (startDate > today) {
-                    status = "scheduled"; // Scheduled/Future projects - Orange
+                    status = "scheduled"; // Scheduled/Future projects
                 }
                 
                 employeeData.projects.push({
                     projectName: cp.projectName,
                     startDate: cp.startDate,
                     endDate: cp.endDate,
+                    hoursPerDay: cp.hoursPerDay,
                     status: status,
-                    type: "Current Project"
+                    type: "CurrentProject",
+                    color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
                 });
             });
             
-            // Only add employee to gantt data if they have current projects
+            // Include Initiatives (both Initiative, CAIA, and POC types)
+            d.initiatives.forEach((init: any) => {
+                if (!init.startDate || !init.endDate) return;
+                
+                const startDate = new Date(init.startDate);
+                const endDate = new Date(init.endDate);
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setHours(0, 0, 0, 0);
+                
+                // Filter by year
+                if (startDate.getFullYear() !== selectedYear && endDate.getFullYear() !== selectedYear) return;
+                
+                // Determine status based on dates
+                let status = "scheduled";
+                if (endDate < today) {
+                    status = "finished";
+                } else if (startDate <= today && endDate >= today) {
+                    status = "ongoing";
+                } else if (startDate > today) {
+                    status = "scheduled";
+                }
+                
+                // All initiatives (Initiative, CAIA, POC) — always orange regardless of status
+                const color = "#f39c12";
+                const typeLabel = init.type || "Initiative";
+                
+                employeeData.projects.push({
+                    projectName: init.initiativeName,
+                    description: init.description,
+                    startDate: init.startDate,
+                    endDate: init.endDate,
+                    hoursPerDay: init.hoursPerDay,
+                    status: status,
+                    type: "Initiative",
+                    typeLabel: typeLabel,
+                    color: color
+                });
+            });
+
+            // Include historical Projects (project history)
+            d.projects.forEach((proj: any) => {
+                if (!proj.startDate || !proj.endDate) return;
+
+                const startDate = new Date(proj.startDate);
+                const endDate = new Date(proj.endDate);
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setHours(0, 0, 0, 0);
+
+                // Filter by year - include if either start or end year matches, or project spans it
+                if (startDate.getFullYear() !== selectedYear && endDate.getFullYear() !== selectedYear &&
+                    !(startDate.getFullYear() < selectedYear && endDate.getFullYear() > selectedYear)) return;
+
+                // Historical projects are always "finished" unless still running
+                const status = endDate < today ? "finished" : (startDate <= today ? "ongoing" : "scheduled");
+
+                employeeData.projects.push({
+                    projectName: proj.projectName,
+                    startDate: proj.startDate,
+                    endDate: proj.endDate,
+                    status: status,
+                    type: "ProjectHistory",
+                    typeLabel: "History",
+                    color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
+                });
+            });
+
+            // Only add employee to gantt data if they have projects/initiatives
             if (employeeData.projects.length > 0) {
                 ganttData.push(employeeData);
             }
         });
         
         visualizationModel?.setProperty("/ganttData", ganttData);
-        console.log("📊 Gantt Data Generated:", ganttData.length, "employees with current projects");
+        console.log("📊 Gantt Data Generated:", ganttData.length, "employees with projects/initiatives");
     }
 
     /**
@@ -851,24 +900,19 @@ export default class ManagerDashboard extends Controller {
         // Update percentage text
         const currentProjectsUtilized = utilizationData.currentProjects?.utilized || 0;
         const currentProjectsAvailable = utilizationData.currentProjects?.available || 100;
-        const caiaUtilized = utilizationData.caia?.utilized || 0;
-        const caiaAvailable = utilizationData.caia?.available || 100;
-        const pocUtilized = utilizationData.poc?.utilized || 0;
-        const pocAvailable = utilizationData.poc?.available || 100;
+        const initiativesUtilized = utilizationData.initiatives?.utilized || 0;
+        const initiativesAvailable = utilizationData.initiatives?.available || 100;
         
         (this.byId("currentProjectsUtilized") as any)?.setText(`${currentProjectsUtilized}%`);
         (this.byId("currentProjectsAvailable") as any)?.setText(`${currentProjectsAvailable}%`);
-        (this.byId("caiaUtilized") as any)?.setText(`${caiaUtilized}%`);
-        (this.byId("caiaAvailable") as any)?.setText(`${caiaAvailable}%`);
-        (this.byId("pocUtilized") as any)?.setText(`${pocUtilized}%`);
-        (this.byId("pocAvailable") as any)?.setText(`${pocAvailable}%`);
+        (this.byId("initiativesUtilized") as any)?.setText(`${initiativesUtilized}%`);
+        (this.byId("initiativesAvailable") as any)?.setText(`${initiativesAvailable}%`);
         
-        console.log(`📊 Rendering charts - CP: ${currentProjectsUtilized}%, CAIA: ${caiaUtilized}%, POC: ${pocUtilized}%`);
+        console.log(`📊 Rendering charts - CP: ${currentProjectsUtilized}%, Initiatives: ${initiativesUtilized}%`);
         
         // Render SVG donut charts
         this.renderDonutChart("currentProjectsChart", currentProjectsUtilized, "#0070f2");
-        this.renderDonutChart("caiaChart", caiaUtilized, "#f39c12");
-        this.renderDonutChart("pocChart", pocUtilized, "#2ecc71");
+        this.renderDonutChart("initiativesChart", initiativesUtilized, "#2ecc71");
     }
 
     /**
@@ -1100,6 +1144,9 @@ export default class ManagerDashboard extends Controller {
     private createGanttRow(empData: any, year: number, monthNumbers: number[], totalMonths: number): string {
         let barsHtml = '';
         
+        // First, calculate positions for all projects to detect overlaps
+        const projectsWithPositions: any[] = [];
+        
         empData.projects.forEach((project: any) => {
             const startDate = new Date(project.startDate);
             const endDate = new Date(project.endDate);
@@ -1126,12 +1173,12 @@ export default class ManagerDashboard extends Controller {
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
                 
                 // Calculate left position: which month + day offset within that month
-                const dayOffsetInStartMonth = (startDay - 1) / daysInStartMonth; // 0 to 1
+                const dayOffsetInStartMonth = (startDay - 1) / daysInStartMonth;
                 leftPercent = ((startIndex + dayOffsetInStartMonth) / totalMonths) * 100;
                 
                 // Calculate width: number of months spanned + day fractions
                 const monthsSpanned = endIndex - startIndex;
-                const endDayFraction = endDay / daysInEndMonth; // 0 to 1
+                const endDayFraction = endDay / daysInEndMonth;
                 
                 if (monthsSpanned === 0) {
                     // Same month - just calculate days between
@@ -1139,7 +1186,6 @@ export default class ManagerDashboard extends Controller {
                     widthPercent = ((daysSpanned / daysInStartMonth) / totalMonths) * 100;
                 } else {
                     // Multiple months - calculate total width including partial months
-                    // Width = (remaining days in start month + full months between + days in end month) / total months
                     const startDayFraction = (daysInStartMonth - startDay + 1) / daysInStartMonth;
                     widthPercent = ((startDayFraction + (monthsSpanned - 1) + endDayFraction) / totalMonths) * 100;
                 }
@@ -1157,23 +1203,77 @@ export default class ManagerDashboard extends Controller {
                 widthPercent = ((endIndex + endDayFraction) / totalMonths) * 100;
             }
             
-            const colorClass = project.status; // ongoing, finished, scheduled
-            
+            projectsWithPositions.push({
+                ...project,
+                leftPercent,
+                widthPercent
+            });
+        });
+        
+        // Detect overlaps and assign stacking lanes
+        const lanes: number[] = new Array(projectsWithPositions.length).fill(0);
+        for (let i = 0; i < projectsWithPositions.length; i++) {
+            const usedLanes = new Set<number>();
+            for (let j = 0; j < i; j++) {
+                const p1 = projectsWithPositions[i];
+                const p2 = projectsWithPositions[j];
+                const p1Left = p1.leftPercent;
+                const p1Right = p1.leftPercent + p1.widthPercent;
+                const p2Left = p2.leftPercent;
+                const p2Right = p2.leftPercent + p2.widthPercent;
+                if (!(p1Right <= p2Left || p2Right <= p1Left)) {
+                    usedLanes.add(lanes[j]);
+                }
+            }
+            let lane = 0;
+            while (usedLanes.has(lane)) lane++;
+            lanes[i] = lane;
+        }
+        const maxLane = Math.max(0, ...lanes);
+        const laneHeight = 34; // px per lane
+        const rowPadding = 4;
+
+        // Generate bar HTML — keep status-based color, stack overlapping bars vertically
+        projectsWithPositions.forEach((project: any, index: number) => {
+            const lane = lanes[index];
+            const color = project.color || "#2ecc71";
+            const top = rowPadding + lane * (laneHeight + 2);
+
+            // Create tooltip with all information
+            let tooltipText = `${project.projectName} (${project.startDate} to ${project.endDate})`;
+            if (project.typeLabel) {
+                tooltipText += ` [${project.typeLabel}]`;
+            }
+            if (project.hoursPerDay) {
+                tooltipText += ` - ${project.hoursPerDay} hrs/day`;
+            }
+            if (project.description) {
+                tooltipText += ` - ${project.description}`;
+            }
+
             barsHtml += `
-                <div class="ganttBar ${colorClass}" 
-                     style="left: ${leftPercent}%; width: ${widthPercent}%;"
-                     title="${project.projectName} (${project.startDate} to ${project.endDate})">
+                <div class="ganttBar"
+                     style="left: ${project.leftPercent}%; width: ${project.widthPercent}%; background-color: ${color}; top: ${top}px; height: 28px; z-index: 5; border: 1px solid rgba(0,0,0,0.15); opacity: 0.95;"
+                     title="${tooltipText}"
+                     data-project="${project.projectName}"
+                     data-type="${project.type}"
+                     data-dates="${project.startDate} to ${project.endDate}"
+                     data-hours="${project.hoursPerDay || 'N/A'}"
+                     data-description="${project.description || ''}"
+                     onmouseover="this.style.opacity='1'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)';"
+                     onmouseout="this.style.opacity='0.95'; this.style.boxShadow='none';">
                     <span class="ganttBarLabel">${project.projectName}</span>
                 </div>
             `;
         });
-        
+
+        const rowHeight = Math.max(40, rowPadding * 2 + (maxLane + 1) * (laneHeight + 2));
         const monthCells = monthNumbers.map(() => '<div class="ganttMonth"></div>').join('');
         
         return `
-            <div class="ganttRow">
+            <div class="ganttRow" style="height: ${rowHeight}px; min-height: ${rowHeight}px;">
                 <div class="ganttLabel" title="${empData.employeeId}">${empData.employeeName}</div>
-                <div class="ganttTimeline">
+                <div class="ganttTimeline" style="height: ${rowHeight}px;">
                     ${monthCells}
                     ${barsHtml}
                 </div>
@@ -1804,18 +1904,17 @@ export default class ManagerDashboard extends Controller {
             // Load all data from OData in parallel
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             
-            const [employeeData, profileData, skills, projects, currentProjects, caiaUtilization, pocUtilization, certifications] = await Promise.all([
+            const [employeeData, profileData, skills, projects, currentProjects, initiatives, certifications] = await Promise.all([
                 this.loadEmployeeData(empId),
                 this.loadProfileData(empId),
                 this.getEmployeeSkills(empId),
                 this.getEmployeeProjects(empId),
                 this.getCurrentProjects(empId),
-                this.getCAIAUtilization(empId),
-                this.getPOCUtilization(empId),
+                this.getInitiatives(empId),
                 this.getCertifications(empId)
             ]);
 
-            console.log("✅ All employee data loaded:", { employeeData, profileData, skills, projects, currentProjects, caiaUtilization, pocUtilization, certifications });
+            console.log("✅ All employee data loaded:", { employeeData, profileData, skills, projects, currentProjects, initiatives, certifications });
 
             // Merge all data
             const completeData = {
@@ -1824,8 +1923,7 @@ export default class ManagerDashboard extends Controller {
                 skills: skills,
                 projects: projects,
                 currentProjects: currentProjects,
-                caiaUtilization: caiaUtilization,
-                pocUtilization: pocUtilization,
+                initiatives: initiatives,
                 certifications: certifications
             };
 
@@ -1845,7 +1943,11 @@ export default class ManagerDashboard extends Controller {
             (this.byId("dialogEmployeeRole") as any)?.setText(profileData.role || 'N/A');
             (this.byId("dialogEmployeeLocation") as any)?.setText(profileData.location || 'N/A');
             (this.byId("dialogEmployeeTLevel") as any)?.setText(profileData.tLevel || 'N/A');
+            (this.byId("dialogEmployeeGradeLevel") as any)?.setText(profileData.gradeLevel || 'N/A');
             (this.byId("dialogEmployeeLastUpdated") as any)?.setText(profileData.lastUpdated ? new Date(profileData.lastUpdated).toLocaleDateString() : 'N/A');
+
+            // Store current dialog employee ID for manager actions (e.g., Add Project)
+            this.currentDialogEmployeeId = empId;
 
             // Populate current status
             const statusText = this.formatWorkingStatus(employee.working_on_project);
@@ -1961,35 +2063,18 @@ export default class ManagerDashboard extends Controller {
     }
 
     /**
-     * Get CAIA utilization records for an employee
+     * Get initiatives records for an employee
      */
-    private async getCAIAUtilization(employeeId: string): Promise<any[]> {
+    private async getInitiatives(employeeId: string): Promise<any[]> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CAIAUtilization");
+            const listBinding = oDataModel.bindList("/Initiatives");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
             const contexts = await listBinding.requestContexts();
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading CAIA utilization for ${employeeId}:`, error);
-            return [];
-        }
-    }
-
-    /**
-     * Get POC utilization records for an employee
-     */
-    private async getPOCUtilization(employeeId: string): Promise<any[]> {
-        try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/POCUtilization");
-            listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            
-            const contexts = await listBinding.requestContexts();
-            return contexts.map((context: any) => context.getObject());
-        } catch (error) {
-            console.error(`Error loading POC utilization for ${employeeId}:`, error);
+            console.error(`Error loading initiatives for ${employeeId}:`, error);
             return [];
         }
     }
@@ -2494,5 +2579,128 @@ private initializeAIChat(): void {
         this.aiInitialized = false;
         this.initializeAIChat();
     }
-    
+
+    // ==================== MANAGER ADD PROJECT ====================
+
+    public async onManagerAddProject(): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("No employee selected");
+            return;
+        }
+
+        if (this.managerAddProjectDialog) {
+            this.managerAddProjectDialog.destroy();
+            this.managerAddProjectDialog = undefined;
+        }
+
+        const newProjectModel = new JSONModel({
+            projectName: "",
+            role: "",
+            startDate: null,
+            endDate: null,
+            status: "Active",
+            description: "",
+            projectManager: "",
+            accountExecutiveManager: "",
+            lineManagerPOC: "",
+            projectOrchestrator: ""
+        });
+        this.getView()?.setModel(newProjectModel, "managerNewProject");
+
+        this.managerAddProjectDialog = await Fragment.load({
+            name: "skillsphere.view.dialogs.ManagerAddProjectDialog",
+            controller: this
+        }) as Dialog;
+        this.getView()?.addDependent(this.managerAddProjectDialog);
+        this.managerAddProjectDialog.open();
+    }
+
+    public onManagerCloseProjectDialog(): void {
+        this.managerAddProjectDialog?.close();
+    }
+
+    public async onManagerSaveProject(): Promise<void> {
+        const employeeId = this.currentDialogEmployeeId;
+        if (!employeeId) {
+            MessageToast.show("Employee ID not found");
+            return;
+        }
+
+        const projectModel = this.getView()?.getModel("managerNewProject") as JSONModel;
+        const data = projectModel?.getData();
+
+        if (!data?.projectName || !data?.role) {
+            MessageToast.show("Please fill in required fields: Project Name and Role");
+            return;
+        }
+
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, "0");
+                const d = String(date.getDate()).padStart(2, "0");
+                return `${y}-${m}-${d}`;
+            } catch { return null; }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        let duration = "";
+        if (startDateISO && endDateISO) {
+            const diffDays = Math.ceil(Math.abs(new Date(endDateISO).getTime() - new Date(startDateISO).getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays < 30) {
+                duration = `${diffDays} days`;
+            } else if (diffDays < 365) {
+                const mo = Math.floor(diffDays / 30);
+                const dy = diffDays % 30;
+                duration = dy > 0 ? `${mo} months ${dy} days` : `${mo} months`;
+            } else {
+                const yr = Math.floor(diffDays / 365);
+                const mo = Math.floor((diffDays % 365) / 30);
+                duration = mo > 0 ? `${yr} years ${mo} months` : `${yr} years`;
+            }
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Projects");
+            listBinding.create({
+                projectId: `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                employeeId: employeeId,
+                projectName: data.projectName,
+                role: data.role,
+                startDate: startDateISO,
+                endDate: endDateISO,
+                status: data.status || "Active",
+                description: data.description || "",
+                duration: duration,
+                projectManager: data.projectManager || "",
+                accountExecutiveManager: data.accountExecutiveManager || "",
+                lineManagerPOC: data.lineManagerPOC || "",
+                projectOrchestrator: data.projectOrchestrator || "",
+                addedByManager: this.currentManagerId || "Manager"
+            });
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+            MessageToast.show("Project added successfully");
+            this.managerAddProjectDialog?.close();
+
+            // Refresh project list in the dialog
+            const projects = await this.getEmployeeProjects(employeeId);
+            const detailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+            detailsModel?.setProperty("/projects", projects);
+            (this.byId("dialogTotalProjects") as any)?.setNumber(projects.length);
+            (this.byId("dialogTotalProjects") as any)?.setUnit(projects.length === 1 ? "project" : "projects");
+        } catch (error) {
+            console.error("❌ Error saving project:", error);
+            MessageToast.show("Error saving project");
+        }
+    }
+
 }

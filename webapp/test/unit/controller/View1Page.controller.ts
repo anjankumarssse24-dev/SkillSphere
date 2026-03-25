@@ -1,5 +1,5 @@
 /*global QUnit*/
-import Controller from "project1/controller/View1.controller";
+import Controller from "skillsphere/controller/View1.controller";
 
 QUnit.module("View1 Controller");
 

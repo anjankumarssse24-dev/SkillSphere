@@ -31,9 +31,11 @@ entity Employees {
   role : String;
   location : String;
   tLevel : String;
+  gradeLevel : String; // L1, L2, L3 for each T level
   skills : Composition of many Skills on skills.employeeId = $self.employeeId;
   projects : Composition of many Projects on projects.employeeId = $self.employeeId;
   currentProjects : Composition of many CurrentProjects on currentProjects.employeeId = $self.employeeId;
+  initiatives : Composition of many Initiatives on initiatives.employeeId = $self.employeeId;
   caiaUtilization : Composition of many CAIAUtilization on caiaUtilization.employeeId = $self.employeeId;
   pocUtilization : Composition of many POCUtilization on pocUtilization.employeeId = $self.employeeId;
   certifications : Composition of many Certifications on certifications.employeeId = $self.employeeId;
@@ -85,6 +87,7 @@ entity Projects {
   accountExecutiveManager : String;
   lineManagerPOC : String;
   projectOrchestrator : String;
+  addedByManager : String; // managerId if project was added by a manager
   employee : Association to Employees on employee.employeeId = employeeId;
 }
 
@@ -97,6 +100,7 @@ entity Profiles {
   role : String;
   location : String;
   tLevel : String;
+  gradeLevel : String; // L1, L2, L3 for each T level
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;
 }
@@ -112,6 +116,24 @@ entity CurrentProjects {
   startDate : Date;
   endDate : Date;
   hoursPerDay : Decimal(5,2);
+  createdAt : DateTime;
+  lastUpdated : DateTime;
+  employee : Association to Employees on employee.employeeId = employeeId;
+}
+
+/**
+ * Initiatives entity - Strategic initiatives and organizational projects
+ */
+entity Initiatives {
+  key initiativeId : String;
+  employeeId : String;
+  initiativeName : String;
+  description : String;
+  startDate : Date;
+  endDate : Date;
+  hoursPerDay : Decimal(5,2);
+  status : String default 'Active';
+  type : String default 'Initiative'; // Initiative, CAIA, or POC
   createdAt : DateTime;
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;

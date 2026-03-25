@@ -9,14 +9,14 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npm ci
+        - npm install --production=false
         - npx cds build --production
 
 modules:
   # CAP Service Module
   - name: skillsphere-srv
     type: nodejs
-    path: gen/srv
+    path: srv/gen
     parameters:
       buildpack: nodejs_buildpack
       memory: 256M
@@ -37,7 +37,7 @@ modules:
   # HANA Database Deployer
   - name: skillsphere-db-deployer
     type: hdb
-    path: gen/db
+    path: db
     parameters:
       buildpack: nodejs_buildpack
       memory: 256M
@@ -69,8 +69,8 @@ modules:
       build-result: dist
       builder: custom
       commands:
-        - npm ci
-        - npm run build:ui
+        - npx ui5 build --clean-dest --dest dist
+        - npx bestzip skillsphere.zip dist/*
       supported-platforms:
         []
 

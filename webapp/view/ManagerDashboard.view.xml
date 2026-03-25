@@ -207,10 +207,10 @@
                                             <m:Title text="Visualization Controls" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:Label text="Year:" class="sapUiTinyMarginEnd"/>
-                                            <m:Select id="yearFilter" selectedKey="{visualization>/selectedYear}" width="8rem">
-                                                <core:Item key="2024" text="2024"/>
-                                                <core:Item key="2025" text="2025"/>
-                                                <core:Item key="2026" text="2026"/>
+                                            <m:Select id="yearFilter" selectedKey="{visualization>/selectedYear}" width="8rem" change="onYearFilterChange">
+                                                <core:Item key="2024" text="2024 (Last Year)"/>
+                                                <core:Item key="2025" text="2025 (Last Year)"/>
+                                                <core:Item key="2026" text="2026 (Current Year)"/>
                                             </m:Select>
                                             <m:Label text="Quarter:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
                                             <m:Select id="quarterFilter" selectedKey="{visualization>/selectedQuarter}" width="8rem">
@@ -242,31 +242,17 @@
                                                         </m:HBox>
                                                     </m:VBox>
 
-                                                    <!-- CAIA Utilization -->
+                                                    <!-- Initiatives -->
                                                     <m:VBox class="sapUiSmallMargin" width="30%">
-                                                        <m:Title text="CAIA Activities" level="H4" class="sapUiTinyMarginBottom"/>
-                                                        <m:VBox id="caiaChart" height="250px" alignItems="Center" justifyContent="Center">
+                                                        <m:Title text="Strategic Initiatives" level="H4" class="sapUiTinyMarginBottom"/>
+                                                        <m:VBox id="initiativesChart" height="250px" alignItems="Center" justifyContent="Center">
                                                             <m:Text text="Loading chart..." class="sapUiSmallMargin"/>
                                                         </m:VBox>
                                                         <m:HBox justifyContent="Center" class="sapUiTinyMarginTop">
                                                             <m:Label text="Utilized: " class="sapUiTinyMarginEnd"/>
-                                                            <m:Text id="caiaUtilized" text="0%" class="sapUiContentLabelColor"/>
+                                                            <m:Text id="initiativesUtilized" text="0%" class="sapUiContentLabelColor"/>
                                                             <m:Label text=" | Available: " class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
-                                                            <m:Text id="caiaAvailable" text="0%" class="sapUiSuccessColor"/>
-                                                        </m:HBox>
-                                                    </m:VBox>
-
-                                                    <!-- POC Utilization -->
-                                                    <m:VBox class="sapUiSmallMargin" width="30%">
-                                                        <m:Title text="POC Projects" level="H4" class="sapUiTinyMarginBottom"/>
-                                                        <m:VBox id="pocChart" height="250px" alignItems="Center" justifyContent="Center">
-                                                            <m:Text text="Loading chart..." class="sapUiSmallMargin"/>
-                                                        </m:VBox>
-                                                        <m:HBox justifyContent="Center" class="sapUiTinyMarginTop">
-                                                            <m:Label text="Utilized: " class="sapUiTinyMarginEnd"/>
-                                                            <m:Text id="pocUtilized" text="0%" class="sapUiContentLabelColor"/>
-                                                            <m:Label text=" | Available: " class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
-                                                            <m:Text id="pocAvailable" text="0%" class="sapUiSuccessColor"/>
+                                                            <m:Text id="initiativesAvailable" text="0%" class="sapUiSuccessColor"/>
                                                         </m:HBox>
                                                     </m:VBox>
                                                 </m:FlexBox>
@@ -274,22 +260,26 @@
                                         </m:Panel>
 
                                         <!-- 2. Gantt Chart / Project Timeline -->
-                                        <m:Panel id="ganttChartPanel" headerText="2. Project Timeline - Gantt Chart (Current Projects Only)" class="sapUiSmallMarginTop" expandable="true" expanded="true">
+                                        <m:Panel id="ganttChartPanel" headerText="2. Project Timeline - Gantt Chart" class="sapUiSmallMarginTop" expandable="true" expanded="true">
                                             <m:content>
                                                 <m:VBox class="sapUiSmallMargin">
                                                     <!-- Legend -->
                                                     <m:HBox class="sapUiTinyMarginBottom" wrap="Wrap">
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
                                                             <core:Icon src="sap-icon://circle-task" color="#2ECC71" class="sapUiTinyMarginEnd"/>
-                                                            <m:Text text="Ongoing (Green)"/>
+                                                            <m:Text text="Project - Ongoing (Green)"/>
                                                         </m:HBox>
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
-                                                            <core:Icon src="sap-icon://circle-task" color="#3498DB" class="sapUiTinyMarginEnd"/>
-                                                            <m:Text text="Completed (Blue)"/>
+                                                            <core:Icon src="sap-icon://circle-task" color="#808080" class="sapUiTinyMarginEnd"/>
+                                                            <m:Text text="Project - Completed (Gray)"/>
+                                                        </m:HBox>
+                                                        <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
+                                                            <core:Icon src="sap-icon://circle-task" color="#0070f2" class="sapUiTinyMarginEnd"/>
+                                                            <m:Text text="Project - Scheduled (Blue)"/>
                                                         </m:HBox>
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
                                                             <core:Icon src="sap-icon://circle-task" color="#F39C12" class="sapUiTinyMarginEnd"/>
-                                                            <m:Text text="Scheduled (Orange)"/>
+                                                            <m:Text text="Initiative / CAIA / POC (Orange)"/>
                                                         </m:HBox>
                                                     </m:HBox>
                                                     
@@ -492,6 +482,8 @@
                                             <m:VBox width="45%">
                                                 <m:Label text="T-Level:" class="sapUiTinyMarginBottom"/>
                                                 <m:Text id="dialogEmployeeTLevel" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Grade Level:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="dialogEmployeeGradeLevel" text="" class="sapUiMediumMarginBottom"/>
                                                 <m:Label text="Last Updated:" class="sapUiTinyMarginBottom"/>
                                                 <m:Text id="dialogEmployeeLastUpdated" text="" class="sapUiMediumMarginBottom"/>
                                             </m:VBox>
@@ -592,9 +584,12 @@
                         <m:Panel class="sapUiSmallMargin" headerText="Project History" expandable="false">
                             <m:content>
                                 <m:VBox class="sapUiSmallMargin">
-                                    <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
-                                        <m:Label text="Total Projects: " class="sapUiMediumMarginEnd"/>
-                                        <m:ObjectNumber id="dialogTotalProjects" number="0" unit="projects" emphasized="true"/>
+                                    <m:FlexBox class="sapUiMediumMarginBottom" justifyContent="SpaceBetween" alignItems="Center">
+                                        <m:FlexBox alignItems="Center">
+                                            <m:Label text="Total Projects: " class="sapUiMediumMarginEnd"/>
+                                            <m:ObjectNumber id="dialogTotalProjects" number="0" unit="projects" emphasized="true"/>
+                                        </m:FlexBox>
+                                        <m:Button text="Add Project" icon="sap-icon://add" type="Emphasized" press="onManagerAddProject"/>
                                     </m:FlexBox>
                                     <m:Table id="dialogProjectsTable" items="{employeeDetails>/projects}" class="sapUiSmallMarginTop">
                                         <m:columns>
@@ -646,41 +641,21 @@
                                 </m:content>
                             </m:Panel>
                             
-                            <!-- CAIA Utilization -->
-                            <m:Panel class="sapUiSmallMarginBottom" headerText="CAIA Activities" expandable="true" expanded="false">
+                            <!-- Initiatives -->
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Strategic Initiatives" expandable="true" expanded="false">
                                 <m:content>
-                                    <m:Table id="dialogCAIATable" items="{employeeDetails>/caiaUtilization}">
+                                    <m:Table id="dialogInitiativesTable" items="{employeeDetails>/initiatives}">
                                         <m:columns>
-                                            <m:Column><m:Text text="Task Name"/></m:Column>
+                                            <m:Column><m:Text text="Initiative Name"/></m:Column>
+                                            <m:Column><m:Text text="Description"/></m:Column>
                                             <m:Column><m:Text text="Start Date"/></m:Column>
                                             <m:Column><m:Text text="End Date"/></m:Column>
                                             <m:Column><m:Text text="Utilization"/></m:Column>
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem>
-                                                <m:Text text="{employeeDetails>taskName}"/>
-                                                <m:Text text="{employeeDetails>startDate}"/>
-                                                <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
-                                            </m:ColumnListItem>
-                                        </m:items>
-                                    </m:Table>
-                                </m:content>
-                            </m:Panel>
-                            
-                            <!-- POC Utilization -->
-                            <m:Panel class="sapUiSmallMarginBottom" headerText="POC Projects" expandable="true" expanded="false">
-                                <m:content>
-                                    <m:Table id="dialogPOCTable" items="{employeeDetails>/pocUtilization}">
-                                        <m:columns>
-                                            <m:Column><m:Text text="POC Title"/></m:Column>
-                                            <m:Column><m:Text text="Start Date"/></m:Column>
-                                            <m:Column><m:Text text="End Date"/></m:Column>
-                                            <m:Column><m:Text text="Utilization"/></m:Column>
-                                        </m:columns>
-                                        <m:items>
-                                            <m:ColumnListItem>
-                                                <m:Text text="{employeeDetails>pocTitle}"/>
+                                                <m:Text text="{employeeDetails>initiativeName}"/>
+                                                <m:Text text="{employeeDetails>description}" maxLines="1"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
                                                 <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>

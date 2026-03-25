@@ -11,7 +11,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "project1/*": [
+      "skillsphere/*": [
         "./webapp/*"
       ],
       "unit/*": [

@@ -28,6 +28,7 @@ builder:
           - mode: preload
             filters:
               - "skillsphere/"
+              - "!skillsphere/node_modules/"
             resolve: false
             resolveConditional: false
   customTasks:
@@ -35,9 +36,13 @@ builder:
       afterTask: replaceVersion
       configuration:
         debug: true
+        excludePatterns:
+          - "node_modules/**"
+          - "**/node_modules/**"
         transformModulesToUI5:
           overridesToOverride: true
 resources:
   configuration:
     paths:
       webapp: .
+    propertiesFileSourceEncoding: UTF-8

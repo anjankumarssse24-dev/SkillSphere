@@ -3,22 +3,9 @@
   "version": "1.0.0",
   "description": "SkillSphere UI5 Application",
   "private": true,
-  "devDependencies": {
-    "@ui5/cli": "^4.0.33",
-    "ui5-tooling-transpile": "^3.3.7",
-    "typescript": "^5.9.3",
-    "rimraf": "^5.0.5",
-    "bestzip": "^2.2.1"
-  },
   "scripts": {
-    "build": "ui5 build --clean-dest --dest dist",
-    "build:ui": "npm run build && npm run zip",
-    "zip": "npx bestzip skillsphere.zip dist/*",
+    "build": "ui5 build --clean-dest --dest dist --exclude-task=generateComponentPreload",
+    "build:ui": "ui5 build --clean-dest --dest dist && cd dist && npx bestzip ../skillsphere.zip *",
     "clean": "rimraf dist skillsphere.zip"
-  },
-  "ui5": {
-    "dependencies": [
-      "ui5-tooling-transpile"
-    ]
   }
 }

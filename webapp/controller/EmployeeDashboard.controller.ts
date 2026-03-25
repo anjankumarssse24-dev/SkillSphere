@@ -121,8 +121,7 @@ export default class EmployeeDashboard extends Controller {
             
             // Load Utilization data
             await this.loadCurrentProjects(employeeId);
-            await this.loadCAIAUtilization(employeeId);
-            await this.loadPOCUtilization(employeeId);
+            await this.loadInitiatives(employeeId);
             
         } catch (error) {
             console.error("Error loading employee data:", error);
@@ -191,7 +190,8 @@ export default class EmployeeDashboard extends Controller {
                     specialization: "",
                     role: "",
                     location: "",
-                    tLevel: ""
+                    tLevel: "",
+                    gradeLevel: ""
                 };
                 this.getView()?.setModel(new JSONModel(emptyProfile), "profile");
             }
@@ -281,6 +281,225 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
+    private async loadInitiatives(employeeId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const binding = oDataModel.bindList("/Initiatives");
+            binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            
+            const contexts = await binding.requestContexts(0, 100);
+            const data = contexts.map((ctx: any) => {
+                const obj = ctx.getObject();
+                const formatted = {
+                    ...obj,
+                    startDate: this.formatDate(obj.startDate),
+                    endDate: this.formatDate(obj.endDate)
+                };
+                return formatted;
+            });
+            
+            console.log(`✅ Loaded ${data.length} initiatives from OData`);
+            
+            const model = new JSONModel({ data: data });
+            this.getView()?.setModel(model, "initiatives");
+        } catch (error) {
+            console.error("Error loading initiatives:", error);
+            this.getView()?.setModel(new JSONModel({ data: [] }), "initiatives");
+        }
+    }
+
+    // ==================== Initiative Methods ====================
+    
+    private initiativeDialog?: Dialog;
+
+    public async onAddInitiative(): Promise<void> {
+        if (!this.initiativeDialog) {
+            this.initiativeDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.InitiativeDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.initiativeDialog);
+        }
+
+        // Initialize dialog model with empty data
+        const dialogModel = new JSONModel({
+            initiativeName: "",
+            description: "",
+            startDate: null,
+            endDate: null,
+            hoursPerDay: 0,
+            status: "Active"
+        });
+        this.getView()?.setModel(dialogModel, "initiativeDialog");
+        
+        this.initiativeDialog.open();
+    }
+
+    public async onSaveInitiative(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("initiativeDialog") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.currentEmployeeId;
+
+        // Validation
+        if (!data.initiativeName || !data.description || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        // Helper function to convert date
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error converting date:', dateString, error);
+                return null;
+            }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            
+            if (data.initiativeId) {
+                // Update existing record
+                const listBinding = oDataModel.bindList("/Initiatives");
+                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, data.initiativeId)]);
+                
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    const context = contexts[0];
+                    context.setProperty("initiativeName", data.initiativeName);
+                    context.setProperty("description", data.description);
+                    context.setProperty("startDate", startDateISO);
+                    context.setProperty("endDate", endDateISO);
+                    context.setProperty("hoursPerDay", data.hoursPerDay);
+                    context.setProperty("status", data.status || "Active");
+                    context.setProperty("lastUpdated", new Date().toISOString());
+                    
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
+                    
+                    MessageToast.show("Initiative updated successfully");
+                }
+            } else {
+                // Add new record
+                const listBinding = oDataModel.bindList("/Initiatives");
+                const newData = {
+                    initiativeId: `INIT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    employeeId: employeeId,
+                    initiativeName: data.initiativeName,
+                    description: data.description,
+                    startDate: startDateISO,
+                    endDate: endDateISO,
+                    hoursPerDay: data.hoursPerDay,
+                    status: data.status || "Active",
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                listBinding.create(newData);
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                MessageToast.show("Initiative added successfully");
+            }
+            
+            this.initiativeDialog?.close();
+            if (employeeId) {
+                await this.loadInitiatives(employeeId);
+            }
+        } catch (error) {
+            console.error("❌ Error saving initiative:", error);
+            MessageToast.show("Error saving initiative");
+        }
+    }
+
+    public onCloseInitiativeDialog(): void {
+        this.initiativeDialog?.close();
+    }
+
+    public async onEditInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("initiatives");
+        const initiative = bindingContext?.getObject();
+
+        if (!this.initiativeDialog) {
+            this.initiativeDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.InitiativeDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.initiativeDialog);
+        }
+
+        const dialogModel = new JSONModel(initiative);
+        this.getView()?.setModel(dialogModel, "initiativeDialog");
+        
+        this.initiativeDialog.open();
+    }
+
+    public async onDeleteInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("initiatives");
+        const initiative = bindingContext?.getObject();
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Initiatives");
+            listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, initiative.initiativeId)]);
+            
+            const contexts = await listBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                contexts[0].delete();
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 300));
+                listBinding.refresh();
+                
+                MessageToast.show("Initiative deleted successfully");
+                const employeeId = this.currentEmployeeId;
+                if (employeeId) {
+                    await this.loadInitiatives(employeeId);
+                }
+            }
+        } catch (error) {
+            console.error("❌ Error deleting initiative:", error);
+            MessageToast.show("Error deleting initiative");
+        }
+    }
+
+    public async onReadMoreInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("initiatives");
+        const initiative = bindingContext?.getObject();
+
+        if (!initiative) {
+            MessageToast.show("Could not load initiative details");
+            return;
+        }
+
+        // Create a message box with the full description
+        MessageBox.information(
+            initiative.description,
+            {
+                title: `${initiative.initiativeName} - Details`,
+                actions: [MessageBox.Action.CLOSE],
+                onClose: () => {
+                    // Dialog closed
+                }
+            }
+        );
+    }
+
     private async loadCertifications(employeeId: string): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
@@ -288,22 +507,33 @@ export default class EmployeeDashboard extends Controller {
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
             const contexts = await binding.requestContexts(0, 100);
-            const certifications = contexts.map((ctx: any) => {
+            let certifications = contexts.map((ctx: any) => {
                 const obj = ctx.getObject();
-                const formatted = {
+                return {
                     ...obj,
                     dateOfCompletion: this.formatDate(obj.dateOfCompletion)
                 };
-                return formatted;
             });
             
-            console.log(`✅ Loaded ${certifications.length} certifications from OData`);
+            // Sort by dateOfCompletion in descending order (newest first)
+            certifications = certifications.sort((a: any, b: any) => {
+                const dateA = new Date(a.dateOfCompletion || 0).getTime();
+                const dateB = new Date(b.dateOfCompletion || 0).getTime();
+                return dateB - dateA;
+            });
             
-            const model = new JSONModel({ certifications: certifications });
+            console.log(`✅ Loaded ${certifications.length} certifications from OData (sorted descending by date)`);
+            
+            // Store all certs separately so year filter can always work from full list
+            const model = new JSONModel({
+                certifications: certifications,
+                allCertifications: certifications,
+                selectedYear: "all"
+            });
             this.getView()?.setModel(model, "certifications");
         } catch (error) {
             console.error("Error loading certifications:", error);
-            this.getView()?.setModel(new JSONModel({ certifications: [] }), "certifications");
+            this.getView()?.setModel(new JSONModel({ certifications: [], allCertifications: [], selectedYear: "all" }), "certifications");
         }
     }
 
@@ -1397,6 +1627,11 @@ export default class EmployeeDashboard extends Controller {
                 return;
             }
             
+            if (!profileData?.gradeLevel) {
+                MessageToast.show("Please select your Grade Level");
+                return;
+            }
+            
             if (!profileData?.specialization) {
                 MessageToast.show("Please select your specialization");
                 return;
@@ -1418,6 +1653,7 @@ export default class EmployeeDashboard extends Controller {
                     role: profileData.role,
                     location: profileData.location,
                     tLevel: profileData.tLevel,
+                    gradeLevel: profileData.gradeLevel,
                     specialization: profileData.specialization
                 });
                 
@@ -1434,6 +1670,7 @@ export default class EmployeeDashboard extends Controller {
                     context.setProperty("role", profileData.role);
                     context.setProperty("location", profileData.location);
                     context.setProperty("tLevel", profileData.tLevel);
+                    context.setProperty("gradeLevel", profileData.gradeLevel);
                     context.setProperty("specialization", profileData.specialization);
                     context.setProperty("lastUpdated", new Date().toISOString());
                     
@@ -1445,6 +1682,7 @@ export default class EmployeeDashboard extends Controller {
                         role: profileData.role,
                         location: profileData.location,
                         tLevel: profileData.tLevel,
+                        gradeLevel: profileData.gradeLevel,
                         specialization: profileData.specialization,
                         lastUpdated: new Date().toISOString()
                     };
@@ -1464,6 +1702,7 @@ export default class EmployeeDashboard extends Controller {
                     empContext.setProperty("role", profileData.role);
                     empContext.setProperty("location", profileData.location);
                     empContext.setProperty("tLevel", profileData.tLevel);
+                    empContext.setProperty("gradeLevel", profileData.gradeLevel);
                     empContext.setProperty("specialization", profileData.specialization);
                     console.log('📝 Employee record also updated');
                 }
@@ -2626,5 +2865,43 @@ private async queryAI(query: string): Promise<void> {
     /**
      * Clear chat
      */
-  
+    
+    /**
+     * Handle T-Level change event
+     */
+    public onTLevelChange(event: Event): void {
+        const source = event.getSource() as any;
+        const selectedTLevel = source.getSelectedKey();
+        
+        if (selectedTLevel) {
+            console.log("T-Level changed to:", selectedTLevel);
+        }
+    }
+
+    /**
+     * Handle Certification Year Filter change
+     */
+    public onCertificationYearFilterChange(event: Event): void {
+        const source = event.getSource() as any;
+        const selectedYear = source.getSelectedKey();
+        const certModel = this.getView()?.getModel("certifications") as JSONModel;
+        // Always filter from the original full list
+        const allCertifications = certModel?.getProperty("/allCertifications") || [];
+        
+        let filteredCertifications = allCertifications;
+
+        if (selectedYear !== "all") {
+            const yearNumber = parseInt(selectedYear, 10);
+            filteredCertifications = allCertifications.filter((cert: any) => {
+                if (!cert.dateOfCompletion) return false;
+                const certDate = new Date(cert.dateOfCompletion);
+                return certDate.getFullYear() === yearNumber;
+            });
+        }
+        
+        certModel?.setProperty("/selectedYear", selectedYear);
+        certModel?.setProperty("/certifications", filteredCertifications);
+        
+        console.log(`📅 Certification filter changed to ${selectedYear}, showing ${filteredCertifications.length} certifications`);
+    }
 }

@@ -1,0 +1,90 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Add New Project"
+        contentWidth="600px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Project Name:" required="true" />
+                <Input
+                    value="{managerNewProject>/projectName}"
+                    placeholder="Enter project name" />
+
+                <Label text="Role:" required="true" class="sapUiSmallMarginTop"/>
+                <Select selectedKey="{managerNewProject>/role}" width="100%">
+                    <core:Item key="" text="-- Select Role --"/>
+                    <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Architect" text="Architect"/>
+                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                    <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                    <core:Item key="Data Analyst" text="Data Analyst"/>
+                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                    <core:Item key="QA Engineer" text="QA Engineer"/>
+                    <core:Item key="Tech Lead" text="Tech Lead"/>
+                    <core:Item key="Project Manager" text="Project Manager"/>
+                </Select>
+
+                <Label text="Project Manager:" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{managerNewProject>/projectManager}"
+                    placeholder="Oversees complete project planning, execution, and delivery" />
+
+                <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{managerNewProject>/accountExecutiveManager}"
+                    placeholder="Represents business stakeholders and validates outcomes" />
+
+                <Label text="Line Manager / POC:" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{managerNewProject>/lineManagerPOC}"
+                    placeholder="Supervises daily tasks and mentors employee" />
+
+                <Label text="Project Orchestrator:" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{managerNewProject>/projectOrchestrator}"
+                    placeholder="Coordinates frontend-backend integration" />
+
+                <Label text="Start Date:" class="sapUiSmallMarginTop"/>
+                <DatePicker
+                    value="{managerNewProject>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="End Date:" class="sapUiSmallMarginTop"/>
+                <DatePicker
+                    value="{managerNewProject>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="Status:" class="sapUiSmallMarginTop"/>
+                <Select selectedKey="{managerNewProject>/status}" width="100%">
+                    <core:Item key="Active" text="Active"/>
+                    <core:Item key="Completed" text="Completed"/>
+                    <core:Item key="On Hold" text="On Hold"/>
+                </Select>
+
+                <Label text="Description:" class="sapUiSmallMarginTop"/>
+                <TextArea
+                    value="{managerNewProject>/description}"
+                    rows="3"
+                    width="100%"
+                    placeholder="Enter project description" />
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onManagerSaveProject" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onManagerCloseProjectDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
