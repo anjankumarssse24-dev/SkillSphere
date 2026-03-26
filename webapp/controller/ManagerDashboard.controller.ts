@@ -1160,14 +1160,29 @@ export default class ManagerDashboard extends Controller {
             // Check if project overlaps with selected months
             const startIndex = monthNumbers.indexOf(startMonth);
             const endIndex = monthNumbers.indexOf(endMonth);
-            
-            if (startIndex === -1 && endIndex === -1) return; // Skip if not in range
+
+            // Check if project completely spans the visible range
+            // (starts before first visible month AND ends after last visible month)
+            const firstVisibleMonth = monthNumbers[0];
+            const lastVisibleMonth = monthNumbers[monthNumbers.length - 1];
+            const spansEntireRange = startMonth < firstVisibleMonth && endMonth > lastVisibleMonth;
+            const startsBeforeAndEndsAfter =
+                (startDate.getFullYear() < new Date(startDate.getFullYear(), firstVisibleMonth, 1).getFullYear() ||
+                 startMonth < firstVisibleMonth) &&
+                (endDate.getFullYear() > new Date(endDate.getFullYear(), lastVisibleMonth, 1).getFullYear() ||
+                 endMonth > lastVisibleMonth);
+
+            if (startIndex === -1 && endIndex === -1 && !spansEntireRange) return; // Skip if not in range at all
             
             // Calculate precise position with day-level accuracy
             let leftPercent = 0;
             let widthPercent = 0;
             
-            if (startIndex !== -1 && endIndex !== -1) {
+            if (spansEntireRange) {
+                // Project covers entire visible range — full width bar
+                leftPercent = 0;
+                widthPercent = 100;
+            } else if (startIndex !== -1 && endIndex !== -1) {
                 // Both start and end are in visible range
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
