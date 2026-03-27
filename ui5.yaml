@@ -34,8 +34,8 @@ server:
       afterMiddleware: compression
       configuration:
         debug: true
-        transformModulesToUI5:
-          overridesToOverride: true
+        transformTypeScript: true
+        transformModulesToUI5: true
         excludePatterns:
           - /Component-preload.js
 builder:
@@ -44,5 +44,5 @@ builder:
       afterTask: replaceVersion
       configuration:
         debug: true
-        transformModulesToUI5:
-          overridesToOverride: true
+        transformTypeScript: true
+        transformModulesToUI5: true

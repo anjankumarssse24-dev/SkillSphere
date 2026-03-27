@@ -42,7 +42,9 @@ builder:
       afterTask: replaceVersion
       configuration:
         debug: false
-        transformModulesToUI5: false
+        transformTypeScript: true
+        transformModulesToUI5: true
+        omitTSFromBuildResult: true
         excludePatterns:
           - "/resources/skillsphere/node_modules/**"
           - "/resources/skillsphere/**/test/**"
