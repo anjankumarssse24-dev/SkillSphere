@@ -35,7 +35,6 @@ builder:
           - mode: preload
             filters:
               - "skillsphere/"
-              - "!skillsphere/node_modules/"
             resolve: false
             resolveConditional: false
   customTasks:
@@ -56,4 +55,3 @@ resources:
   configuration:
     paths:
       webapp: .
-    propertiesFileSourceEncoding: UTF-8

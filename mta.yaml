@@ -9,7 +9,7 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npm install --production=false
+        - npm ci
         - npx cds build --production
 
 modules:
@@ -37,7 +37,6 @@ modules:
   # HANA Database Deployer
   - name: skillsphere-db-deployer
     type: hdb
-    path: db
     path: db
     parameters:
       buildpack: nodejs_buildpack
@@ -70,8 +69,8 @@ modules:
       build-result: dist
       builder: custom
       commands:
-        - npx ui5 build --clean-dest --dest dist
-        - npx bestzip skillsphere.zip dist/*
+        - npm ci
+        - npm run build:ui
       supported-platforms:
         []
       ignore:
