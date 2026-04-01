@@ -1,23 +1,101 @@
 const axios = require('axios');
+const cds = require('@sap/cds');
+
+function _readJsonEnv(name) {
+  try {
+    return JSON.parse(process.env[name] || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function _normalizeConfig({ aiApiUrl, authUrl, clientId, clientSecret, resourceGroup, deploymentId, modelName }) {
+  return {
+    aiApiUrl,
+    authUrl,
+    clientId,
+    clientSecret,
+    resourceGroup: resourceGroup || 'default',
+    deploymentId,
+    modelName: modelName || 'gpt-4o'
+  };
+}
+
+function _resolveFromVcap() {
+  const vcap = _readJsonEnv('VCAP_SERVICES');
+  const aiCore = vcap.aicore?.[0];
+  if (!aiCore?.credentials) {
+    return null;
+  }
+
+  const creds = aiCore.credentials;
+  return _normalizeConfig({
+    aiApiUrl: creds.serviceurls?.AI_API_URL,
+    authUrl: creds.url ? `${creds.url}/oauth/token` : undefined,
+    clientId: creds.clientid,
+    clientSecret: creds.clientsecret,
+    resourceGroup: process.env.AI_RESOURCE_GROUP,
+    deploymentId: process.env.AI_DEPLOYMENT_ID,
+    modelName: process.env.AI_MODEL_NAME
+  });
+}
+
+function _resolveFromCdsConfig() {
+  const creds = cds.env.requires?.aicore?.credentials;
+  if (!creds) {
+    return null;
+  }
+
+  return _normalizeConfig({
+    aiApiUrl: creds.serviceurls?.AI_API_URL || creds.aiApiUrl || creds.url,
+    authUrl: creds.tokenurl || creds.authUrl || (creds.url && !creds.url.includes('/oauth/token') ? `${creds.url}/oauth/token` : creds.url),
+    clientId: creds.clientid || creds.clientId,
+    clientSecret: creds.clientsecret || creds.clientSecret,
+    resourceGroup: process.env.AI_RESOURCE_GROUP || creds.resourceGroup,
+    deploymentId: process.env.AI_DEPLOYMENT_ID || creds.deploymentId,
+    modelName: process.env.AI_MODEL_NAME || creds.modelName
+  });
+}
+
+function _resolveFromEnv() {
+  if (!process.env.AI_API_URL && !process.env.AI_AUTH_URL && !process.env.AI_TOKEN_URL) {
+    return null;
+  }
+
+  return _normalizeConfig({
+    aiApiUrl: process.env.AI_API_URL,
+    authUrl: process.env.AI_TOKEN_URL || process.env.AI_AUTH_URL,
+    clientId: process.env.AI_CLIENT_ID,
+    clientSecret: process.env.AI_CLIENT_SECRET,
+    resourceGroup: process.env.AI_RESOURCE_GROUP,
+    deploymentId: process.env.AI_DEPLOYMENT_ID,
+    modelName: process.env.AI_MODEL_NAME
+  });
+}
+
+function _resolveConfig() {
+  return _resolveFromVcap() || _resolveFromCdsConfig() || _resolveFromEnv();
+}
 
 class AICoreClient {
   constructor() {
-    const vcap = JSON.parse(process.env.VCAP_SERVICES || '{}');
-    const aiCore = vcap.aicore?.[0];
+    const config = _resolveConfig();
 
-    if (!aiCore) {
-      throw new Error('AI Core service not bound');
+    if (!config) {
+      throw new Error('AI Core configuration not found. Provide VCAP_SERVICES, cds.requires.aicore credentials, or AI_* environment variables');
     }
 
-    const creds = aiCore.credentials;
+    this.aiApiUrl = config.aiApiUrl;
+    this.clientId = config.clientId;
+    this.clientSecret = config.clientSecret;
+    this.authUrl = config.authUrl;
+    this.resourceGroup = config.resourceGroup;
+    this.deploymentId = config.deploymentId;
+    this.modelName = config.modelName;
 
-    this.aiApiUrl = creds.serviceurls.AI_API_URL;
-    this.clientId = creds.clientid;
-    this.clientSecret = creds.clientsecret;
-    this.authUrl = creds.url;
-    this.resourceGroup = process.env.AI_RESOURCE_GROUP || 'default';
-    this.deploymentId = process.env.AI_DEPLOYMENT_ID;
-    this.modelName = process.env.AI_MODEL_NAME || 'gpt-4o';
+    if (!this.aiApiUrl || !this.authUrl || !this.clientId || !this.clientSecret) {
+      throw new Error('Incomplete AI Core configuration. Required: API URL, auth URL, client ID, and client secret');
+    }
 
     if (!this.deploymentId) {
       throw new Error('AI_DEPLOYMENT_ID not set in environment variables');
@@ -39,7 +117,9 @@ class AICoreClient {
 
     console.log('🔄 Getting OAuth2 token...');
 
-    const tokenUrl = `${this.authUrl}/oauth/token`;
+    const tokenUrl = this.authUrl.endsWith('/oauth/token')
+      ? this.authUrl
+      : `${this.authUrl}/oauth/token`;
     const body = new URLSearchParams({
       grant_type: 'client_credentials',
       client_id: this.clientId,
