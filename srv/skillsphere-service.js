@@ -13,9 +13,44 @@ module.exports = cds.service.impl(async function() {
 
   console.log('🚀 Initializing SkillSphere...');
   let aiClient = null;
-  function getAIClient() {
+
+  function _extractBearerToken(req) {
+    const authHeader =
+      req?.headers?.authorization ||
+      req?.http?.req?.headers?.authorization ||
+      req?.req?.headers?.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    return authHeader.slice('Bearer '.length);
+  }
+  
+  async function getAIClient(req) {
+    const jwt = _extractBearerToken(req);
+
+    // Prefer request-scoped resolution first to support subscriber destinations.
+    if (jwt) {
+      try {
+        return await AICoreClient.create({ jwt });
+      } catch (error) {
+        const expectedAuthNoneError = error.message?.includes('XSUAA service binding matching the token');
+        if (expectedAuthNoneError) {
+          console.log('ℹ️ Request-scoped destination lookup skipped (no XSUAA binding for token).');
+        } else {
+          console.warn('⚠️ Request-scoped AI Core initialization failed:', error.message);
+        }
+      }
+    }
+
     if (!aiClient) {
-      aiClient = new AICoreClient();
+      try {
+        aiClient = await AICoreClient.create();
+      } catch (error) {
+        console.warn('⚠️ AI Core initialization failed:', error.message);
+        console.warn('⚠️ AI features will be unavailable');
+        aiClient = null;
+      }
     }
     return aiClient;
   }
@@ -74,7 +109,12 @@ ${projects.length ? projects.map(p =>
 `;
 
       console.log('📤 Sending employee AI request...');
-      const answer = await getAIClient().chatCompletion({
+      const aiClient = await getAIClient(req);
+      if (!aiClient) {
+        return req.reject(503, 'AI Core service unavailable');
+      }
+      
+      const answer = await aiClient.chatCompletion({
         systemPrompt,
         userPrompt
       });
@@ -145,7 +185,12 @@ ${projects.map(p =>
 `;
 
       console.log('📤 Sending manager AI request...');
-      const answer = await getAIClient().chatCompletion({
+      const aiClient = await getAIClient(req);
+      if (!aiClient) {
+        return req.reject(503, 'AI Core service unavailable');
+      }
+      
+      const answer = await aiClient.chatCompletion({
         systemPrompt,
         userPrompt
       });
@@ -260,7 +305,12 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
 `;
 
       console.log('📤 Sending request to AI...');
-      const answer = await getAIClient().chatCompletion({
+      const aiClient = await getAIClient(req);
+      if (!aiClient) {
+        return req.reject(503, 'AI Core service unavailable');
+      }
+      
+      const answer = await aiClient.chatCompletion({
         systemPrompt,
         userPrompt
       });

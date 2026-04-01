@@ -1,6 +1,118 @@
 const axios = require('axios');
 const cds = require('@sap/cds');
 
+function _readDestinationValue(props, ...keys) {
+  for (const key of keys) {
+    if (props[key] !== undefined && props[key] !== null && String(props[key]).trim() !== '') {
+      return props[key];
+    }
+  }
+  return undefined;
+}
+
+async function _resolveFromDestination(options = {}) {
+  try {
+    const { getDestination } = require('@sap-cloud-sdk/connectivity');
+
+    const destinationName = process.env.AI_DESTINATION_NAME || 'skillsphere-aicore-dest';
+    let dest = null;
+
+    // Cloud SDK v3 expects an options object. Include JWT when available
+    // so subscriber/user-scoped destinations can be resolved.
+    const lookupOptions = [{ destinationName }];
+    if (options.jwt) {
+      lookupOptions.unshift({ destinationName, jwt: options.jwt });
+    }
+
+    for (const lookup of lookupOptions) {
+      try {
+        dest = await getDestination(lookup);
+      } catch (error) {
+        console.log('⚠️ Destination lookup attempt failed:', error.message);
+      }
+      if (dest) break;
+    }
+
+    // Backward-compatible fallback for older SDK call style.
+    if (!dest) {
+      try {
+        dest = await getDestination(destinationName);
+      } catch {
+        // ignore and continue with not-found logging below
+      }
+    }
+
+    if (!dest) {
+      console.log(`⚠️ Destination ${destinationName} not found`);
+      return null;
+    }
+
+    const props = dest.originalProperties || {};
+    const auth = dest.authentication || {};
+
+    // SDK shapes differ between runtime versions. Support all common locations.
+    const aiApiUrl = dest.url || props.URL || process.env.AI_API_URL;
+    const authUrl =
+      dest.tokenServiceUrl ||
+      auth.tokenServiceUrl ||
+      auth.tokenServiceURLWithoutTokenEndpoint ||
+      props.tokenServiceURL ||
+      props.tokenServiceUrl ||
+      props.TokenServiceURL ||
+      process.env.AI_TOKEN_URL ||
+      process.env.AI_AUTH_URL;
+
+    const clientId =
+      dest.clientId ||
+      auth.clientId ||
+      props.clientId ||
+      props.clientid ||
+      process.env.AI_CLIENT_ID ||
+      process.env.AICORE_CLIENTID;
+
+    const clientSecret =
+      dest.clientSecret ||
+      auth.clientSecret ||
+      props.clientSecret ||
+      props.clientsecret ||
+      process.env.AI_CLIENT_SECRET ||
+      process.env.AICORE_CLIENTSECRET;
+
+    console.log('ℹ️ Destination resolved:', {
+      destinationName,
+      hasApiUrl: !!aiApiUrl,
+      hasAuthUrl: !!authUrl,
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret
+    });
+
+    const deploymentId =
+      process.env.AI_DEPLOYMENT_ID ||
+      _readDestinationValue(props, 'AI_DEPLOYMENT_ID', 'ai_deployment_id', 'deploymentId', 'DEPLOYMENT_ID');
+
+    const resourceGroup =
+      process.env.AI_RESOURCE_GROUP ||
+      _readDestinationValue(props, 'AI_RESOURCE_GROUP', 'ai_resource_group', 'resourceGroup', 'RESOURCE_GROUP');
+
+    const modelName =
+      process.env.AI_MODEL_NAME ||
+      _readDestinationValue(props, 'AI_MODEL_NAME', 'ai_model_name', 'modelName', 'MODEL_NAME');
+
+    return _normalizeConfig({
+      aiApiUrl,
+      authUrl,
+      clientId,
+      clientSecret,
+      resourceGroup,
+      deploymentId,
+      modelName
+    });
+  } catch (error) {
+    console.log('⚠️ Destination resolution failed:', error.message);
+    return null;
+  }
+}
+
 function _readJsonEnv(name) {
   try {
     return JSON.parse(process.env[name] || '{}');
@@ -47,10 +159,10 @@ function _resolveFromCdsConfig() {
   }
 
   return _normalizeConfig({
-    aiApiUrl: creds.serviceurls?.AI_API_URL || creds.aiApiUrl || creds.url,
-    authUrl: creds.tokenurl || creds.authUrl || (creds.url && !creds.url.includes('/oauth/token') ? `${creds.url}/oauth/token` : creds.url),
-    clientId: creds.clientid || creds.clientId,
-    clientSecret: creds.clientsecret || creds.clientSecret,
+    aiApiUrl: creds.serviceurls?.AI_API_URL || creds.aiApiUrl || creds.url || process.env.AI_API_URL,
+    authUrl: creds.tokenurl || creds.authUrl || (creds.url && !creds.url.includes('/oauth/token') ? `${creds.url}/oauth/token` : undefined) || process.env.AI_TOKEN_URL || process.env.AI_AUTH_URL,
+    clientId: creds.clientid || creds.clientId || process.env.AI_CLIENT_ID,
+    clientSecret: creds.clientsecret || creds.clientSecret || process.env.AI_CLIENT_SECRET,
     resourceGroup: process.env.AI_RESOURCE_GROUP || creds.resourceGroup,
     deploymentId: process.env.AI_DEPLOYMENT_ID || creds.deploymentId,
     modelName: process.env.AI_MODEL_NAME || creds.modelName
@@ -58,31 +170,30 @@ function _resolveFromCdsConfig() {
 }
 
 function _resolveFromEnv() {
-  if (!process.env.AI_API_URL && !process.env.AI_AUTH_URL && !process.env.AI_TOKEN_URL) {
+  if (!process.env.AI_API_URL && !process.env.AICORE_URL && !process.env.AI_AUTH_URL && !process.env.AI_TOKEN_URL) {
     return null;
   }
 
   return _normalizeConfig({
     aiApiUrl: process.env.AI_API_URL,
-    authUrl: process.env.AI_TOKEN_URL || process.env.AI_AUTH_URL,
-    clientId: process.env.AI_CLIENT_ID,
-    clientSecret: process.env.AI_CLIENT_SECRET,
+    authUrl: process.env.AICORE_URL || process.env.AI_TOKEN_URL || process.env.AI_AUTH_URL,
+    clientId: process.env.AICORE_CLIENTID || process.env.AI_CLIENT_ID,
+    clientSecret: process.env.AICORE_CLIENTSECRET || process.env.AI_CLIENT_SECRET,
     resourceGroup: process.env.AI_RESOURCE_GROUP,
     deploymentId: process.env.AI_DEPLOYMENT_ID,
     modelName: process.env.AI_MODEL_NAME
   });
 }
 
-function _resolveConfig() {
-  return _resolveFromVcap() || _resolveFromCdsConfig() || _resolveFromEnv();
+async function _resolveConfig(options = {}) {
+  // Priority: Destination > VCAP > CDS Config > Env
+  return await _resolveFromDestination(options) || _resolveFromVcap() || _resolveFromCdsConfig() || _resolveFromEnv();
 }
 
 class AICoreClient {
-  constructor() {
-    const config = _resolveConfig();
-
+  constructor(config) {
     if (!config) {
-      throw new Error('AI Core configuration not found. Provide VCAP_SERVICES, cds.requires.aicore credentials, or AI_* environment variables');
+      throw new Error('AI Core configuration not found. Provide VCAP_SERVICES, cds.requires.aicore credentials, destination, or AI_* environment variables');
     }
 
     this.aiApiUrl = config.aiApiUrl;
@@ -98,7 +209,7 @@ class AICoreClient {
     }
 
     if (!this.deploymentId) {
-      throw new Error('AI_DEPLOYMENT_ID not set in environment variables');
+      throw new Error('AI deployment ID not found. Set AI_DEPLOYMENT_ID as env var or destination property');
     }
 
     this.accessToken = null;
@@ -108,6 +219,11 @@ class AICoreClient {
     console.log('  ✅ Model:', this.modelName);
     console.log('  ✅ Deployment:', this.deploymentId);
     console.log('  ✅ Resource Group:', this.resourceGroup);
+  }
+
+  static async create(options = {}) {
+    const config = await _resolveConfig(options);
+    return new AICoreClient(config);
   }
 
   async _getToken() {

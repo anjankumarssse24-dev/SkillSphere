@@ -2,6 +2,7 @@ node_modules/
 dist/
 .scp/
 .env
+*.mtaext
 Makefile*.mta
 mta_archives
 mta-*

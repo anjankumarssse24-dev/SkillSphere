@@ -1065,26 +1065,14 @@ export default class SeniorManagerDashboard extends Controller {
                 throw new Error("Senior Manager ID is required");
             }
 
-            const response = await fetch("/odata/v4/skillsphere/seniorManagerQuery", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({
-                    seniorManagerId: this.seniorManagerId,
-                    queryType: "general",
-                    context: query
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("❌ Server response:", errorText);
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const result = await response.json();
+            // Use OData V4 model action binding — handles CSRF automatically
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const oAction = oDataModel.bindContext("/seniorManagerQuery(...)");
+            oAction.setParameter("seniorManagerId", this.seniorManagerId);
+            oAction.setParameter("queryType", "general");
+            oAction.setParameter("context", query);
+            await oAction.execute("$auto");
+            const result = oAction.getBoundContext().getObject();
             this.removeTypingIndicator();
 
             if (result.answer) {

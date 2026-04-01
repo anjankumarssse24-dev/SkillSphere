@@ -33,6 +33,7 @@ modules:
       - name: skillsphere-db
       # - name: skillsphere-auth
       - name: skillsphere-destination
+      - name: skillsphere-connectivity
 
   # HANA Database Deployer
   - name: skillsphere-db-deployer
@@ -77,7 +78,7 @@ modules:
         - "node_modules/"
         - "dist/"
 
-  # Destination Content (for managed app router)
+  # Destination Content (for managed app router + AI Core)
   - name: skillsphere-destination-content
     type: com.sap.application.content
     requires:
@@ -163,3 +164,10 @@ resources:
     parameters:
       service: html5-apps-repo
       service-plan: app-host
+
+  # Connectivity Service (for destination resolution)
+  - name: skillsphere-connectivity
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: connectivity
+      service-plan: lite

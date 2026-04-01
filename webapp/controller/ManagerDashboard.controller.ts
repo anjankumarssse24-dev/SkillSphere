@@ -2445,26 +2445,14 @@ private initializeAIChat(): void {
             throw new Error("Manager ID is required");
         }
 
-        const response = await fetch("/odata/v4/skillsphere/managerQuery", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                managerId: this.managerId,
-                queryType: "general",
-                context: query
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("❌ Server response:", errorText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
+        // Use OData V4 model action binding — handles CSRF automatically
+        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+        const oAction = oDataModel.bindContext("/managerQuery(...)");
+        oAction.setParameter("managerId", this.managerId);
+        oAction.setParameter("queryType", "general");
+        oAction.setParameter("context", query);
+        await oAction.execute("$auto");
+        const result = oAction.getBoundContext().getObject();
         this.removeTypingIndicator();
 
         if (result.answer) {

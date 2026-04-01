@@ -2725,31 +2725,18 @@ private async queryAI(query: string): Promise<void> {
         if (!this.employeeIdForAI) {
             throw new Error("Employee ID is required");
         }
-        
-        // Call backend with BOTH query AND employeeId
-        const response = await fetch("/odata/v4/skillsphere/askAIAssistant", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                query: query,
-                employeeId: this.employeeIdForAI  // ✅ CRITICAL!
-            })
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("❌ Server response:", errorText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const result = await response.json();
+
+        // Use OData V4 model action binding — handles CSRF automatically
+        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+        const oAction = oDataModel.bindContext("/askAIAssistant(...)");
+        oAction.setParameter("query", query);
+        oAction.setParameter("employeeId", this.employeeIdForAI);
+        await oAction.execute("$auto");
+        const result = oAction.getBoundContext().getObject();
         console.log('✅ Backend response received');
-        
+
         this.removeTypingIndicator();
-        
+
         // Handle the response structure
         if (result.answer) {
             this.addBotMessage(result.answer);
