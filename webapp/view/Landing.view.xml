@@ -146,9 +146,10 @@
                 <m:Select id="regTeam" class="sapUiMediumMarginBottom" required="true">
                     <core:Item key="S4HANA" text="SAP S/4HANA"/>
                     <core:Item key="SuccessFactors" text="SAP SuccessFactors"/>
-                    <core:Item key="CIS" text="CIS"/>
+                    <core:Item key="CIS" text="Customer Innovation Service"/>
                     <core:Item key="Ariba" text="SAP Ariba"/>
                     <core:Item key="BTP" text="SAP Business Technology Platform"/>
+                    <core:Item key="DataScience" text="Data Science"/>
                 </m:Select>
                 
                 <m:Label text="Sub Team:" required="true" class="sapUiSmallMarginBottom"/>

@@ -6,15 +6,24 @@ class MockAICoreClient {
     console.log('🤖 MockAICoreClient initialized (MOCK MODE - No real AI)');
   }
 
-  async chatCompletion(userQuery, systemPrompt = null) {
+  async chatCompletion(input, systemPrompt = null) {
+    const rawQuery = typeof input === 'object' && input !== null
+      ? input.userPrompt
+      : input;
+    const effectiveSystemPrompt = typeof input === 'object' && input !== null
+      ? input.systemPrompt
+      : systemPrompt;
+
+    const userQuery = this.extractUserQuestion(rawQuery || '');
+
     console.log('🔄 Mock AI called with query:', userQuery);
-    console.log('🔄 System prompt:', systemPrompt);
+    console.log('🔄 System prompt:', effectiveSystemPrompt);
     
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Generate mock response based on query keywords
-    let mockResponse = this.generateMockResponse(userQuery);
+    let mockResponse = this.generateMockResponse(userQuery || '');
     
     console.log('✅ Mock AI response:', mockResponse);
     return mockResponse;
@@ -72,6 +81,24 @@ Resource allocation:
 
 No overallocation detected. Team capacity is well-balanced.`;
     }
+
+  if (lowerQuery.includes('certification') || lowerQuery.includes('certificate')) {
+    return `Certification Summary:
+- 14 active certifications across the team
+- 5 employees hold advanced-level certifications
+- 3 certifications are expiring in the next quarter
+
+Recommended next step: prioritize renewals and map certifications to project demand.`;
+  }
+
+  if (lowerQuery.includes('utilization') || lowerQuery.includes('workload')) {
+    return `Utilization Overview:
+- Average utilization: 6.4 hours/day
+- 3 employees are near full capacity
+- 6 employees have available bandwidth
+
+Recommendation: shift non-critical tasks from high-load to mid-load members.`;
+  }
     
     // Default response
     return `I understand you're asking about: "${query}"
@@ -83,6 +110,27 @@ As your SkillSphere AI Assistant, I can help you with:
 • Team capability assessments
 
 Please ask me a specific question about your team, skills, projects, or availability.`;
+  }
+
+  extractUserQuestion(promptText) {
+    if (!promptText || typeof promptText !== 'string') {
+      return '';
+    }
+
+    const patterns = [
+      /USER QUESTION:\s*([\s\S]*?)\n\s*EMPLOYEE PROFILE:/i,
+      /MANAGER QUESTION:\s*([\s\S]*?)\n\s*TEAM MEMBERS:/i,
+      /SENIOR MANAGER QUESTION:\s*([\s\S]*?)\n\s*ORGANIZATIONAL STRUCTURE:/i
+    ];
+
+    for (const pattern of patterns) {
+      const match = promptText.match(pattern);
+      if (match && match[1]) {
+        return match[1].trim();
+      }
+    }
+
+    return promptText.trim();
   }
 
   async getSkillSphereResponse(userQuery, contextData = null) {

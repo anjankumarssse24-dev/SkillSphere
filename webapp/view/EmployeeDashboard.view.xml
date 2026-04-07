@@ -1,4 +1,4 @@
-<mvc:View
+﻿<mvc:View
     controllerName="skillsphere.controller.EmployeeDashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:m="sap.m"
@@ -103,19 +103,20 @@
                                             </m:VBox>
                                         </m:FlexBox>
 
-                                        <!-- Row 2: T Level and Specialization with proper spacing -->
+                                        <!-- Row 2: T Level and Grade Level with proper spacing -->
                                         <m:FlexBox id="profileRow2" 
                                             direction="Row" 
                                             justifyContent="SpaceBetween" 
                                             class="sapUiSmallMarginBottom"
                                             width="100%">
                                             <!-- T Level Field -->
-                                            <m:VBox id="tLevelBox" width="48%">
+                                            <m:VBox id="tLevelBox" width="30%">
                                                 <m:Label id="tLevelLabel" text="T Level" class="sapUiTinyMarginBottom" required="true"/>
                                                 <m:Select id="tLevelSelect" 
                                                     selectedKey="{profile>/tLevel}" 
                                                     width="100%"
-                                                    class="sapUiMediumMarginBottom">
+                                                    class="sapUiMediumMarginBottom"
+                                                    change="onTLevelChange">
                                                     <core:Item key="" text="-- Select T Level --"/>
                                                     <core:Item key="T1" text="T1"/>
                                                     <core:Item key="T2" text="T2"/>
@@ -123,9 +124,9 @@
                                                     <core:Item key="T4" text="T4"/>
                                                 </m:Select>
                                             </m:VBox>
-                                            
+
                                             <!-- Specialization Field -->
-                                            <m:VBox id="specializationBox" width="48%">
+                                            <m:VBox id="specializationBox" width="36%">
                                                 <m:Label id="specializationLabel" text="Specialization" class="sapUiTinyMarginBottom" required="true"/>
                                                 <m:Select id="specializationSelect" 
                                                     selectedKey="{profile>/specialization}" 
@@ -145,16 +146,9 @@
                                                     <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
                                                 </m:Select>
                                             </m:VBox>
-                                        </m:FlexBox>
 
-                                        <!-- Row 3: Grade Level with proper spacing -->
-                                        <m:FlexBox id="profileRow3" 
-                                            direction="Row" 
-                                            justifyContent="Start" 
-                                            class="sapUiSmallMarginBottom"
-                                            width="100%">
                                             <!-- Grade Level Field -->
-                                            <m:VBox id="gradeLevelBox" width="48%">
+                                            <m:VBox id="gradeLevelBox" width="30%">
                                                 <m:Label id="gradeLevelLabel" text="Grade Level" class="sapUiTinyMarginBottom" required="true"/>
                                                 <m:Select id="gradeLevelSelect" 
                                                     selectedKey="{profile>/gradeLevel}" 
@@ -190,152 +184,93 @@
             <!-- Utilization Management Section -->
             <uxap:ObjectPageSection id="utilizationSection" title="Utilization Management" titleUppercase="false">
                 <uxap:subSections>
-                    <!-- Current Project Subsection -->
-                    <uxap:ObjectPageSubSection id="currentProjectSubSection" title="Current Project">
+                    <!-- Unified Work Assignments -->
+                    <uxap:ObjectPageSubSection id="currentProjectSubSection" title="My Work &amp; Utilization">
                         <uxap:blocks>
-                            <f:Card id="currentProjectCard" class="sapUiMediumMargin" width="94%">
+                            <f:Card id="currentProjectCard" class="sapUiMediumMargin" width="96%">
                                 <f:content>
                                     <m:VBox id="currentProjectVBox" class="sapUiMediumMargin">
-                                        <m:Toolbar id="currentProjectToolbar">
-                                            <m:Title id="currentProjectTitle" text="Current Project Utilization"/>
-                                            <m:ToolbarSpacer id="currentProjectToolbarSpacer"/>
-                                            <m:Button id="addCurrentProjectBtn" text="Mark Utilization" icon="sap-icon://add" type="Emphasized" press="onMarkCurrentProject"/>
-                                        </m:Toolbar>
+                                        <m:FlexBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+                                            <m:Title id="currentProjectTitle" text="All Work Assignments" level="H3"/>
+                                            <m:Button id="addCurrentProjectBtn" text="Add Work" icon="sap-icon://add" type="Emphasized" press="onOpenUnifiedWork"/>
+                                        </m:FlexBox>
                                         
-                                        <m:Table id="currentProjectTable" items="{currentProjects>/data}" class="sapUiSmallMarginTop">
+                                        <m:Table id="currentProjectTable" 
+                                                 items="{currentProjects>/data}" 
+                                                 class="sapUiSmallMarginTop"
+                                                 growing="true"
+                                                 growingThreshold="20">
                                             <m:columns>
-                                                <m:Column id="currentProjectNameCol">
-                                                    <m:Text id="currentProjectNameHeader" text="Project Name"/>
+                                                <m:Column width="10%">
+                                                    <m:Text text="Type"/>
                                                 </m:Column>
-                                                <m:Column id="currentProjectManagerCol">
-                                                    <m:Text id="currentProjectManagerHeader" text="Project Manager"/>
+                                                <m:Column width="10%">
+                                                    <m:Text text="Status"/>
                                                 </m:Column>
-                                                <m:Column id="currentProjectStartCol">
-                                                    <m:Text id="currentProjectStartHeader" text="Start Date"/>
+                                                <m:Column width="18%">
+                                                    <m:Text text="Name"/>
                                                 </m:Column>
-                                                <m:Column id="currentProjectEndCol">
-                                                    <m:Text id="currentProjectEndHeader" text="End Date"/>
+                                                <m:Column width="10%">
+                                                    <m:Text text="Role"/>
                                                 </m:Column>
-                                                <m:Column id="currentProjectHoursPerDayCol">
-                                                    <m:Text id="currentProjectHoursPerDayHeader" text="Utilization per Day"/>
+                                                <m:Column width="12%">
+                                                    <m:Text text="Project Manager"/>
                                                 </m:Column>
-                                                <m:Column id="currentProjectActionsCol" width="150px">
-                                                    <m:Text id="currentProjectActionsHeader" text="Actions"/>
+                                                <m:Column width="10%" hAlign="Center">
+                                                    <m:Text text="Start Date"/>
+                                                </m:Column>
+                                                <m:Column width="10%" hAlign="Center">
+                                                    <m:Text text="End Date"/>
+                                                </m:Column>
+                                                <m:Column width="8%" hAlign="Center">
+                                                    <m:Text text="Allocation"/>
+                                                </m:Column>
+                                                <m:Column width="12%" hAlign="Center">
+                                                    <m:Text text="Actions"/>
                                                 </m:Column>
                                             </m:columns>
                                             <m:items>
-                                                <m:ColumnListItem id="currentProjectItem">
+                                                <m:ColumnListItem>
                                                     <m:cells>
-                                                        <m:Text id="currentProjectNameText" text="{currentProjects>projectName}"/>
-                                                        <m:Text id="currentProjectManagerText" text="{currentProjects>projectManager}"/>
-                                                        <m:Text id="currentProjectStartText" text="{currentProjects>startDate}"/>
-                                                        <m:Text id="currentProjectEndText" text="{currentProjects>endDate}"/>
-                                                        <m:Text id="currentProjectHoursPerDayText" text="{path: 'currentProjects>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
-                                                        <m:HBox id="currentProjectActionBox">
-                                                            <m:Button id="editCurrentProjectBtn" icon="sap-icon://edit" press="onEditCurrentProject" tooltip="Edit Current Project"/>
-                                                            <m:Button id="deleteCurrentProjectBtn" icon="sap-icon://delete" type="Reject" press="onDeleteCurrentProject" tooltip="Delete Current Project"/>
-                                                        </m:HBox>
-                                                    </m:cells>
-                                                </m:ColumnListItem>
-                                            </m:items>
-                                        </m:Table>
-                                    </m:VBox>
-                                </f:content>
-                            </f:Card>
-                        </uxap:blocks>
-                    </uxap:ObjectPageSubSection>
-
-                    <!-- CAIA (Internal Utilization) Subsection -->
-                    <uxap:ObjectPageSubSection id="caiaSubSection" title="CAIA (Internal Utilization)">
-                        <uxap:blocks>
-                            <f:Card id="caiaCard" class="sapUiMediumMargin" width="94%">
-                                <f:content>
-                                    <m:VBox id="caiaVBox" class="sapUiMediumMargin">
-                                        <m:Toolbar id="caiaToolbar">
-                                            <m:Title id="caiaTitle" text="CAIA Internal Tasks"/>
-                                            <m:ToolbarSpacer id="caiaToolbarSpacer"/>
-                                            <m:Button id="addCaiaBtn" text="Mark Utilization" icon="sap-icon://add" type="Emphasized" press="onMarkCAIA"/>
-                                        </m:Toolbar>
-                                        
-                                        <m:Table id="caiaTable" items="{caia>/data}" class="sapUiSmallMarginTop">
-                                            <m:columns>
-                                                <m:Column id="caiaTaskCol">
-                                                    <m:Text id="caiaTaskHeader" text="Task Name"/>
-                                                </m:Column>
-                                                <m:Column id="caiaStartCol">
-                                                    <m:Text id="caiaStartHeader" text="Start Date"/>
-                                                </m:Column>
-                                                <m:Column id="caiaEndCol">
-                                                    <m:Text id="caiaEndHeader" text="End Date"/>
-                                                </m:Column>
-                                                <m:Column id="caiaHoursPerDayCol">
-                                                    <m:Text id="caiaHoursPerDayHeader" text="Utilization per Day"/>
-                                                </m:Column>
-                                                <m:Column id="caiaActionsCol" width="150px">
-                                                    <m:Text id="caiaActionsHeader" text="Actions"/>
-                                                </m:Column>
-                                            </m:columns>
-                                            <m:items>
-                                                <m:ColumnListItem id="caiaItem">
-                                                    <m:cells>
-                                                        <m:Text id="caiaTaskText" text="{caia>taskName}"/>
-                                                        <m:Text id="caiaStartText" text="{caia>startDate}"/>
-                                                        <m:Text id="caiaEndText" text="{caia>endDate}"/>
-                                                        <m:Text id="caiaHoursPerDayText" text="{path: 'caia>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
-                                                        <m:HBox id="caiaActionBox">
-                                                            <m:Button id="editCaiaBtn" icon="sap-icon://edit" press="onEditCAIA" tooltip="Edit CAIA Utilization"/>
-                                                            <m:Button id="deleteCaiaBtn" icon="sap-icon://delete" type="Reject" press="onDeleteCAIA" tooltip="Delete CAIA Utilization"/>
-                                                        </m:HBox>
-                                                    </m:cells>
-                                                </m:ColumnListItem>
-                                            </m:items>
-                                        </m:Table>
-                                    </m:VBox>
-                                </f:content>
-                            </f:Card>
-                        </uxap:blocks>
-                    </uxap:ObjectPageSubSection>
-
-                    <!-- POC Utilization Subsection -->
-                    <uxap:ObjectPageSubSection id="pocSubSection" title="POC Utilization">
-                        <uxap:blocks>
-                            <f:Card id="pocCard" class="sapUiMediumMargin" width="94%">
-                                <f:content>
-                                    <m:VBox id="pocVBox" class="sapUiMediumMargin">
-                                        <m:Toolbar id="pocToolbar">
-                                            <m:Title id="pocTitle" text="POC/Proof of Concept"/>
-                                            <m:ToolbarSpacer id="pocToolbarSpacer"/>
-                                            <m:Button id="addPocBtn" text="Mark Utilization" icon="sap-icon://add" type="Emphasized" press="onMarkPOC"/>
-                                        </m:Toolbar>
-                                        
-                                        <m:Table id="pocTable" items="{poc>/data}" class="sapUiSmallMarginTop">
-                                            <m:columns>
-                                                <m:Column id="pocTitleCol">
-                                                    <m:Text id="pocTitleHeader" text="POC Title"/>
-                                                </m:Column>
-                                                <m:Column id="pocStartCol">
-                                                    <m:Text id="pocStartHeader" text="Start Date"/>
-                                                </m:Column>
-                                                <m:Column id="pocEndCol">
-                                                    <m:Text id="pocEndHeader" text="End Date"/>
-                                                </m:Column>
-                                                <m:Column id="pocHoursPerDayCol">
-                                                    <m:Text id="pocHoursPerDayHeader" text="Utilization per Day"/>
-                                                </m:Column>
-                                                <m:Column id="pocActionsCol" width="150px">
-                                                    <m:Text id="pocActionsHeader" text="Actions"/>
-                                                </m:Column>
-                                            </m:columns>
-                                            <m:items>
-                                                <m:ColumnListItem id="pocItem">
-                                                    <m:cells>
-                                                        <m:Text id="pocTitleText" text="{poc>pocTitle}"/>
-                                                        <m:Text id="pocStartText" text="{poc>startDate}"/>
-                                                        <m:Text id="pocEndText" text="{poc>endDate}"/>
-                                                        <m:Text id="pocHoursPerDayText" text="{path: 'poc>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
-                                                        <m:HBox id="pocActionBox">
-                                                            <m:Button id="editPocBtn" icon="sap-icon://edit" press="onEditPOC" tooltip="Edit POC Utilization"/>
-                                                            <m:Button id="deletePocBtn" icon="sap-icon://delete" type="Reject" press="onDeletePOC" tooltip="Delete POC Utilization"/>
+                                                        <m:ObjectStatus
+                                                            text="{currentProjects>type}"
+                                                            state="{= ${currentProjects>type} === 'Project' ? 'Success' : ${currentProjects>type} === 'Evaluation' ? 'Warning' : ${currentProjects>type} === 'Initiative' ? 'Information' : ${currentProjects>type} === 'CAIA' ? 'Error' : 'None' }"/>
+                                                        <m:ObjectStatus
+                                                            text="{currentProjects>assignmentStatus}"
+                                                            state="{= ${currentProjects>assignmentStatus} === 'Accepted' ? 'Success' : ${currentProjects>assignmentStatus} === 'Self-Assigned' ? 'Success' : ${currentProjects>assignmentStatus} === 'Pending' ? 'Warning' : ${currentProjects>assignmentStatus} === 'Rejected' ? 'Error' : 'None' }"/>
+                                                        <m:Text text="{currentProjects>projectName}"/>
+                                                        <m:Text text="{currentProjects>role}"/>
+                                                        <m:Text text="{currentProjects>projectManager}"/>
+                                                        <m:Text text="{currentProjects>startDate}"/>
+                                                        <m:Text text="{currentProjects>endDate}"/>
+                                                        <m:Text text="{path: 'currentProjects>utilizationPercent', formatter: '.formatUtilizationPercent'}"/>
+                                                        <m:HBox justifyContent="Center" alignItems="Center" class="sapUiTinyMargin">
+                                                            <m:Button 
+                                                                icon="sap-icon://accept" 
+                                                                type="Accept"
+                                                                press="onAcceptAssignment" 
+                                                                tooltip="Accept"
+                                                                visible="{= ${currentProjects>assignmentStatus} === 'Pending' }"
+                                                                class="sapUiTinyMarginEnd"/>
+                                                            <m:Button 
+                                                                icon="sap-icon://decline" 
+                                                                type="Reject"
+                                                                press="onRejectAssignment" 
+                                                                tooltip="Reject"
+                                                                visible="{= ${currentProjects>assignmentStatus} === 'Pending' }"
+                                                                class="sapUiTinyMarginEnd"/>
+                                                            <m:Button 
+                                                                icon="sap-icon://edit" 
+                                                                press="onEditCurrentProject" 
+                                                                tooltip="Edit"
+                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' }"
+                                                                class="sapUiTinyMarginEnd"/>
+                                                            <m:Button 
+                                                                icon="sap-icon://delete" 
+                                                                type="Reject" 
+                                                                press="onDeleteCurrentProject" 
+                                                                tooltip="Delete"
+                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' }"/>
                                                         </m:HBox>
                                                     </m:cells>
                                                 </m:ColumnListItem>
@@ -439,6 +374,9 @@
                                         <m:Column id="orchestratorCol">
                                             <m:Text id="orchestratorHeader" text="Project Orchestrator"/>
                                         </m:Column>
+                                        <m:Column id="addedByCol" width="140px">
+                                            <m:Text id="addedByHeader" text="Source"/>
+                                        </m:Column>
                                         <m:Column id="projectActionsCol" width="150px">
                                             <m:Text id="projectActionsHeader" text="Actions"/>
                                         </m:Column>
@@ -452,6 +390,11 @@
                                             <m:Text id="aemText" text="{projects>accountExecutiveManager}"/>
                                             <m:Text id="lineManagerText" text="{projects>lineManagerPOC}"/>
                                             <m:Text id="orchestratorText" text="{projects>projectOrchestrator}"/>
+                                            <m:ObjectStatus
+                                                text="{= ${projects>addedByManager} ? 'Added by Manager' : 'Self Added'}"
+                                                state="{= ${projects>addedByManager} ? 'Warning' : 'None'}"
+                                                icon="{= ${projects>addedByManager} ? 'sap-icon://manager' : ''}"
+                                                tooltip="{= ${projects>addedByManager} ? ('Added by: ' + ${projects>addedByManager}) : 'Added by employee'}"/>
                                             <m:HBox id="projectActionsHBox">
                                                 <m:Button id="editProjectBtn" icon="sap-icon://edit" press="onEditProject" tooltip="Edit Project"/>
                                                 <m:Button id="deleteProjectBtn" icon="sap-icon://delete" type="Reject" press="onDeleteProject" tooltip="Delete Project"/>
@@ -474,6 +417,13 @@
                                 <m:Toolbar id="certificationsToolbar">
                                     <m:Title id="certificationsTitle" text="Certifications"/>
                                     <m:ToolbarSpacer id="certificationsToolbarSpacer"/>
+                                    <m:Label text="Filter by Year:" class="sapUiSmallMarginEnd"/>
+                                    <m:Select id="certYearFilter" width="100px" selectedKey="{certifications>/selectedYear}" change="onCertificationYearFilterChange">
+                                        <core:Item key="all" text="All Years"/>
+                                        <core:Item key="2026" text="2026"/>
+                                        <core:Item key="2025" text="2025"/>
+                                    </m:Select>
+                                    <m:ToolbarSpacer id="spacer1"/>
                                     <m:Button id="addCertificationBtn" text="Add Certification" icon="sap-icon://add" type="Emphasized" press="onAddCertification"/>
                                 </m:Toolbar>
                                 
@@ -533,6 +483,7 @@
         title="SkillSphere AI Assistant"
         contentWidth="600px"
         contentHeight="700px"
+        class="aiAssistantDialog"
         resizable="true"
         draggable="true">
         
@@ -556,12 +507,12 @@
                     id="chatContainerEmployee"
                     height="520px"
                     vertical="true"
-                    class="sapUiSmallMargin">
-                    <m:VBox id="messagesContainerEmployee" class="sapUiSmallMargin"/>
+                    class="sapUiSmallMargin aiChatScrollArea">
+                    <m:VBox id="messagesContainerEmployee" class="sapUiSmallMargin aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Employee -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
                     <m:Button 
                         text="My Skills" 
                         icon="sap-icon://learning-assistant"
@@ -582,14 +533,14 @@
                 </m:HBox>
                 
                 <!-- Input Area -->
-                <m:Bar>
+                <m:Bar class="aiInputBar">
                     <m:contentLeft>
                         <m:Input
                             id="messageInputEmployee"
                             placeholder="Ask me anything..."
                             width="100%"
                             submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
                     </m:contentLeft>
                     <m:contentRight>
                         <m:Button
@@ -608,3 +559,4 @@
         
     </m:Dialog>
 </mvc:View>
+

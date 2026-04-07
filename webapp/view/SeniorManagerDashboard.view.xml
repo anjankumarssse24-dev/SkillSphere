@@ -141,6 +141,166 @@
                 </uxap:subSections>
             </uxap:ObjectPageSection>
 
+            <!-- Current Work Overview Section -->
+            <uxap:ObjectPageSection id="workOverviewSection" title="Current Work Overview" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="workOverviewSubSection">
+                        <uxap:blocks>
+                            <f:Card class="sapUiMediumMargin" width="96%">
+                                <f:content>
+                                    <m:VBox class="sapUiLargeMargin">
+                                        <m:HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiMediumMarginBottom">
+                                            <m:VBox>
+                                                <m:Title text="Employee Work Distribution - Projects, Evaluations &amp; Initiatives" level="H3"/>
+                                                <m:Text text="Senior Team Members (T3 &amp; T4 Only)" class="sapUiTinyMarginTop sapThemeTextSubtle-asColor"/>
+                                            </m:VBox>
+                                            <core:Icon src="sap-icon://work-history" size="2.5rem" color="#0070f2"/>
+                                        </m:HBox>
+                                        
+                                        <m:ScrollContainer id="workScrollContainer" 
+                                                           horizontal="true" 
+                                                           vertical="true" 
+                                                           height="650px" 
+                                                           width="100%" 
+                                                           focusable="true"
+                                                           class="workOverviewScrollContainer">
+                                        <m:content>
+                                        <m:Table id="workOverviewTable" 
+                                                 items="{workOverview>/employees}"
+                                                 growing="false"
+                                                 alternateRowColors="true"
+                                                 fixedLayout="true"
+                                                 width="2400px"
+                                                 mode="None">
+                                            <m:headerToolbar>
+                                                <m:OverflowToolbar design="Transparent">
+                                                    <m:Title text="Current Work Assignments" level="H4"/>
+                                                    <m:ToolbarSpacer/>
+                                                    <m:Label text="T-Level:" class="sapUiTinyMarginEnd"/>
+                                                    <m:ComboBox id="tLevelFilter" 
+                                                                width="10rem" 
+                                                                placeholder="All Levels"
+                                                                selectionChange="onFilterWorkOverview">
+                                                        <core:Item key="" text="All Levels"/>
+                                                        <core:Item key="T3" text="T3"/>
+                                                        <core:Item key="T4" text="T4"/>
+                                                    </m:ComboBox>
+                                                    <m:Label text="Specialization:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
+                                                    <m:ComboBox id="specializationFilter" 
+                                                                width="12rem" 
+                                                                placeholder="All Specializations"
+                                                                selectionChange="onFilterWorkOverview">
+                                                        <core:Item key="" text="All Specializations"/>
+                                                        <core:Item key="S/4HANA" text="S/4HANA"/>
+                                                        <core:Item key="BTP" text="BTP"/>
+                                                        <core:Item key="Data Science" text="Data Science"/>
+                                                    </m:ComboBox>
+                                                    <m:ToolbarSpacer/>
+                                                    <m:SearchField width="22rem" 
+                                                                   placeholder="Search by name..." 
+                                                                   search="onSearchWorkOverview"
+                                                                   showSearchButton="true"/>
+                                                </m:OverflowToolbar>
+                                            </m:headerToolbar>
+                                            <m:columns>
+                                                <m:Column width="250px" hAlign="Left">
+                                                    <m:Text text="Name"/>
+                                                </m:Column>
+                                                <m:Column width="120px" hAlign="Center">
+                                                    <m:Text text="T-Level"/>
+                                                </m:Column>
+                                                <m:Column width="180px" hAlign="Left">
+                                                    <m:Text text="Specialization"/>
+                                                </m:Column>
+                                                <m:Column width="320px" hAlign="Left">
+                                                    <m:Text text="Project 1"/>
+                                                </m:Column>
+                                                <m:Column width="320px" hAlign="Left">
+                                                    <m:Text text="Project 2"/>
+                                                </m:Column>
+                                                <m:Column width="320px" hAlign="Left">
+                                                    <m:Text text="Evaluation"/>
+                                                </m:Column>
+                                                <m:Column width="320px" hAlign="Left">
+                                                    <m:Text text="Initiative 1"/>
+                                                </m:Column>
+                                                <m:Column width="320px" hAlign="Left">
+                                                    <m:Text text="Initiative 2"/>
+                                                </m:Column>
+                                            </m:columns>
+                                            <m:items>
+                                                <m:ColumnListItem>
+                                                    <m:cells>
+                                                        <!-- Name -->
+                                                        <m:VBox>
+                                                            <m:Text text="{workOverview>name}" class="sapUiTinyMarginBottom" wrapping="false"/>
+                                                            <m:Text text="{workOverview>employeeId}" class="sapThemeTextSubtle-asColor"/>
+                                                        </m:VBox>
+                                                        
+                                                        <!-- T-Level -->
+                                                        <m:ObjectStatus text="{workOverview>tLevel}" state="Information"/>
+                                                        
+                                                        <!-- Specialization -->
+                                                        <m:ObjectStatus text="{workOverview>specialization}" state="None"/>
+                                                        
+                                                        <!-- Project 1 -->
+                                                        <m:VBox>
+                                                            <m:Text text="{workOverview>project1Name}" wrapping="false" maxLines="1"/>
+                                                            <m:HBox class="sapUiTinyMarginTop">
+                                                                <m:ObjectStatus text="{workOverview>project1Tech}" state="Success" class="sapUiTinyMarginEnd"/>
+                                                                <m:ObjectStatus text="{workOverview>project1Util}" state="Success"/>
+                                                            </m:HBox>
+                                                        </m:VBox>
+                                                        
+                                                        <!-- Project 2 -->
+                                                        <m:VBox>
+                                                            <m:Text text="{workOverview>project2Name}" wrapping="false" maxLines="1"/>
+                                                            <m:HBox class="sapUiTinyMarginTop">
+                                                                <m:ObjectStatus text="{workOverview>project2Tech}" state="Success" class="sapUiTinyMarginEnd"/>
+                                                                <m:ObjectStatus text="{workOverview>project2Util}" state="Success"/>
+                                                            </m:HBox>
+                                                        </m:VBox>
+                                                        
+                                                        <!-- Evaluation -->
+                                                        <m:VBox>
+                                                            <m:Text text="{workOverview>evaluation1Name}" wrapping="false" maxLines="1"/>
+                                                            <m:HBox class="sapUiTinyMarginTop">
+                                                                <m:ObjectStatus text="{workOverview>evaluation1Tech}" state="Warning" class="sapUiTinyMarginEnd"/>
+                                                                <m:ObjectStatus text="{workOverview>evaluation1Util}" state="Warning"/>
+                                                            </m:HBox>
+                                                        </m:VBox>
+                                                        
+                                                        <!-- Initiative 1 -->
+                                                        <m:VBox>
+                                                            <m:Text text="{workOverview>initiative1Name}" wrapping="false" maxLines="1"/>
+                                                            <m:HBox class="sapUiTinyMarginTop">
+                                                                <m:ObjectStatus text="{workOverview>initiative1Tech}" state="Information" class="sapUiTinyMarginEnd"/>
+                                                                <m:ObjectStatus text="{workOverview>initiative1Util}" state="Information"/>
+                                                            </m:HBox>
+                                                        </m:VBox>
+                                                        
+                                                        <!-- Initiative 2 -->
+                                                        <m:VBox>
+                                                            <m:Text text="{workOverview>initiative2Name}" wrapping="false" maxLines="1"/>
+                                                            <m:HBox class="sapUiTinyMarginTop">
+                                                                <m:ObjectStatus text="{workOverview>initiative2Tech}" state="Information" class="sapUiTinyMarginEnd"/>
+                                                                <m:ObjectStatus text="{workOverview>initiative2Util}" state="Information"/>
+                                                            </m:HBox>
+                                                        </m:VBox>
+                                                    </m:cells>
+                                                </m:ColumnListItem>
+                                            </m:items>
+                                        </m:Table>
+                                        </m:content>
+                                        </m:ScrollContainer>
+                                    </m:VBox>
+                                </f:content>
+                            </f:Card>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
             <!-- Manager Overview Section -->
             <uxap:ObjectPageSection id="managersSection" title="Manager Overview" titleUppercase="false">
                 <uxap:subSections>
@@ -767,6 +927,7 @@
         title="SkillSphere AI Assistant - Senior Manager"
         contentWidth="600px"
         contentHeight="700px"
+        class="aiAssistantDialog"
         resizable="true"
         draggable="true">
         
@@ -790,12 +951,12 @@
                     id="chatContainerSeniorManager"
                     height="520px"
                     vertical="true"
-                    class="sapUiSmallMargin">
-                    <m:VBox id="messagesContainerSeniorManager" class="sapUiSmallMargin"/>
+                    class="sapUiSmallMargin aiChatScrollArea">
+                    <m:VBox id="messagesContainerSeniorManager" class="sapUiSmallMargin aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Senior Manager -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
                     <m:Button 
                         text="Org Insights" 
                         icon="sap-icon://org-chart"
@@ -816,14 +977,14 @@
                 </m:HBox>
                 
                 <!-- Input Area -->
-                <m:Bar>
+                <m:Bar class="aiInputBar">
                     <m:contentLeft>
                         <m:Input
                             id="messageInputSeniorManager"
                             placeholder="Ask me about your organization..."
                             width="100%"
                             submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
                     </m:contentLeft>
                     <m:contentRight>
                         <m:Button

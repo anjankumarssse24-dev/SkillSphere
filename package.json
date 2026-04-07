@@ -65,7 +65,7 @@
       },
       "[production]": {
         "db": {
-          "kind": "hana"
+          "kind": "sqlite"
         },
         "auth": "dummy"
       },

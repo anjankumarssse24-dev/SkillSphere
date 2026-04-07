@@ -2,31 +2,41 @@
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Dialog
-        title="Assign Yourself to Project (from Master Data)"
-        contentWidth="500px">
+        title="Assign to Project/Evaluation"
+        contentWidth="550px">
         <content>
             <VBox class="sapUiMediumMargin">
                 <!-- Info Message -->
                 <MessageStrip
-                    text="Select a project created by your manager from the master data. Project Manager and dates will be auto-filled."
+                    text="Select a project or evaluation from master data created by your manager."
                     type="Information"
                     showIcon="true"
                     class="sapUiSmallMarginBottom"/>
                 
-                <!-- Project Name -->
-                <Label text="Project Name (from Manager's Projects):" required="true" />
+                <!-- Assignment Type -->
+                <Label text="Assignment Type:" required="true" />
+                <Select
+                    selectedKey="{workAssignment>/isEvaluation}"
+                    width="100%"
+                    change="onWorkTypeChange">
+                    <core:Item key="false" text="Project Assignment"/>
+                    <core:Item key="true" text="Evaluation Assignment"/>
+                </Select>
+                
+                <!-- Project Selection -->
+                <Label text="{= ${workAssignment>/isEvaluation} === 'true' ? 'Evaluation Project:' : 'Project Name:' }" required="true" class="sapUiSmallMarginTop" />
                 <ComboBox
-                    selectedKey="{currentProjectDialog>/projectName}"
-                    placeholder="Select project created by manager"
+                    selectedKey="{workAssignment>/projectName}"
+                    placeholder="Select from master data"
                     width="100%"
                     items="{projectsList>/projects}"
-                    selectionChange="onProjectSelected">
+                    selectionChange="onWorkProjectSelected">
                     <core:Item key="{projectsList>projectName}" text="{projectsList>projectName}"/>
                 </ComboBox>
                 
                 <!-- Role -->
-                <Label text="Role:" required="true" class="sapUiSmallMarginTop" />
-                <Select selectedKey="{currentProjectDialog>/role}" width="100%">
+                <Label text="Your Role:" required="true" class="sapUiSmallMarginTop" />
+                <Select selectedKey="{workAssignment>/role}" width="100%">
                     <core:Item key="" text="-- Select Role --"/>
                     <core:Item key="Developer" text="Developer"/>
                     <core:Item key="Architect" text="Architect"/>
@@ -42,38 +52,35 @@
                     <core:Item key="Project Manager" text="Project Manager"/>
                 </Select>
                 
-                <!-- Project Manager -->
-                <Label text="Project Manager (from Master Data):" required="true" class="sapUiSmallMarginTop" />
-                <ComboBox
-                    selectedKey="{currentProjectDialog>/projectManager}"
-                    placeholder="Auto-filled from project master data"
-                    width="100%"
+                <!-- Project Manager (Read-only) -->
+                <Label text="Project Manager:" class="sapUiSmallMarginTop" />
+                <Input
+                    value="{workAssignment>/projectManager}"
                     enabled="false"
-                    items="{managersList>/managers}">
-                    <core:Item key="{managersList>name}" text="{managersList>name}"/>
-                </ComboBox>
+                    placeholder="Auto-filled from master data"
+                    width="100%"/>
                 
                 <!-- Start Date -->
-                <Label text="Start Date (Your Assignment):" required="true" class="sapUiSmallMarginTop" />
+                <Label text="Start Date:" required="true" class="sapUiSmallMarginTop" />
                 <DatePicker
-                    value="{currentProjectDialog>/startDate}"
-                    placeholder="Auto-filled from project, adjust if needed"
+                    value="{workAssignment>/startDate}"
+                    placeholder="Auto-filled, adjust if needed"
                     displayFormat="MM/dd/yyyy"
                     width="100%"/>
                 
                 <!-- End Date -->
-                <Label text="End Date (Your Assignment):" required="true" class="sapUiSmallMarginTop" />
+                <Label text="End Date:" required="true" class="sapUiSmallMarginTop" />
                 <DatePicker
-                    value="{currentProjectDialog>/endDate}"
-                    placeholder="Auto-filled from project, adjust if needed"
+                    value="{workAssignment>/endDate}"
+                    placeholder="Auto-filled, adjust if needed"
                     displayFormat="MM/dd/yyyy"
                     width="100%"/>
                 
-                <!-- Utilization Percentage Input -->
-                <Label text="Utilization per Day (%):" required="true" class="sapUiSmallMarginTop" />
+                <!-- Allocation -->
+                <Label text="Your Allocation (%):" required="true" class="sapUiSmallMarginTop" />
                 <ComboBox
-                    selectedKey="{currentProjectDialog>/utilizationPercent}"
-                    placeholder="Select utilization percentage"
+                    selectedKey="{workAssignment>/utilizationPercent}"
+                    placeholder="Select allocation percentage"
                     width="100%">
                     <core:Item key="100" text="100% (Full Time)"/>
                     <core:Item key="75" text="75%"/>
@@ -86,12 +93,12 @@
             <Button
                 text="Save"
                 type="Emphasized"
-                press="onSaveCurrentProject" />
+                press="onSaveWorkAssignment" />
         </beginButton>
         <endButton>
             <Button
                 text="Cancel"
-                press="onCloseCurrentProjectDialog" />
+                press="onCloseWorkAssignmentDialog" />
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

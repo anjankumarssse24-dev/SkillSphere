@@ -1,0 +1,91 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Add/Edit Initiative"
+        contentWidth="600px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Info Message -->
+                <MessageStrip
+                    text="Create your own initiative, CAIA, POC, or other self-driven work."
+                    type="Information"
+                    showIcon="true"
+                    class="sapUiSmallMarginBottom"/>
+                
+                <!-- Initiative Name -->
+                <Label text="Initiative Name:" required="true" />
+                <Input
+                    value="{initiativeDialog>/initiativeName}"
+                    placeholder="e.g., Digital Transformation, Cloud Migration"
+                    width="100%"/>
+                
+                <!-- Description -->
+                <Label text="Description:" required="true" class="sapUiSmallMarginTop" />
+                <TextArea
+                    value="{initiativeDialog>/description}"
+                    placeholder="Detailed description of the initiative"
+                    rows="5"
+                    width="100%"/>
+                
+                <!-- Start Date -->
+                <Label text="Start Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{initiativeDialog>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- End Date -->
+                <Label text="End Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{initiativeDialog>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- Utilization Percent Input -->
+                <Label text="Utilization Percent (0-100%):" required="true" class="sapUiSmallMarginTop" />
+                <Input
+                    value="{initiativeDialog>/utilizationPercent}"
+                    type="Number"
+                    placeholder="Enter percentage (0-100)"
+                    width="100%"
+                    description="%"/>
+                
+                <!-- Type/Category -->
+                <Label text="Type:" class="sapUiSmallMarginTop" />
+                <Select
+                    selectedKey="{initiativeDialog>/type}"
+                    width="100%">
+                    <core:Item key="Initiative" text="Initiative"/>
+                    <core:Item key="CAIA" text="CAIA (Cross-Account Internal Activities)"/>
+                    <core:Item key="POC" text="POC (Proof of Concept)"/>
+                    <core:Item key="Evaluation" text="Evaluation"/>
+                </Select>
+                
+                <!-- Status -->
+                <Label text="Status:" class="sapUiSmallMarginTop" />
+                <Select
+                    selectedKey="{initiativeDialog>/status}"
+                    width="100%">
+                    <core:Item key="Active" text="Active"/>
+                    <core:Item key="Completed" text="Completed"/>
+                    <core:Item key="OnHold" text="On Hold"/>
+                    <core:Item key="Cancelled" text="Cancelled"/>
+                </Select>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onSaveInitiative" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseInitiativeDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

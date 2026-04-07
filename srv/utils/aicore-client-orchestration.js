@@ -5,22 +5,54 @@ class AICoreClient {
     const vcap = JSON.parse(process.env.VCAP_SERVICES || '{}');
     const aiCore = vcap.aicore?.[0];
 
-    if (!aiCore) {
-      throw new Error('AI Core service not bound');
+    // Primary mode: Cloud Foundry service binding
+    if (aiCore?.credentials) {
+      const creds = aiCore.credentials;
+      this.aiApiUrl = creds.serviceurls?.AI_API_URL;
+      this.clientId = creds.clientid;
+      this.clientSecret = creds.clientsecret;
+      this.authUrl = creds.url;
+      console.log('🔐 AI Core credentials source: VCAP_SERVICES binding');
+    } else {
+      // Local mode: explicit environment variables
+      this.aiApiUrl =
+        process.env.AI_API_URL ||
+        process.env.AICORE_AI_API_URL ||
+        process.env.AI_CORE_API_URL;
+      this.clientId =
+        process.env.AI_CLIENT_ID ||
+        process.env.AICORE_CLIENTID ||
+        process.env.AICORE_CLIENT_ID ||
+        process.env.CLIENT_ID;
+      this.clientSecret =
+        process.env.AI_CLIENT_SECRET ||
+        process.env.AICORE_CLIENTSECRET ||
+        process.env.AICORE_CLIENT_SECRET ||
+        process.env.CLIENT_SECRET;
+      this.authUrl =
+        process.env.AI_AUTH_URL ||
+        process.env.AICORE_URL ||
+        process.env.AICORE_AUTH_URL ||
+        process.env.AI_TOKEN_BASE_URL;
+      console.log('🔐 AI Core credentials source: local environment variables');
     }
 
-    const creds = aiCore.credentials;
+    this.resourceGroup =
+      process.env.AI_RESOURCE_GROUP ||
+      process.env.AICORE_RESOURCE_GROUP ||
+      'default';
+    this.deploymentId = process.env.AI_DEPLOYMENT_ID || process.env.AICORE_DEPLOYMENT_ID;
+    this.modelName = process.env.AI_MODEL_NAME || process.env.AICORE_MODEL_NAME || 'gpt-4o';
 
-    this.aiApiUrl = creds.serviceurls.AI_API_URL;
-    this.clientId = creds.clientid;
-    this.clientSecret = creds.clientsecret;
-    this.authUrl = creds.url;
-    this.resourceGroup = process.env.AI_RESOURCE_GROUP || 'default';
-    this.deploymentId = process.env.AI_DEPLOYMENT_ID;
-    this.modelName = process.env.AI_MODEL_NAME || 'gpt-4o';
+    const missing = [];
+    if (!this.aiApiUrl) missing.push('AI_API_URL (or VCAP aicore.credentials.serviceurls.AI_API_URL)');
+    if (!this.clientId) missing.push('AI_CLIENT_ID (or VCAP aicore.credentials.clientid)');
+    if (!this.clientSecret) missing.push('AI_CLIENT_SECRET (or VCAP aicore.credentials.clientsecret)');
+    if (!this.authUrl) missing.push('AI_AUTH_URL (or VCAP aicore.credentials.url)');
+    if (!this.deploymentId) missing.push('AI_DEPLOYMENT_ID');
 
-    if (!this.deploymentId) {
-      throw new Error('AI_DEPLOYMENT_ID not set in environment variables');
+    if (missing.length) {
+      throw new Error(`AI Core configuration missing: ${missing.join(', ')}`);
     }
 
     this.accessToken = null;

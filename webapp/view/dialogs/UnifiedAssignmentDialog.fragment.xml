@@ -1,0 +1,130 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Assign Yourself to Work"
+        contentWidth="550px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Info Message -->
+                <MessageStrip
+                    text="Select work type and assign yourself from master data created by managers."
+                    type="Information"
+                    showIcon="true"
+                    class="sapUiSmallMarginBottom"/>
+                
+                <!-- Work Type Selection -->
+                <Label text="Type:" required="true" />
+                <Select
+                    selectedKey="{assignmentDialog>/type}"
+                    width="100%"
+                    change="onAssignmentTypeChange">
+                    <core:Item key="Project" text="Project"/>
+                    <core:Item key="Evaluation" text="Evaluation"/>
+                    <core:Item key="Initiative" text="Initiative (CAIA/POC/Other)"/>
+                </Select>
+                
+                <!-- Project/Evaluation Selection (visible for Project and Evaluation) -->
+                <VBox id="projectSelectionBox" visible="{= ${assignmentDialog>/type} === 'Project' || ${assignmentDialog>/type} === 'Evaluation' }">
+                    <Label text="{= ${assignmentDialog>/type} === 'Evaluation' ? 'Evaluation Project:' : 'Project Name:' }" required="true" class="sapUiSmallMarginTop" />
+                    <ComboBox
+                        selectedKey="{assignmentDialog>/projectName}"
+                        placeholder="Select from master data"
+                        width="100%"
+                        items="{projectsList>/projects}"
+                        selectionChange="onProjectSelected">
+                        <core:Item key="{projectsList>projectName}" text="{projectsList>projectName}"/>
+                    </ComboBox>
+                    
+                    <!-- Role -->
+                    <Label text="Your Role:" required="true" class="sapUiSmallMarginTop" />
+                    <Select selectedKey="{assignmentDialog>/role}" width="100%">
+                        <core:Item key="" text="-- Select Role --"/>
+                        <core:Item key="Developer" text="Developer"/>
+                        <core:Item key="Architect" text="Architect"/>
+                        <core:Item key="Backend Developer" text="Backend Developer"/>
+                        <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                        <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                        <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                        <core:Item key="Data Scientist" text="Data Scientist"/>
+                        <core:Item key="Data Analyst" text="Data Analyst"/>
+                        <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                        <core:Item key="QA Engineer" text="QA Engineer"/>
+                        <core:Item key="Tech Lead" text="Tech Lead"/>
+                        <core:Item key="Project Manager" text="Project Manager"/>
+                    </Select>
+                    
+                    <!-- Project Manager (Read-only, auto-filled) -->
+                    <Label text="Project Manager:" class="sapUiSmallMarginTop" />
+                    <Input
+                        value="{assignmentDialog>/projectManager}"
+                        enabled="false"
+                        placeholder="Auto-filled from master data"
+                        width="100%"/>
+                </VBox>
+                
+                <!-- Initiative Selection (visible for Initiative only) -->
+                <VBox id="initiativeSelectionBox" visible="{= ${assignmentDialog>/type} === 'Initiative' }">
+                    <Label text="Initiative Name:" required="true" class="sapUiSmallMarginTop" />
+                    <Input
+                        value="{assignmentDialog>/projectName}"
+                        placeholder="Enter initiative/CAIA/POC name"
+                        width="100%"/>
+                    
+                    <Label text="Initiative Type:" class="sapUiSmallMarginTop" />
+                    <Select selectedKey="{assignmentDialog>/initiativeType}" width="100%">
+                        <core:Item key="Initiative" text="Initiative"/>
+                        <core:Item key="CAIA" text="CAIA (Cross-Account Internal Activities)"/>
+                        <core:Item key="POC" text="POC (Proof of Concept)"/>
+                        <core:Item key="Evaluation" text="Evaluation"/>
+                    </Select>
+                    
+                    <Label text="Description:" class="sapUiSmallMarginTop" />
+                    <TextArea
+                        value="{assignmentDialog>/description}"
+                        rows="3"
+                        width="100%"
+                        placeholder="Describe the initiative"/>
+                </VBox>
+                
+                <!-- Common Fields -->
+                <Label text="Start Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{assignmentDialog>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <Label text="End Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{assignmentDialog>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <!-- Utilization Allocation -->
+                <Label text="Your Allocation (%):" required="true" class="sapUiSmallMarginTop" />
+                <ComboBox
+                    selectedKey="{assignmentDialog>/utilizationPercent}"
+                    placeholder="Select allocation percentage"
+                    width="100%">
+                    <core:Item key="100" text="100% (Full Time)"/>
+                    <core:Item key="75" text="75%"/>
+                    <core:Item key="50" text="50% (Half Time)"/>
+                    <core:Item key="25" text="25%"/>
+                </ComboBox>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onSaveAssignment" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseAssignmentDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

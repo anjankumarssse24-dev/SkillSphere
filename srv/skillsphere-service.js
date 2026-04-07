@@ -16,6 +16,7 @@ module.exports = cds.service.impl(async function() {
   function getAIClient() {
     if (!aiClient) {
       aiClient = new AICoreClient();
+      console.log('🤖 Using SAP AI Core client');
     }
     return aiClient;
   }

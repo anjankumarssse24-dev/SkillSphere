@@ -1,0 +1,112 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Add New Project"
+        contentWidth="600px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Project Name:" required="true" />
+                <Input
+                    value="{managerNewProject>/projectName}"
+                    placeholder="Enter project name" />
+
+                <Label text="Project Manager:" class="sapUiSmallMarginTop"/>
+                <ComboBox
+                    selectedKey="{managerNewProject>/projectManager}"
+                    placeholder="Select project manager"
+                    width="100%"
+                    items="{pmList>/managers}">
+                    <core:Item key="{pmList>name}" text="{pmList>name}"/>
+                </ComboBox>
+
+                <Label text="Technology / Tech Stack:" class="sapUiSmallMarginTop" required="true"/>
+                <ComboBox
+                    selectedKey="{managerNewProject>/technology}"
+                    placeholder="Select primary technology"
+                    width="100%">
+                    <core:Item key="S/4HANA" text="S/4HANA"/>
+                    <core:Item key="BTP" text="BTP (Business Technology Platform)"/>
+                    <core:Item key="Data Science" text="Data Science"/>
+                    <core:Item key="AI/ML" text="AI/ML (Artificial Intelligence &amp; Machine Learning)"/>
+                    <core:Item key="ABAP" text="ABAP"/>
+                    <core:Item key="SAPUI5" text="SAPUI5"/>
+                    <core:Item key="Fiori" text="Fiori"/>
+                    <core:Item key="Ariba" text="Ariba"/>
+                    <core:Item key="SuccessFactors" text="SuccessFactors"/>
+                    <core:Item key="Analytics Cloud" text="Analytics Cloud"/>
+                    <core:Item key="Integration" text="Integration"/>
+                    <core:Item key="HANA" text="HANA"/>
+                </ComboBox>
+
+                <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{managerNewProject>/accountExecutiveManager}"
+                    placeholder="Represents business stakeholders and validates outcomes" />
+
+                <Label text="Line Manager / POC:" class="sapUiSmallMarginTop"/>
+                <ComboBox
+                    selectedKey="{managerNewProject>/lineManagerPOC}"
+                    placeholder="Select line manager"
+                    width="100%"
+                    items="{lmList>/managers}">
+                    <core:Item key="{lmList>name}" text="{lmList>name}"/>
+                </ComboBox>
+
+                <Label text="Project Orchestrator:" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{managerNewProject>/projectOrchestrator}"
+                    placeholder="Coordinates frontend-backend integration" />
+
+                <Label text="Start Date:" class="sapUiSmallMarginTop"/>
+                <DatePicker
+                    value="{managerNewProject>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="End Date:" class="sapUiSmallMarginTop"/>
+                <DatePicker
+                    value="{managerNewProject>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="Evaluation Start Date:" class="sapUiSmallMarginTop"/>
+                <DatePicker
+                    value="{managerNewProject>/evaluationStartDate}"
+                    placeholder="Optional - for evaluation projects"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="Evaluation End Date:" class="sapUiSmallMarginTop"/>
+                <DatePicker
+                    value="{managerNewProject>/evaluationEndDate}"
+                    placeholder="Optional - for evaluation projects"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="Status:" class="sapUiSmallMarginTop"/>
+                <Select selectedKey="{managerNewProject>/status}" width="100%">
+                    <core:Item key="Active" text="Active"/>
+                    <core:Item key="Completed" text="Completed"/>
+                    <core:Item key="On Hold" text="On Hold"/>
+                </Select>
+
+                <Label text="Description:" class="sapUiSmallMarginTop"/>
+                <TextArea
+                    value="{managerNewProject>/description}"
+                    rows="3"
+                    width="100%"
+                    placeholder="Enter project description" />
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Save"
+                type="Emphasized"
+                press="onManagerSaveProject" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onManagerCloseProjectDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

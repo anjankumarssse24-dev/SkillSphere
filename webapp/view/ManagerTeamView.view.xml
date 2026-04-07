@@ -91,8 +91,8 @@
                 </uxap:subSections>
             </uxap:ObjectPageSection>
 
-            <!-- Team Members Section -->
-            <uxap:ObjectPageSection id="mtvTeamSection" title="Team Members" titleUppercase="false">
+            <!-- My Team Section -->
+            <uxap:ObjectPageSection id="mtvTeamSection" title="My Team" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection id="mtvTeamSubSection">
                         <uxap:blocks>
@@ -208,10 +208,10 @@
                                             <m:Title text="Visualization Controls" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:Label text="Year:" class="sapUiTinyMarginEnd"/>
-                                            <m:Select id="mtvYearFilter" selectedKey="{visualization>/selectedYear}" width="8rem">
-                                                <core:Item key="2024" text="2024"/>
-                                                <core:Item key="2025" text="2025"/>
-                                                <core:Item key="2026" text="2026"/>
+                                            <m:Select id="mtvYearFilter" selectedKey="{visualization>/selectedYear}" width="8rem" change="onYearFilterChange">
+                                                <core:Item key="2024" text="2024 (Last Year)"/>
+                                                <core:Item key="2025" text="2025 (Last Year)"/>
+                                                <core:Item key="2026" text="2026 (Current Year)"/>
                                             </m:Select>
                                             <m:Label text="Quarter:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
                                             <m:Select id="mtvQuarterFilter" selectedKey="{visualization>/selectedQuarter}" width="8rem">
@@ -243,31 +243,17 @@
                                                         </m:HBox>
                                                     </m:VBox>
 
-                                                    <!-- CAIA Utilization -->
+                                                    <!-- Initiatives -->
                                                     <m:VBox class="sapUiSmallMargin" width="30%">
-                                                        <m:Title text="CAIA Activities" level="H4" class="sapUiTinyMarginBottom"/>
-                                                        <m:VBox id="mtvCaiaChart" height="250px" alignItems="Center" justifyContent="Center">
+                                                        <m:Title text="Strategic Initiatives" level="H4" class="sapUiTinyMarginBottom"/>
+                                                        <m:VBox id="mtvInitiativesChart" height="250px" alignItems="Center" justifyContent="Center">
                                                             <m:Text text="Loading chart..." class="sapUiSmallMargin"/>
                                                         </m:VBox>
                                                         <m:HBox justifyContent="Center" class="sapUiTinyMarginTop">
                                                             <m:Label text="Utilized: " class="sapUiTinyMarginEnd"/>
-                                                            <m:Text id="mtvCaiaUtilized" text="0%" class="sapUiContentLabelColor"/>
+                                                            <m:Text id="mtvInitiativesUtilized" text="0%" class="sapUiContentLabelColor"/>
                                                             <m:Label text=" | Available: " class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
-                                                            <m:Text id="mtvCaiaAvailable" text="0%" class="sapUiSuccessColor"/>
-                                                        </m:HBox>
-                                                    </m:VBox>
-
-                                                    <!-- POC Utilization -->
-                                                    <m:VBox class="sapUiSmallMargin" width="30%">
-                                                        <m:Title text="POC Projects" level="H4" class="sapUiTinyMarginBottom"/>
-                                                        <m:VBox id="mtvPocChart" height="250px" alignItems="Center" justifyContent="Center">
-                                                            <m:Text text="Loading chart..." class="sapUiSmallMargin"/>
-                                                        </m:VBox>
-                                                        <m:HBox justifyContent="Center" class="sapUiTinyMarginTop">
-                                                            <m:Label text="Utilized: " class="sapUiTinyMarginEnd"/>
-                                                            <m:Text id="mtvPocUtilized" text="0%" class="sapUiContentLabelColor"/>
-                                                            <m:Label text=" | Available: " class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
-                                                            <m:Text id="mtvPocAvailable" text="0%" class="sapUiSuccessColor"/>
+                                                            <m:Text id="mtvInitiativesAvailable" text="0%" class="sapUiSuccessColor"/>
                                                         </m:HBox>
                                                     </m:VBox>
                                                 </m:FlexBox>
@@ -275,22 +261,26 @@
                                         </m:Panel>
 
                                         <!-- 2. Gantt Chart / Project Timeline -->
-                                        <m:Panel id="mtvGanttChartPanel" headerText="2. Project Timeline - Gantt Chart (Current Projects Only)" class="sapUiSmallMarginTop" expandable="true" expanded="true">
+                                        <m:Panel id="mtvGanttChartPanel" headerText="2. Project Timeline - Gantt Chart" class="sapUiSmallMarginTop" expandable="true" expanded="true">
                                             <m:content>
                                                 <m:VBox class="sapUiSmallMargin">
                                                     <!-- Legend -->
                                                     <m:HBox class="sapUiTinyMarginBottom" wrap="Wrap">
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
                                                             <core:Icon src="sap-icon://circle-task" color="#2ECC71" class="sapUiTinyMarginEnd"/>
-                                                            <m:Text text="Ongoing (Green)"/>
+                                                            <m:Text text="Project - Ongoing (Green)"/>
                                                         </m:HBox>
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
-                                                            <core:Icon src="sap-icon://circle-task" color="#3498DB" class="sapUiTinyMarginEnd"/>
-                                                            <m:Text text="Completed (Blue)"/>
+                                                            <core:Icon src="sap-icon://circle-task" color="#808080" class="sapUiTinyMarginEnd"/>
+                                                            <m:Text text="Project - Completed (Gray)"/>
+                                                        </m:HBox>
+                                                        <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
+                                                            <core:Icon src="sap-icon://circle-task" color="#0070f2" class="sapUiTinyMarginEnd"/>
+                                                            <m:Text text="Project - Scheduled (Blue)"/>
                                                         </m:HBox>
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
                                                             <core:Icon src="sap-icon://circle-task" color="#F39C12" class="sapUiTinyMarginEnd"/>
-                                                            <m:Text text="Scheduled (Orange)"/>
+                                                            <m:Text text="Initiative / CAIA / POC (Orange)"/>
                                                         </m:HBox>
                                                     </m:HBox>
                                                     
@@ -723,6 +713,64 @@
                                 </m:VBox>
                             </m:content>
                         </m:Panel>
+                    </m:IconTabFilter>
+                    
+                    <!-- Assign Project Tab -->
+                    <m:IconTabFilter icon="sap-icon://add-coursebook" text="Assign Project" key="assign">
+                        <m:VBox class="sapUiSmallMargin">
+                            <!-- Assign New Project -->
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Project to Employee" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Project from Master Data:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="mtvAssignProjectComboBox"
+                                                    items="{/Projects}"
+                                                    placeholder="Select a project to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{projectId}" text="{projectName} ({projectManager})"/>
+                                        </m:ComboBox>
+                                        <m:Button text="Assign Project" 
+                                                  type="Emphasized" 
+                                                  icon="sap-icon://add" 
+                                                  press="onMTVAssignProject"
+                                                  enabled="{= ${mtvAssignProjectComboBox>/selectedKey} !== '' }"/>
+                                        <m:MessageStrip text="The employee will receive this assignment with 'Pending' status and can accept or reject it." 
+                                                        type="Information" 
+                                                        showIcon="true" 
+                                                        class="sapUiSmallMarginTop"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                            
+                            <!-- Current Assignments -->
+                            <m:Panel class="sapUiSmallMarginTop" headerText="Assignment History" expandable="true" expanded="true">
+                                <m:content>
+                                    <m:Table id="mtvDialogAssignmentsTable" items="{employeeDetails>/assignments}" class="sapUiSmallMargin">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Type"/></m:Column>
+                                            <m:Column><m:Text text="Project/Work Name"/></m:Column>
+                                            <m:Column><m:Text text="Assignment Status"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization %"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:ObjectStatus text="{employeeDetails>type}"
+                                                               state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
+                                                <m:Text text="{employeeDetails>projectName}"/>
+                                                <m:ObjectStatus text="{employeeDetails>assignmentStatus}"
+                                                               state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{employeeDetails>utilizationPercent}%"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
                     </m:IconTabFilter>
                     
                     <!-- Match Details Tab (for search results only) -->

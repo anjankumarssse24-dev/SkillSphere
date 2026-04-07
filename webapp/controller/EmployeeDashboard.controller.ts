@@ -1,3 +1,4 @@
+/// <reference types="@sapui5/types" />
 import Controller from "sap/ui/core/mvc/Controller";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
@@ -123,8 +124,7 @@ export default class EmployeeDashboard extends Controller {
             
             // Load Utilization data
             await this.loadCurrentProjects(employeeId);
-            await this.loadCAIAUtilization(employeeId);
-            await this.loadPOCUtilization(employeeId);
+            await this.loadInitiatives(employeeId);
             
         } catch (error) {
             console.error("Error loading employee data:", error);
@@ -284,6 +284,230 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
+    private async loadInitiatives(employeeId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const binding = oDataModel.bindList("/Initiatives");
+            binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            
+            const contexts = await binding.requestContexts(0, 100);
+            const data = contexts.map((ctx: any) => {
+                const obj = ctx.getObject();
+                const formatted = {
+                    ...obj,
+                    startDate: this.formatDate(obj.startDate),
+                    endDate: this.formatDate(obj.endDate)
+                };
+                return formatted;
+            });
+            
+            console.log(`✅ Loaded ${data.length} initiatives from OData`);
+            
+            const model = new JSONModel({ data: data });
+            this.getView()?.setModel(model, "initiatives");
+        } catch (error) {
+            console.error("Error loading initiatives:", error);
+            this.getView()?.setModel(new JSONModel({ data: [] }), "initiatives");
+        }
+    }
+
+    // ==================== Initiative Methods ====================
+    
+    private initiativeDialog?: Dialog;
+
+    public async onAddInitiative(): Promise<void> {
+        if (!this.initiativeDialog) {
+            this.initiativeDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.InitiativeDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.initiativeDialog);
+        }
+
+        // Initialize dialog model with empty data
+        const dialogModel = new JSONModel({
+            initiativeName: "",
+            description: "",
+            startDate: null,
+            endDate: null,
+            utilizationPercent: 0,
+            type: "Initiative",
+            status: "Active"
+        });
+        this.getView()?.setModel(dialogModel, "initiativeDialog");
+        
+        this.initiativeDialog.open();
+    }
+
+    public async onSaveInitiative(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("initiativeDialog") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.currentEmployeeId;
+
+        // Validation
+        const utilizationPercent = parseInt(data.utilizationPercent);
+        if (!data.initiativeName || !data.description || !data.startDate || !data.endDate || 
+            isNaN(utilizationPercent) || utilizationPercent < 0 || utilizationPercent > 100) {
+            MessageToast.show("Please fill all required fields. Utilization must be between 0-100%");
+            return;
+        }
+
+        // Helper function to convert date
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error converting date:', dateString, error);
+                return null;
+            }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            
+            if (data.initiativeId) {
+                // Update existing record
+                const listBinding = oDataModel.bindList("/Initiatives");
+                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, data.initiativeId)]);
+                
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    const context = contexts[0];
+                    context.setProperty("initiativeName", data.initiativeName);
+                    context.setProperty("description", data.description);
+                    context.setProperty("startDate", startDateISO);
+                    context.setProperty("endDate", endDateISO);
+                    context.setProperty("utilizationPercent", utilizationPercent);
+                    context.setProperty("type", data.type || "Initiative");
+                    context.setProperty("status", data.status || "Active");
+                    context.setProperty("lastUpdated", new Date().toISOString());
+                    
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
+                    
+                    MessageToast.show("Initiative updated successfully");
+                }
+            } else {
+                // Add new record
+                const listBinding = oDataModel.bindList("/Initiatives");
+                const newData = {
+                    initiativeId: `INIT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    employeeId: employeeId,
+                    initiativeName: data.initiativeName,
+                    description: data.description,
+                    startDate: startDateISO,
+                    endDate: endDateISO,
+                    utilizationPercent: utilizationPercent,
+                    type: data.type || "Initiative",
+                    status: data.status || "Active",
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString()
+                };
+                
+                listBinding.create(newData);
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 800));
+                
+                MessageToast.show("Initiative added successfully");
+            }
+            
+            this.initiativeDialog?.close();
+            if (employeeId) {
+                await this.loadInitiatives(employeeId);
+            }
+        } catch (error) {
+            console.error("❌ Error saving initiative:", error);
+            MessageToast.show("Error saving initiative");
+        }
+    }
+
+    public onCloseInitiativeDialog(): void {
+        this.initiativeDialog?.close();
+    }
+
+    public async onEditInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("initiatives");
+        const initiative = bindingContext?.getObject();
+
+        if (!this.initiativeDialog) {
+            this.initiativeDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.InitiativeDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.initiativeDialog);
+        }
+
+        const dialogModel = new JSONModel(initiative);
+        this.getView()?.setModel(dialogModel, "initiativeDialog");
+        
+        this.initiativeDialog.open();
+    }
+
+    public async onDeleteInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("initiatives");
+        const initiative = bindingContext?.getObject();
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Initiatives");
+            listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, initiative.initiativeId)]);
+            
+            const contexts = await listBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                contexts[0].delete();
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 300));
+                listBinding.refresh();
+                
+                MessageToast.show("Initiative deleted successfully");
+                const employeeId = this.currentEmployeeId;
+                if (employeeId) {
+                    await this.loadInitiatives(employeeId);
+                }
+            }
+        } catch (error) {
+            console.error("❌ Error deleting initiative:", error);
+            MessageToast.show("Error deleting initiative");
+        }
+    }
+
+    public async onReadMoreInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("initiatives");
+        const initiative = bindingContext?.getObject();
+
+        if (!initiative) {
+            MessageToast.show("Could not load initiative details");
+            return;
+        }
+
+        // Create a message box with the full description
+        MessageBox.information(
+            initiative.description,
+            {
+                title: `${initiative.initiativeName} - Details`,
+                actions: [MessageBox.Action.CLOSE],
+                onClose: () => {
+                    // Dialog closed
+                }
+            }
+        );
+    }
+
     private async loadCertifications(employeeId: string): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
@@ -291,22 +515,33 @@ export default class EmployeeDashboard extends Controller {
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
             const contexts = await binding.requestContexts(0, 100);
-            const certifications = contexts.map((ctx: any) => {
+            let certifications = contexts.map((ctx: any) => {
                 const obj = ctx.getObject();
-                const formatted = {
+                return {
                     ...obj,
                     dateOfCompletion: this.formatDate(obj.dateOfCompletion)
                 };
-                return formatted;
             });
             
-            console.log(`✅ Loaded ${certifications.length} certifications from OData`);
+            // Sort by dateOfCompletion in descending order (newest first)
+            certifications = certifications.sort((a: any, b: any) => {
+                const dateA = new Date(a.dateOfCompletion || 0).getTime();
+                const dateB = new Date(b.dateOfCompletion || 0).getTime();
+                return dateB - dateA;
+            });
             
-            const model = new JSONModel({ certifications: certifications });
+            console.log(`✅ Loaded ${certifications.length} certifications from OData (sorted descending by date)`);
+            
+            // Store all certs separately so year filter can always work from full list
+            const model = new JSONModel({
+                certifications: certifications,
+                allCertifications: certifications,
+                selectedYear: "all"
+            });
             this.getView()?.setModel(model, "certifications");
         } catch (error) {
             console.error("Error loading certifications:", error);
-            this.getView()?.setModel(new JSONModel({ certifications: [] }), "certifications");
+            this.getView()?.setModel(new JSONModel({ certifications: [], allCertifications: [], selectedYear: "all" }), "certifications");
         }
     }
 
@@ -340,14 +575,12 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
-    public formatUtilizationPercent(hoursPerDay: number): string {
-        if (!hoursPerDay || hoursPerDay === 0) {
+    public formatUtilizationPercent(utilizationPercent: number): string {
+        if (!utilizationPercent || utilizationPercent === 0) {
             return "0%";
         }
         
-        // Calculate utilization percentage: (hours worked / 8 hours) * 100
-        const percentage = Math.round((hoursPerDay / 8) * 100);
-        return `${percentage}%`;
+        return `${utilizationPercent}%`;
     }
 
     public onLogout(): void {
@@ -1400,6 +1633,11 @@ export default class EmployeeDashboard extends Controller {
                 return;
             }
             
+            if (!profileData?.gradeLevel) {
+                MessageToast.show("Please select your Grade Level");
+                return;
+            }
+            
             if (!profileData?.specialization) {
                 MessageToast.show("Please select your specialization");
                 return;
@@ -1426,8 +1664,7 @@ export default class EmployeeDashboard extends Controller {
                     role: profileData.role,
                     location: profileData.location,
                     tLevel: profileData.tLevel,
-                    specialization: profileData.specialization,
-                    gradeLevel: profileData.gradeLevel
+                    specialization: profileData.specialization
                 });
                 
                 // Update the Profiles table
@@ -1443,6 +1680,7 @@ export default class EmployeeDashboard extends Controller {
                     context.setProperty("role", profileData.role);
                     context.setProperty("location", profileData.location);
                     context.setProperty("tLevel", profileData.tLevel);
+                    context.setProperty("gradeLevel", profileData.gradeLevel);
                     context.setProperty("specialization", profileData.specialization);
                     context.setProperty("gradeLevel", profileData.gradeLevel);
                     context.setProperty("lastUpdated", new Date().toISOString());
@@ -1455,8 +1693,8 @@ export default class EmployeeDashboard extends Controller {
                         role: profileData.role,
                         location: profileData.location,
                         tLevel: profileData.tLevel,
-                        specialization: profileData.specialization,
                         gradeLevel: profileData.gradeLevel,
+                        specialization: profileData.specialization,
                         lastUpdated: new Date().toISOString()
                     };
                     
@@ -1475,6 +1713,7 @@ export default class EmployeeDashboard extends Controller {
                     empContext.setProperty("role", profileData.role);
                     empContext.setProperty("location", profileData.location);
                     empContext.setProperty("tLevel", profileData.tLevel);
+                    empContext.setProperty("gradeLevel", profileData.gradeLevel);
                     empContext.setProperty("specialization", profileData.specialization);
                     console.log('📝 Employee record also updated');
                 }
@@ -1633,16 +1872,88 @@ export default class EmployeeDashboard extends Controller {
             this.getView()?.addDependent(this.currentProjectDialog);
         }
 
+        // Load projects list from existing Projects entity
+        await this.loadProjectsListForDropdown();
+        
+        // Load managers list
+        await this.loadManagersListForDropdown();
+
         // Initialize dialog model with empty data
         const dialogModel = new JSONModel({
             projectName: "",
+            role: "",
+            projectManager: "",
             startDate: null,
             endDate: null,
-            hoursPerDay: 0
+            utilizationPercent: 100
         });
         this.getView()?.setModel(dialogModel, "currentProjectDialog");
         
         this.currentProjectDialog.open();
+    }
+
+    private async loadProjectsListForDropdown(): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const projectsBinding = oDataModel.bindList("/Projects");
+            
+            const contexts = await projectsBinding.requestContexts(0, 1000);
+            const allProjects = contexts.map((ctx: any) => ctx.getObject());
+            
+            // Store full project objects including project manager info
+            const projectsModel = new JSONModel({ projects: allProjects });
+            this.getView()?.setModel(projectsModel, "projectsList");
+            
+            console.log(`✅ Loaded ${allProjects.length} projects from master data (created by managers)`);
+        } catch (error) {
+            console.error("Error loading projects from master data:", error);
+            this.getView()?.setModel(new JSONModel({ projects: [] }), "projectsList");
+        }
+    }
+
+    private async loadManagersListForDropdown(): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const managersBinding = oDataModel.bindList("/Managers");
+            
+            const contexts = await managersBinding.requestContexts(0, 1000);
+            const managers = contexts.map((ctx: any) => ctx.getObject())
+                .map((m: any) => ({ name: m.name }));
+            
+            const managersModel = new JSONModel({ managers });
+            this.getView()?.setModel(managersModel, "managersList");
+            
+            console.log(`Loaded ${managers.length} managers for dropdown`);
+        } catch (error) {
+            console.error("Error loading managers list:", error);
+            this.getView()?.setModel(new JSONModel({ managers: [] }), "managersList");
+        }
+    }
+
+    public onProjectSelected(event: Event): void {
+        const comboBox = event.getSource() as any;
+        const selectedKey = comboBox.getSelectedKey();
+        
+        if (!selectedKey) return;
+        
+        // Find the selected project from master data
+        const projectsModel = this.getView()?.getModel("projectsList") as JSONModel;
+        const projects = projectsModel?.getProperty("/projects") || [];
+        const selectedProject = projects.find((p: any) => p.projectName === selectedKey);
+        
+        if (selectedProject) {
+            // Auto-populate Project Manager and other fields from master data
+            const dialogModel = this.getView()?.getModel("currentProjectDialog") as JSONModel;
+            dialogModel?.setProperty("/projectManager", selectedProject.projectManager || "");
+            dialogModel?.setProperty("/startDate", selectedProject.startDate || null);
+            dialogModel?.setProperty("/endDate", selectedProject.endDate || null);
+            
+            console.log(`✅ Auto-filled project details from master data:`, {
+                projectManager: selectedProject.projectManager,
+                startDate: selectedProject.startDate,
+                endDate: selectedProject.endDate
+            });
+        }
     }
 
     public async onSaveCurrentProject(): Promise<void> {
@@ -1651,8 +1962,8 @@ export default class EmployeeDashboard extends Controller {
         const employeeId = this.currentEmployeeId;
 
         // Validation
-        if (!data.projectName || !data.projectManager || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {
-            MessageToast.show("Please fill all required fields");
+        if (!data.projectName || !data.role || !data.projectManager || !data.startDate || !data.endDate || !data.utilizationPercent || data.utilizationPercent <= 0) {
+            MessageToast.show("Please fill all required fields including Role");
             return;
         }
 
@@ -1687,10 +1998,11 @@ export default class EmployeeDashboard extends Controller {
                 if (contexts.length > 0) {
                     const context = contexts[0];
                     context.setProperty("projectName", data.projectName);
+                    context.setProperty("role", data.role);
                     context.setProperty("projectManager", data.projectManager);
                     context.setProperty("startDate", startDateISO);
                     context.setProperty("endDate", endDateISO);
-                    context.setProperty("hoursPerDay", data.hoursPerDay);
+                    context.setProperty("utilizationPercent", parseInt(data.utilizationPercent));
                     context.setProperty("lastUpdated", new Date().toISOString());
                     
                     await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
@@ -1706,10 +2018,11 @@ export default class EmployeeDashboard extends Controller {
                     currentProjectId: `CP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     projectName: data.projectName,
+                    role: data.role,
                     projectManager: data.projectManager,
                     startDate: startDateISO,
                     endDate: endDateISO,
-                    hoursPerDay: data.hoursPerDay,
+                    utilizationPercent: parseInt(data.utilizationPercent),
                     createdAt: new Date().toISOString(),
                     lastUpdated: new Date().toISOString()
                 };
@@ -1749,6 +2062,10 @@ export default class EmployeeDashboard extends Controller {
             this.getView()?.addDependent(this.currentProjectDialog);
         }
 
+        // Load projects and managers for dropdowns
+        await this.loadProjectsListForDropdown();
+        await this.loadManagersListForDropdown();
+
         const dialogModel = new JSONModel(currentProject);
         this.getView()?.setModel(dialogModel, "currentProjectDialog");
         
@@ -1782,6 +2099,489 @@ export default class EmployeeDashboard extends Controller {
             console.error("❌ Error deleting current project:", error);
             MessageToast.show("Error deleting current project utilization");
         }
+    }
+
+    // ==================== UNIFIED WORK MANAGEMENT ====================
+    
+    private unifiedWorkDialog?: Dialog;
+
+    public async onOpenUnifiedWork(): Promise<void> {
+        if (!this.unifiedWorkDialog) {
+            this.unifiedWorkDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.UnifiedWorkDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.unifiedWorkDialog);
+        }
+
+        await this.loadProjectsListForDropdown();
+        await this.loadManagersListForDropdown();
+
+        const dialogModel = new JSONModel({
+            type: "Project",
+            projectName: "",
+            role: "",
+            projectManager: "",
+            startDate: null,
+            endDate: null,
+            utilizationPercent: 100,
+            description: ""
+        });
+        this.getView()?.setModel(dialogModel, "unifiedWork");
+        
+        this.unifiedWorkDialog.open();
+    }
+
+    public onUnifiedWorkTypeChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedType = select.getSelectedKey();
+        console.log(`Work type changed to: ${selectedType}`);
+    }
+
+    public onUnifiedProjectSelected(event: Event): void {
+        const comboBox = event.getSource() as any;
+        const selectedKey = comboBox.getSelectedKey();
+        
+        if (!selectedKey) return;
+        
+        const projectsModel = this.getView()?.getModel("projectsList") as JSONModel;
+        const projects = projectsModel?.getProperty("/projects") || [];
+        const selectedProject = projects.find((p: any) => p.projectName === selectedKey);
+        
+        if (selectedProject) {
+            const dialogModel = this.getView()?.getModel("unifiedWork") as JSONModel;
+            const workType = dialogModel?.getProperty("/type");
+            
+            dialogModel?.setProperty("/projectManager", selectedProject.projectManager || "");
+            
+            if (workType === "Evaluation" && selectedProject.evaluationStartDate) {
+                dialogModel?.setProperty("/startDate", selectedProject.evaluationStartDate);
+                dialogModel?.setProperty("/endDate", selectedProject.evaluationEndDate);
+            } else {
+                dialogModel?.setProperty("/startDate", selectedProject.startDate || null);
+                dialogModel?.setProperty("/endDate", selectedProject.endDate || null);
+            }
+        }
+    }
+
+    public async onSaveUnifiedWork(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("unifiedWork") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.currentEmployeeId;
+
+        // Validation
+        if (!data.projectName || !data.startDate || !data.endDate || !data.utilizationPercent) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        if ((data.type === "Project" || data.type === "Evaluation") && !data.role) {
+            MessageToast.show("Please select your role");
+            return;
+        }
+
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error converting date:', dateString, error);
+                return null;
+            }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            
+            const newData: any = {
+                currentProjectId: `WORK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                employeeId: employeeId,
+                type: data.type,
+                projectName: data.projectName,
+                startDate: startDateISO,
+                endDate: endDateISO,
+                utilizationPercent: parseInt(data.utilizationPercent),
+                assignmentStatus: "Self-Assigned",
+                assignedBy: null,
+                isEvaluation: data.type === "Evaluation",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+
+            if (data.type === "Project" || data.type === "Evaluation") {
+                newData.role = data.role;
+                newData.projectManager = data.projectManager;
+            }
+
+            if (data.type !== "Project" && data.type !== "Evaluation") {
+                newData.description = data.description || "";
+            }
+            
+            listBinding.create(newData);
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            MessageToast.show(`${data.type} assignment saved successfully`);
+            this.unifiedWorkDialog?.close();
+            
+            if (employeeId) {
+                await this.loadCurrentProjects(employeeId);
+            }
+        } catch (error) {
+            console.error("❌ Error saving work:", error);
+            MessageToast.show("Error saving assignment");
+        }
+    }
+
+    public onCloseUnifiedWorkDialog(): void {
+        this.unifiedWorkDialog?.close();
+    }
+
+    public async onAcceptAssignment(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("currentProjects");
+        const assignment = bindingContext?.getObject();
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, assignment.currentProjectId)]);
+            
+            const contexts = await listBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                contexts[0].setProperty("assignmentStatus", "Accepted");
+                contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 300));
+                listBinding.refresh();
+                
+                MessageToast.show("Assignment accepted successfully");
+                const employeeId = this.currentEmployeeId;
+                if (employeeId) {
+                    await this.loadCurrentProjects(employeeId);
+                }
+            }
+        } catch (error) {
+            console.error("❌ Error accepting assignment:", error);
+            MessageToast.show("Error accepting assignment");
+        }
+    }
+
+    public async onRejectAssignment(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("currentProjects");
+        const assignment = bindingContext?.getObject();
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, assignment.currentProjectId)]);
+            
+            const contexts = await listBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                contexts[0].setProperty("assignmentStatus", "Rejected");
+                contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 300));
+                listBinding.refresh();
+                
+                MessageToast.show("Assignment rejected");
+                const employeeId = this.currentEmployeeId;
+                if (employeeId) {
+                    await this.loadCurrentProjects(employeeId);
+                }
+            }
+        } catch (error) {
+            console.error("❌ Error rejecting assignment:", error);
+            MessageToast.show("Error rejecting assignment");
+        }
+    }
+
+    // ==================== WORK ASSIGNMENT (Projects/Evaluations) ====================
+    
+    private workAssignmentDialog?: Dialog;
+
+    public async onOpenWorkAssignment(): Promise<void> {
+        if (!this.workAssignmentDialog) {
+            this.workAssignmentDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.WorkAssignmentDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.workAssignmentDialog);
+        }
+
+        // Load projects list from master data
+        await this.loadProjectsListForDropdown();
+        await this.loadManagersListForDropdown();
+
+        // Initialize dialog model
+        const dialogModel = new JSONModel({
+            isEvaluation: "false",
+            projectName: "",
+            role: "",
+            projectManager: "",
+            startDate: null,
+            endDate: null,
+            utilizationPercent: 100
+        });
+        this.getView()?.setModel(dialogModel, "workAssignment");
+        
+        this.workAssignmentDialog.open();
+    }
+
+    public onWorkTypeChange(event: Event): void {
+        const select = event.getSource() as any;
+        const isEvaluation = select.getSelectedKey();
+        console.log(`Work type changed to: ${isEvaluation === 'true' ? 'Evaluation' : 'Project'}`);
+    }
+
+    public onWorkProjectSelected(event: Event): void {
+        const comboBox = event.getSource() as any;
+        const selectedKey = comboBox.getSelectedKey();
+        
+        if (!selectedKey) return;
+        
+        // Find the selected project from master data
+        const projectsModel = this.getView()?.getModel("projectsList") as JSONModel;
+        const projects = projectsModel?.getProperty("/projects") || [];
+        const selectedProject = projects.find((p: any) => p.projectName === selectedKey);
+        
+        if (selectedProject) {
+            const dialogModel = this.getView()?.getModel("workAssignment") as JSONModel;
+            const isEvaluation = dialogModel?.getProperty("/isEvaluation") === "true";
+            
+            // Auto-populate from master data
+            dialogModel?.setProperty("/projectManager", selectedProject.projectManager || "");
+            
+            // Use evaluation dates if available and evaluation type selected
+            if (isEvaluation && selectedProject.evaluationStartDate) {
+                dialogModel?.setProperty("/startDate", selectedProject.evaluationStartDate);
+                dialogModel?.setProperty("/endDate", selectedProject.evaluationEndDate);
+            } else {
+                dialogModel?.setProperty("/startDate", selectedProject.startDate || null);
+                dialogModel?.setProperty("/endDate", selectedProject.endDate || null);
+            }
+            
+            console.log(`✅ Auto-filled from master data:`, {
+                projectManager: selectedProject.projectManager,
+                startDate: dialogModel?.getProperty("/startDate"),
+                endDate: dialogModel?.getProperty("/endDate")
+            });
+        }
+    }
+
+    public async onSaveWorkAssignment(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("workAssignment") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.currentEmployeeId;
+
+        // Validation
+        if (!data.projectName || !data.role || !data.startDate || !data.endDate || !data.utilizationPercent) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error converting date:', dateString, error);
+                return null;
+            }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            
+            const newData = {
+                currentProjectId: `WORK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                employeeId: employeeId,
+                projectName: data.projectName,
+                role: data.role,
+                projectManager: data.projectManager,
+                startDate: startDateISO,
+                endDate: endDateISO,
+                utilizationPercent: parseInt(data.utilizationPercent),
+                isEvaluation: data.isEvaluation === "true",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+            
+            listBinding.create(newData);
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            const assignmentType = data.isEvaluation === "true" ? "Evaluation" : "Project";
+            MessageToast.show(`${assignmentType} assignment saved successfully`);
+            this.workAssignmentDialog?.close();
+            
+            if (employeeId) {
+                await this.loadCurrentProjects(employeeId);
+            }
+        } catch (error) {
+            console.error("❌ Error saving work assignment:", error);
+            MessageToast.show("Error saving assignment");
+        }
+    }
+
+    public onCloseWorkAssignmentDialog(): void {
+        this.workAssignmentDialog?.close();
+    }
+
+    // ==================== UNIFIED ASSIGNMENT DIALOG ====================
+    
+    private assignmentDialog?: Dialog;
+
+    public async onOpenUnifiedAssignment(): Promise<void> {
+        if (!this.assignmentDialog) {
+            this.assignmentDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.UnifiedAssignmentDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.assignmentDialog);
+        }
+
+        // Load projects list from master data
+        await this.loadProjectsListForDropdown();
+        await this.loadManagersListForDropdown();
+
+        // Initialize dialog model
+        const dialogModel = new JSONModel({
+            type: "Project",
+            projectName: "",
+            role: "",
+            projectManager: "",
+            startDate: null,
+            endDate: null,
+            utilizationPercent: 100,
+            description: "",
+            initiativeType: "Initiative"
+        });
+        this.getView()?.setModel(dialogModel, "assignmentDialog");
+        
+        this.assignmentDialog.open();
+    }
+
+    public onAssignmentTypeChange(event: Event): void {
+        // Type change is handled by binding visibility
+        const select = event.getSource() as any;
+        const selectedType = select.getSelectedKey();
+        
+        // Reset fields when type changes
+        const dialogModel = this.getView()?.getModel("assignmentDialog") as JSONModel;
+        if (selectedType === "Initiative") {
+            dialogModel?.setProperty("/projectManager", "");
+            dialogModel?.setProperty("/role", "");
+        }
+        
+        console.log(`Assignment type changed to: ${selectedType}`);
+    }
+
+    public async onSaveAssignment(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("assignmentDialog") as JSONModel;
+        const data = dialogModel.getData();
+        const employeeId = this.currentEmployeeId;
+
+        // Validation based on type
+        if (data.type === "Project" || data.type === "Evaluation") {
+            if (!data.projectName || !data.role || !data.startDate || !data.endDate || !data.utilizationPercent) {
+                MessageToast.show("Please fill all required fields");
+                return;
+            }
+        } else if (data.type === "Initiative") {
+            if (!data.projectName || !data.startDate || !data.endDate || !data.utilizationPercent) {
+                MessageToast.show("Please fill all required fields");
+                return;
+            }
+        }
+
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            } catch (error) {
+                console.error('Error converting date:', dateString, error);
+                return null;
+            }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            
+            const newData: any = {
+                currentProjectId: `ASSIGN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                employeeId: employeeId,
+                type: data.type,
+                projectName: data.projectName,
+                startDate: startDateISO,
+                endDate: endDateISO,
+                utilizationPercent: parseInt(data.utilizationPercent),
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            };
+
+            // Add fields specific to Project/Evaluation
+            if (data.type === "Project" || data.type === "Evaluation") {
+                newData.role = data.role;
+                newData.projectManager = data.projectManager;
+            }
+
+            // Add description for Initiatives
+            if (data.type === "Initiative") {
+                newData.description = data.description || "";
+            }
+            
+            listBinding.create(newData);
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            MessageToast.show(`${data.type} assignment saved successfully`);
+            this.assignmentDialog?.close();
+            
+            if (employeeId) {
+                await this.loadCurrentProjects(employeeId);
+            }
+        } catch (error) {
+            console.error("❌ Error saving assignment:", error);
+            MessageToast.show("Error saving assignment");
+        }
+    }
+
+    public onCloseAssignmentDialog(): void {
+        this.assignmentDialog?.close();
     }
 
     // ==================== CAIA Utilization Methods ====================
@@ -2637,5 +3437,43 @@ private async queryAI(query: string): Promise<void> {
     /**
      * Clear chat
      */
-  
+    
+    /**
+     * Handle T-Level change event
+     */
+    public onTLevelChange(event: Event): void {
+        const source = event.getSource() as any;
+        const selectedTLevel = source.getSelectedKey();
+        
+        if (selectedTLevel) {
+            console.log("T-Level changed to:", selectedTLevel);
+        }
+    }
+
+    /**
+     * Handle Certification Year Filter change
+     */
+    public onCertificationYearFilterChange(event: Event): void {
+        const source = event.getSource() as any;
+        const selectedYear = source.getSelectedKey();
+        const certModel = this.getView()?.getModel("certifications") as JSONModel;
+        // Always filter from the original full list
+        const allCertifications = certModel?.getProperty("/allCertifications") || [];
+        
+        let filteredCertifications = allCertifications;
+
+        if (selectedYear !== "all") {
+            const yearNumber = parseInt(selectedYear, 10);
+            filteredCertifications = allCertifications.filter((cert: any) => {
+                if (!cert.dateOfCompletion) return false;
+                const certDate = new Date(cert.dateOfCompletion);
+                return certDate.getFullYear() === yearNumber;
+            });
+        }
+        
+        certModel?.setProperty("/selectedYear", selectedYear);
+        certModel?.setProperty("/certifications", filteredCertifications);
+        
+        console.log(`📅 Certification filter changed to ${selectedYear}, showing ${filteredCertifications.length} certifications`);
+    }
 }

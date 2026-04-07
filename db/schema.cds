@@ -66,10 +66,13 @@ entity Projects {
   role : String;
   startDate : Date;
   endDate : Date;
+  evaluationStartDate : Date;
+  evaluationEndDate : Date;
   status : String;
   description : String;
   duration : String;
   projectManager : String;
+  technology : String; // S/4HANA, BTP, Data Science, AI/ML, etc.
   accountExecutiveManager : String;
   lineManagerPOC : String;
   projectOrchestrator : String;
@@ -91,8 +94,32 @@ entity Profiles {
   employee : Association to Employees on employee.employeeId = employeeId;
 }
 
+
 /**
- * Initiatives entity - Strategic initiatives and organizational projects
+ * CurrentProjects entity - Unified work assignments (Projects, Evaluations, Initiatives)
+ */
+entity CurrentProjects {
+  key currentProjectId : String;
+  employeeId : String;
+  type : String default 'Project'; // Project, Evaluation, Initiative, CAIA, POC
+  projectName : String;
+  role : String;
+  projectManager : String;
+  technology : String; // S/4HANA, BTP, Data Science, AI/ML, etc.
+  startDate : Date;
+  endDate : Date;
+  utilizationPercent : Integer;
+  description : String;
+  assignmentStatus : String default 'Self-Assigned'; // Self-Assigned, Pending, Accepted, Rejected
+  assignedBy : String; // Manager ID who assigned (if manager-assigned)
+  isEvaluation : Boolean default false;
+  createdAt : DateTime;
+  lastUpdated : DateTime;
+  employee : Association to Employees on employee.employeeId = employeeId;
+}
+
+/**
+ * Initiatives entity - Strategic initiatives, CAIA, POC, and other employee-driven work
  */
 entity Initiatives {
   key initiativeId : String;
@@ -101,25 +128,9 @@ entity Initiatives {
   description : String;
   startDate : Date;
   endDate : Date;
-  hoursPerDay : Decimal(5,2);
+  utilizationPercent : Integer;
   status : String default 'Active';
-  type : String default 'Initiative';
-  createdAt : DateTime;
-  lastUpdated : DateTime;
-  employee : Association to Employees on employee.employeeId = employeeId;
-}
-
-/**
- * CurrentProjects entity - Employee's current project allocations
- */
-entity CurrentProjects {
-  key currentProjectId : String;
-  employeeId : String;
-  projectName : String;
-  projectManager : String;
-  startDate : Date;
-  endDate : Date;
-  hoursPerDay : Decimal(5,2);
+  type : String default 'Initiative'; // Initiative, CAIA, POC, Evaluation, Other
   createdAt : DateTime;
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;

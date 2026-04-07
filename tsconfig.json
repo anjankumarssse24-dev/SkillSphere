@@ -6,12 +6,11 @@
     "allowJs": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "rootDir": "./webapp",
     "outDir": "./dist",
-    "baseUrl": "./",
     "paths": {
-      "project1/*": [
+      "skillsphere/*": [
         "./webapp/*"
       ],
       "unit/*": [
