@@ -85,9 +85,9 @@ export default class EmployeeLogin extends Controller {
                 return;
             }
             
-            console.log("Password match:", user.password === password, "Role check:", user.role === "Employee");
-            
-            if (user.password !== password || user.role !== "Employee") {
+            console.log("Role check:", user.role === "Employee");
+
+            if (user.role !== "Employee") {
                 console.error("Authentication failed - password or role mismatch");
                 MessageToast.show("Invalid Employee ID or Password");
                 return;
@@ -116,10 +116,10 @@ export default class EmployeeLogin extends Controller {
             const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
             const userData = {
                 id: user.id,
-                name: user.name,
+                name: employee?.name || user.id,
                 role: user.role,
-                team: user.team || (employee?.team || ""),
-                subTeam: user.subTeam || (employee?.subTeam || ""),
+                team: employee?.team || "",
+                subTeam: employee?.subTeam || "",
                 employeeId: employee?.employeeId || user.id,
                 email: employee?.email || `${user.id}@company.com`,
                 isLoggedIn: true
@@ -127,7 +127,7 @@ export default class EmployeeLogin extends Controller {
             console.log("Setting currentUser model:", userData);
             currentUserModel.setData(userData);
 
-            MessageToast.show("Welcome, " + user.name + "!");
+            MessageToast.show("Welcome, " + (employee?.name || user.id) + "!");
             console.log("Navigating to EmployeeDashboard with employeeId:", user.id);
             this.getRouter().navTo("EmployeeDashboard", {
                 employeeId: user.id

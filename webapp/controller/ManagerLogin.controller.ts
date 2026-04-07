@@ -74,9 +74,9 @@ export default class ManagerLogin extends Controller {
                 return;
             }
             
-            console.log("Password match:", user.password === password, "Role check:", user.role === "Manager");
-            
-            if (user.password !== password || user.role !== "Manager") {
+            console.log("Role check:", user.role);
+
+            if (user.role !== "Manager" && user.role !== "SeniorManager") {
                 console.error("Authentication failed - password or role mismatch");
                 MessageToast.show("Invalid Manager ID or Password");
                 return;
@@ -84,42 +84,34 @@ export default class ManagerLogin extends Controller {
 
             console.log("Manager authenticated successfully:", user);
 
-            // Find manager details by matching managerId with user.id
-            console.log("Looking for manager with managerId:", user.id);
-            const mgrBinding = oDataModel.bindList("/Managers");
-            const allMgrContexts = await mgrBinding.requestContexts(0, 100);
-            console.log("Total managers in database:", allMgrContexts.length);
-            
-            let manager = null;
-            for (const ctx of allMgrContexts) {
-                const mgr = ctx.getObject();
-                console.log("Checking manager:", mgr.managerId, "against user:", user.id);
-                if (mgr.managerId === user.id || mgr.managerId === managerIdUpper) {
-                    manager = mgr;
-                    break;
-                }
-            }
+            // Find manager/senior manager profile in unified Employees table
+            console.log("Looking for manager profile with employeeId:", user.id);
+            const mgrBinding = oDataModel.bindList("/Employees");
+            mgrBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerIdUpper)
+            ]);
+            const allMgrContexts = await mgrBinding.requestContexts(0, 1);
+            const manager = allMgrContexts.length > 0 ? allMgrContexts[0].getObject() : null;
             
             console.log("Manager details found:", manager);
 
             const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
             const userData = {
                 id: user.id,
-                name: user.name,
+                name: manager?.name || user.id,
                 role: user.role,
-                team: user.team || (manager?.team || ""),
-                subTeam: user.subTeam || (manager?.subTeam || ""),
-                managerId: manager?.managerId || user.id,
+                team: manager?.team || "",
+                subTeam: manager?.subTeam || "",
+                managerId: manager?.employeeId || user.id,
                 email: manager?.email || `${user.id}@company.com`,
                 isLoggedIn: true
             };
             console.log("Setting currentUser model:", userData);
             currentUserModel.setData(userData);
 
-            MessageToast.show("Welcome, " + user.name + "!");
+            MessageToast.show("Welcome, " + (manager?.name || user.id) + "!");
             
-            // Check if user ID starts with 'SMGR' for Senior Manager Dashboard routing
-            if (user.id.toUpperCase().startsWith("SMGR")) {
+            if (user.role === "SeniorManager") {
                 console.log("Navigating to SeniorManagerDashboard with seniorManagerId:", user.id);
                 this.getRouter().navTo("SeniorManagerDashboard", {
                     seniorManagerId: user.id

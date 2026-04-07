@@ -102,8 +102,11 @@ export default class ManagerTeamView extends Controller {
         
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             
             const contexts = await listBinding.requestContexts(0, 1);
             
@@ -113,10 +116,10 @@ export default class ManagerTeamView extends Controller {
                 
                 // Create a model for manager team info to display in the header
                 const managerTeamInfoModel = new JSONModel({
-                    managerId: manager.managerId,
+                    managerId: manager.employeeId,
                     managerName: manager.name,
                     team: manager.team,
-                    specialization: manager.specialization
+                    specialization: manager.specialization || ""
                 });
                 
                 this.getView()?.setModel(managerTeamInfoModel, "managerTeamInfo");
@@ -247,10 +250,17 @@ export default class ManagerTeamView extends Controller {
     private async loadAllManagers(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await listBinding.requestContexts();
-            const allManagers = contexts.map((context: any) => context.getObject());
+            const allManagers = contexts.map((context: any) => {
+                const manager = context.getObject();
+                return {
+                    ...manager,
+                    managerId: manager.employeeId
+                };
+            });
             
             console.log(`✅ Loaded ${allManagers.length} managers for search dropdown`);
             

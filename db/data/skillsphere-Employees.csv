@@ -1,160 +1,175 @@
-employeeId,name,team,subTeam,managerId,email,experience,totalSkills,totalProjects,role,location,tLevel
-I770144,Anjan Kumar,CIS,Team8,MGR003,anjan.kumar.s@sap.com,0.17,13,2,Developer,"Whitefield, Bangalore",T1
-I770164,Kavita Joshi,CIS,Team2,MGR006,kavita.joshi@company.com,3,8,4,Data Scientist,Mumbai,T3
-I770165,Manoj Verma,CIS,Team2,MGR006,manoj.verma@company.com,3,9,5,AI/ML Engineer,Gurugram,T4
-I770166,Deepa Iyer,CIS,Team3,MGR006,deepa.iyer@company.com,13,7,3,Developer,Pune,T3
-I770167,Naveen Kumar,CIS,Team2,MGR006,naveen.kumar@company.com,3,6,4,Developer,Whitefield Bangalore,T2
-I770168,Swati Pillai,CIS,Team5,MGR006,swati.pillai@company.com,14,8,5,Backend Developer,Devanahalli Campuses Bangalore,T3
-I750145,Sreeja Reddy,CIS,Team8,MGR003,sreejareddykattekommula@sap.com,0.33,2,1,Developer,"Whitefield, Bangalore",T1
-I346659,Rubal Gupta,CIS,Team8,MGR003,rubal.gupta@sap.com,0,2,0,Architect,"Whitefield, Bangalore",T2
-I769086,Lakshmi Priya,CIS,Team8,MGR003,lakshmi.priya.a@sap.com,0.17,1,1,Data Scientist,"Whitefield, Bangalore",T1
-I763161,Shrikrushna Kulkarni,CIS,Team8,MGR003,shrikrushna.kulkarni@sap.com,8.5,2,2,Developer,"Whitefield, Bangalore",T1
-I755736,Farooque Abdullah,CIS,Team8,MGR003,farooque.abdullah@sap.com,2.4,1,1,Developer,"Whitefield, Bangalore",T1
-I749085,Shajith Mujipurrahuman,CIS,Team8,MGR003,shajith.mujipurrahuman@sap.com,0.33,2,1,Developer,"Whitefield, Bangalore",T1
-I753890,Bhargavi Sami,CIS,Team8,MGR003,bhargavi.sami@sap.com,3.4,1,1,Data Scientist,"Whitefield, Bangalore",T1
-I755719,Swapnil Joshi,CIS,Team8,MGR003,swapnil.joshi02@sap.com,16,1,2,Developer,"Whitefield, Bangalore",T1
-I763266,Dinkar Shinde,CIS,Team8,MGR003,dinkar.shinde@sap.com,4,1,1,Developer,"Whitefield, Bangalore",T1
-I773926,Siddhanth Srivastava,CIS,Team8,MGR003,siddhanth.srivastava@sap.com,0,0,0,Developer,"Devanahalli Campuses, Bangalore",T1
-I774156,Arushi Mittal,CIS,Team8,MGR003,arushi.mittal@sap.com,0,0,0,Developer,"Whitefield, Bangalore",T1
-I780001,Singh Anurag,CIS,Team1,MGR001,singh.anurag@company.com,5,6,3,Developer,Bangalore,T3
-I780002,Kale Shreyas,CIS,Team1,MGR001,kale.shreyas@company.com,3,5,2,Developer,Bangalore,T2
-I780003,Prasad Priya,CIS,Team1,MGR001,prasad.priya@company.com,4,6,3,Data Scientist,Pune,T3
-I780004,Valiyaparambil Abhay,CIS,Team1,MGR001,valiyaparambil.abhay@company.com,6,7,4,Solution Architect,Mumbai,T3
-I780005,Singh Sehaj,CIS,Team1,MGR001,singh.sehaj@company.com,2,4,2,Developer,Delhi,T2
-I780006,Singhal Richa,CIS,Team1,MGR001,singhal.richa@company.com,7,8,5,Senior Developer,Bangalore,T4
-I780007,Bhateja Rohan,CIS,Team1,MGR001,bhateja.rohan@company.com,4,5,3,QA Engineer,Pune,T2
-I780008,Gupta Anushka,CIS,Team1,MGR001,gupta.anushka@company.com,3,6,3,Frontend Developer,Mumbai,T2
-I780009,Srivastav Anshi,CIS,Team1,MGR001,srivastav.anshi@company.com,5,7,4,Backend Developer,Bangalore,T3
-I780010,Mahajan Palak,CIS,Team1,MGR001,mahajan.palak@company.com,6,8,5,Full Stack Developer,Hyderabad,T3
-I780011,Pandey Pratibha,CIS,Team1,MGR001,pandey.pratibha@company.com,8,9,6,Architect,Pune,T4
-I780012,Tandon Prabhav,CIS,Team1,MGR001,tandon.prabhav@company.com,4,5,3,Developer,Delhi,T2
-I780013,Batra Puneet,CIS,Team1,MGR001,batra.puneet@company.com,7,8,5,Solution Architect,Bangalore,T4
-I780014,Abhinav Kumar,CIS,Team1,MGR001,abhinav.kumar@company.com,3,4,2,Developer,Mumbai,T2
-I780015,Sehrawat Prachi,CIS,Team1,MGR001,sehrawat.prachi@company.com,5,6,4,Data Scientist,Pune,T3
-I780016,Gaurav Arman,CIS,Team1,MGR001,gaurav.arman@company.com,6,7,5,AI/ML Engineer,Bangalore,T4
-I780017,Goswami Pratiksha,CIS,Team1,MGR001,goswami.pratiksha@company.com,2,4,2,Developer,Hyderabad,T2
-I780018,Gupta Shourya,CIS,Team1,MGR001,gupta.shourya@company.com,9,10,7,Senior Architect,Bangalore,T4
-I780019,Gupta Sonu,CIS,Team1,MGR001,gupta.sonu@company.com,4,5,3,QA Engineer,Mumbai,T2
-I780020,Nagpal Sumita,CIS,Team1,MGR001,nagpal.sumita@company.com,10,11,8,Principal Engineer,Pune,T5
-I780021,Jha Aakash,CIS,Team1,MGR001,jha.aakash@company.com,3,5,3,Developer,Delhi,T2
-I780022,Agrawal Ishita,CIS,Team6,MGR010,agrawal.ishita@company.com,4,6,3,Developer,Bangalore,T2
-I780023,Kashyap Vikas,CIS,Team6,MGR010,kashyap.vikas@company.com,7,8,5,Senior Developer,Pune,T4
-I780024,Rathor Ajay,CIS,Team6,MGR010,rathor.ajay@company.com,5,7,4,Solution Architect,Mumbai,T3
-I780025,Omer Madhu,CIS,Team6,MGR010,omer.madhu@company.com,3,5,3,QA Engineer,Hyderabad,T2
-I780026,Aggarwal Komal,CIS,Team6,MGR010,aggarwal.komal@company.com,6,7,5,Backend Developer,Bangalore,T3
-I780027,Patel Vikas,CIS,Team6,MGR010,patel.vikas@company.com,8,9,6,Architect,Delhi,T4
-I780028,Gupta Anshul,CIS,Team6,MGR010,gupta.anshul@company.com,4,6,4,Frontend Developer,Pune,T2
-I780029,Jain Akansha,CIS,Team6,MGR010,jain.akansha@company.com,5,7,4,Full Stack Developer,Bangalore,T3
-I780030,Gupta Vibhor,CIS,Team6,MGR010,gupta.vibhor@company.com,9,10,7,Principal Engineer,Mumbai,T5
-I780031,Gupta Nidhi,CIS,Team6,MGR010,gupta.nidhi@company.com,3,5,3,Data Scientist,Hyderabad,T2
-I780032,Gill Kanwardeep Singh,CIS,Team6,MGR010,gill.kanwardeep@company.com,7,8,5,DevOps Engineer,Bangalore,T4
-I780033,Dimri Yogesh,CIS,Team6,MGR010,dimri.yogesh@company.com,6,7,5,Solution Architect,Pune,T3
-I780034,Sethi Arpita,CIS,Team6,MGR010,sethi.arpita@company.com,4,6,3,Developer,Delhi,T2
-I780035,Pandey Vaishnavi,CIS,Team6,MGR010,pandey.vaishnavi@company.com,5,6,4,QA Engineer,Mumbai,T3
-I780036,Patel Dhyani,CIS,Team6,MGR010,patel.dhyani@company.com,3,5,3,Developer,Bangalore,T2
-I780037,Sikka Tanvi,CIS,Team6,MGR010,sikka.tanvi@company.com,7,8,6,Senior Developer,Hyderabad,T4
-I780038,Jain Nihar,CIS,Team6,MGR010,jain.nihar@company.com,4,6,4,Backend Developer,Pune,T2
-I780039,Mohit,CIS,Team6,MGR010,mohit@company.com,6,7,5,AI/ML Engineer,Bangalore,T3
-I780040,Agrawal Ankit,CIS,Team6,MGR010,agrawal.ankit@company.com,8,9,6,Architect,Mumbai,T4
-I780041,Agrawal Doyel,CIS,Team6,MGR010,agrawal.doyel@company.com,5,6,4,Data Scientist,Delhi,T3
-I780042,Verma Sushant,CIS,Team6,MGR010,verma.sushant@company.com,10,11,8,Principal Architect,Bangalore,T5
-I780043,Bakshi Kanishk,CIS,Team4,MGR008,bakshi.kanishk@company.com,4,6,3,Developer,Pune,T2
-I780044,Sinha Manish Kumar,CIS,Team4,MGR008,sinha.manish@company.com,7,8,5,Senior Developer,Mumbai,T4
-I780045,Sardana Garima,CIS,Team4,MGR008,sardana.garima@company.com,5,7,4,Solution Architect,Bangalore,T3
-I780046,Khandelwal Anumeha,CIS,Team4,MGR008,khandelwal.anumeha@company.com,3,5,3,QA Engineer,Hyderabad,T2
-I780047,Sondhi Hema,CIS,Team4,MGR008,sondhi.hema@company.com,6,7,5,Backend Developer,Delhi,T3
-I780048,Verma Lokesh,CIS,Team4,MGR008,verma.lokesh@company.com,8,9,6,Architect,Pune,T4
-I780049,Kumar Sachin,CIS,Team4,MGR008,kumar.sachin@company.com,4,6,4,Frontend Developer,Bangalore,T2
-I780050,Chaturvedi Shikha,CIS,Team4,MGR008,chaturvedi.shikha@company.com,5,7,4,Full Stack Developer,Mumbai,T3
-I780051,Vijay Kapil,CIS,Team4,MGR008,vijay.kapil@company.com,9,10,7,Principal Engineer,Hyderabad,T5
-I780052,Mohan Shikha,CIS,Team4,MGR008,mohan.shikha@company.com,3,5,3,Data Scientist,Bangalore,T2
-I780053,Sethi Manish,CIS,Team4,MGR008,sethi.manish@company.com,7,8,5,DevOps Engineer,Pune,T4
-I780054,Gupta Kapil Kumar,CIS,Team4,MGR008,gupta.kapil@company.com,6,7,5,Solution Architect,Delhi,T3
-I780055,Shrivastava Sumit Kumar,CIS,Team4,MGR008,shrivastava.sumit@company.com,10,11,8,Senior Architect,Mumbai,T5
-I780056,Kaleswaram Sumanth,CIS,Team1,MGR013,kaleswaram.sumanth@company.com,5,6,4,Developer,Bangalore,T3
-I780057,K Anushya,CIS,Team1,MGR013,k.anushya@company.com,3,5,3,Developer,Pune,T2
-I780058,Verma Chhavi,CIS,Team1,MGR013,verma.chhavi@company.com,4,6,3,Data Scientist,Mumbai,T2
-I780059,Sirdeshpande Manjunath,CIS,Team1,MGR013,sirdeshpande.manjunath@company.com,8,9,6,Architect,Bangalore,T4
-I780060,Mamta,CIS,Team1,MGR013,mamta@company.com,2,4,2,QA Engineer,Hyderabad,T2
-I780061,Kuncham Vamsi Krishna,CIS,Team1,MGR013,kuncham.vamsi@company.com,6,7,5,Backend Developer,Delhi,T3
-I780062,VK Vishal,CIS,Team1,MGR013,vk.vishal@company.com,7,8,5,Senior Developer,Pune,T4
-I780063,Veeraraj Vijaya Kumar,CIS,Team1,MGR013,veeraraj.vijaya@company.com,5,6,4,Solution Architect,Bangalore,T3
-I780064,Narasimha Murthy,CIS,Team1,MGR013,narasimha.murthy@company.com,9,10,7,Principal Engineer,Mumbai,T5
-I780065,Kumar Prabhanjan,CIS,Team1,MGR013,kumar.prabhanjan@company.com,4,5,3,Frontend Developer,Hyderabad,T2
-I780066,Annambira Kushalappa,CIS,Team1,MGR013,annambira.kushalappa@company.com,6,7,5,Full Stack Developer,Bangalore,T3
-I780067,Quadros Climus,CIS,Team1,MGR013,quadros.climus@company.com,3,5,3,Developer,Pune,T2
-I780068,Tiwari Kritika,CIS,Team1,MGR013,tiwari.kritika@company.com,5,6,4,Data Scientist,Delhi,T3
-I780069,Rawat Ajay,CIS,Team1,MGR013,rawat.ajay@company.com,7,8,5,DevOps Engineer,Mumbai,T4
-I780070,Tiwari Arvind Kumar,CIS,Team1,MGR013,tiwari.arvind@company.com,8,9,6,Architect,Bangalore,T4
-I780071,Kuswaha Vikas,CIS,Team1,MGR013,kuswaha.vikas@company.com,4,6,4,Developer,Hyderabad,T2
-I780072,Bhardwaj Anay,CIS,Team1,MGR013,bhardwaj.anay@company.com,6,7,5,Solution Architect,Pune,T3
-I780073,RS Puneetha,CIS,Team1,MGR013,rs.puneetha@company.com,3,5,3,QA Engineer,Bangalore,T2
-I780074,Padibandla Dayakar,CIS,Team1,MGR013,padibandla.dayakar@company.com,9,10,7,Senior Architect,Delhi,T5
-I780075,P Harshitha,CIS,Team1,MGR013,p.harshitha@company.com,2,4,2,Developer,Mumbai,T2
-I780076,M Abishek,CIS,Team1,MGR013,m.abishek@company.com,5,6,4,Backend Developer,Bangalore,T3
-I780077,Ganta Srinivas,CIS,Team1,MGR013,ganta.srinivas@company.com,7,8,6,AI/ML Engineer,Hyderabad,T4
-I780078,Nagaraju Sanjaykumar,CIS,Team1,MGR013,nagaraju.sanjaykumar@company.com,10,11,8,Principal Architect,Pune,T5
-I780079,Oberoi Ameesha,Analytics,Team1,MGR006,oberoi.ameesha@company.com,4,6,3,Developer,Bangalore,T2
-I780080,Komal,Analytics,Team1,MGR006,komal@company.com,3,5,3,QA Engineer,Mumbai,T2
-I780081,Kanne Akhileshwar,Analytics,Team1,MGR006,kanne.akhileshwar@company.com,6,7,5,Backend Developer,Delhi,T3
-I780082,Thiyagarajan Sridhar,Analytics,Team1,MGR006,thiyagarajan.sridhar@company.com,8,9,6,Architect,Pune,T4
-I780083,Dey Gourab,Analytics,Team1,MGR006,dey.gourab@company.com,5,6,4,Data Scientist,Bangalore,T3
-I780084,Channooru Raghava,Analytics,Team1,MGR006,channooru.raghava@company.com,7,8,5,Solution Architect,Hyderabad,T4
-I780085,Hiregange Venkatraman,Analytics,Team1,MGR006,hiregange.venkatraman@company.com,9,10,7,Principal Engineer,Mumbai,T5
-I780086,H Divyashree,Analytics,Team1,MGR006,h.divyashree@company.com,3,5,3,Frontend Developer,Bangalore,T2
-I780087,Jayaprakash Devika,Analytics,Team1,MGR006,jayaprakash.devika@company.com,4,6,4,Full Stack Developer,Pune,T2
-I780088,Nath Mayukh,Analytics,Team1,MGR006,nath.mayukh@company.com,6,7,5,AI/ML Engineer,Delhi,T3
-I780089,Kumar K Suchendra,Analytics,Team1,MGR006,kumar.suchendra@company.com,5,6,4,Data Scientist,Mumbai,T3
-I780090,Adavi Vinayak,Analytics,Team1,MGR006,adavi.vinayak@company.com,7,8,6,DevOps Engineer,Bangalore,T4
-I780091,Nagavelli Shashidhar,Analytics,Team1,MGR006,nagavelli.shashidhar@company.com,8,9,6,Architect,Hyderabad,T4
-I780092,Kaipravan Meethalevee,Analytics,Team1,MGR006,kaipravan.meethalevee@company.com,4,6,4,Developer,Pune,T2
-I780093,Patel Motishree,Analytics,Team1,MGR006,patel.motishree@company.com,6,7,5,Solution Architect,Bangalore,T3
-I780094,Agarwal Sanchari,Analytics,Team1,MGR006,agarwal.sanchari@company.com,3,5,3,QA Engineer,Mumbai,T2
-I780095,Kejriwal Saurabh,Analytics,Team1,MGR006,kejriwal.saurabh@company.com,9,10,7,Senior Architect,Delhi,T5
-I780096,Aredath Sithara V,Analytics,Team1,MGR006,aredath.sithara@company.com,5,6,4,Backend Developer,Pune,T3
-I780097,Kumari Ruchi,Analytics,Team1,MGR006,kumari.ruchi@company.com,4,5,3,Data Scientist,Bangalore,T2
-I780098,Sarkar Shubhojit,Analytics,Team1,MGR006,sarkar.shubhojit@company.com,7,8,6,AI/ML Engineer,Hyderabad,T4
-I780099,Pandey Aman,Analytics,Team1,MGR006,pandey.aman@company.com,6,7,5,Full Stack Developer,Mumbai,T3
-I780100,Jain Harsh,Analytics,Team1,MGR006,jain.harsh@company.com,8,9,6,Principal Engineer,Bangalore,T4
-I780101,Asapu Madhumita,Analytics,Team1,MGR006,asapu.madhumita@company.com,10,11,8,Distinguished Engineer,Pune,T5
-I780102,Taj Naveen,CIS,Team1,MGR014,taj.naveen@company.com,5,6,4,Developer,Bangalore,T3
-I780103,Atchyutuni Dutta Avinash,CIS,Team1,MGR014,atchyutuni.dutta@company.com,4,5,3,QA Engineer,Mumbai,T2
-I780104,Khandelwal Avijit,CIS,Team1,MGR014,khandelwal.avijit@company.com,7,8,5,Solution Architect,Delhi,T4
-I780105,Dubey Tripty,CIS,Team1,MGR014,dubey.tripty@company.com,3,5,3,Developer,Pune,T2
-I780106,Bedre Shital,CIS,Team1,MGR014,bedre.shital@company.com,6,7,5,Backend Developer,Hyderabad,T3
-I780107,Murugesan Karthiheyan,CIS,Team1,MGR014,murugesan.karthiheyan@company.com,8,9,6,Architect,Bangalore,T4
-I780108,Ojha Rupam,CIS,Team1,MGR014,ojha.rupam@company.com,5,6,4,Frontend Developer,Mumbai,T3
-I780109,Shrivastva Nancy,CIS,Team1,MGR014,shrivastva.nancy@company.com,4,6,3,Data Scientist,Delhi,T2
-I780110,Saxena Praveen,CIS,Team1,MGR014,saxena.praveen@company.com,9,10,7,Principal Engineer,Pune,T5
-I780111,Mittal Yash,CIS,Team1,MGR014,mittal.yash@company.com,3,5,3,Developer,Bangalore,T2
-I780112,Anil Chaithra,CIS,Team1,MGR014,anil.chaithra@company.com,6,7,5,Full Stack Developer,Hyderabad,T3
-I780113,M D Athira,CIS,Team1,MGR014,md.athira@company.com,7,8,6,AI/ML Engineer,Mumbai,T4
-I780114,Pandey Toolika,CIS,Team1,MGR014,pandey.toolika@company.com,5,6,4,DevOps Engineer,Bangalore,T3
-I780115,Dutta Tanuja,CIS,Team1,MGR014,dutta.tanuja@company.com,8,9,6,Architect,Delhi,T4
-I780116,Kulkarni Vikas Dayanand,CIS,Team1,MGR014,kulkarni.vikas@company.com,10,11,8,Distinguished Engineer,Pune,T5
-I780117,Ghosh Apurba,CIS,Team1,MGR014,ghosh.apurba@company.com,4,6,4,Solution Architect,Mumbai,T2
-I780118,Shenoy Ravindranath,CIS,Team1,MGR014,shenoy.ravindranath@company.com,9,10,7,Senior Architect,Bangalore,T5
-I780119,Krishnan Gokul Gowri,CIS,Team1,MGR014,krishnan.gokul@company.com,6,7,5,Backend Developer,Hyderabad,T3
-I780120,Vijayan Nair Lajilekha,CIS,Team1,MGR014,vijayan.lajilekha@company.com,7,8,6,Data Scientist,Delhi,T4
-I780121,M Santhosh,CIS,Team1,MGR014,m.santhosh@company.com,5,6,4,Developer,Pune,T3
-I780122,Rawat Aman,CIS,Team1,MGR015,rawat.aman@company.com,4,6,3,Developer,Bangalore,T2
-I780123,Patnaik Nidhi,CIS,Team1,MGR015,patnaik.nidhi@company.com,3,5,3,QA Engineer,Mumbai,T2
-I780124,Kaur Amritpal,CIS,Team1,MGR015,kaur.amritpal@company.com,6,7,5,Backend Developer,Delhi,T3
-I780125,Kaur Simran,CIS,Team1,MGR015,kaur.simran@company.com,7,8,5,Solution Architect,Pune,T4
-I780126,Miglani Nipunn,CIS,Team1,MGR015,miglani.nipunn@company.com,5,6,4,Frontend Developer,Hyderabad,T3
-I780127,Singh Dharambir,CIS,Team1,MGR015,singh.dharambir@company.com,8,9,6,Architect,Bangalore,T4
-I780128,Tayal Shubham,CIS,Team1,MGR015,tayal.shubham@company.com,4,5,3,Developer,Mumbai,T2
-I780129,Gupta Vanshika,CIS,Team1,MGR015,gupta.vanshika@company.com,6,7,5,Full Stack Developer,Delhi,T3
-I780130,K S Nikhila,CIS,Team1,MGR015,ks.nikhila@company.com,3,5,3,Data Scientist,Pune,T2
-I780131,Varshney Atul,CIS,Team1,MGR015,varshney.atul@company.com,9,10,7,Principal Engineer,Bangalore,T5
-I780132,Kondaveeti Venkata M,CIS,Team1,MGR015,kondaveeti.venkata@company.com,5,6,4,DevOps Engineer,Hyderabad,T3
-I780133,Sankhla Akshita,CIS,Team1,MGR015,sankhla.akshita@company.com,4,6,4,AI/ML Engineer,Mumbai,T2
-I780134,Aggarwal Priyanka,CIS,Team1,MGR015,aggarwal.priyanka@company.com,7,8,6,Solution Architect,Delhi,T4
-I780135,Rajpurohit Aayush,CIS,Team1,MGR015,rajpurohit.aayush@company.com,6,7,5,Backend Developer,Pune,T3
-I780136,Jain Deepesh,CIS,Team1,MGR015,jain.deepesh@company.com,8,9,6,Architect,Bangalore,T4
-I780137,Singh Jasmeet,CIS,Team1,MGR015,singh.jasmeet@company.com,5,6,4,Developer,Hyderabad,T3
-I780138,Ranjan Rishav,CIS,Team1,MGR015,ranjan.rishav@company.com,10,11,8,Distinguished Engineer,Mumbai,T5
-I780139,Bhamra Navjot,CIS,Team1,MGR015,bhamra.navjot@company.com,4,5,3,QA Engineer,Delhi,T2
-I780140,Goel Rishabh,CIS,Team1,MGR015,goel.rishabh@company.com,6,7,5,Full Stack Developer,Pune,T3
-I780141,Kulshreshtha Sachin,CIS,Team1,MGR015,kulshreshtha.sachin@company.com,9,10,7,Senior Architect,Bangalore,T5
-I780142,Pandey Ashish,CIS,Team1,MGR015,pandey.ashish@company.com,7,8,6,Principal Engineer,Hyderabad,T4
+"employeeId","name","team","subTeam","managerId","email","experience","totalSkills","totalProjects","role","location","tLevel"
+"I770144","Anjan Kumar","CIS","Team8","MGR003","anjan.kumar.s@sap.com","0.17","13","2","Developer","Whitefield, Bangalore","T1"
+"I770164","Kavita Joshi","CIS","Team2","MGR006","kavita.joshi@company.com","3","8","4","Data Scientist","Mumbai","T3"
+"I770165","Manoj Verma","CIS","Team2","MGR006","manoj.verma@company.com","3","9","5","AI/ML Engineer","Gurugram","T4"
+"I770166","Deepa Iyer","CIS","Team3","MGR006","deepa.iyer@company.com","13","7","3","Developer","Pune","T3"
+"I770167","Naveen Kumar","CIS","Team2","MGR006","naveen.kumar@company.com","3","6","4","Developer","Whitefield Bangalore","T2"
+"I770168","Swati Pillai","CIS","Team5","MGR006","swati.pillai@company.com","14","8","5","Backend Developer","Devanahalli Campuses Bangalore","T3"
+"I750145","Sreeja Reddy","CIS","Team8","MGR003","sreejareddykattekommula@sap.com","0.33","2","1","Developer","Whitefield, Bangalore","T1"
+"I346659","Rubal Gupta","CIS","Team8","MGR003","rubal.gupta@sap.com","0","2","0","Architect","Whitefield, Bangalore","T2"
+"I769086","Lakshmi Priya","CIS","Team8","MGR003","lakshmi.priya.a@sap.com","0.17","1","1","Data Scientist","Whitefield, Bangalore","T1"
+"I763161","Shrikrushna Kulkarni","CIS","Team8","MGR003","shrikrushna.kulkarni@sap.com","8.5","2","2","Developer","Whitefield, Bangalore","T1"
+"I755736","Farooque Abdullah","CIS","Team8","MGR003","farooque.abdullah@sap.com","2.4","1","1","Developer","Whitefield, Bangalore","T1"
+"I749085","Shajith Mujipurrahuman","CIS","Team8","MGR003","shajith.mujipurrahuman@sap.com","0.33","2","1","Developer","Whitefield, Bangalore","T1"
+"I753890","Bhargavi Sami","CIS","Team8","MGR003","bhargavi.sami@sap.com","3.4","1","1","Data Scientist","Whitefield, Bangalore","T1"
+"I755719","Swapnil Joshi","CIS","Team8","MGR003","swapnil.joshi02@sap.com","16","1","2","Developer","Whitefield, Bangalore","T1"
+"I763266","Dinkar Shinde","CIS","Team8","MGR003","dinkar.shinde@sap.com","4","1","1","Developer","Whitefield, Bangalore","T1"
+"I773926","Siddhanth Srivastava","CIS","Team8","MGR003","siddhanth.srivastava@sap.com","0","0","0","Developer","Devanahalli Campuses, Bangalore","T1"
+"I774156","Arushi Mittal","CIS","Team8","MGR003","arushi.mittal@sap.com","0","0","0","Developer","Whitefield, Bangalore","T1"
+"I780001","Singh Anurag","CIS","Team1","MGR001","singh.anurag@company.com","5","6","3","Developer","Bangalore","T3"
+"I780002","Kale Shreyas","CIS","Team1","MGR001","kale.shreyas@company.com","3","5","2","Developer","Bangalore","T2"
+"I780003","Prasad Priya","CIS","Team1","MGR001","prasad.priya@company.com","4","6","3","Data Scientist","Pune","T3"
+"I780004","Valiyaparambil Abhay","CIS","Team1","MGR001","valiyaparambil.abhay@company.com","6","7","4","Solution Architect","Mumbai","T3"
+"I780005","Singh Sehaj","CIS","Team1","MGR001","singh.sehaj@company.com","2","4","2","Developer","Delhi","T2"
+"I780006","Singhal Richa","CIS","Team1","MGR001","singhal.richa@company.com","7","8","5","Senior Developer","Bangalore","T4"
+"I780007","Bhateja Rohan","CIS","Team1","MGR001","bhateja.rohan@company.com","4","5","3","QA Engineer","Pune","T2"
+"I780008","Gupta Anushka","CIS","Team1","MGR001","gupta.anushka@company.com","3","6","3","Frontend Developer","Mumbai","T2"
+"I780009","Srivastav Anshi","CIS","Team1","MGR001","srivastav.anshi@company.com","5","7","4","Backend Developer","Bangalore","T3"
+"I780010","Mahajan Palak","CIS","Team1","MGR001","mahajan.palak@company.com","6","8","5","Full Stack Developer","Hyderabad","T3"
+"I780011","Pandey Pratibha","CIS","Team1","MGR001","pandey.pratibha@company.com","8","9","6","Architect","Pune","T4"
+"I780012","Tandon Prabhav","CIS","Team1","MGR001","tandon.prabhav@company.com","4","5","3","Developer","Delhi","T2"
+"I780013","Batra Puneet","CIS","Team1","MGR001","batra.puneet@company.com","7","8","5","Solution Architect","Bangalore","T4"
+"I780014","Abhinav Kumar","CIS","Team1","MGR001","abhinav.kumar@company.com","3","4","2","Developer","Mumbai","T2"
+"I780015","Sehrawat Prachi","CIS","Team1","MGR001","sehrawat.prachi@company.com","5","6","4","Data Scientist","Pune","T3"
+"I780016","Gaurav Arman","CIS","Team1","MGR001","gaurav.arman@company.com","6","7","5","AI/ML Engineer","Bangalore","T4"
+"I780017","Goswami Pratiksha","CIS","Team1","MGR001","goswami.pratiksha@company.com","2","4","2","Developer","Hyderabad","T2"
+"I780018","Gupta Shourya","CIS","Team1","MGR001","gupta.shourya@company.com","9","10","7","Senior Architect","Bangalore","T4"
+"I780019","Gupta Sonu","CIS","Team1","MGR001","gupta.sonu@company.com","4","5","3","QA Engineer","Mumbai","T2"
+"I780020","Nagpal Sumita","CIS","Team1","MGR001","nagpal.sumita@company.com","10","11","8","Principal Engineer","Pune","T5"
+"I780021","Jha Aakash","CIS","Team1","MGR001","jha.aakash@company.com","3","5","3","Developer","Delhi","T2"
+"I780022","Agrawal Ishita","CIS","Team6","MGR010","agrawal.ishita@company.com","4","6","3","Developer","Bangalore","T2"
+"I780023","Kashyap Vikas","CIS","Team6","MGR010","kashyap.vikas@company.com","7","8","5","Senior Developer","Pune","T4"
+"I780024","Rathor Ajay","CIS","Team6","MGR010","rathor.ajay@company.com","5","7","4","Solution Architect","Mumbai","T3"
+"I780025","Omer Madhu","CIS","Team6","MGR010","omer.madhu@company.com","3","5","3","QA Engineer","Hyderabad","T2"
+"I780026","Aggarwal Komal","CIS","Team6","MGR010","aggarwal.komal@company.com","6","7","5","Backend Developer","Bangalore","T3"
+"I780027","Patel Vikas","CIS","Team6","MGR010","patel.vikas@company.com","8","9","6","Architect","Delhi","T4"
+"I780028","Gupta Anshul","CIS","Team6","MGR010","gupta.anshul@company.com","4","6","4","Frontend Developer","Pune","T2"
+"I780029","Jain Akansha","CIS","Team6","MGR010","jain.akansha@company.com","5","7","4","Full Stack Developer","Bangalore","T3"
+"I780030","Gupta Vibhor","CIS","Team6","MGR010","gupta.vibhor@company.com","9","10","7","Principal Engineer","Mumbai","T5"
+"I780031","Gupta Nidhi","CIS","Team6","MGR010","gupta.nidhi@company.com","3","5","3","Data Scientist","Hyderabad","T2"
+"I780032","Gill Kanwardeep Singh","CIS","Team6","MGR010","gill.kanwardeep@company.com","7","8","5","DevOps Engineer","Bangalore","T4"
+"I780033","Dimri Yogesh","CIS","Team6","MGR010","dimri.yogesh@company.com","6","7","5","Solution Architect","Pune","T3"
+"I780034","Sethi Arpita","CIS","Team6","MGR010","sethi.arpita@company.com","4","6","3","Developer","Delhi","T2"
+"I780035","Pandey Vaishnavi","CIS","Team6","MGR010","pandey.vaishnavi@company.com","5","6","4","QA Engineer","Mumbai","T3"
+"I780036","Patel Dhyani","CIS","Team6","MGR010","patel.dhyani@company.com","3","5","3","Developer","Bangalore","T2"
+"I780037","Sikka Tanvi","CIS","Team6","MGR010","sikka.tanvi@company.com","7","8","6","Senior Developer","Hyderabad","T4"
+"I780038","Jain Nihar","CIS","Team6","MGR010","jain.nihar@company.com","4","6","4","Backend Developer","Pune","T2"
+"I780039","Mohit","CIS","Team6","MGR010","mohit@company.com","6","7","5","AI/ML Engineer","Bangalore","T3"
+"I780040","Agrawal Ankit","CIS","Team6","MGR010","agrawal.ankit@company.com","8","9","6","Architect","Mumbai","T4"
+"I780041","Agrawal Doyel","CIS","Team6","MGR010","agrawal.doyel@company.com","5","6","4","Data Scientist","Delhi","T3"
+"I780042","Verma Sushant","CIS","Team6","MGR010","verma.sushant@company.com","10","11","8","Principal Architect","Bangalore","T5"
+"I780043","Bakshi Kanishk","CIS","Team4","MGR008","bakshi.kanishk@company.com","4","6","3","Developer","Pune","T2"
+"I780044","Sinha Manish Kumar","CIS","Team4","MGR008","sinha.manish@company.com","7","8","5","Senior Developer","Mumbai","T4"
+"I780045","Sardana Garima","CIS","Team4","MGR008","sardana.garima@company.com","5","7","4","Solution Architect","Bangalore","T3"
+"I780046","Khandelwal Anumeha","CIS","Team4","MGR008","khandelwal.anumeha@company.com","3","5","3","QA Engineer","Hyderabad","T2"
+"I780047","Sondhi Hema","CIS","Team4","MGR008","sondhi.hema@company.com","6","7","5","Backend Developer","Delhi","T3"
+"I780048","Verma Lokesh","CIS","Team4","MGR008","verma.lokesh@company.com","8","9","6","Architect","Pune","T4"
+"I780049","Kumar Sachin","CIS","Team4","MGR008","kumar.sachin@company.com","4","6","4","Frontend Developer","Bangalore","T2"
+"I780050","Chaturvedi Shikha","CIS","Team4","MGR008","chaturvedi.shikha@company.com","5","7","4","Full Stack Developer","Mumbai","T3"
+"I780051","Vijay Kapil","CIS","Team4","MGR008","vijay.kapil@company.com","9","10","7","Principal Engineer","Hyderabad","T5"
+"I780052","Mohan Shikha","CIS","Team4","MGR008","mohan.shikha@company.com","3","5","3","Data Scientist","Bangalore","T2"
+"I780053","Sethi Manish","CIS","Team4","MGR008","sethi.manish@company.com","7","8","5","DevOps Engineer","Pune","T4"
+"I780054","Gupta Kapil Kumar","CIS","Team4","MGR008","gupta.kapil@company.com","6","7","5","Solution Architect","Delhi","T3"
+"I780055","Shrivastava Sumit Kumar","CIS","Team4","MGR008","shrivastava.sumit@company.com","10","11","8","Senior Architect","Mumbai","T5"
+"I780056","Kaleswaram Sumanth","CIS","Team1","MGR013","kaleswaram.sumanth@company.com","5","6","4","Developer","Bangalore","T3"
+"I780057","K Anushya","CIS","Team1","MGR013","k.anushya@company.com","3","5","3","Developer","Pune","T2"
+"I780058","Verma Chhavi","CIS","Team1","MGR013","verma.chhavi@company.com","4","6","3","Data Scientist","Mumbai","T2"
+"I780059","Sirdeshpande Manjunath","CIS","Team1","MGR013","sirdeshpande.manjunath@company.com","8","9","6","Architect","Bangalore","T4"
+"I780060","Mamta","CIS","Team1","MGR013","mamta@company.com","2","4","2","QA Engineer","Hyderabad","T2"
+"I780061","Kuncham Vamsi Krishna","CIS","Team1","MGR013","kuncham.vamsi@company.com","6","7","5","Backend Developer","Delhi","T3"
+"I780062","VK Vishal","CIS","Team1","MGR013","vk.vishal@company.com","7","8","5","Senior Developer","Pune","T4"
+"I780063","Veeraraj Vijaya Kumar","CIS","Team1","MGR013","veeraraj.vijaya@company.com","5","6","4","Solution Architect","Bangalore","T3"
+"I780064","Narasimha Murthy","CIS","Team1","MGR013","narasimha.murthy@company.com","9","10","7","Principal Engineer","Mumbai","T5"
+"I780065","Kumar Prabhanjan","CIS","Team1","MGR013","kumar.prabhanjan@company.com","4","5","3","Frontend Developer","Hyderabad","T2"
+"I780066","Annambira Kushalappa","CIS","Team1","MGR013","annambira.kushalappa@company.com","6","7","5","Full Stack Developer","Bangalore","T3"
+"I780067","Quadros Climus","CIS","Team1","MGR013","quadros.climus@company.com","3","5","3","Developer","Pune","T2"
+"I780068","Tiwari Kritika","CIS","Team1","MGR013","tiwari.kritika@company.com","5","6","4","Data Scientist","Delhi","T3"
+"I780069","Rawat Ajay","CIS","Team1","MGR013","rawat.ajay@company.com","7","8","5","DevOps Engineer","Mumbai","T4"
+"I780070","Tiwari Arvind Kumar","CIS","Team1","MGR013","tiwari.arvind@company.com","8","9","6","Architect","Bangalore","T4"
+"I780071","Kuswaha Vikas","CIS","Team1","MGR013","kuswaha.vikas@company.com","4","6","4","Developer","Hyderabad","T2"
+"I780072","Bhardwaj Anay","CIS","Team1","MGR013","bhardwaj.anay@company.com","6","7","5","Solution Architect","Pune","T3"
+"I780073","RS Puneetha","CIS","Team1","MGR013","rs.puneetha@company.com","3","5","3","QA Engineer","Bangalore","T2"
+"I780074","Padibandla Dayakar","CIS","Team1","MGR013","padibandla.dayakar@company.com","9","10","7","Senior Architect","Delhi","T5"
+"I780075","P Harshitha","CIS","Team1","MGR013","p.harshitha@company.com","2","4","2","Developer","Mumbai","T2"
+"I780076","M Abishek","CIS","Team1","MGR013","m.abishek@company.com","5","6","4","Backend Developer","Bangalore","T3"
+"I780077","Ganta Srinivas","CIS","Team1","MGR013","ganta.srinivas@company.com","7","8","6","AI/ML Engineer","Hyderabad","T4"
+"I780078","Nagaraju Sanjaykumar","CIS","Team1","MGR013","nagaraju.sanjaykumar@company.com","10","11","8","Principal Architect","Pune","T5"
+"I780079","Oberoi Ameesha","Analytics","Team1","MGR006","oberoi.ameesha@company.com","4","6","3","Developer","Bangalore","T2"
+"I780080","Komal","Analytics","Team1","MGR006","komal@company.com","3","5","3","QA Engineer","Mumbai","T2"
+"I780081","Kanne Akhileshwar","Analytics","Team1","MGR006","kanne.akhileshwar@company.com","6","7","5","Backend Developer","Delhi","T3"
+"I780082","Thiyagarajan Sridhar","Analytics","Team1","MGR006","thiyagarajan.sridhar@company.com","8","9","6","Architect","Pune","T4"
+"I780083","Dey Gourab","Analytics","Team1","MGR006","dey.gourab@company.com","5","6","4","Data Scientist","Bangalore","T3"
+"I780084","Channooru Raghava","Analytics","Team1","MGR006","channooru.raghava@company.com","7","8","5","Solution Architect","Hyderabad","T4"
+"I780085","Hiregange Venkatraman","Analytics","Team1","MGR006","hiregange.venkatraman@company.com","9","10","7","Principal Engineer","Mumbai","T5"
+"I780086","H Divyashree","Analytics","Team1","MGR006","h.divyashree@company.com","3","5","3","Frontend Developer","Bangalore","T2"
+"I780087","Jayaprakash Devika","Analytics","Team1","MGR006","jayaprakash.devika@company.com","4","6","4","Full Stack Developer","Pune","T2"
+"I780088","Nath Mayukh","Analytics","Team1","MGR006","nath.mayukh@company.com","6","7","5","AI/ML Engineer","Delhi","T3"
+"I780089","Kumar K Suchendra","Analytics","Team1","MGR006","kumar.suchendra@company.com","5","6","4","Data Scientist","Mumbai","T3"
+"I780090","Adavi Vinayak","Analytics","Team1","MGR006","adavi.vinayak@company.com","7","8","6","DevOps Engineer","Bangalore","T4"
+"I780091","Nagavelli Shashidhar","Analytics","Team1","MGR006","nagavelli.shashidhar@company.com","8","9","6","Architect","Hyderabad","T4"
+"I780092","Kaipravan Meethalevee","Analytics","Team1","MGR006","kaipravan.meethalevee@company.com","4","6","4","Developer","Pune","T2"
+"I780093","Patel Motishree","Analytics","Team1","MGR006","patel.motishree@company.com","6","7","5","Solution Architect","Bangalore","T3"
+"I780094","Agarwal Sanchari","Analytics","Team1","MGR006","agarwal.sanchari@company.com","3","5","3","QA Engineer","Mumbai","T2"
+"I780095","Kejriwal Saurabh","Analytics","Team1","MGR006","kejriwal.saurabh@company.com","9","10","7","Senior Architect","Delhi","T5"
+"I780096","Aredath Sithara V","Analytics","Team1","MGR006","aredath.sithara@company.com","5","6","4","Backend Developer","Pune","T3"
+"I780097","Kumari Ruchi","Analytics","Team1","MGR006","kumari.ruchi@company.com","4","5","3","Data Scientist","Bangalore","T2"
+"I780098","Sarkar Shubhojit","Analytics","Team1","MGR006","sarkar.shubhojit@company.com","7","8","6","AI/ML Engineer","Hyderabad","T4"
+"I780099","Pandey Aman","Analytics","Team1","MGR006","pandey.aman@company.com","6","7","5","Full Stack Developer","Mumbai","T3"
+"I780100","Jain Harsh","Analytics","Team1","MGR006","jain.harsh@company.com","8","9","6","Principal Engineer","Bangalore","T4"
+"I780101","Asapu Madhumita","Analytics","Team1","MGR006","asapu.madhumita@company.com","10","11","8","Distinguished Engineer","Pune","T5"
+"I780102","Taj Naveen","CIS","Team1","MGR014","taj.naveen@company.com","5","6","4","Developer","Bangalore","T3"
+"I780103","Atchyutuni Dutta Avinash","CIS","Team1","MGR014","atchyutuni.dutta@company.com","4","5","3","QA Engineer","Mumbai","T2"
+"I780104","Khandelwal Avijit","CIS","Team1","MGR014","khandelwal.avijit@company.com","7","8","5","Solution Architect","Delhi","T4"
+"I780105","Dubey Tripty","CIS","Team1","MGR014","dubey.tripty@company.com","3","5","3","Developer","Pune","T2"
+"I780106","Bedre Shital","CIS","Team1","MGR014","bedre.shital@company.com","6","7","5","Backend Developer","Hyderabad","T3"
+"I780107","Murugesan Karthiheyan","CIS","Team1","MGR014","murugesan.karthiheyan@company.com","8","9","6","Architect","Bangalore","T4"
+"I780108","Ojha Rupam","CIS","Team1","MGR014","ojha.rupam@company.com","5","6","4","Frontend Developer","Mumbai","T3"
+"I780109","Shrivastva Nancy","CIS","Team1","MGR014","shrivastva.nancy@company.com","4","6","3","Data Scientist","Delhi","T2"
+"I780110","Saxena Praveen","CIS","Team1","MGR014","saxena.praveen@company.com","9","10","7","Principal Engineer","Pune","T5"
+"I780111","Mittal Yash","CIS","Team1","MGR014","mittal.yash@company.com","3","5","3","Developer","Bangalore","T2"
+"I780112","Anil Chaithra","CIS","Team1","MGR014","anil.chaithra@company.com","6","7","5","Full Stack Developer","Hyderabad","T3"
+"I780113","M D Athira","CIS","Team1","MGR014","md.athira@company.com","7","8","6","AI/ML Engineer","Mumbai","T4"
+"I780114","Pandey Toolika","CIS","Team1","MGR014","pandey.toolika@company.com","5","6","4","DevOps Engineer","Bangalore","T3"
+"I780115","Dutta Tanuja","CIS","Team1","MGR014","dutta.tanuja@company.com","8","9","6","Architect","Delhi","T4"
+"I780116","Kulkarni Vikas Dayanand","CIS","Team1","MGR014","kulkarni.vikas@company.com","10","11","8","Distinguished Engineer","Pune","T5"
+"I780117","Ghosh Apurba","CIS","Team1","MGR014","ghosh.apurba@company.com","4","6","4","Solution Architect","Mumbai","T2"
+"I780118","Shenoy Ravindranath","CIS","Team1","MGR014","shenoy.ravindranath@company.com","9","10","7","Senior Architect","Bangalore","T5"
+"I780119","Krishnan Gokul Gowri","CIS","Team1","MGR014","krishnan.gokul@company.com","6","7","5","Backend Developer","Hyderabad","T3"
+"I780120","Vijayan Nair Lajilekha","CIS","Team1","MGR014","vijayan.lajilekha@company.com","7","8","6","Data Scientist","Delhi","T4"
+"I780121","M Santhosh","CIS","Team1","MGR014","m.santhosh@company.com","5","6","4","Developer","Pune","T3"
+"I780122","Rawat Aman","CIS","Team1","MGR015","rawat.aman@company.com","4","6","3","Developer","Bangalore","T2"
+"I780123","Patnaik Nidhi","CIS","Team1","MGR015","patnaik.nidhi@company.com","3","5","3","QA Engineer","Mumbai","T2"
+"I780124","Kaur Amritpal","CIS","Team1","MGR015","kaur.amritpal@company.com","6","7","5","Backend Developer","Delhi","T3"
+"I780125","Kaur Simran","CIS","Team1","MGR015","kaur.simran@company.com","7","8","5","Solution Architect","Pune","T4"
+"I780126","Miglani Nipunn","CIS","Team1","MGR015","miglani.nipunn@company.com","5","6","4","Frontend Developer","Hyderabad","T3"
+"I780127","Singh Dharambir","CIS","Team1","MGR015","singh.dharambir@company.com","8","9","6","Architect","Bangalore","T4"
+"I780128","Tayal Shubham","CIS","Team1","MGR015","tayal.shubham@company.com","4","5","3","Developer","Mumbai","T2"
+"I780129","Gupta Vanshika","CIS","Team1","MGR015","gupta.vanshika@company.com","6","7","5","Full Stack Developer","Delhi","T3"
+"I780130","K S Nikhila","CIS","Team1","MGR015","ks.nikhila@company.com","3","5","3","Data Scientist","Pune","T2"
+"I780131","Varshney Atul","CIS","Team1","MGR015","varshney.atul@company.com","9","10","7","Principal Engineer","Bangalore","T5"
+"I780132","Kondaveeti Venkata M","CIS","Team1","MGR015","kondaveeti.venkata@company.com","5","6","4","DevOps Engineer","Hyderabad","T3"
+"I780133","Sankhla Akshita","CIS","Team1","MGR015","sankhla.akshita@company.com","4","6","4","AI/ML Engineer","Mumbai","T2"
+"I780134","Aggarwal Priyanka","CIS","Team1","MGR015","aggarwal.priyanka@company.com","7","8","6","Solution Architect","Delhi","T4"
+"I780135","Rajpurohit Aayush","CIS","Team1","MGR015","rajpurohit.aayush@company.com","6","7","5","Backend Developer","Pune","T3"
+"I780136","Jain Deepesh","CIS","Team1","MGR015","jain.deepesh@company.com","8","9","6","Architect","Bangalore","T4"
+"I780137","Singh Jasmeet","CIS","Team1","MGR015","singh.jasmeet@company.com","5","6","4","Developer","Hyderabad","T3"
+"I780138","Ranjan Rishav","CIS","Team1","MGR015","ranjan.rishav@company.com","10","11","8","Distinguished Engineer","Mumbai","T5"
+"I780139","Bhamra Navjot","CIS","Team1","MGR015","bhamra.navjot@company.com","4","5","3","QA Engineer","Delhi","T2"
+"I780140","Goel Rishabh","CIS","Team1","MGR015","goel.rishabh@company.com","6","7","5","Full Stack Developer","Pune","T3"
+"I780141","Kulshreshtha Sachin","CIS","Team1","MGR015","kulshreshtha.sachin@company.com","9","10","7","Senior Architect","Bangalore","T5"
+"I780142","Pandey Ashish","CIS","Team1","MGR015","pandey.ashish@company.com","7","8","6","Principal Engineer","Hyderabad","T4"
+"MGR001","Jain Pawan","CIS","Team1","SMGR01","jain.pawan@company.com","0","15","8","Manager","Bangalore","M1"
+"MGR002","V B Adhithya","CIS","Team2","SMGR01","adhithya@company.com","0","16","8","Manager","Bangalore","M1"
+"MGR003","Puja K","CIS","Team1","SMGR01","pujak@sap.com","0","24","12","Manager","Bangalore","M1"
+"MGR006","Fazal Ilahi","CIS","Team1","SMGR01","fazal.ilahi@company.com","0","16","8","Manager","Bangalore","M1"
+"MGR007","Arumugam Surendren","CIS","Team3","SMGR01","arumugam.surendren@company.com","0","14","7","Manager","Bangalore","M1"
+"MGR008","Singh Agya Pal","CIS","Team4","SMGR01","singh.agyapal@company.com","0","17","9","Manager","Bangalore","M1"
+"MGR009","Kumar Rakesh","CIS","Team5","SMGR01","kumar.rakesh@company.com","0","13","7","Manager","Bangalore","M1"
+"MGR010","Garg Abhishek","CIS","Team6","SMGR01","garg.abhishek@company.com","0","19","10","Manager","Bangalore","M1"
+"MGR011","Ramanathan Srinivasan","CIS","Team7","SMGR01","ramanathan.srinivasan@company.com","0","15","8","Manager","Bangalore","M1"
+"MGR012","Kumar V Chendil","CIS","Team8","SMGR01","kumar.chendil@company.com","0","16","8","Manager","Bangalore","M1"
+"MGR013","Tadse Sachin Muralidhar","CIS","Team1","SMGR01","tadse.sachin@company.com","0","20","10","Manager","Bangalore","M1"
+"MGR014","Ram Deepak","CIS","Team1","SMGR01","ram.deepak@company.com","0","18","9","Manager","Bangalore","M1"
+"MGR015","Janawa Hemlata","CIS","Team1","SMGR01","janawa.hemlata@company.com","0","17","9","Manager","Bangalore","M1"
+"MGR016","Mohamed Inayath","CIS","Team1","SMGR01","mohamed.inayath@company.com","0","14","7","Manager","Bangalore","M1"
+"SMGR01","Nirmala Shettar","Corporate","Executive","","nirmala.shettar@company.com","0","0","0","SeniorManager","Bangalore","SM1"

@@ -1,26 +1,22 @@
 namespace skillsphere;
 
-using { cuid, managed } from '@sap/cds/common';
-
 /**
- * Users entity - Authentication and authorization
+ * Users entity - Identity and authorization only
  */
 entity Users {
   key id : String;
-  name : String;
-  password : String;
   role : String;
-  team : String;
-  subTeam : String;
-  managerId : String;
+  isActive : Boolean default true;
 }
 
 /**
- * Employees entity - Employee master data
+ * Employees entity - Unified people master data
+ * Contains employees, managers, and senior managers.
  */
 entity Employees {
   key employeeId : String;
   name : String;
+  role : String;
   team : String;
   subTeam : String;
   managerId : String;
@@ -28,30 +24,22 @@ entity Employees {
   experience : Decimal(5,2) default 0;
   totalSkills : Integer default 0;
   totalProjects : Integer default 0;
-  role : String;
   location : String;
   tLevel : String;
+  gradeLevel : String;
+
+  user : Association to one Users on user.id = $self.employeeId;
+  manager : Association to one Employees on manager.employeeId = $self.managerId;
+  reports : Composition of many Employees on reports.managerId = $self.employeeId;
+
   skills : Composition of many Skills on skills.employeeId = $self.employeeId;
   projects : Composition of many Projects on projects.employeeId = $self.employeeId;
   currentProjects : Composition of many CurrentProjects on currentProjects.employeeId = $self.employeeId;
+  initiatives : Composition of many Initiatives on initiatives.employeeId = $self.employeeId;
   caiaUtilization : Composition of many CAIAUtilization on caiaUtilization.employeeId = $self.employeeId;
   pocUtilization : Composition of many POCUtilization on pocUtilization.employeeId = $self.employeeId;
   certifications : Composition of many Certifications on certifications.employeeId = $self.employeeId;
   profile : Association to Profiles on profile.employeeId = $self.employeeId;
-}
-
-/**
- * Managers entity - Manager master data
- */
-entity Managers {
-  key managerId : String;
-  name : String;
-  team : String;
-  subTeam : String;
-  email : String;
-  totalSkills : Integer default 0;
-  totalProjects : Integer default 0;
-  specialization : String;
 }
 
 /**
@@ -85,6 +73,7 @@ entity Projects {
   accountExecutiveManager : String;
   lineManagerPOC : String;
   projectOrchestrator : String;
+  addedByManager : String;
   employee : Association to Employees on employee.employeeId = employeeId;
 }
 
@@ -97,6 +86,25 @@ entity Profiles {
   role : String;
   location : String;
   tLevel : String;
+  gradeLevel : String;
+  lastUpdated : DateTime;
+  employee : Association to Employees on employee.employeeId = employeeId;
+}
+
+/**
+ * Initiatives entity - Strategic initiatives and organizational projects
+ */
+entity Initiatives {
+  key initiativeId : String;
+  employeeId : String;
+  initiativeName : String;
+  description : String;
+  startDate : Date;
+  endDate : Date;
+  hoursPerDay : Decimal(5,2);
+  status : String default 'Active';
+  type : String default 'Initiative';
+  createdAt : DateTime;
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;
 }

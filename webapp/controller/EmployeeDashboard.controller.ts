@@ -72,8 +72,10 @@ export default class EmployeeDashboard extends Controller {
                 let managerName = "";
                 if (employee.managerId) {
                     try {
-                        const mgrBinding = oDataModel.bindList("/Managers");
-                        mgrBinding.filter([new Filter("managerId", FilterOperator.EQ, employee.managerId)]);
+                        const mgrBinding = oDataModel.bindList("/Employees");
+                        mgrBinding.filter([
+                            new Filter("employeeId", FilterOperator.EQ, employee.managerId)
+                        ]);
                         const mgrContexts = await mgrBinding.requestContexts(0, 1);
                         if (mgrContexts.length > 0) {
                             const manager = mgrContexts[0].getObject();

@@ -9,9 +9,8 @@ service SkillSphereService {
   // User Management
   entity Users as projection on skillsphere.Users;
   
-  // Employee & Manager Management
+  // People Management
   entity Employees as projection on skillsphere.Employees;
-  entity Managers as projection on skillsphere.Managers;
   
   // Skills & Projects
   entity Skills as projection on skillsphere.Skills;
@@ -20,6 +19,7 @@ service SkillSphereService {
   
   // Utilization Tracking
   entity CurrentProjects as projection on skillsphere.CurrentProjects;
+  entity Initiatives as projection on skillsphere.Initiatives;
   entity CAIAUtilization as projection on skillsphere.CAIAUtilization;
   entity POCUtilization as projection on skillsphere.POCUtilization;
   

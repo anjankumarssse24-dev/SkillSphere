@@ -32,7 +32,8 @@ export default class Landing extends Controller {
     private async loadManagers(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await listBinding.requestContexts();
             const managers = contexts.map((context: any) => context.getObject());
@@ -125,13 +126,12 @@ export default class Landing extends Controller {
         
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const entitySet = role === "Employee" ? "/Employees" : "/Managers";
-            const listBinding = oDataModel.bindList(entitySet);
+            const listBinding = oDataModel.bindList("/Employees");
             
             const contexts = await listBinding.requestContexts();
             const existingIds = contexts.map((context: any) => {
                 const data = context.getObject();
-                return role === "Employee" ? data.employeeId : data.managerId;
+                return data.employeeId;
             });
             
             // Find next available number
@@ -289,12 +289,8 @@ export default class Landing extends Controller {
             const usersBinding = oDataModel.bindList("/Users");
             const userData = {
                 id: employeeId,
-                name: name,
-                password: password,
                 role: 'Employee',
-                team: team,
-                subTeam: subTeam,
-                managerId: managerId
+                isActive: true
             };
             usersBinding.create(userData);
             console.log("✅ User created");
@@ -366,27 +362,28 @@ export default class Landing extends Controller {
             const usersBinding = oDataModel.bindList("/Users");
             const userData = {
                 id: managerId,
-                name: name,
-                password: password,
                 role: 'Manager',
-                team: team,
-                subTeam: subTeam,
-                managerId: '' // Managers don't have managers
+                isActive: true
             };
             usersBinding.create(userData);
             console.log("✅ User created");
 
-            // 2. Add to Managers
-            const managersBinding = oDataModel.bindList("/Managers");
+            // 2. Add manager as a row in unified Employees entity
+            const managersBinding = oDataModel.bindList("/Employees");
             const managerData = {
-                managerId: managerId,
+                employeeId: managerId,
                 name: name,
+                role: 'Manager',
                 team: team,
                 subTeam: subTeam,
+                managerId: '',
                 email: email,
-                totalSkills: experience * 2, // Estimate based on experience
-                totalProjects: experience, // Estimate based on experience
-                specialization: managementArea
+                experience: experience,
+                totalSkills: experience * 2,
+                totalProjects: experience,
+                location: 'Bangalore',
+                tLevel: 'T3',
+                gradeLevel: 'L1'
             };
             managersBinding.create(managerData);
             console.log("✅ Manager created");

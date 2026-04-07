@@ -7,8 +7,8 @@ const AICoreClient = require('./utils/aicore-client-orchestration');
 
 module.exports = cds.service.impl(async function() {
   const { 
-    Users, Employees, Managers, Skills, Projects, Profiles,
-    CurrentProjects, CAIAUtilization, POCUtilization, Certifications
+    Users, Employees, Skills, Projects, Profiles,
+    CurrentProjects, Initiatives, CAIAUtilization, POCUtilization, Certifications
   } = this.entities;
 
   console.log('🚀 Initializing SkillSphere...');
@@ -100,7 +100,11 @@ ${projects.length ? projects.map(p =>
         return req.reject(400, 'managerId and query are required');
       }
 
-      const team = await SELECT.from(Employees).where({ managerId });
+      //CHECK:- check how the AI assistant will work for Nirmala 
+      const team = await SELECT.from(Employees).where({
+        managerId,
+        role: 'Employee'
+      });
 
       const teamIds = team.map(e => e.employeeId);
 
@@ -171,30 +175,28 @@ ${projects.map(p =>
         return req.reject(400, 'seniorManagerId and query are required');
       }
 
-      // Get all manager users reporting to the senior manager
-      // In Users table, managers have role='Manager' and their managerId field points to SMGR
-      const managerUsers = await SELECT.from(Users).where({ 
-        role: 'Manager', 
-        managerId: seniorManagerId 
+      // Managers directly reporting to this senior manager
+      const managers = await SELECT.from(Employees).where({
+        managerId: seniorManagerId,
+        role: 'Manager'
       });
-      
-      console.log(`Found ${managerUsers.length} manager users reporting to ${seniorManagerId}`);
-      
-      // Get manager IDs from the user records
-      const managerIds = managerUsers.map(mu => mu.id);
-      
-      // Get full manager details from Managers table
-      const managers = managerIds.length > 0 
-        ? await SELECT.from(Managers).where({ managerId: { in: managerIds } })
+
+      const managerIds = managers.map(m => m.employeeId);
+
+      // Employees directly under senior manager + employees under child managers
+      const directEmployees = await SELECT.from(Employees).where({
+        managerId: seniorManagerId,
+        role: 'Employee'
+      });
+
+      const indirectEmployees = managerIds.length > 0
+        ? await SELECT.from(Employees).where({
+            managerId: { in: managerIds },
+            role: 'Employee'
+          })
         : [];
-      
-      // Get all employees (both direct and indirect reports)
-      const allEmployees = await SELECT.from(Employees);
-      
-      // Filter employees under this senior manager's organization
-      const orgEmployees = allEmployees.filter(e => 
-        managerIds.includes(e.managerId) || e.managerId === seniorManagerId
-      );
+
+      const orgEmployees = [...directEmployees, ...indirectEmployees];
 
       const employeeIds = orgEmployees.map(e => e.employeeId);
 
@@ -236,7 +238,7 @@ ${context}
 ORGANIZATIONAL STRUCTURE:
 Managers (${managers.length}):
 ${managers.map(m =>
-  `- ${m.name} (${m.managerId}, ${m.team} - ${m.subTeam})`).join('\n')}
+  `- ${m.name} (${m.employeeId}, ${m.team} - ${m.subTeam})`).join('\n')}
 
 Employees (${orgEmployees.length}):
 ${orgEmployees.slice(0, 50).map(e =>
@@ -280,15 +282,31 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    */
   this.on('login', async (req) => {
     const { username, password } = req.data;
-    const user = await SELECT.one.from(Users).where({ username, password });
+    if (!username) {
+      return { success: false, user: null, message: 'Username is required' };
+    }
+
+    // Password-based login is deprecated; Users now stores identity/auth metadata only.
+    const user = await SELECT.one.from(Users).where({ id: username });
     
     if (user) {
+      const person = await SELECT.one.from(Employees).where({ employeeId: user.id });
+
       // Clear chat history for this user on login to start fresh
-      const userId = user.role === 'Employee' ? user.username : user.username;
+      const userId = user.id;
       try { getAIClient().clearUserChat(userId); } catch(_) {}
-      console.log(`🔐 User logged in: ${user.username} (${user.role}), chat cleared`);
+      console.log(`🔐 User logged in: ${user.id} (${user.role}), chat cleared`);
       
-      return { success: true, user, message: 'Login successful' };
+      return {
+        success: true,
+        user: {
+          id: user.id,
+          name: person?.name || user.id,
+          role: user.role,
+          team: person?.team || ''
+        },
+        message: 'Login successful'
+      };
     }
     return { success: false, user: null, message: 'Invalid credentials' };
   });
