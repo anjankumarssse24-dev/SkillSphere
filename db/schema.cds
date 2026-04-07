@@ -29,7 +29,7 @@ entity Employees {
   gradeLevel : String;
 
   user : Association to one Users on user.id = $self.employeeId;
-  manager : Association to one Employees on manager.employeeId = $self.managerId;
+  manager : Association to one Employees on manager.employeeId = $self.managerId; //ask if keep
   reports : Composition of many Employees on reports.managerId = $self.employeeId;
 
   skills : Composition of many Skills on skills.employeeId = $self.employeeId;

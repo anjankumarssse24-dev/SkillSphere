@@ -498,6 +498,8 @@
                                             <m:VBox width="45%">
                                                 <m:Label text="T-Level:" class="sapUiTinyMarginBottom"/>
                                                 <m:Text id="dialogEmployeeTLevel" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Grade Level:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="dialogEmployeeGradeLevel" text="" class="sapUiMediumMarginBottom"/>
                                                 <m:Label text="Last Updated:" class="sapUiTinyMarginBottom"/>
                                                 <m:Text id="dialogEmployeeLastUpdated" text="" class="sapUiMediumMarginBottom"/>
                                             </m:VBox>

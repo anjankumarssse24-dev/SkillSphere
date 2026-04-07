@@ -1849,6 +1849,7 @@ export default class ManagerDashboard extends Controller {
             (this.byId("dialogEmployeeRole") as any)?.setText(profileData.role || 'N/A');
             (this.byId("dialogEmployeeLocation") as any)?.setText(profileData.location || 'N/A');
             (this.byId("dialogEmployeeTLevel") as any)?.setText(profileData.tLevel || 'N/A');
+            (this.byId("dialogEmployeeGradeLevel") as any)?.setText(profileData.gradeLevel || 'N/A');
             (this.byId("dialogEmployeeLastUpdated") as any)?.setText(profileData.lastUpdated ? new Date(profileData.lastUpdated).toLocaleDateString() : 'N/A');
 
             // Populate current status

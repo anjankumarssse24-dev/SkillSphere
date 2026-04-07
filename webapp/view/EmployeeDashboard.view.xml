@@ -147,6 +147,27 @@
                                             </m:VBox>
                                         </m:FlexBox>
 
+                                        <!-- Row 3: Grade Level with proper spacing -->
+                                        <m:FlexBox id="profileRow3" 
+                                            direction="Row" 
+                                            justifyContent="Start" 
+                                            class="sapUiSmallMarginBottom"
+                                            width="100%">
+                                            <!-- Grade Level Field -->
+                                            <m:VBox id="gradeLevelBox" width="48%">
+                                                <m:Label id="gradeLevelLabel" text="Grade Level" class="sapUiTinyMarginBottom" required="true"/>
+                                                <m:Select id="gradeLevelSelect" 
+                                                    selectedKey="{profile>/gradeLevel}" 
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                                    <core:Item key="" text="-- Select Grade Level --"/>
+                                                    <core:Item key="L1" text="L1"/>
+                                                    <core:Item key="L2" text="L2"/>
+                                                    <core:Item key="L3" text="L3"/>
+                                                </m:Select>
+                                            </m:VBox>
+                                        </m:FlexBox>
+
                                         <!-- Action Button -->
                                         <m:FlexBox id="profileActionBox" 
                                             justifyContent="End" 

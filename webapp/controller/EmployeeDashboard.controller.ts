@@ -193,7 +193,8 @@ export default class EmployeeDashboard extends Controller {
                     specialization: "",
                     role: "",
                     location: "",
-                    tLevel: ""
+                    tLevel: "",
+                    gradeLevel: ""
                 };
                 this.getView()?.setModel(new JSONModel(emptyProfile), "profile");
             }
@@ -1404,6 +1405,11 @@ export default class EmployeeDashboard extends Controller {
                 return;
             }
 
+            if (!profileData?.gradeLevel) {
+                MessageToast.show("Please select your Grade Level");
+                return;
+            }
+
             // Add employeeId to profile data
             const profileToSave = {
                 ...profileData,
@@ -1420,7 +1426,8 @@ export default class EmployeeDashboard extends Controller {
                     role: profileData.role,
                     location: profileData.location,
                     tLevel: profileData.tLevel,
-                    specialization: profileData.specialization
+                    specialization: profileData.specialization,
+                    gradeLevel: profileData.gradeLevel
                 });
                 
                 // Update the Profiles table
@@ -1437,6 +1444,7 @@ export default class EmployeeDashboard extends Controller {
                     context.setProperty("location", profileData.location);
                     context.setProperty("tLevel", profileData.tLevel);
                     context.setProperty("specialization", profileData.specialization);
+                    context.setProperty("gradeLevel", profileData.gradeLevel);
                     context.setProperty("lastUpdated", new Date().toISOString());
                     
                     console.log('📝 Profile properties set, submitting batch...');
@@ -1448,6 +1456,7 @@ export default class EmployeeDashboard extends Controller {
                         location: profileData.location,
                         tLevel: profileData.tLevel,
                         specialization: profileData.specialization,
+                        gradeLevel: profileData.gradeLevel,
                         lastUpdated: new Date().toISOString()
                     };
                     
