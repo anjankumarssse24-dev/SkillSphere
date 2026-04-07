@@ -6,10 +6,9 @@
     "allowJs": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "rootDir": "./webapp",
     "outDir": "./dist",
-    "baseUrl": "./",
     "paths": {
       "skillsphere/*": [
         "./webapp/*"
@@ -21,9 +20,8 @@
         "./webapp/test/integration/*"
       ]
     },
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@sapui5/types"
+    "types": [
+      "@sapui5/types"
     ]
   },
   "include": [

@@ -1,4 +1,6 @@
 /*global QUnit*/
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import opaTest from "sap/ui/test/opaQunit";
 import AppPage from "./pages/AppPage";
 import ViewPage from "./pages/View1Page";

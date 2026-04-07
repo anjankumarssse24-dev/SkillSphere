@@ -6,6 +6,13 @@
         contentWidth="600px">
         <content>
             <VBox class="sapUiMediumMargin">
+                <!-- Info Message -->
+                <MessageStrip
+                    text="Create your own initiative, CAIA, POC, or other self-driven work."
+                    type="Information"
+                    showIcon="true"
+                    class="sapUiSmallMarginBottom"/>
+                
                 <!-- Initiative Name -->
                 <Label text="Initiative Name:" required="true" />
                 <Input
@@ -37,21 +44,30 @@
                     displayFormat="MM/dd/yyyy"
                     width="100%"/>
                 
-                <!-- Hours per Day Input -->
-                <Label text="Hours per Day:" required="true" class="sapUiSmallMarginTop" />
-                <StepInput
-                    value="{initiativeDialog>/hoursPerDay}"
-                    min="0"
-                    max="24"
-                    step="0.5"
-                    displayValuePrecision="1"
+                <!-- Utilization Percent Input -->
+                <Label text="Utilization Percent (0-100%):" required="true" class="sapUiSmallMarginTop" />
+                <Input
+                    value="{initiativeDialog>/utilizationPercent}"
+                    type="Number"
+                    placeholder="Enter percentage (0-100)"
                     width="100%"
-                    description="hours"/>
+                    description="%"/>
+                
+                <!-- Type/Category -->
+                <Label text="Type:" class="sapUiSmallMarginTop" />
+                <Select
+                    selectedKey="{initiativeDialog>/type}"
+                    width="100%">
+                    <core:Item key="Initiative" text="Initiative"/>
+                    <core:Item key="CAIA" text="CAIA (Cross-Account Internal Activities)"/>
+                    <core:Item key="POC" text="POC (Proof of Concept)"/>
+                    <core:Item key="Evaluation" text="Evaluation"/>
+                </Select>
                 
                 <!-- Status -->
                 <Label text="Status:" class="sapUiSmallMarginTop" />
                 <Select
-                    value="{initiativeDialog>/status}"
+                    selectedKey="{initiativeDialog>/status}"
                     width="100%">
                     <core:Item key="Active" text="Active"/>
                     <core:Item key="Completed" text="Completed"/>

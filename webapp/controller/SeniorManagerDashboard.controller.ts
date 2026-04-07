@@ -15,6 +15,8 @@ import Text from "sap/m/Text";
 import VBox from "sap/m/VBox";
 import HBox from "sap/m/HBox";
 import HTML from "sap/ui/core/HTML";
+import ListBinding from "sap/ui/model/ListBinding";
+import OverflowToolbar from "sap/m/OverflowToolbar";
 
 /**
  * @namespace skillsphere.controller
@@ -93,6 +95,9 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load organization metrics
             await this.loadOrganizationMetrics();
+            
+            // Load work overview
+            await this.loadWorkOverview();
             
             MessageToast.show("Dashboard data loaded successfully");
         } catch (error) {
@@ -266,6 +271,150 @@ export default class SeniorManagerDashboard extends Controller {
         } catch (error) {
             console.error("❌ Error loading organization metrics:", error);
         }
+    }
+
+    private async loadWorkOverview(): Promise<void> {
+        try {
+            console.log("📊 Loading work overview...");
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            
+            // Load all employees
+            const employeesBinding = oDataModel.bindList("/Employees");
+            const employeeContexts = await employeesBinding.requestContexts(0, 9999);
+            const allEmployees = employeeContexts.map((ctx: any) => ctx.getObject())
+                .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
+            
+            // Load all profiles for T-Level (filter only T3 and T4)
+            const profilesBinding = oDataModel.bindList("/Profiles");
+            const profileContexts = await profilesBinding.requestContexts(0, 9999);
+            const profiles = profileContexts.map((ctx: any) => ctx.getObject());
+            const profileMap = new Map(profiles.map((p: any) => [p.employeeId, p]));
+            
+            // Filter only T3 and T4 employees
+            const seniorEmployees = allEmployees.filter((emp: any) => {
+                const profile: any = profileMap.get(emp.employeeId);
+                return profile?.tLevel === 'T3' || profile?.tLevel === 'T4';
+            });
+            
+            // Load all current projects
+            const cpBinding = oDataModel.bindList("/CurrentProjects");
+            const cpContexts = await cpBinding.requestContexts(0, 9999);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Group work by employee
+            const workByEmployee = new Map<string, any[]>();
+            cpContexts.map((ctx: any) => ctx.getObject()).forEach((cp: any) => {
+                if (!cp.startDate || !cp.endDate) return;
+                const start = new Date(cp.startDate); start.setHours(0, 0, 0, 0);
+                const end = new Date(cp.endDate); end.setHours(0, 0, 0, 0);
+                
+                // Only include active work
+                if (today >= start && today <= end) {
+                    if (!workByEmployee.has(cp.employeeId)) {
+                        workByEmployee.set(cp.employeeId, []);
+                    }
+                    workByEmployee.get(cp.employeeId)!.push(cp);
+                }
+            });
+            
+            // Build overview data for T3/T4 employees only
+            const employeesOverview = seniorEmployees.map((emp: any) => {
+                const profile: any = profileMap.get(emp.employeeId);
+                const work = workByEmployee.get(emp.employeeId) || [];
+                
+                // Categorize work (Projects, Evaluations, Initiatives only)
+                const projects = work.filter((w: any) => w.type === 'Project');
+                const evaluations = work.filter((w: any) => w.type === 'Evaluation');
+                const initiatives = work.filter((w: any) => w.type === 'Initiative');
+                
+                return {
+                    name: emp.name,
+                    employeeId: emp.employeeId,
+                    tLevel: profile?.tLevel || '-',
+                    specialization: emp.specialization || profile?.specialization || '-',
+                    
+                    // Projects with technology
+                    project1Name: projects[0]?.projectName || '-',
+                    project1Tech: projects[0]?.technology || '',
+                    project1Util: projects[0] ? `${projects[0].utilizationPercent}%` : '',
+                    project2Name: projects[1]?.projectName || '-',
+                    project2Tech: projects[1]?.technology || '',
+                    project2Util: projects[1] ? `${projects[1].utilizationPercent}%` : '',
+                    
+                    // Evaluations with technology
+                    evaluation1Name: evaluations[0]?.projectName || '-',
+                    evaluation1Tech: evaluations[0]?.technology || '',
+                    evaluation1Util: evaluations[0] ? `${evaluations[0].utilizationPercent}%` : '',
+                    
+                    // Initiatives with technology
+                    initiative1Name: initiatives[0]?.projectName || '-',
+                    initiative1Tech: initiatives[0]?.technology || '',
+                    initiative1Util: initiatives[0] ? `${initiatives[0].utilizationPercent}%` : '',
+                    initiative2Name: initiatives[1]?.projectName || '-',
+                    initiative2Tech: initiatives[1]?.technology || '',
+                    initiative2Util: initiatives[1] ? `${initiatives[1].utilizationPercent}%` : ''
+                };
+            });
+            
+            // Set model
+            this.getView()?.setModel(new JSONModel({ employees: employeesOverview }), "workOverview");
+            
+            console.log(`✅ Work overview loaded for ${employeesOverview.length} senior employees (T3/T4 only)`);
+            
+        } catch (error) {
+            console.error("❌ Error loading work overview:", error);
+        }
+    }
+
+    public onSearchWorkOverview(event: any): void {
+        const query = event.getParameter("query") || event.getParameter("newValue") || "";
+        this.applyWorkOverviewFilters(query);
+    }
+
+    public onFilterWorkOverview(event: any): void {
+        // Get current search query if any
+        const table = this.byId("workOverviewTable") as Table;
+        const toolbar = table?.getHeaderToolbar() as OverflowToolbar;
+        const searchField = toolbar?.getContent()
+            .find((c: any) => c.getMetadata().getName() === "sap.m.SearchField") as any;
+        const query = searchField?.getValue() || "";
+        this.applyWorkOverviewFilters(query);
+    }
+
+    private applyWorkOverviewFilters(searchQuery: string = ""): void {
+        const table = this.byId("workOverviewTable") as Table;
+        const binding = table.getBinding("items") as ListBinding;
+        
+        if (!binding) return;
+
+        const filters: Filter[] = [];
+
+        // T-Level filter
+        const tLevelFilter = this.byId("tLevelFilter") as any;
+        const selectedTLevel = tLevelFilter?.getSelectedKey();
+        if (selectedTLevel) {
+            filters.push(new Filter("tLevel", FilterOperator.EQ, selectedTLevel));
+        }
+
+        // Specialization filter
+        const specializationFilter = this.byId("specializationFilter") as any;
+        const selectedSpecialization = specializationFilter?.getSelectedKey();
+        if (selectedSpecialization) {
+            filters.push(new Filter("specialization", FilterOperator.EQ, selectedSpecialization));
+        }
+
+        // Search filter
+        if (searchQuery) {
+            const searchFilters = [
+                new Filter("name", FilterOperator.Contains, searchQuery),
+                new Filter("employeeId", FilterOperator.Contains, searchQuery)
+            ];
+            filters.push(new Filter({ filters: searchFilters, and: false }));
+        }
+
+        // Apply all filters (combined with AND)
+        binding.filter(filters.length > 0 ? filters : []);
     }
 
     public async onViewManagerTeam(event: any): Promise<void> {

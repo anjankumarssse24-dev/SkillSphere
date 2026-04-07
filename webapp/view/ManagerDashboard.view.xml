@@ -699,6 +699,64 @@
                         </m:Panel>
                     </m:IconTabFilter>
                     
+                    <!-- Assign Project Tab -->
+                    <m:IconTabFilter icon="sap-icon://add-coursebook" text="Assign Project" key="assign">
+                        <m:VBox class="sapUiSmallMargin">
+                            <!-- Assign New Project -->
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Project to Employee" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Project from Master Data:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="assignProjectComboBox"
+                                                    items="{/Projects}"
+                                                    placeholder="Select a project to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{projectId}" text="{projectName} ({projectManager})"/>
+                                        </m:ComboBox>
+                                        <m:Button text="Assign Project" 
+                                                  type="Emphasized" 
+                                                  icon="sap-icon://add" 
+                                                  press="onAssignProject"
+                                                  enabled="{= ${assignProjectComboBox>/selectedKey} !== '' }"/>
+                                        <m:MessageStrip text="The employee will receive this assignment with 'Pending' status and can accept or reject it." 
+                                                        type="Information" 
+                                                        showIcon="true" 
+                                                        class="sapUiSmallMarginTop"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                            
+                            <!-- Current Assignments -->
+                            <m:Panel class="sapUiSmallMarginTop" headerText="Assignment History" expandable="true" expanded="true">
+                                <m:content>
+                                    <m:Table id="dialogAssignmentsTable" items="{employeeDetails>/assignments}" class="sapUiSmallMargin">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Type"/></m:Column>
+                                            <m:Column><m:Text text="Project/Work Name"/></m:Column>
+                                            <m:Column><m:Text text="Assignment Status"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization %"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:ObjectStatus text="{employeeDetails>type}"
+                                                               state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
+                                                <m:Text text="{employeeDetails>projectName}"/>
+                                                <m:ObjectStatus text="{employeeDetails>assignmentStatus}"
+                                                               state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{employeeDetails>utilizationPercent}%"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
+                    </m:IconTabFilter>
+                    
                     <!-- Match Details Tab (for search results only) -->
                     <m:IconTabFilter id="dialogMatchTab" icon="sap-icon://compare" text="Match Details" key="match" visible="false">
                         <m:Panel class="sapUiSmallMargin" headerText="Search Match Analysis" expandable="false">

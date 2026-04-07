@@ -1,4 +1,6 @@
 /* @sapUiRequire */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 QUnit.config.autostart = false;
 
 // import all your QUnit tests here
