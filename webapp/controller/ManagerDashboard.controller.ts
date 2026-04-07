@@ -1154,6 +1154,8 @@ export default class ManagerDashboard extends Controller {
             // Get month and day information
             const startMonth = startDate.getMonth();
             const endMonth = endDate.getMonth();
+            const startYear = startDate.getFullYear();
+            const endYear = endDate.getFullYear();
             const startDay = startDate.getDate();
             const endDay = endDate.getDate();
             
@@ -1165,16 +1167,15 @@ export default class ManagerDashboard extends Controller {
             // (starts before first visible month AND ends after last visible month)
             const firstVisibleMonth = monthNumbers[0];
             const lastVisibleMonth = monthNumbers[monthNumbers.length - 1];
-            const spansEntireRange = startMonth < firstVisibleMonth && endMonth > lastVisibleMonth;
-            const startsBeforeAndEndsAfter =
-                (startDate.getFullYear() < new Date(startDate.getFullYear(), firstVisibleMonth, 1).getFullYear() ||
-                 startMonth < firstVisibleMonth) &&
-                (endDate.getFullYear() > new Date(endDate.getFullYear(), lastVisibleMonth, 1).getFullYear() ||
-                 endMonth > lastVisibleMonth);
+            
+            // Account for year differences when determining if project spans the range
+            const startsBeforeRange = (startYear < year) || (startYear === year && startMonth < firstVisibleMonth);
+            const endsAfterRange = (endYear > year) || (endYear === year && endMonth > lastVisibleMonth);
+            const spansEntireRange = startsBeforeRange && endsAfterRange;
 
             if (startIndex === -1 && endIndex === -1 && !spansEntireRange) return; // Skip if not in range at all
             
-            // Calculate precise position with day-level accuracy
+            // Calculate precise position with day-level accuracy and year awareness
             let leftPercent = 0;
             let widthPercent = 0;
             
@@ -1182,8 +1183,8 @@ export default class ManagerDashboard extends Controller {
                 // Project covers entire visible range — full width bar
                 leftPercent = 0;
                 widthPercent = 100;
-            } else if (startIndex !== -1 && endIndex !== -1) {
-                // Both start and end are in visible range
+            } else if (startYear === year && endYear === year && startIndex !== -1 && endIndex !== -1) {
+                // Both start and end are in the same visible year
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
                 
@@ -1204,14 +1205,14 @@ export default class ManagerDashboard extends Controller {
                     const startDayFraction = (daysInStartMonth - startDay + 1) / daysInStartMonth;
                     widthPercent = ((startDayFraction + (monthsSpanned - 1) + endDayFraction) / totalMonths) * 100;
                 }
-            } else if (startIndex !== -1) {
-                // Only start is visible, extends beyond visible range
+            } else if (startYear === year && startIndex !== -1) {
+                // Only start is in same year, extends beyond visible range
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const dayOffsetInStartMonth = (startDay - 1) / daysInStartMonth;
                 leftPercent = ((startIndex + dayOffsetInStartMonth) / totalMonths) * 100;
                 widthPercent = ((totalMonths - startIndex - dayOffsetInStartMonth) / totalMonths) * 100;
-            } else if (endIndex !== -1) {
-                // Only end is visible, starts before visible range
+            } else if (endYear === year && endIndex !== -1) {
+                // Only end is in same year, starts before visible range
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
                 const endDayFraction = endDay / daysInEndMonth;
                 leftPercent = 0;
