@@ -402,67 +402,6 @@
 }
 
 /* Work Overview Table Styles */
-/* Horizontal and Vertical scroll container */
-.workOverviewScrollContainer {
-    overflow-x: scroll !important;
-    overflow-y: scroll !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    -webkit-overflow-scrolling: touch !important;
-}
-
-.workOverviewScrollContainer .sapMScrollContScroll {
-    overflow-x: scroll !important;
-    overflow-y: scroll !important;
-    display: block !important;
-}
-
-/* Force scrollbars to always be visible */
-.sapMScrollCont.workOverviewScrollContainer {
-    scrollbar-width: thin !important;
-    scrollbar-color: #0070f2 #f0f0f0 !important;
-}
-
-/* Custom scrollbar for work overview - Both directions */
-.workOverviewScrollContainer::-webkit-scrollbar,
-.workOverviewScrollContainer .sapMScrollContScroll::-webkit-scrollbar {
-    height: 14px !important;
-    width: 14px !important;
-    display: block !important;
-}
-
-.workOverviewScrollContainer::-webkit-scrollbar-track,
-.workOverviewScrollContainer .sapMScrollContScroll::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 7px;
-    border: 1px solid #e0e0e0;
-}
-
-.workOverviewScrollContainer::-webkit-scrollbar-thumb,
-.workOverviewScrollContainer .sapMScrollContScroll::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #0070f2, #0052cc);
-    border-radius: 7px;
-    border: 2px solid #f0f0f0;
-}
-
-.workOverviewScrollContainer::-webkit-scrollbar-thumb:hover,
-.workOverviewScrollContainer .sapMScrollContScroll::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #0052cc, #003d99);
-}
-
-/* Scrollbar corner styling */
-.workOverviewScrollContainer::-webkit-scrollbar-corner,
-.workOverviewScrollContainer .sapMScrollContScroll::-webkit-scrollbar-corner {
-    background: #f0f0f0;
-}
-
-/* Ensure table has fixed width for horizontal scroll */
-#workOverviewTable {
-    min-width: 2400px !important;
-    width: 2400px !important;
-    table-layout: fixed !important;
-}
-
 #workOverviewTable .sapMListTblRow {
     height: 5rem;
     border-bottom: 1px solid #e0e0e0;
