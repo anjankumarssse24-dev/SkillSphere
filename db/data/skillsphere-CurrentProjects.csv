@@ -231,3 +231,6 @@
 "CP_1730000010083","I774171","Project","Finance Module Upgrade","Tech Lead","2026-01-01","2026-12-31","58","Anita Patel","Accepted","","false","","S/4HANA"
 "CP_1730000010084","I774171","Initiative","Master Data Governance - Initiative","Contributor","2026-02-01","2026-06-30","23","Self-Managed","Accepted","","false","","S/4HANA"
 "CP_1730000010085","I774171","Initiative","Master Data Governance - Initiative","Contributor","2026-02-01","2026-06-30","22","Self-Managed","Accepted","","false","","S/4HANA"
+"CP_DUMMY_EVAL_20260408_001","I774161","Evaluation","Integration Suite Governance - Evaluation","Evaluator","2026-04-01","2026-06-30","24","Self-Managed","Accepted","","true","Dummy evaluation data for dashboard visibility","BTP"
+"CP_DUMMY_EVAL_20260408_002","I774162","Evaluation","Advanced ML Review - Evaluation","Evaluator","2026-04-02","2026-07-15","18","Self-Managed","Accepted","","true","Dummy evaluation data for dashboard visibility","Data Science"
+"CP_DUMMY_EVAL_20260408_003","I774164","Evaluation","Forecasting Model QA - Evaluation","Evaluator","2026-04-05","2026-06-20","20","Self-Managed","Accepted","","true","Dummy evaluation data for dashboard visibility","Data Science"

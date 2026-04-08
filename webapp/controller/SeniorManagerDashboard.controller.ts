@@ -60,6 +60,17 @@ export default class SeniorManagerDashboard extends Controller {
         MessageToast.show("You have been logged out");
     }
 
+    public onOpenWorkOverview(): void {
+        if (!this.currentSeniorManagerId) {
+            MessageToast.show("Senior manager information not found");
+            return;
+        }
+
+        this.getRouter().navTo("SeniorManagerWorkOverview", {
+            seniorManagerId: this.currentSeniorManagerId
+        });
+    }
+
     private async onRouteMatched(event: any): Promise<void> {
         const args: any = event.getParameter("arguments");
         const seniorManagerId = args?.seniorManagerId;
@@ -99,9 +110,6 @@ export default class SeniorManagerDashboard extends Controller {
             // Load organization metrics
             await this.loadOrganizationMetrics();
             
-            // Load work overview
-            await this.loadWorkOverview();
-            
             MessageToast.show("Dashboard data loaded successfully");
         } catch (error) {
             console.error("❌ Error loading dashboard data:", error);
@@ -125,25 +133,40 @@ export default class SeniorManagerDashboard extends Controller {
                     };
                 });
             
-            console.log(`✅ Loaded ${managers.length} managers`);
+            console.log(`✅ Loaded ${managers.length} manager records`);
             
             // Load team size for each manager
             const managersWithTeamSize = await Promise.all(managers.map(async (mgr: any) => {
                 const teamSize = await this.getManagerTeamSize(mgr.managerId);
                 return {
                     ...mgr,
-                    teamSize: teamSize
+                    teamSize: teamSize,
+                    working_on_project: (mgr.totalProjects || 0) > 0
                 };
             }));
             
-            // Create model for managers
-            const managersModel = new JSONModel({ managers: managersWithTeamSize });
+            // Split into true managers (have reports) and individual employees (no reports)
+            const managersOnly = managersWithTeamSize.filter((person: any) => (person.teamSize || 0) > 0);
+            const individualEmployees = managersWithTeamSize
+                .filter((person: any) => (person.teamSize || 0) === 0)
+                .map((person: any) => ({
+                    ...person,
+                    displayExperience: (person.experience && Number(person.experience) > 0)
+                        ? person.experience
+                        : (String(person.managerId || "").startsWith("MGR") ? 10 : 5)
+                }));
+
+            // Create model for manager overview section
+            const managersModel = new JSONModel({
+                managers: managersOnly,
+                individualEmployees: individualEmployees
+            });
             this.getView()?.setModel(managersModel, "allManagers");
             
             // Populate manager dropdown for search
             const managerSelect = this.byId("orgManagerFilter") as Select;
             if (managerSelect) {
-                managersWithTeamSize.forEach((mgr: any) => {
+                managersOnly.forEach((mgr: any) => {
                     managerSelect.addItem(
                         new Item({
                             key: mgr.managerId,
@@ -152,6 +175,8 @@ export default class SeniorManagerDashboard extends Controller {
                     );
                 });
             }
+
+            console.log(`✅ Manager overview split: ${managersOnly.length} managers, ${individualEmployees.length} employees (no reports)`);
             
         } catch (error) {
             console.error("❌ Error loading managers:", error);
@@ -954,6 +979,18 @@ export default class SeniorManagerDashboard extends Controller {
             const manager = bindingContext.getObject();
             console.log("Manager selected:", manager);
         }
+    }
+
+    public onViewIndividualEmployeeDetails(event: any): void {
+        const source = event.getSource();
+        const bindingContext = source.getBindingContext("allManagers");
+        if (!bindingContext) {
+            MessageToast.show("Unable to load employee details");
+            return;
+        }
+
+        const employee = bindingContext.getObject();
+        this.openEmployeeDetailsDialog(employee);
     }
 
     // Helper methods

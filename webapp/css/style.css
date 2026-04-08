@@ -624,3 +624,80 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
 }
+
+/* Senior Manager Work Overview page */
+.smWorkOverviewPage {
+    background-color: #f7f7f7;
+}
+
+.smWorkOverviewWrapper {
+    gap: 0.75rem;
+    height: 100%;
+    display: flex;
+}
+
+.smWorkOverviewLegend {
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+}
+
+.smWorkOverviewToolbar {
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+.smWorkOverviewPanel {
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+}
+
+.smWorkOverviewPanel .sapMPanelContent {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.smWorkOverviewScroll {
+    width: 100%;
+    height: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+
+.smWorkOverviewTable {
+    min-width: 1200px;
+}
+
+.smWorkOverviewTable .sapMColumnHeader {
+    background: #f8f9fa;
+    color: #32363a;
+    font-weight: 600;
+}
+
+.smWorkOverviewTable .sapMListTblRow:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.smWorkOverviewTable .sapMListTblCell {
+    vertical-align: top;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+.smWorkOverviewTable .sapMObjStatus {
+    border-radius: 8px;
+    padding: 0.1rem 0.45rem;
+}
+
+.smWorkOverviewFilterGroup {
+    margin-left: 100px;
+}

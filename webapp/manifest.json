@@ -158,6 +158,11 @@
           "target": ["TargetSeniorManagerDashboard"]
         },
         {
+          "name": "SeniorManagerWorkOverview",
+          "pattern": "senior-manager-work-overview/{seniorManagerId}",
+          "target": ["TargetSeniorManagerWorkOverview"]
+        },
+        {
           "name": "ManagerTeamView",
           "pattern": "manager-team-view/{managerId}/{seniorManagerId}",
           "target": ["TargetManagerTeamView"]
@@ -191,6 +196,10 @@
         "TargetSeniorManagerDashboard": {
           "id": "SeniorManagerDashboard",
           "name": "SeniorManagerDashboard"
+        },
+        "TargetSeniorManagerWorkOverview": {
+          "id": "SeniorManagerWorkOverview",
+          "name": "SeniorManagerWorkOverview"
         },
         "TargetManagerTeamView": {
           "id": "ManagerTeamView",

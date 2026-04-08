@@ -14,6 +14,7 @@
         <uxap:headerTitle>
             <uxap:ObjectPageHeader id="seniorManagerHeader" objectTitle="{currentUser>/name}" objectSubtitle="Senior Manager / VP Dashboard">
                 <uxap:actions>
+                    <m:Button id="seniorManagerWorkOverviewBtn" text="Current Work Overview" icon="sap-icon://work-history" press="onOpenWorkOverview"/>
                     <m:Button id="seniorManagerLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
                 </uxap:actions>
             </uxap:ObjectPageHeader>
@@ -141,120 +142,88 @@
                 </uxap:subSections>
             </uxap:ObjectPageSection>
 
-            <!-- Current Work Overview Section -->
-            <uxap:ObjectPageSection id="workOverviewSection" title="Current Work Overview" titleUppercase="false">
-                <uxap:subSections>
-                    <uxap:ObjectPageSubSection id="workOverviewSubSection">
-                        <uxap:blocks>
-                            <m:Panel id="workOverviewPanel" headerText="Employee Work Distribution - Projects, Evaluations &amp; Initiatives" class="sapUiMediumMargin" width="95%">
-                                <m:headerToolbar>
-                                    <m:OverflowToolbar>
-                                        <m:Title text="Employee Work Distribution - Projects, Evaluations &amp; Initiatives" level="H4"/>
-                                        <m:ToolbarSpacer/>
-                                        <core:Icon src="sap-icon://work-history" size="2rem" color="#0070f2"/>
-                                    </m:OverflowToolbar>
-                                </m:headerToolbar>
-                                <m:content>
-                                    <m:Table id="workOverviewTable" 
-                                             class="sapUiResponsiveMargin"
-                                             growing="true"
-                                             growingThreshold="20"
-                                             alternateRowColors="true"
-                                             mode="None">
-                                        <m:headerToolbar>
-                                            <m:OverflowToolbar design="Transparent">
-                                                <m:Title text="Senior Team Members (T3 &amp; T4 Only)" level="H5"/>
-                                                <m:ToolbarSpacer/>
-                                                <m:Label text="T-Level:" class="sapUiTinyMarginEnd"/>
-                                                <m:ComboBox id="tLevelFilter" 
-                                                            width="10rem" 
-                                                            placeholder="All Levels"
-                                                            selectionChange="onFilterWorkOverview">
-                                                    <core:Item key="" text="All Levels"/>
-                                                    <core:Item key="T3" text="T3"/>
-                                                    <core:Item key="T4" text="T4"/>
-                                                </m:ComboBox>
-                                                <m:Label text="Specialization:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
-                                                <m:ComboBox id="specializationFilter" 
-                                                            width="12rem" 
-                                                            placeholder="All Specializations"
-                                                            selectionChange="onFilterWorkOverview">
-                                                    <core:Item key="" text="All Specializations"/>
-                                                    <core:Item key="S/4HANA" text="S/4HANA"/>
-                                                    <core:Item key="BTP" text="BTP"/>
-                                                    <core:Item key="Data Science" text="Data Science"/>
-                                                </m:ComboBox>
-                                                <m:ToolbarSpacer/>
-                                                <m:SearchField width="22rem" 
-                                                               placeholder="Search by name..." 
-                                                               search="onSearchWorkOverview"
-                                                               showSearchButton="true"/>
-                                            </m:OverflowToolbar>
-                                        </m:headerToolbar>
-                                            <m:columns>
-                                                <m:Column width="250px" hAlign="Left">
-                                                    <m:Text text="Name"/>
-                                                </m:Column>
-                                                <m:Column width="120px" hAlign="Center">
-                                                    <m:Text text="T-Level"/>
-                                                </m:Column>
-                                                <m:Column width="180px" hAlign="Left">
-                                                    <m:Text text="Specialization"/>
-                                                </m:Column>
-                                                <!-- Dynamic columns for Projects, Evaluations, and Initiatives will be added by controller -->
-                                            </m:columns>
-                                            <!-- Items binding will be created dynamically by the controller -->
-                                        </m:Table>
-                                </m:content>
-                            </m:Panel>
-                        </uxap:blocks>
-                    </uxap:ObjectPageSubSection>
-                </uxap:subSections>
-            </uxap:ObjectPageSection>
-
             <!-- Manager Overview Section -->
-            <uxap:ObjectPageSection id="managersSection" title="Manager Overview" titleUppercase="false">
+            <uxap:ObjectPageSection id="managersSection" title="Team Overview" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection id="managersSubSection">
                         <uxap:blocks>
-                            <m:Panel id="managersPanel" headerText="All Managers" class="sapUiMediumMargin" width="95%">
-                                <m:content>
-                                    <m:Table id="managersTable" items="{allManagers>/managers}" class="sapUiResponsiveMargin" mode="SingleSelectMaster" selectionChange="onManagerSelect">
-                                        <m:columns>
-                                            <m:Column>
-                                                <m:Text text="Manager Name"/>
-                                            </m:Column>
-                                            <m:Column>
-                                                <m:Text text="Manager ID"/>
-                                            </m:Column>
-                                            <m:Column>
-                                                <m:Text text="Team"/>
-                                            </m:Column>
-                                            <m:Column hAlign="Center">
-                                                <m:Text text="Team Size"/>
-                                            </m:Column>
-                                            <m:Column>
-                                                <m:Text text="Specialization"/>
-                                            </m:Column>
-                                            <m:Column hAlign="End" width="8rem">
-                                                <m:Text text="Actions"/>
-                                            </m:Column>
-                                        </m:columns>
-                                        <m:items>
-                                            <m:ColumnListItem type="Active">
-                                                <m:cells>
-                                                    <m:ObjectIdentifier title="{allManagers>name}"/>
-                                                    <m:Text text="{allManagers>managerId}"/>
-                                                    <m:Text text="{allManagers>team}"/>
-                                                    <m:ObjectNumber number="{allManagers>teamSize}" unit="employees"/>
-                                                    <m:Text text="{allManagers>specialization}"/>
-                                                    <m:Button text="View Team" icon="sap-icon://group" type="Emphasized" press="onViewManagerTeam"/>
-                                                </m:cells>
-                                            </m:ColumnListItem>
-                                        </m:items>
-                                    </m:Table>
-                                </m:content>
-                            </m:Panel>
+                            <m:VBox width="100%">
+                                <m:Panel id="managersPanel" headerText="Managers" class="sapUiMediumMargin" width="95%">
+                                    <m:content>
+                                        <m:Table id="managersTable" items="{allManagers>/managers}" class="sapUiResponsiveMargin" mode="SingleSelectMaster" selectionChange="onManagerSelect" fixedLayout="true" autoPopinMode="true" noDataText="No managers with direct reports found">
+                                            <m:columns>
+                                                <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                    <m:Text text="Manager Name"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                    <m:Text text="Manager ID"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                    <m:Text text="Team"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Desktop" demandPopin="true" hAlign="Center">
+                                                    <m:Text text="Team Size"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Phone" demandPopin="false" hAlign="End" width="8rem">
+                                                    <m:Text text="Actions"/>
+                                                </m:Column>
+                                            </m:columns>
+                                            <m:items>
+                                                <m:ColumnListItem type="Active">
+                                                    <m:cells>
+                                                        <m:ObjectIdentifier title="{allManagers>name}"/>
+                                                        <m:Text text="{allManagers>managerId}"/>
+                                                        <m:Text text="{allManagers>team}"/>
+                                                        <m:ObjectNumber number="{allManagers>teamSize}" unit="employees"/>
+                                                        <m:Button text="View Team" icon="sap-icon://group" type="Emphasized" press="onViewManagerTeam"/>
+                                                    </m:cells>
+                                                </m:ColumnListItem>
+                                            </m:items>
+                                        </m:Table>
+                                    </m:content>
+                                </m:Panel>
+
+                                <m:Panel id="individualEmployeesPanel" headerText="Employees" class="sapUiMediumMargin" width="95%">
+                                    <m:content>
+                                        <m:Table id="individualEmployeesTable" items="{allManagers>/individualEmployees}" class="sapUiResponsiveMargin" mode="None" fixedLayout="true" autoPopinMode="true" noDataText="No individual employees found">
+                                            <m:columns>
+                                                <m:Column minScreenWidth="Phone" demandPopin="true">
+                                                    <m:Text text="Employee Name"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                    <m:Text text="Employee ID"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                    <m:Text text="Team"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline" hAlign="Center">
+                                                    <m:Text text="Experience (Years)"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Desktop" demandPopin="true">
+                                                    <m:Text text="Specialization"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                    <m:Text text="Current Status"/>
+                                                </m:Column>
+                                            </m:columns>
+                                            <m:items>
+                                                <m:ColumnListItem type="Navigation" press="onViewIndividualEmployeeDetails">
+                                                    <m:cells>
+                                                        <m:ObjectIdentifier title="{allManagers>name}"/>
+                                                        <m:Text text="{allManagers>managerId}"/>
+                                                        <m:Text text="{allManagers>team}"/>
+                                                        <m:Text text="{allManagers>displayExperience}" textAlign="Center"/>
+                                                        <m:Text text="{allManagers>specialization}"/>
+                                                        <m:ObjectStatus 
+                                                            text="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatus'}"
+                                                            state="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatusState'}"/>
+                                                    </m:cells>
+                                                </m:ColumnListItem>
+                                            </m:items>
+                                        </m:Table>
+                                    </m:content>
+                                </m:Panel>
+                            </m:VBox>
                         </uxap:blocks>
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>

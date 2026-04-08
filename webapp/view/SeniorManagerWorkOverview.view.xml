@@ -1,0 +1,87 @@
+<mvc:View
+    controllerName="skillsphere.controller.SeniorManagerWorkOverview"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:core="sap.ui.core"
+    displayBlock="true">
+
+    <m:Page id="seniorManagerWorkOverviewPage" class="smWorkOverviewPage" title="Current Work Overview" showNavButton="true" navButtonPress="onNavBack" enableScrolling="false">
+        <m:headerContent>
+            <m:Button id="seniorManagerWorkOverviewLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
+        </m:headerContent>
+
+        <m:content>
+            <m:VBox class="sapUiResponsiveContentPadding sapUiMediumMarginBottom smWorkOverviewWrapper" fitContainer="true">
+                <m:Toolbar class="sapUiSmallMarginBottom smWorkOverviewToolbar">
+                    <m:Title text="Employee Work Distribution - Projects, Evaluations &amp; Initiatives" level="H2"/>
+                    <m:ToolbarSpacer/>
+                    <core:Icon src="sap-icon://work-history" size="1.2rem" color="#6a6d70"/>
+                </m:Toolbar>
+
+                <m:Toolbar class="smWorkOverviewLegend sapUiSmallMarginBottom">
+                    <m:Button text="Projects" type="Transparent" press="onJumpToProjects" class="sapUiTinyMarginEnd"/>
+                    <m:Button text="Evaluations" type="Transparent" press="onJumpToEvaluations" class="sapUiTinyMarginEnd"/>
+                    <m:Button text="Initiatives" type="Transparent" press="onJumpToInitiatives" class="sapUiTinyMarginEnd"/>
+                </m:Toolbar>
+
+                <m:Panel class="sapUiMediumMargin smWorkOverviewPanel" backgroundDesign="Solid" width="95%">
+                    <m:content>
+                        <m:ScrollContainer id="workOverviewHorizontalScroll" width="100%" height="100%" horizontal="true" vertical="true" class="smWorkOverviewScroll">
+                            <m:Table id="workOverviewTable"
+                                class="smWorkOverviewTable"
+                                growing="true"
+                                growingThreshold="20"
+                                alternateRowColors="true"
+                                mode="None"
+                                fixedLayout="false"
+                                width="auto">
+                                <m:headerToolbar>
+                                    <m:OverflowToolbar design="Transparent">
+                                        <m:Title text="Senior Team Members (T3 &amp; T4 Only)" level="H5"/>
+                                        <m:HBox class="smWorkOverviewFilterGroup" alignItems="Center" renderType="Bare">
+                                            <m:Label text="T-Level:" class="sapUiTinyMarginEnd"/>
+                                            <m:ComboBox id="tLevelFilter"
+                                                width="10rem"
+                                                placeholder="All Levels"
+                                                selectionChange="onFilterWorkOverview">
+                                                <core:Item key="" text="All Levels"/>
+                                                <core:Item key="T3" text="T3"/>
+                                                <core:Item key="T4" text="T4"/>
+                                            </m:ComboBox>
+                                            <m:Label text="Specialization:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
+                                            <m:ComboBox id="specializationFilter"
+                                                width="12rem"
+                                                placeholder="All Specializations"
+                                                selectionChange="onFilterWorkOverview">
+                                                <core:Item key="" text="All Specializations"/>
+                                                <core:Item key="S/4HANA" text="S/4HANA"/>
+                                                <core:Item key="BTP" text="BTP"/>
+                                                <core:Item key="Data Science" text="Data Science"/>
+                                            </m:ComboBox>
+                                        </m:HBox>
+                                        <m:ToolbarSpacer/>
+                                        <m:SearchField width="22rem"
+                                            placeholder="Search by name..."
+                                            search="onSearchWorkOverview"
+                                            showSearchButton="true"/>
+                                    </m:OverflowToolbar>
+                                </m:headerToolbar>
+                                <m:columns>
+                                    <m:Column width="250px" hAlign="Left">
+                                        <m:Text text="Name"/>
+                                    </m:Column>
+                                    <m:Column width="120px" hAlign="Center">
+                                        <m:Text text="T-Level"/>
+                                    </m:Column>
+                                    <m:Column width="260px" hAlign="Left">
+                                        <m:Text text="Specialization"/>
+                                    </m:Column>
+                                </m:columns>
+                            </m:Table>
+                        </m:ScrollContainer>
+                    </m:content>
+                </m:Panel>
+            </m:VBox>
+        </m:content>
+    </m:Page>
+</mvc:View>
