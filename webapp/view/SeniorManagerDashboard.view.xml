@@ -914,6 +914,7 @@
         title="SkillSphere AI Assistant - Senior Manager"
         contentWidth="600px"
         contentHeight="700px"
+        class="aiAssistantDialog"
         resizable="true"
         draggable="true">
         
@@ -937,12 +938,12 @@
                     id="chatContainerSeniorManager"
                     height="520px"
                     vertical="true"
-                    class="sapUiSmallMargin">
-                    <m:VBox id="messagesContainerSeniorManager" class="sapUiSmallMargin"/>
+                    class="sapUiSmallMargin aiChatScrollArea">
+                    <m:VBox id="messagesContainerSeniorManager" class="sapUiSmallMargin aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Senior Manager -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
                     <m:Button 
                         text="Org Insights" 
                         icon="sap-icon://org-chart"
@@ -963,14 +964,14 @@
                 </m:HBox>
                 
                 <!-- Input Area -->
-                <m:Bar>
+                <m:Bar class="aiInputBar">
                     <m:contentLeft>
                         <m:Input
                             id="messageInputSeniorManager"
                             placeholder="Ask me about your organization..."
                             width="100%"
                             submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
                     </m:contentLeft>
                     <m:contentRight>
                         <m:Button

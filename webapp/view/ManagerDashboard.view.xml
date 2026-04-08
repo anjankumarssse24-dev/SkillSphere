@@ -57,15 +57,21 @@
                                                 <m:Label text="Role:" class="sapUiSmallMarginBottom"/>
                                                 <m:Select id="roleFilter" width="15rem">
                                                     <core:Item key="" text="Any Role"/>
-                                                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
-                                                    <core:Item key="Backend Developer" text="Backend Developer"/>
-                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
                                                     <core:Item key="Architect" text="Architect"/>
-                                                    <core:Item key="Project Manager" text="Project Manager"/>
-                                                    <core:Item key="ABAP Developer" text="ABAP Developer"/>
-                                                    <core:Item key="Data Analyst" text="Data Analyst"/>
+                                                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                                                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                                                    <core:Item key="Developer" text="Developer"/>
                                                     <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                                    <core:Item key="Distinguished Engineer" text="Distinguished Engineer"/>
+                                                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="Principal Architect" text="Principal Architect"/>
+                                                    <core:Item key="Principal Engineer" text="Principal Engineer"/>
                                                     <core:Item key="QA Engineer" text="QA Engineer"/>
+                                                    <core:Item key="Senior Architect" text="Senior Architect"/>
+                                                    <core:Item key="Senior Developer" text="Senior Developer"/>
+                                                    <core:Item key="Solution Architect" text="Solution Architect"/>
                                                 </m:Select>
                                             </m:VBox>
                                             <m:VBox class="sapUiResponsiveMargin" width="auto">
@@ -841,6 +847,7 @@
         title="SkillSphere AI Assistant - Manager"
         contentWidth="600px"
         contentHeight="700px"
+        class="aiAssistantDialog"
         resizable="true"
         draggable="true">
         
@@ -864,12 +871,12 @@
                     id="chatContainerManager"
                     height="520px"
                     vertical="true"
-                    class="sapUiSmallMargin">
-                    <m:VBox id="messagesContainerManager" class="sapUiSmallMargin"/>
+                    class="sapUiSmallMargin aiChatScrollArea">
+                    <m:VBox id="messagesContainerManager" class="sapUiSmallMargin aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Manager -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
                     <m:Button 
                         text="Team Skills" 
                         icon="sap-icon://learning-assistant"
@@ -890,14 +897,14 @@
                 </m:HBox>
                 
                 <!-- Input Area -->
-                <m:Bar>
+                <m:Bar class="aiInputBar">
                     <m:contentLeft>
                         <m:Input
                             id="messageInputManager"
                             placeholder="Ask me about your team..."
                             width="100%"
                             submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
                     </m:contentLeft>
                     <m:contentRight>
                         <m:Button

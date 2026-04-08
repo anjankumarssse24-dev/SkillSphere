@@ -158,18 +158,18 @@
 "I780140","Goel Rishabh","CIS","Team1","MGR015","goel.rishabh@company.com","6","7","5","Full Stack Developer","Pune","T3","L1"
 "I780141","Kulshreshtha Sachin","CIS","Team1","MGR015","kulshreshtha.sachin@company.com","9","10","7","Senior Architect","Bangalore","T5","L3"
 "I780142","Pandey Ashish","CIS","Team1","MGR015","pandey.ashish@company.com","7","8","6","Principal Engineer","Hyderabad","T4","L2"
-"I774157","Employee I774157","CIS","Team3","MGR002","I774157@skillsphere.com","8","15","7",,,,
-"I774158","Employee I774158","CIS","Team2","MGR002","I774158@skillsphere.com","5","18","6",,,,
-"I774159","Employee I774159","CIS","Team2","MGR001","I774159@skillsphere.com","7","13","4",,,,
-"I774160","Employee I774160","CIS","Team1","MGR002","I774160@skillsphere.com","10","15","7",,,,
-"I774161","Employee I774161","CIS","Team4","MGR001","I774161@skillsphere.com","13","19","5",,,,
-"I774162","Employee I774162","CIS","Team6","MGR001","I774162@skillsphere.com","8","19","4",,,,
-"I774163","Employee I774163","CIS","Team3","MGR002","I774163@skillsphere.com","13","10","5",,,,
-"I774164","Employee I774164","CIS","Team9","MGR002","I774164@skillsphere.com","6","12","5",,,,
-"I774165","Employee I774165","CIS","Team9","MGR002","I774165@skillsphere.com","11","8","7",,,,
-"I774166","Employee I774166","CIS","Team7","MGR001","I774166@skillsphere.com","13","14","4",,,,
-"I774167","Employee I774167","CIS","Team4","MGR001","I774167@skillsphere.com","5","8","8",,,,
-"I774168","Employee I774168","CIS","Team5","MGR001","I774168@skillsphere.com","10","12","3",,,,
-"I774169","Employee I774169","CIS","Team1","MGR002","I774169@skillsphere.com","6","8","6",,,,
-"I774170","Employee I774170","CIS","Team4","MGR001","I774170@skillsphere.com","10","17","5",,,,
-"I774171","Employee I774171","CIS","Team9","MGR001","I774171@skillsphere.com","5","19","7",,,,
+"MGR001","Jain Pawan","CIS","Team1","SMGR01","jain.pawan@company.com","0","15","8","Manager","Bangalore","M1","L3"
+"MGR002","V B Adhithya","CIS","Team2","SMGR01","adhithya@company.com","0","16","8","Manager","Bangalore","M1","L3"
+"MGR003","Puja K","CIS","Team1","SMGR01","pujak@sap.com","0","24","12","Manager","Bangalore","M1","L3"
+"MGR006","Fazal Ilahi","CIS","Team1","SMGR01","fazal.ilahi@company.com","0","16","8","Manager","Bangalore","M1","L3"
+"MGR007","Arumugam Surendren","CIS","Team3","SMGR01","arumugam.surendren@company.com","0","14","7","Manager","Bangalore","M1","L3"
+"MGR008","Singh Agya Pal","CIS","Team4","SMGR01","singh.agyapal@company.com","0","17","9","Manager","Bangalore","M1","L3"
+"MGR009","Kumar Rakesh","CIS","Team5","SMGR01","kumar.rakesh@company.com","0","13","7","Manager","Bangalore","M1","L3"
+"MGR010","Garg Abhishek","CIS","Team6","SMGR01","garg.abhishek@company.com","0","19","10","Manager","Bangalore","M1","L3"
+"MGR011","Ramanathan Srinivasan","CIS","Team7","SMGR01","ramanathan.srinivasan@company.com","0","15","8","Manager","Bangalore","M1","L3"
+"MGR012","Kumar V Chendil","CIS","Team8","SMGR01","kumar.chendil@company.com","0","16","8","Manager","Bangalore","M1","L3"
+"MGR013","Tadse Sachin Muralidhar","CIS","Team1","SMGR01","tadse.sachin@company.com","0","20","10","Manager","Bangalore","M1","L3"
+"MGR014","Ram Deepak","CIS","Team1","SMGR01","ram.deepak@company.com","0","18","9","Manager","Bangalore","M1","L3"
+"MGR015","Janawa Hemlata","CIS","Team1","SMGR01","janawa.hemlata@company.com","0","17","9","Manager","Bangalore","M1","L3"
+"MGR016","Mohamed Inayath","CIS","Team1","SMGR01","mohamed.inayath@company.com","0","14","7","Manager","Bangalore","M1","L3"
+"SMGR01","Nirmala Shettar","Corporate","Executive","","nirmala.shettar@company.com","0","0","0","SeniorManager","Bangalore","SM1","L3"

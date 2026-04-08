@@ -1,4 +1,4 @@
-<mvc:View
+﻿<mvc:View
     controllerName="skillsphere.controller.EmployeeDashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:m="sap.m"
@@ -125,20 +125,6 @@
                                                 </m:Select>
                                             </m:VBox>
 
-                                            <!-- Grade Level Field -->
-                                            <m:VBox id="gradeLevelBox" width="30%">
-                                                <m:Label id="gradeLevelLabel" text="Grade Level" class="sapUiTinyMarginBottom" required="true"/>
-                                                <m:Select id="gradeLevelSelect" 
-                                                    selectedKey="{profile>/gradeLevel}" 
-                                                    width="100%"
-                                                    class="sapUiMediumMarginBottom">
-                                                    <core:Item key="" text="-- Select Grade --"/>
-                                                    <core:Item key="L1" text="L1"/>
-                                                    <core:Item key="L2" text="L2"/>
-                                                    <core:Item key="L3" text="L3"/>
-                                                </m:Select>
-                                            </m:VBox>
-                                            
                                             <!-- Specialization Field -->
                                             <m:VBox id="specializationBox" width="36%">
                                                 <m:Label id="specializationLabel" text="Specialization" class="sapUiTinyMarginBottom" required="true"/>
@@ -158,6 +144,20 @@
                                                     <core:Item key="SAP Basis" text="SAP Basis"/>
                                                     <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
                                                     <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                                </m:Select>
+                                            </m:VBox>
+
+                                            <!-- Grade Level Field -->
+                                            <m:VBox id="gradeLevelBox" width="30%">
+                                                <m:Label id="gradeLevelLabel" text="Grade Level" class="sapUiTinyMarginBottom" required="true"/>
+                                                <m:Select id="gradeLevelSelect" 
+                                                    selectedKey="{profile>/gradeLevel}" 
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                                    <core:Item key="" text="-- Select Grade Level --"/>
+                                                    <core:Item key="L1" text="L1"/>
+                                                    <core:Item key="L2" text="L2"/>
+                                                    <core:Item key="L3" text="L3"/>
                                                 </m:Select>
                                             </m:VBox>
                                         </m:FlexBox>
@@ -483,6 +483,7 @@
         title="SkillSphere AI Assistant"
         contentWidth="600px"
         contentHeight="700px"
+        class="aiAssistantDialog"
         resizable="true"
         draggable="true">
         
@@ -506,12 +507,12 @@
                     id="chatContainerEmployee"
                     height="520px"
                     vertical="true"
-                    class="sapUiSmallMargin">
-                    <m:VBox id="messagesContainerEmployee" class="sapUiSmallMargin"/>
+                    class="sapUiSmallMargin aiChatScrollArea">
+                    <m:VBox id="messagesContainerEmployee" class="sapUiSmallMargin aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Employee -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
                     <m:Button 
                         text="My Skills" 
                         icon="sap-icon://learning-assistant"
@@ -532,14 +533,14 @@
                 </m:HBox>
                 
                 <!-- Input Area -->
-                <m:Bar>
+                <m:Bar class="aiInputBar">
                     <m:contentLeft>
                         <m:Input
                             id="messageInputEmployee"
                             placeholder="Ask me anything..."
                             width="100%"
                             submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
                     </m:contentLeft>
                     <m:contentRight>
                         <m:Button
@@ -558,3 +559,4 @@
         
     </m:Dialog>
 </mvc:View>
+

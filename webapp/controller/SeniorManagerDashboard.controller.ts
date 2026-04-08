@@ -109,12 +109,18 @@ export default class SeniorManagerDashboard extends Controller {
     private async loadAllManagers(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const managersBinding = oDataModel.bindList("/Managers");
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await managersBinding.requestContexts(0, 100);
             const managers = contexts
-                .map((context: any) => context.getObject())
-                .filter((mgr: any) => !mgr.managerId?.startsWith("SMGR"));
+                .map((context: any) => {
+                    const mgr = context.getObject();
+                    return {
+                        ...mgr,
+                        managerId: mgr.employeeId
+                    };
+                });
             
             console.log(`✅ Loaded ${managers.length} managers`);
             
@@ -167,12 +173,12 @@ export default class SeniorManagerDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-            // Load all managers (exclude SMGR)
-            const managersBinding = oDataModel.bindList("/Managers");
+            // Load all managers
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const managerContexts = await managersBinding.requestContexts(0, 1000);
             const totalManagers = managerContexts
-                .map((ctx: any) => ctx.getObject())
-                .filter((m: any) => !m.managerId?.startsWith("SMGR")).length;
+                .map((ctx: any) => ctx.getObject()).length;
 
             // Load all employees (exclude manager rows)
             const employeesBinding = oDataModel.bindList("/Employees");
@@ -242,8 +248,13 @@ export default class SeniorManagerDashboard extends Controller {
 
             // Cache everything for View All dialogs
             const allManagersRaw = managerContexts
-                .map((ctx: any) => ctx.getObject())
-                .filter((m: any) => !m.managerId?.startsWith("SMGR"));
+                .map((ctx: any) => {
+                    const m = ctx.getObject();
+                    return {
+                        ...m,
+                        managerId: m.employeeId
+                    };
+                });
             const onProjectEmployees = allEmployees
                 .filter((emp: any) => activeEmployeeIds.has(emp.employeeId))
                 .map((emp: any) => ({ ...emp, skillCount: skillCountByEmp[emp.employeeId] || 0 }));
@@ -788,8 +799,11 @@ export default class SeniorManagerDashboard extends Controller {
     private async getManagerName(managerId: string): Promise<string> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             
             const contexts = await listBinding.requestContexts(0, 1);
             if (contexts.length > 0) {
@@ -1214,26 +1228,14 @@ export default class SeniorManagerDashboard extends Controller {
                 throw new Error("Senior Manager ID is required");
             }
 
-            const response = await fetch("/odata/v4/skillsphere/seniorManagerQuery", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify({
-                    seniorManagerId: this.seniorManagerId,
-                    queryType: "general",
-                    context: query
-                })
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("❌ Server response:", errorText);
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const result = await response.json();
+            // Use OData V4 model action binding — handles CSRF automatically
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const oAction = oDataModel.bindContext("/seniorManagerQuery(...)");
+            oAction.setParameter("seniorManagerId", this.seniorManagerId);
+            oAction.setParameter("queryType", "general");
+            oAction.setParameter("context", query);
+            await oAction.execute("$auto");
+            const result = oAction.getBoundContext().getObject();
             this.removeTypingIndicator();
 
             if (result.answer) {

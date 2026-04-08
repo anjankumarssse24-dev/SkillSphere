@@ -101,8 +101,11 @@ export default class ManagerDashboard extends Controller {
         
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             
             const contexts = await listBinding.requestContexts(0, 1);
             
@@ -113,13 +116,13 @@ export default class ManagerDashboard extends Controller {
                 // Restore currentUser model
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
                 currentUserModel?.setData({
-                    id: manager.managerId,
+                    id: manager.employeeId,
                     name: manager.name,
                     role: 'Manager',
                     team: manager.team,
                     subTeam: manager.subTeam,
                     email: manager.email,
-                    managerId: manager.managerId,
+                    managerId: manager.employeeId,
                     isLoggedIn: true
                 });
                 
@@ -235,7 +238,8 @@ export default class ManagerDashboard extends Controller {
     private async loadAllManagers(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await listBinding.requestContexts();
             const allManagers = contexts.map((context: any) => context.getObject());
@@ -2477,26 +2481,14 @@ private initializeAIChat(): void {
             throw new Error("Manager ID is required");
         }
 
-        const response = await fetch("/odata/v4/skillsphere/managerQuery", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                managerId: this.managerId,
-                queryType: "general",
-                context: query
-            })
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("❌ Server response:", errorText);
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-
-        const result = await response.json();
+        // Use OData V4 model action binding — handles CSRF automatically
+        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+        const oAction = oDataModel.bindContext("/managerQuery(...)");
+        oAction.setParameter("managerId", this.managerId);
+        oAction.setParameter("queryType", "general");
+        oAction.setParameter("context", query);
+        await oAction.execute("$auto");
+        const result = oAction.getBoundContext().getObject();
         this.removeTypingIndicator();
 
         if (result.answer) {

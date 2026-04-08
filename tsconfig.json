@@ -19,12 +19,10 @@
       "integration/*": [
         "./webapp/test/integration/*"
       ]
-    },
-    "types": [
-      "@sapui5/types"
-    ]
+    }
   },
   "include": [
+    "./node_modules/@sapui5/types/types/index.d.ts",
     "./webapp/**/*"
   ]
 }

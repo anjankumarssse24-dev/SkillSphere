@@ -68,15 +68,6 @@
           "kind": "sqlite"
         },
         "auth": "dummy"
-      },
-      "aicore": {
-        "kind": "rest",
-        "credentials": {
-          "url": "https://api.ai.intprod-eu12.eu-central-1.aws.ml.hana.ondemand.com",
-          "clientid": "sb-a50c590e-3530-432e-8790-d564cc1cf0db!b1308080|xsuaa_std!b318061",
-          "clientsecret": "e3a742ce-4b27-4b5c-b19e-9a03edb005a0$0j23iciCI6nIpKxknwcokkdMoxT2EB4kbIafdtWcdNA=",
-          "tokenurl": "https://buildteam8-dev.authentication.eu12.hana.ondemand.com/oauth/token"
-        }
       }
     }
   }
