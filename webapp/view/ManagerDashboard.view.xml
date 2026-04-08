@@ -57,15 +57,21 @@
                                                 <m:Label text="Role:" class="sapUiSmallMarginBottom"/>
                                                 <m:Select id="roleFilter" width="15rem">
                                                     <core:Item key="" text="Any Role"/>
-                                                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
-                                                    <core:Item key="Backend Developer" text="Backend Developer"/>
-                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
                                                     <core:Item key="Architect" text="Architect"/>
-                                                    <core:Item key="Project Manager" text="Project Manager"/>
-                                                    <core:Item key="ABAP Developer" text="ABAP Developer"/>
-                                                    <core:Item key="Data Analyst" text="Data Analyst"/>
+                                                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                                                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                                                    <core:Item key="Developer" text="Developer"/>
                                                     <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                                    <core:Item key="Distinguished Engineer" text="Distinguished Engineer"/>
+                                                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="Principal Architect" text="Principal Architect"/>
+                                                    <core:Item key="Principal Engineer" text="Principal Engineer"/>
                                                     <core:Item key="QA Engineer" text="QA Engineer"/>
+                                                    <core:Item key="Senior Architect" text="Senior Architect"/>
+                                                    <core:Item key="Senior Developer" text="Senior Developer"/>
+                                                    <core:Item key="Solution Architect" text="Solution Architect"/>
                                                 </m:Select>
                                             </m:VBox>
                                             <m:VBox class="sapUiResponsiveMargin" width="auto">
@@ -699,6 +705,64 @@
                         </m:Panel>
                     </m:IconTabFilter>
                     
+                    <!-- Assign Project Tab -->
+                    <m:IconTabFilter icon="sap-icon://add-coursebook" text="Assign Project" key="assign">
+                        <m:VBox class="sapUiSmallMargin">
+                            <!-- Assign New Project -->
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Project to Employee" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Project from Master Data:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="assignProjectComboBox"
+                                                    items="{/Projects}"
+                                                    placeholder="Select a project to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{projectId}" text="{projectName} ({projectManager})"/>
+                                        </m:ComboBox>
+                                        <m:Button text="Assign Project" 
+                                                  type="Emphasized" 
+                                                  icon="sap-icon://add" 
+                                                  press="onAssignProject"
+                                                  enabled="{= ${assignProjectComboBox>/selectedKey} !== '' }"/>
+                                        <m:MessageStrip text="The employee will receive this assignment with 'Pending' status and can accept or reject it." 
+                                                        type="Information" 
+                                                        showIcon="true" 
+                                                        class="sapUiSmallMarginTop"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+                            
+                            <!-- Current Assignments -->
+                            <m:Panel class="sapUiSmallMarginTop" headerText="Assignment History" expandable="true" expanded="true">
+                                <m:content>
+                                    <m:Table id="dialogAssignmentsTable" items="{employeeDetails>/assignments}" class="sapUiSmallMargin">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Type"/></m:Column>
+                                            <m:Column><m:Text text="Project/Work Name"/></m:Column>
+                                            <m:Column><m:Text text="Assignment Status"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization %"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:ObjectStatus text="{employeeDetails>type}"
+                                                               state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
+                                                <m:Text text="{employeeDetails>projectName}"/>
+                                                <m:ObjectStatus text="{employeeDetails>assignmentStatus}"
+                                                               state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{employeeDetails>utilizationPercent}%"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
+                    </m:IconTabFilter>
+                    
                     <!-- Match Details Tab (for search results only) -->
                     <m:IconTabFilter id="dialogMatchTab" icon="sap-icon://compare" text="Match Details" key="match" visible="false">
                         <m:Panel class="sapUiSmallMargin" headerText="Search Match Analysis" expandable="false">
@@ -783,6 +847,7 @@
         title="SkillSphere AI Assistant - Manager"
         contentWidth="600px"
         contentHeight="700px"
+        class="aiAssistantDialog"
         resizable="true"
         draggable="true">
         
@@ -806,12 +871,12 @@
                     id="chatContainerManager"
                     height="520px"
                     vertical="true"
-                    class="sapUiSmallMargin">
-                    <m:VBox id="messagesContainerManager" class="sapUiSmallMargin"/>
+                    class="sapUiSmallMargin aiChatScrollArea">
+                    <m:VBox id="messagesContainerManager" class="sapUiSmallMargin aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Manager -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom">
+                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
                     <m:Button 
                         text="Team Skills" 
                         icon="sap-icon://learning-assistant"
@@ -832,14 +897,14 @@
                 </m:HBox>
                 
                 <!-- Input Area -->
-                <m:Bar>
+                <m:Bar class="aiInputBar">
                     <m:contentLeft>
                         <m:Input
                             id="messageInputManager"
                             placeholder="Ask me about your team..."
                             width="100%"
                             submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd"/>
+                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
                     </m:contentLeft>
                     <m:contentRight>
                         <m:Button

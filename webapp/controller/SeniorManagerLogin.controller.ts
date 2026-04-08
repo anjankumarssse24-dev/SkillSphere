@@ -77,10 +77,9 @@ export default class SeniorManagerLogin extends Controller {
                 return;
             }
             
-            console.log("Password match:", user.password === password, "Role check:", user.role);
-            
-            // Allow Manager role to access Senior Manager dashboard (in real scenario, you'd have a separate role)
-            if (user.password !== password || user.role !== "Manager") {
+            console.log("Role check:", user.role);
+
+            if (user.role !== "SeniorManager") {
                 console.error("Authentication failed - password or role mismatch");
                 MessageToast.show("Invalid Manager ID or Password");
                 return;
@@ -88,20 +87,14 @@ export default class SeniorManagerLogin extends Controller {
 
             console.log("Senior Manager authenticated successfully:", user);
 
-            // Find manager details
-            console.log("Looking for manager with managerId:", user.id);
-            const mgrBinding = oDataModel.bindList("/Managers");
-            const allMgrContexts = await mgrBinding.requestContexts(0, 100);
-            console.log("Total managers in database:", allMgrContexts.length);
-            
-            let manager = null;
-            for (const ctx of allMgrContexts) {
-                const mgr = ctx.getObject();
-                if (mgr.managerId === user.id || mgr.managerId === managerIdUpper) {
-                    manager = mgr;
-                    break;
-                }
-            }
+            // Find profile in unified Employees table
+            console.log("Looking for senior manager with employeeId:", user.id);
+            const mgrBinding = oDataModel.bindList("/Employees");
+            mgrBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerIdUpper)
+            ]);
+            const allMgrContexts = await mgrBinding.requestContexts(0, 1);
+            const manager = allMgrContexts.length > 0 ? allMgrContexts[0].getObject() : null;
 
             if (!manager) {
                 console.error("❌ Manager profile not found for ID:", managerIdUpper);
@@ -116,9 +109,9 @@ export default class SeniorManagerLogin extends Controller {
             if (currentUserModel) {
                 currentUserModel.setData({
                     id: user.id,
-                    name: manager.name || user.name,
+                    name: manager.name || user.id,
                     role: "Senior Manager",
-                    team: manager.team || user.team,
+                    team: manager.team || "",
                     isLoggedIn: true
                 });
                 console.log("✅ Current user model set:", currentUserModel.getData());

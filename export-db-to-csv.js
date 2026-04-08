@@ -18,15 +18,15 @@ if (!fs.existsSync(csvDir)) {
 
 // Entity to CSV file mapping
 const entityMappings = [
-    { entity: 'skillsphere.Users', file: 'skillsphere-Users.csv', columns: ['id', 'name', 'password', 'role', 'team', 'subTeam', 'managerId'] },
-    { entity: 'skillsphere.Employees', file: 'skillsphere-Employees.csv', columns: ['employeeId', 'name', 'team', 'subTeam', 'managerId', 'email', 'experience', 'totalSkills', 'totalProjects', 'role', 'location', 'tLevel', 'gradeLevel'] },
-    { entity: 'skillsphere.Managers', file: 'skillsphere-Managers.csv', columns: ['managerId', 'name', 'team', 'subTeam', 'email', 'totalSkills', 'totalProjects', 'specialization'] },
+    { entity: 'skillsphere.Users', file: 'skillsphere-Users.csv', columns: ['id', 'role', 'isActive'] },
+    { entity: 'skillsphere.Employees', file: 'skillsphere-Employees.csv', columns: ['employeeId', 'name', 'role', 'team', 'subTeam', 'managerId', 'email', 'experience', 'totalSkills', 'totalProjects', 'location', 'tLevel', 'gradeLevel'] },
     { entity: 'skillsphere.Skills', file: 'skillsphere-Skills.csv', columns: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'] },
     { entity: 'skillsphere.Projects', file: 'skillsphere-Projects.csv', columns: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration', 'projectManager', 'accountExecutiveManager', 'lineManagerPOC', 'projectOrchestrator', 'addedByManager'] },
     { entity: 'skillsphere.Profiles', file: 'skillsphere-Profiles.csv', columns: ['employeeId', 'specialization', 'role', 'location', 'tLevel', 'gradeLevel', 'lastUpdated'] },
-    { entity: 'skillsphere.CurrentProjects', file: 'skillsphere-CurrentProjects.csv', columns: ['currentProjectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'hoursPerDay', 'utilizationPercentage', 'projectManager'] },
-    { entity: 'skillsphere.CAIAUtilization', file: 'skillsphere-CAIAUtilization.csv', columns: ['caiaId', 'employeeId', 'projectName', 'startDate', 'endDate', 'hoursPerDay', 'utilizationPercentage'] },
-    { entity: 'skillsphere.POCUtilization', file: 'skillsphere-POCUtilization.csv', columns: ['pocId', 'employeeId', 'projectName', 'startDate', 'endDate', 'hoursPerDay', 'utilizationPercentage'] },
+    { entity: 'skillsphere.CurrentProjects', file: 'skillsphere-CurrentProjects.csv', columns: ['currentProjectId', 'employeeId', 'projectName', 'projectManager', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'] },
+    { entity: 'skillsphere.Initiatives', file: 'skillsphere-Initiatives.csv', columns: ['initiativeId', 'employeeId', 'initiativeName', 'description', 'startDate', 'endDate', 'hoursPerDay', 'status', 'type', 'createdAt', 'lastUpdated'] },
+    { entity: 'skillsphere.CAIAUtilization', file: 'skillsphere-CAIAUtilization.csv', columns: ['caiaId', 'employeeId', 'taskName', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'] },
+    { entity: 'skillsphere.POCUtilization', file: 'skillsphere-POCUtilization.csv', columns: ['pocId', 'employeeId', 'pocTitle', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'] },
     { entity: 'skillsphere.Certifications', file: 'skillsphere-Certifications.csv', columns: ['certificationId', 'employeeId', 'name', 'code', 'dateOfCompletion', 'description', 'level', 'createdAt', 'lastUpdated'] }
 ];
 

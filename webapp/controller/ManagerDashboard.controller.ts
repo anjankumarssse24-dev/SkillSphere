@@ -101,8 +101,11 @@ export default class ManagerDashboard extends Controller {
         
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             
             const contexts = await listBinding.requestContexts(0, 1);
             
@@ -113,13 +116,13 @@ export default class ManagerDashboard extends Controller {
                 // Restore currentUser model
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
                 currentUserModel?.setData({
-                    id: manager.managerId,
+                    id: manager.employeeId,
                     name: manager.name,
                     role: 'Manager',
                     team: manager.team,
                     subTeam: manager.subTeam,
                     email: manager.email,
-                    managerId: manager.managerId,
+                    managerId: manager.employeeId,
                     isLoggedIn: true
                 });
                 
@@ -235,7 +238,8 @@ export default class ManagerDashboard extends Controller {
     private async loadAllManagers(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await listBinding.requestContexts();
             const allManagers = contexts.map((context: any) => context.getObject());
@@ -539,9 +543,11 @@ export default class ManagerDashboard extends Controller {
         
         console.log(`📊 Team: ${totalEmployees} employees, Months: ${monthsCount}, Available: ${totalAvailableHours} hours total`);
 
-        // Calculate total hours utilized in current month for each type
-        let currentProjectsHours = 0;
-        let initiativesHours = 0;
+        // Calculate average utilization percentages for each type
+        let currentProjectsTotal = 0;
+        let currentProjectsCount = 0;
+        let initiativesTotal = 0;
+        let initiativesCount = 0;
 
         allData.forEach(empData => {
             console.log(`📊 Processing ${empData.employee?.employeeId}:`, {
@@ -549,36 +555,36 @@ export default class ManagerDashboard extends Controller {
                 initiatives: empData.initiatives?.length || 0
             });
             
-            // Current Projects - convert hoursPerDay to monthly hours (hoursPerDay * 20 working days)
+            // Current Projects - use utilizationPercent directly
             empData.currentProjects.forEach((cp: any) => {
                 const isActive = this.isActiveInPeriod(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
-                const hoursPerDay = parseFloat(cp.hoursPerDay) || 0;
+                const utilizationPercent = parseInt(cp.utilizationPercent) || 0;
                 const activeMonths = this.countActiveMonths(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
-                const totalHours = hoursPerDay * 20 * activeMonths; // hours per active month
-                console.log(`  📘 Current Project: ${cp.projectName}, Active: ${isActive}, Months: ${activeMonths}, Hours/Day: ${hoursPerDay}, Total Hours: ${totalHours}`);
-                if (isActive) {
-                    currentProjectsHours += totalHours;
+                console.log(`  📘 Current Project: ${cp.projectName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
+                if (isActive && utilizationPercent > 0) {
+                    currentProjectsTotal += utilizationPercent;
+                    currentProjectsCount++;
                 }
             });
 
-            // Initiatives - convert hoursPerDay to monthly hours
+            // Initiatives - use utilizationPercent directly
             empData.initiatives.forEach((initiative: any) => {
                 const isActive = this.isActiveInPeriod(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
-                const hoursPerDay = parseFloat(initiative.hoursPerDay) || 0;
+                const utilizationPercent = parseInt(initiative.utilizationPercent) || 0;
                 const activeMonths = this.countActiveMonths(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
-                const totalHours = hoursPerDay * 20 * activeMonths;
-                console.log(`  🎯 Initiative: ${initiative.initiativeName}, Active: ${isActive}, Months: ${activeMonths}, Hours/Day: ${hoursPerDay}, Total Hours: ${totalHours}`);
-                if (isActive) {
-                    initiativesHours += totalHours;
+                console.log(`  🎯 Initiative: ${initiative.initiativeName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
+                if (isActive && utilizationPercent > 0) {
+                    initiativesTotal += utilizationPercent;
+                    initiativesCount++;
                 }
             });
         });
 
-        // Calculate percentages based on total available hours
-        const currentProjectsUtilized = Math.min(100, Math.round((currentProjectsHours / totalAvailableHours) * 100));
-        const initiativesUtilized = Math.min(100, Math.round((initiativesHours / totalAvailableHours) * 100));
+        // Calculate average percentages
+        const currentProjectsUtilized = currentProjectsCount > 0 ? Math.round(currentProjectsTotal / currentProjectsCount) : 0;
+        const initiativesUtilized = initiativesCount > 0 ? Math.round(initiativesTotal / initiativesCount) : 0;
 
-        console.log(`📊 Hours: CP=${currentProjectsHours}h (${currentProjectsUtilized}%), Initiatives=${initiativesHours}h (${initiativesUtilized}%) of ${totalAvailableHours}h total`);
+        console.log(`📊 Utilization: CP=${currentProjectsUtilized}% (${currentProjectsCount} projects), Initiatives=${initiativesUtilized}% (${initiativesCount} initiatives)`);
 
         // Update visualization model
         const vizModel = this.getView()?.getModel("visualization") as JSONModel;
@@ -586,12 +592,12 @@ export default class ManagerDashboard extends Controller {
             currentProjects: {
                 utilized: currentProjectsUtilized,
                 available: 100 - currentProjectsUtilized,
-                hours: currentProjectsHours
+                count: currentProjectsCount
             },
             initiatives: {
                 utilized: initiativesUtilized,
                 available: 100 - initiativesUtilized,
-                hours: initiativesHours
+                count: initiativesCount
             },
             totalAvailableHours: totalAvailableHours
         });
@@ -800,7 +806,7 @@ export default class ManagerDashboard extends Controller {
                     projectName: cp.projectName,
                     startDate: cp.startDate,
                     endDate: cp.endDate,
-                    hoursPerDay: cp.hoursPerDay,
+                    utilizationPercent: cp.utilizationPercent,
                     status: status,
                     type: "CurrentProject",
                     color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
@@ -838,7 +844,7 @@ export default class ManagerDashboard extends Controller {
                     description: init.description,
                     startDate: init.startDate,
                     endDate: init.endDate,
-                    hoursPerDay: init.hoursPerDay,
+                    utilizationPercent: init.utilizationPercent,
                     status: status,
                     type: "Initiative",
                     typeLabel: typeLabel,
@@ -1154,6 +1160,8 @@ export default class ManagerDashboard extends Controller {
             // Get month and day information
             const startMonth = startDate.getMonth();
             const endMonth = endDate.getMonth();
+            const startYear = startDate.getFullYear();
+            const endYear = endDate.getFullYear();
             const startDay = startDate.getDate();
             const endDay = endDate.getDate();
             
@@ -1165,16 +1173,15 @@ export default class ManagerDashboard extends Controller {
             // (starts before first visible month AND ends after last visible month)
             const firstVisibleMonth = monthNumbers[0];
             const lastVisibleMonth = monthNumbers[monthNumbers.length - 1];
-            const spansEntireRange = startMonth < firstVisibleMonth && endMonth > lastVisibleMonth;
-            const startsBeforeAndEndsAfter =
-                (startDate.getFullYear() < new Date(startDate.getFullYear(), firstVisibleMonth, 1).getFullYear() ||
-                 startMonth < firstVisibleMonth) &&
-                (endDate.getFullYear() > new Date(endDate.getFullYear(), lastVisibleMonth, 1).getFullYear() ||
-                 endMonth > lastVisibleMonth);
+            
+            // Account for year differences when determining if project spans the range
+            const startsBeforeRange = (startYear < year) || (startYear === year && startMonth < firstVisibleMonth);
+            const endsAfterRange = (endYear > year) || (endYear === year && endMonth > lastVisibleMonth);
+            const spansEntireRange = startsBeforeRange && endsAfterRange;
 
             if (startIndex === -1 && endIndex === -1 && !spansEntireRange) return; // Skip if not in range at all
             
-            // Calculate precise position with day-level accuracy
+            // Calculate precise position with day-level accuracy and year awareness
             let leftPercent = 0;
             let widthPercent = 0;
             
@@ -1182,8 +1189,8 @@ export default class ManagerDashboard extends Controller {
                 // Project covers entire visible range — full width bar
                 leftPercent = 0;
                 widthPercent = 100;
-            } else if (startIndex !== -1 && endIndex !== -1) {
-                // Both start and end are in visible range
+            } else if (startYear === year && endYear === year && startIndex !== -1 && endIndex !== -1) {
+                // Both start and end are in the same visible year
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
                 
@@ -1204,14 +1211,14 @@ export default class ManagerDashboard extends Controller {
                     const startDayFraction = (daysInStartMonth - startDay + 1) / daysInStartMonth;
                     widthPercent = ((startDayFraction + (monthsSpanned - 1) + endDayFraction) / totalMonths) * 100;
                 }
-            } else if (startIndex !== -1) {
-                // Only start is visible, extends beyond visible range
+            } else if (startYear === year && startIndex !== -1) {
+                // Only start is in same year, extends beyond visible range
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const dayOffsetInStartMonth = (startDay - 1) / daysInStartMonth;
                 leftPercent = ((startIndex + dayOffsetInStartMonth) / totalMonths) * 100;
                 widthPercent = ((totalMonths - startIndex - dayOffsetInStartMonth) / totalMonths) * 100;
-            } else if (endIndex !== -1) {
-                // Only end is visible, starts before visible range
+            } else if (endYear === year && endIndex !== -1) {
+                // Only end is in same year, starts before visible range
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
                 const endDayFraction = endDay / daysInEndMonth;
                 leftPercent = 0;
@@ -1259,8 +1266,8 @@ export default class ManagerDashboard extends Controller {
             if (project.typeLabel) {
                 tooltipText += ` [${project.typeLabel}]`;
             }
-            if (project.hoursPerDay) {
-                tooltipText += ` - ${project.hoursPerDay} hrs/day`;
+            if (project.utilizationPercent) {
+                tooltipText += ` - ${project.utilizationPercent}% utilization`;
             }
             if (project.description) {
                 tooltipText += ` - ${project.description}`;
@@ -1273,7 +1280,7 @@ export default class ManagerDashboard extends Controller {
                      data-project="${project.projectName}"
                      data-type="${project.type}"
                      data-dates="${project.startDate} to ${project.endDate}"
-                     data-hours="${project.hoursPerDay || 'N/A'}"
+                     data-utilization="${project.utilizationPercent || 'N/A'}"
                      data-description="${project.description || ''}"
                      onmouseover="this.style.opacity='1'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)';"
                      onmouseout="this.style.opacity='0.95'; this.style.boxShadow='none';">
@@ -1362,14 +1369,11 @@ export default class ManagerDashboard extends Controller {
     /**
      * Format utilization as percentage
      */
-    public formatUtilizationPercent(hoursPerDay: number): string {
-        if (!hoursPerDay || hoursPerDay === 0) {
+    public formatUtilizationPercent(utilizationPercent: number): string {
+        if (!utilizationPercent || utilizationPercent === 0) {
             return "0%";
         }
-        
-        // Calculate utilization percentage: (hours worked / 8 hours) * 100
-        const percentage = Math.round((hoursPerDay / 8) * 100);
-        return `${percentage}%`;
+        return `${utilizationPercent}%`;
     }
 
     /**
@@ -1939,7 +1943,8 @@ export default class ManagerDashboard extends Controller {
                 projects: projects,
                 currentProjects: currentProjects,
                 initiatives: initiatives,
-                certifications: certifications
+                certifications: certifications,
+                assignments: currentProjects // Assignments are the current projects (includes all statuses)
             };
 
             // Create model for employee details
@@ -2269,6 +2274,27 @@ export default class ManagerDashboard extends Controller {
         return stateMap[certificationStatus] || "None";
     }
 
+    public formatTypeState(type: string): string {
+        const stateMap: { [key: string]: string } = {
+            "Project": "Success",
+            "Evaluation": "Warning",
+            "Initiative": "Information",
+            "CAIA": "Error",
+            "POC": "Information"
+        };
+        return stateMap[type] || "None";
+    }
+
+    public formatAssignmentStatusState(status: string): string {
+        const stateMap: { [key: string]: string } = {
+            "Accepted": "Success",
+            "Self-Assigned": "Success",
+            "Pending": "Warning",
+            "Rejected": "Error"
+        };
+        return stateMap[status] || "None";
+    }
+
     // ==================== AI ASSISTANT METHODS ====================
 
     private managerId: string = "";
@@ -2585,6 +2611,45 @@ private initializeAIChat(): void {
 
     // ==================== MANAGER ADD PROJECT ====================
 
+    private async getCurrentManagerName(): Promise<string> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const managersBinding = oDataModel.bindList("/Managers");
+            managersBinding.filter([new Filter("managerId", FilterOperator.EQ, this.currentManagerId)]);
+            
+            const contexts = await managersBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                const manager = contexts[0].getObject();
+                return manager.name || "";
+            }
+            return "";
+        } catch (error) {
+            console.error("Error getting current manager name:", error);
+            return "";
+        }
+    }
+
+    private async loadManagersForProjectDialog(): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const managersBinding = oDataModel.bindList("/Managers");
+            
+            const contexts = await managersBinding.requestContexts(0, 1000);
+            const managers = contexts.map((ctx: any) => ctx.getObject())
+                .map((m: any) => ({ name: m.name }));
+            
+            // Set models for both PM and LM dropdowns
+            this.getView()?.setModel(new JSONModel({ managers }), "pmList");
+            this.getView()?.setModel(new JSONModel({ managers }), "lmList");
+            
+            console.log(`Loaded ${managers.length} managers for project dialog dropdowns`);
+        } catch (error) {
+            console.error("Error loading managers for project dialog:", error);
+            this.getView()?.setModel(new JSONModel({ managers: [] }), "pmList");
+            this.getView()?.setModel(new JSONModel({ managers: [] }), "lmList");
+        }
+    }
+
     public async onManagerAddProject(): Promise<void> {
         if (!this.currentDialogEmployeeId) {
             MessageToast.show("No employee selected");
@@ -2596,19 +2661,26 @@ private initializeAIChat(): void {
             this.managerAddProjectDialog = undefined;
         }
 
+        // Get current manager's name for default Line Manager
+        const currentManagerName = await this.getCurrentManagerName();
+
         const newProjectModel = new JSONModel({
             projectName: "",
-            role: "",
             startDate: null,
             endDate: null,
+            evaluationStartDate: null,
+            evaluationEndDate: null,
             status: "Active",
             description: "",
             projectManager: "",
             accountExecutiveManager: "",
-            lineManagerPOC: "",
+            lineManagerPOC: currentManagerName || "",
             projectOrchestrator: ""
         });
         this.getView()?.setModel(newProjectModel, "managerNewProject");
+        
+        // Load managers list for dropdowns
+        await this.loadManagersForProjectDialog();
 
         this.managerAddProjectDialog = await Fragment.load({
             name: "skillsphere.view.dialogs.ManagerAddProjectDialog",
@@ -2632,8 +2704,8 @@ private initializeAIChat(): void {
         const projectModel = this.getView()?.getModel("managerNewProject") as JSONModel;
         const data = projectModel?.getData();
 
-        if (!data?.projectName || !data?.role) {
-            MessageToast.show("Please fill in required fields: Project Name and Role");
+        if (!data?.projectName) {
+            MessageToast.show("Please fill in required field: Project Name");
             return;
         }
 
@@ -2675,9 +2747,11 @@ private initializeAIChat(): void {
                 projectId: `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 projectName: data.projectName,
-                role: data.role,
+                role: "",
                 startDate: startDateISO,
                 endDate: endDateISO,
+                evaluationStartDate: convertToISODate(data.evaluationStartDate),
+                evaluationEndDate: convertToISODate(data.evaluationEndDate),
                 status: data.status || "Active",
                 description: data.description || "",
                 duration: duration,
@@ -2703,6 +2777,105 @@ private initializeAIChat(): void {
         } catch (error) {
             console.error("❌ Error saving project:", error);
             MessageToast.show("Error saving project");
+        }
+    }
+
+    // ==================== ASSIGN PROJECT TO EMPLOYEE ====================
+
+    public async onAssignProjectToEmployee(employeeId: string, projectId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            
+            // Get project details from Projects master data
+            const projectsBinding = oDataModel.bindList("/Projects");
+            projectsBinding.filter([new Filter("projectId", FilterOperator.EQ, projectId)]);
+            const projectContexts = await projectsBinding.requestContexts(0, 1);
+            
+            if (projectContexts.length === 0) {
+                MessageToast.show("Project not found");
+                return;
+            }
+            
+            const project = projectContexts[0].getObject();
+            
+            // Create assignment in CurrentProjects with Pending status
+            const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
+            currentProjectsBinding.create({
+                currentProjectId: `ASSIGN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                employeeId: employeeId,
+                type: "Project",
+                projectName: project.projectName,
+                role: "", // Employee will set this when accepting
+                projectManager: project.projectManager || "",
+                startDate: project.startDate,
+                endDate: project.endDate,
+                utilizationPercent: 100, // Default, employee can change
+                description: project.description || "",
+                assignmentStatus: "Pending",
+                assignedBy: this.currentManagerId,
+                isEvaluation: false,
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            });
+            
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            MessageToast.show(`Project "${project.projectName}" assigned to employee. Status: Pending acceptance.`);
+        } catch (error) {
+            console.error("❌ Error assigning project:", error);
+            MessageToast.show("Error assigning project to employee");
+        }
+    }
+
+    // Manager assigns project from UI button in employee details dialog
+    public async onAssignProject(): Promise<void> {
+        const comboBox = this.byId("assignProjectComboBox") as any;
+        if (!comboBox) {
+            MessageToast.show("Project selection not found");
+            return;
+        }
+        
+        const selectedKey = comboBox.getSelectedKey();
+        if (!selectedKey) {
+            MessageToast.show("Please select a project to assign");
+            return;
+        }
+        
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Employee information not found");
+            return;
+        }
+        
+        // Call the assignment method
+        await this.onAssignProjectToEmployee(this.currentDialogEmployeeId, selectedKey);
+        
+        // Clear the selection
+        comboBox.setSelectedKey("");
+        
+        // Refresh the assignments table
+        await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
+    }
+
+    // Refresh assignments table in employee details dialog
+    private async refreshEmployeeAssignments(employeeId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            
+            // Get all assignments for this employee
+            const binding = oDataModel.bindList("/CurrentProjects");
+            binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const contexts = await binding.requestContexts();
+            const assignments = contexts.map((ctx: any) => ctx.getObject());
+            
+            // Update the model
+            const detailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+            if (detailsModel) {
+                detailsModel.setProperty("/assignments", assignments);
+            }
+            
+        } catch (error) {
+            console.error("❌ Error refreshing assignments:", error);
         }
     }
 

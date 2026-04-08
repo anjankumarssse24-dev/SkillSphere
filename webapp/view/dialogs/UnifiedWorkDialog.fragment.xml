@@ -1,0 +1,93 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Add Work Assignment"
+        contentWidth="550px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <!-- Work Type Selection -->
+                <Label text="Work Type:" required="true" />
+                <Select
+                    selectedKey="{unifiedWork>/type}"
+                    width="100%"
+                    change="onUnifiedWorkTypeChange">
+                    <core:Item key="Project" text="Project (from Master Data)"/>
+                    <core:Item key="Evaluation" text="Evaluation (from Master Data)"/>
+                    <core:Item key="Initiative" text="Initiative (Self-Created)"/>
+                    <core:Item key="CAIA" text="CAIA (Self-Created)"/>
+                    <core:Item key="POC" text="POC (Self-Created)"/>
+                </Select>
+                
+                <!-- For Project/Evaluation (from master data) -->
+                <VBox visible="{= ${unifiedWork>/type} === 'Project' || ${unifiedWork>/type} === 'Evaluation' }">
+                    <Label text="Select from Master Data:" required="true" class="sapUiSmallMarginTop" />
+                    <ComboBox
+                        selectedKey="{unifiedWork>/projectName}"
+                        placeholder="Choose project"
+                        width="100%"
+                        items="{projectsList>/projects}"
+                        selectionChange="onUnifiedProjectSelected">
+                        <core:Item key="{projectsList>projectName}" text="{projectsList>projectName}"/>
+                    </ComboBox>
+                    
+                    <Label text="Your Role:" required="true" class="sapUiSmallMarginTop" />
+                    <Select selectedKey="{unifiedWork>/role}" width="100%">
+                        <core:Item key="" text="-- Select Role --"/>
+                        <core:Item key="Developer" text="Developer"/>
+                        <core:Item key="Architect" text="Architect"/>
+                        <core:Item key="Backend Developer" text="Backend Developer"/>
+                        <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                        <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                        <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                        <core:Item key="Data Scientist" text="Data Scientist"/>
+                        <core:Item key="Data Analyst" text="Data Analyst"/>
+                        <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                        <core:Item key="QA Engineer" text="QA Engineer"/>
+                        <core:Item key="Tech Lead" text="Tech Lead"/>
+                        <core:Item key="Project Manager" text="Project Manager"/>
+                    </Select>
+                    
+                    <Label text="Project Manager:" class="sapUiSmallMarginTop" />
+                    <Input value="{unifiedWork>/projectManager}" enabled="false" width="100%"/>
+                </VBox>
+                
+                <!-- For Initiative/CAIA/POC (self-created) -->
+                <VBox visible="{= ${unifiedWork>/type} === 'Initiative' || ${unifiedWork>/type} === 'CAIA' || ${unifiedWork>/type} === 'POC' }">
+                    <Label text="Name:" required="true" class="sapUiSmallMarginTop" />
+                    <Input value="{unifiedWork>/projectName}" placeholder="Enter name" width="100%"/>
+                    
+                    <Label text="Description:" class="sapUiSmallMarginTop" />
+                    <TextArea value="{unifiedWork>/description}" rows="3" width="100%"/>
+                </VBox>
+                
+                <!-- Common Fields -->
+                <Label text="Start Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{unifiedWork>/startDate}"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <Label text="End Date:" required="true" class="sapUiSmallMarginTop" />
+                <DatePicker
+                    value="{unifiedWork>/endDate}"
+                    displayFormat="MM/dd/yyyy"
+                    width="100%"/>
+                
+                <Label text="Allocation (%):" required="true" class="sapUiSmallMarginTop" />
+                <ComboBox selectedKey="{unifiedWork>/utilizationPercent}" width="100%">
+                    <core:Item key="100" text="100% (Full Time)"/>
+                    <core:Item key="75" text="75%"/>
+                    <core:Item key="50" text="50% (Half Time)"/>
+                    <core:Item key="25" text="25%"/>
+                </ComboBox>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press="onSaveUnifiedWork" />
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press="onCloseUnifiedWorkDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
