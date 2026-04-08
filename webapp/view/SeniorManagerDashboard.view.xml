@@ -156,7 +156,6 @@
                                 </m:headerToolbar>
                                 <m:content>
                                     <m:Table id="workOverviewTable" 
-                                             items="{workOverview>/employees}"
                                              class="sapUiResponsiveMargin"
                                              growing="true"
                                              growingThreshold="20"
@@ -202,84 +201,9 @@
                                                 <m:Column width="180px" hAlign="Left">
                                                     <m:Text text="Specialization"/>
                                                 </m:Column>
-                                                <m:Column width="320px" hAlign="Left">
-                                                    <m:Text text="Project 1"/>
-                                                </m:Column>
-                                                <m:Column width="320px" hAlign="Left">
-                                                    <m:Text text="Project 2"/>
-                                                </m:Column>
-                                                <m:Column width="320px" hAlign="Left">
-                                                    <m:Text text="Evaluation"/>
-                                                </m:Column>
-                                                <m:Column width="320px" hAlign="Left">
-                                                    <m:Text text="Initiative 1"/>
-                                                </m:Column>
-                                                <m:Column width="320px" hAlign="Left">
-                                                    <m:Text text="Initiative 2"/>
-                                                </m:Column>
+                                                <!-- Dynamic columns for Projects, Evaluations, and Initiatives will be added by controller -->
                                             </m:columns>
-                                            <m:items>
-                                                <m:ColumnListItem>
-                                                    <m:cells>
-                                                        <!-- Name -->
-                                                        <m:VBox>
-                                                            <m:Text text="{workOverview>name}" class="sapUiTinyMarginBottom" wrapping="false"/>
-                                                            <m:Text text="{workOverview>employeeId}" class="sapThemeTextSubtle-asColor"/>
-                                                        </m:VBox>
-                                                        
-                                                        <!-- T-Level -->
-                                                        <m:ObjectStatus text="{workOverview>tLevel}" state="Information"/>
-                                                        
-                                                        <!-- Specialization -->
-                                                        <m:ObjectStatus text="{workOverview>specialization}" state="None"/>
-                                                        
-                                                        <!-- Project 1 -->
-                                                        <m:VBox>
-                                                            <m:Text text="{workOverview>project1Name}" wrapping="false" maxLines="1"/>
-                                                            <m:HBox class="sapUiTinyMarginTop">
-                                                                <m:ObjectStatus text="{workOverview>project1Tech}" state="Success" class="sapUiTinyMarginEnd"/>
-                                                                <m:ObjectStatus text="{workOverview>project1Util}" state="Success"/>
-                                                            </m:HBox>
-                                                        </m:VBox>
-                                                        
-                                                        <!-- Project 2 -->
-                                                        <m:VBox>
-                                                            <m:Text text="{workOverview>project2Name}" wrapping="false" maxLines="1"/>
-                                                            <m:HBox class="sapUiTinyMarginTop">
-                                                                <m:ObjectStatus text="{workOverview>project2Tech}" state="Success" class="sapUiTinyMarginEnd"/>
-                                                                <m:ObjectStatus text="{workOverview>project2Util}" state="Success"/>
-                                                            </m:HBox>
-                                                        </m:VBox>
-                                                        
-                                                        <!-- Evaluation -->
-                                                        <m:VBox>
-                                                            <m:Text text="{workOverview>evaluation1Name}" wrapping="false" maxLines="1"/>
-                                                            <m:HBox class="sapUiTinyMarginTop">
-                                                                <m:ObjectStatus text="{workOverview>evaluation1Tech}" state="Warning" class="sapUiTinyMarginEnd"/>
-                                                                <m:ObjectStatus text="{workOverview>evaluation1Util}" state="Warning"/>
-                                                            </m:HBox>
-                                                        </m:VBox>
-                                                        
-                                                        <!-- Initiative 1 -->
-                                                        <m:VBox>
-                                                            <m:Text text="{workOverview>initiative1Name}" wrapping="false" maxLines="1"/>
-                                                            <m:HBox class="sapUiTinyMarginTop">
-                                                                <m:ObjectStatus text="{workOverview>initiative1Tech}" state="Information" class="sapUiTinyMarginEnd"/>
-                                                                <m:ObjectStatus text="{workOverview>initiative1Util}" state="Information"/>
-                                                            </m:HBox>
-                                                        </m:VBox>
-                                                        
-                                                        <!-- Initiative 2 -->
-                                                        <m:VBox>
-                                                            <m:Text text="{workOverview>initiative2Name}" wrapping="false" maxLines="1"/>
-                                                            <m:HBox class="sapUiTinyMarginTop">
-                                                                <m:ObjectStatus text="{workOverview>initiative2Tech}" state="Information" class="sapUiTinyMarginEnd"/>
-                                                                <m:ObjectStatus text="{workOverview>initiative2Util}" state="Information"/>
-                                                            </m:HBox>
-                                                        </m:VBox>
-                                                    </m:cells>
-                                                </m:ColumnListItem>
-                                            </m:items>
+                                            <!-- Items binding will be created dynamically by the controller -->
                                         </m:Table>
                                 </m:content>
                             </m:Panel>

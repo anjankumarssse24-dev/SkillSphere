@@ -6,6 +6,8 @@ import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import Dialog from "sap/m/Dialog";
 import Table from "sap/m/Table";
+import Column from "sap/m/Column";
+import ColumnListItem from "sap/m/ColumnListItem";
 import MultiInput from "sap/m/MultiInput";
 import Token from "sap/m/Token";
 import Event from "sap/ui/base/Event";
@@ -17,6 +19,7 @@ import HBox from "sap/m/HBox";
 import HTML from "sap/ui/core/HTML";
 import ListBinding from "sap/ui/model/ListBinding";
 import OverflowToolbar from "sap/m/OverflowToolbar";
+import ObjectStatus from "sap/m/ObjectStatus";
 
 /**
  * @namespace skillsphere.controller
@@ -329,8 +332,12 @@ export default class SeniorManagerDashboard extends Controller {
                 }
             });
             
-            // Build overview data for T3/T4 employees only
-            const employeesOverview = seniorEmployees.map((emp: any) => {
+            // Calculate max counts for dynamic columns
+            let maxProjects = 0;
+            let maxEvaluations = 0;
+            let maxInitiatives = 0;
+            
+            const employeeWorkData = seniorEmployees.map((emp: any) => {
                 const profile: any = profileMap.get(emp.employeeId);
                 const work = workByEmployee.get(emp.employeeId) || [];
                 
@@ -339,43 +346,226 @@ export default class SeniorManagerDashboard extends Controller {
                 const evaluations = work.filter((w: any) => w.type === 'Evaluation');
                 const initiatives = work.filter((w: any) => w.type === 'Initiative');
                 
-                return {
+                // Update max counts
+                maxProjects = Math.max(maxProjects, projects.length);
+                maxEvaluations = Math.max(maxEvaluations, evaluations.length);
+                maxInitiatives = Math.max(maxInitiatives, initiatives.length);
+                
+                return { emp, profile, projects, evaluations, initiatives };
+            });
+            
+            console.log(`📊 Dynamic columns: ${maxProjects} projects, ${maxEvaluations} evaluations, ${maxInitiatives} initiatives`);
+            
+            // Build overview data with dynamic columns
+            const employeesOverview = employeeWorkData.map(({ emp, profile, projects, evaluations, initiatives }: any) => {
+                const rowData: any = {
                     name: emp.name,
                     employeeId: emp.employeeId,
                     tLevel: profile?.tLevel || '-',
                     specialization: emp.specialization || profile?.specialization || '-',
-                    
-                    // Projects with technology
-                    project1Name: projects[0]?.projectName || '-',
-                    project1Tech: projects[0]?.technology || '',
-                    project1Util: projects[0] ? `${projects[0].utilizationPercent}%` : '',
-                    project2Name: projects[1]?.projectName || '-',
-                    project2Tech: projects[1]?.technology || '',
-                    project2Util: projects[1] ? `${projects[1].utilizationPercent}%` : '',
-                    
-                    // Evaluations with technology
-                    evaluation1Name: evaluations[0]?.projectName || '-',
-                    evaluation1Tech: evaluations[0]?.technology || '',
-                    evaluation1Util: evaluations[0] ? `${evaluations[0].utilizationPercent}%` : '',
-                    
-                    // Initiatives with technology
-                    initiative1Name: initiatives[0]?.projectName || '-',
-                    initiative1Tech: initiatives[0]?.technology || '',
-                    initiative1Util: initiatives[0] ? `${initiatives[0].utilizationPercent}%` : '',
-                    initiative2Name: initiatives[1]?.projectName || '-',
-                    initiative2Tech: initiatives[1]?.technology || '',
-                    initiative2Util: initiatives[1] ? `${initiatives[1].utilizationPercent}%` : ''
+                    projects: [],
+                    evaluations: [],
+                    initiatives: []
                 };
+                
+                // Add projects dynamically
+                for (let i = 0; i < maxProjects; i++) {
+                    rowData.projects.push({
+                        name: projects[i]?.projectName || '-',
+                        tech: projects[i]?.technology || '',
+                        util: projects[i] ? `${projects[i].utilizationPercent}%` : ''
+                    });
+                }
+                
+                // Add evaluations dynamically
+                for (let i = 0; i < maxEvaluations; i++) {
+                    rowData.evaluations.push({
+                        name: evaluations[i]?.projectName || '-',
+                        tech: evaluations[i]?.technology || '',
+                        util: evaluations[i] ? `${evaluations[i].utilizationPercent}%` : ''
+                    });
+                }
+                
+                // Add initiatives dynamically
+                for (let i = 0; i < maxInitiatives; i++) {
+                    rowData.initiatives.push({
+                        name: initiatives[i]?.projectName || '-',
+                        tech: initiatives[i]?.technology || '',
+                        util: initiatives[i] ? `${initiatives[i].utilizationPercent}%` : ''
+                    });
+                }
+                
+                return rowData;
             });
             
-            // Set model
-            this.getView()?.setModel(new JSONModel({ employees: employeesOverview }), "workOverview");
+            // Set model with column configuration
+            this.getView()?.setModel(new JSONModel({ 
+                employees: employeesOverview,
+                columnConfig: {
+                    projects: maxProjects,
+                    evaluations: maxEvaluations,
+                    initiatives: maxInitiatives
+                }
+            }), "workOverview");
+            
+            // Rebuild table columns dynamically
+            this.rebuildWorkOverviewColumns(maxProjects, maxEvaluations, maxInitiatives);
             
             console.log(`✅ Work overview loaded for ${employeesOverview.length} senior employees (T3/T4 only)`);
             
         } catch (error) {
             console.error("❌ Error loading work overview:", error);
         }
+    }
+
+    private rebuildWorkOverviewColumns(maxProjects: number, maxEvaluations: number, maxInitiatives: number): void {
+        const table = this.byId("workOverviewTable") as Table;
+        if (!table) {
+            console.warn("⚠️ workOverviewTable not found");
+            return;
+        }
+
+        // Unbind any existing items first
+        if (table.isBound("items")) {
+            table.unbindItems();
+        }
+
+        // Clear existing columns (keep first 3: Name, T-Level, Specialization)
+        const existingColumns = table.getColumns();
+        while (existingColumns.length > 3) {
+            table.removeColumn(existingColumns[existingColumns.length - 1]);
+        }
+
+        // Create dynamic columns
+        const columns: Column[] = [];
+        const cellTemplates: any[] = [];
+        
+        // Add static cells for Name, T-Level, Specialization
+        cellTemplates.push(
+            new VBox({
+                items: [
+                    new Text({ text: "{workOverview>name}", wrapping: false }).addStyleClass("sapUiTinyMarginBottom"),
+                    new Text({ text: "{workOverview>employeeId}" }).addStyleClass("sapThemeTextSubtle-asColor")
+                ]
+            }),
+            new ObjectStatus({ text: "{workOverview>tLevel}", state: "Information" }),
+            new ObjectStatus({ text: "{workOverview>specialization}", state: "None" })
+        );
+
+        // Add Project columns
+        for (let i = 0; i < maxProjects; i++) {
+            columns.push(new Column({
+                width: "320px",
+                hAlign: "Left",
+                header: new Text({ text: `Project ${i + 1}` })
+            }));
+            
+            cellTemplates.push(
+                new VBox({
+                    items: [
+                        new Text({ 
+                            text: `{workOverview>projects/${i}/name}`, 
+                            wrapping: false, 
+                            maxLines: 1 
+                        }),
+                        new HBox({
+                            items: [
+                                new ObjectStatus({ 
+                                    text: `{workOverview>projects/${i}/tech}`, 
+                                    state: "Success" 
+                                }).addStyleClass("sapUiTinyMarginEnd"),
+                                new ObjectStatus({ 
+                                    text: `{workOverview>projects/${i}/util}`, 
+                                    state: "Success" 
+                                })
+                            ]
+                        }).addStyleClass("sapUiTinyMarginTop")
+                    ]
+                })
+            );
+        }
+
+        // Add Evaluation columns
+        for (let i = 0; i < maxEvaluations; i++) {
+            columns.push(new Column({
+                width: "320px",
+                hAlign: "Left",
+                header: new Text({ text: maxEvaluations > 1 ? `Evaluation ${i + 1}` : "Evaluation" })
+            }));
+            
+            cellTemplates.push(
+                new VBox({
+                    items: [
+                        new Text({ 
+                            text: `{workOverview>evaluations/${i}/name}`, 
+                            wrapping: false, 
+                            maxLines: 1 
+                        }),
+                        new HBox({
+                            items: [
+                                new ObjectStatus({ 
+                                    text: `{workOverview>evaluations/${i}/tech}`, 
+                                    state: "Warning" 
+                                }).addStyleClass("sapUiTinyMarginEnd"),
+                                new ObjectStatus({ 
+                                    text: `{workOverview>evaluations/${i}/util}`, 
+                                    state: "Warning" 
+                                })
+                            ]
+                        }).addStyleClass("sapUiTinyMarginTop")
+                    ]
+                })
+            );
+        }
+
+        // Add Initiative columns
+        for (let i = 0; i < maxInitiatives; i++) {
+            columns.push(new Column({
+                width: "320px",
+                hAlign: "Left",
+                header: new Text({ text: maxInitiatives > 1 ? `Initiative ${i + 1}` : "Initiative" })
+            }));
+            
+            cellTemplates.push(
+                new VBox({
+                    items: [
+                        new Text({ 
+                            text: `{workOverview>initiatives/${i}/name}`, 
+                            wrapping: false, 
+                            maxLines: 1 
+                        }),
+                        new HBox({
+                            items: [
+                                new ObjectStatus({ 
+                                    text: `{workOverview>initiatives/${i}/tech}`, 
+                                    state: "Information" 
+                                }).addStyleClass("sapUiTinyMarginEnd"),
+                                new ObjectStatus({ 
+                                    text: `{workOverview>initiatives/${i}/util}`, 
+                                    state: "Information" 
+                                })
+                            ]
+                        }).addStyleClass("sapUiTinyMarginTop")
+                    ]
+                })
+            );
+        }
+
+        // Add new columns to table
+        columns.forEach(col => table.addColumn(col));
+
+        // Create new template for items
+        const template = new ColumnListItem({
+            cells: cellTemplates
+        });
+
+        // Rebind items with new template
+        table.bindItems({
+            path: "workOverview>/employees",
+            template: template
+        });
+
+        console.log(`✅ Rebuilt table with ${columns.length} dynamic columns`);
     }
 
     public onSearchWorkOverview(event: any): void {
