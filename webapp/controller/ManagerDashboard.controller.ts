@@ -478,7 +478,6 @@ export default class ManagerDashboard extends Controller {
             const utilizationPromises = employees.map(async (emp: any) => ({
                 employee: emp,
                 currentProjects: await this.getCurrentProjects(emp.employeeId),
-                initiatives: await this.getInitiatives(emp.employeeId),
                 projects: await this.getEmployeeProjects(emp.employeeId)
             }));
 
@@ -547,16 +546,21 @@ export default class ManagerDashboard extends Controller {
 
         allData.forEach(empData => {
             console.log(`📊 Processing ${empData.employee?.employeeId}:`, {
-                currentProjects: empData.currentProjects?.length || 0,
-                initiatives: empData.initiatives?.length || 0
+                currentProjects: empData.currentProjects?.length || 0
             });
             
-            // Current Projects - use utilizationPercent directly
-            empData.currentProjects.forEach((cp: any) => {
+            // Separate by type from CurrentProjects
+            const projects = empData.currentProjects.filter((cp: any) => cp.type === 'Project');
+            const initiatives = empData.currentProjects.filter((cp: any) => 
+                cp.type === 'Initiative' || cp.type === 'Evaluation' || cp.type === 'CAIA' || cp.type === 'POC'
+            );
+            
+            // Projects - use utilizationPercent directly
+            projects.forEach((cp: any) => {
                 const isActive = this.isActiveInPeriod(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
                 const utilizationPercent = parseInt(cp.utilizationPercent) || 0;
                 const activeMonths = this.countActiveMonths(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
-                console.log(`  📘 Current Project: ${cp.projectName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
+                console.log(`  📘 Project: ${cp.projectName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
                 if (isActive && utilizationPercent > 0) {
                     currentProjectsTotal += utilizationPercent;
                     currentProjectsCount++;
@@ -564,11 +568,11 @@ export default class ManagerDashboard extends Controller {
             });
 
             // Initiatives - use utilizationPercent directly
-            empData.initiatives.forEach((initiative: any) => {
+            initiatives.forEach((initiative: any) => {
                 const isActive = this.isActiveInPeriod(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
                 const utilizationPercent = parseInt(initiative.utilizationPercent) || 0;
                 const activeMonths = this.countActiveMonths(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
-                console.log(`  🎯 Initiative: ${initiative.initiativeName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
+                console.log(`  🎯 Initiative: ${initiative.projectName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
                 if (isActive && utilizationPercent > 0) {
                     initiativesTotal += utilizationPercent;
                     initiativesCount++;
@@ -776,8 +780,14 @@ export default class ManagerDashboard extends Controller {
                 projects: []
             };
             
-            // Include Current Projects
-            d.currentProjects.forEach((cp: any) => {
+            // Separate CurrentProjects by type
+            const projectsFromCP = d.currentProjects.filter((cp: any) => cp.type === 'Project');
+            const initiativesFromCP = d.currentProjects.filter((cp: any) => 
+                cp.type === 'Initiative' || cp.type === 'Evaluation' || cp.type === 'CAIA' || cp.type === 'POC'
+            );
+            
+            // Include Projects from CurrentProjects
+            projectsFromCP.forEach((cp: any) => {
                 if (!cp.startDate || !cp.endDate) return;
                 
                 const startDate = new Date(cp.startDate);
@@ -804,13 +814,13 @@ export default class ManagerDashboard extends Controller {
                     endDate: cp.endDate,
                     utilizationPercent: cp.utilizationPercent,
                     status: status,
-                    type: "CurrentProject",
+                    type: "Project",
                     color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
                 });
             });
             
-            // Include Initiatives (both Initiative, CAIA, and POC types)
-            d.initiatives.forEach((init: any) => {
+            // Include Initiatives from CurrentProjects (Initiative, Evaluation, CAIA, POC types)
+            initiativesFromCP.forEach((init: any) => {
                 if (!init.startDate || !init.endDate) return;
                 
                 const startDate = new Date(init.startDate);
@@ -831,18 +841,18 @@ export default class ManagerDashboard extends Controller {
                     status = "scheduled";
                 }
                 
-                // All initiatives (Initiative, CAIA, POC) — always orange regardless of status
+                // All initiatives/evaluations — always orange regardless of status
                 const color = "#f39c12";
                 const typeLabel = init.type || "Initiative";
                 
                 employeeData.projects.push({
-                    projectName: init.initiativeName,
+                    projectName: init.projectName,
                     description: init.description,
                     startDate: init.startDate,
                     endDate: init.endDate,
                     utilizationPercent: init.utilizationPercent,
                     status: status,
-                    type: "Initiative",
+                    type: init.type,
                     typeLabel: typeLabel,
                     color: color
                 });
@@ -2680,6 +2690,9 @@ private initializeAIChat(): void {
             evaluationEndDate: null,
             status: "Active",
             description: "",
+            technology: "",
+            role: "Team Member",
+            utilizationPercent: 100,
             projectManager: "",
             accountExecutiveManager: "",
             lineManagerPOC: currentManagerName || "",
@@ -2750,9 +2763,12 @@ private initializeAIChat(): void {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const projectId = `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            
+            // Create project in Projects master data
             const listBinding = oDataModel.bindList("/Projects");
             listBinding.create({
-                projectId: `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                projectId: projectId,
                 employeeId: employeeId,
                 projectName: data.projectName,
                 role: "",
@@ -2767,7 +2783,29 @@ private initializeAIChat(): void {
                 accountExecutiveManager: data.accountExecutiveManager || "",
                 lineManagerPOC: data.lineManagerPOC || "",
                 projectOrchestrator: data.projectOrchestrator || "",
+                technology: data.technology || "",
                 addedByManager: this.currentManagerId || "Manager"
+            });
+
+            // Also create assignment in CurrentProjects for Gantt Chart visibility
+            const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
+            currentProjectsBinding.create({
+                currentProjectId: `CP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                employeeId: employeeId,
+                type: "Project",
+                projectName: data.projectName,
+                role: data.role || "Team Member",
+                projectManager: data.projectManager || "",
+                startDate: startDateISO,
+                endDate: endDateISO,
+                utilizationPercent: data.utilizationPercent || 100,
+                description: data.description || "",
+                assignmentStatus: "Accepted", // Directly assigned by manager
+                assignedBy: this.currentManagerId,
+                isEvaluation: false,
+                technology: data.technology || "",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
             });
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
@@ -2782,6 +2820,9 @@ private initializeAIChat(): void {
             detailsModel?.setProperty("/projects", projects);
             (this.byId("dialogTotalProjects") as any)?.setNumber(projects.length);
             (this.byId("dialogTotalProjects") as any)?.setUnit(projects.length === 1 ? "project" : "projects");
+
+            // Refresh Gantt Chart and all visualizations
+            await this.loadVisualizationData();
         } catch (error) {
             console.error("❌ Error saving project:", error);
             MessageToast.show("Error saving project");
@@ -2830,6 +2871,9 @@ private initializeAIChat(): void {
             await new Promise(resolve => setTimeout(resolve, 500));
             
             MessageToast.show(`Project "${project.projectName}" assigned to employee. Status: Pending acceptance.`);
+            
+            // Refresh Gantt Chart and all visualizations
+            await this.loadVisualizationData();
         } catch (error) {
             console.error("❌ Error assigning project:", error);
             MessageToast.show("Error assigning project to employee");

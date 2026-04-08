@@ -39,6 +39,28 @@
                     <core:Item key="HANA" text="HANA"/>
                 </ComboBox>
 
+                <Label text="Employee Role in Project:" class="sapUiSmallMarginTop"/>
+                <ComboBox
+                    selectedKey="{managerNewProject>/role}"
+                    placeholder="Select employee's role"
+                    width="100%">
+                    <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Tech Lead" text="Tech Lead"/>
+                    <core:Item key="Solution Architect" text="Solution Architect"/>
+                    <core:Item key="Team Member" text="Team Member"/>
+                    <core:Item key="QA Engineer" text="QA Engineer"/>
+                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                </ComboBox>
+
+                <Label text="Utilization %:" class="sapUiSmallMarginTop"/>
+                <StepInput
+                    value="{managerNewProject>/utilizationPercent}"
+                    min="0"
+                    max="100"
+                    step="5"
+                    width="100%"
+                    displayValuePrecision="0"/>
+
                 <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
                 <Input
                     value="{managerNewProject>/accountExecutiveManager}"
