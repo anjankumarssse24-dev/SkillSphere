@@ -2774,6 +2774,9 @@ private initializeAIChat(): void {
             detailsModel?.setProperty("/projects", projects);
             (this.byId("dialogTotalProjects") as any)?.setNumber(projects.length);
             (this.byId("dialogTotalProjects") as any)?.setUnit(projects.length === 1 ? "project" : "projects");
+
+            // Refresh Gantt chart so the new project appears immediately
+            await this.loadVisualizationData();
         } catch (error) {
             console.error("❌ Error saving project:", error);
             MessageToast.show("Error saving project");
