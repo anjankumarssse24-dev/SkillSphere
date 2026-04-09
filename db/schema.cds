@@ -5,6 +5,7 @@ namespace skillsphere;
  */
 entity Users {
   key id : String;
+  password : String;
   role : String;
   isActive : Boolean default true;
 }

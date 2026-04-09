@@ -1,4 +1,4 @@
-"currentProjectId","employeeId","type","projectName","role","startDate","endDate","utilizationPercent","projectManager","assignmentStatus","assignedBy","isEvaluation","description","technology"
+currentProjectId,employeeId,type,projectName,role,startDate,endDate,utilizationPercent,projectManager,assignmentStatus,assignedBy,isEvaluation,description,technology
 "CP_1730000001008_I769086","I769086","Project","Mahindra","Developer","2026-01-30","2026-03-31","100","Puja K","Accepted","","false","","ABAP"
 "CP_1730000001009_I763161","I763161","Project","Exxon Mobil","Developer","2025-05-01","2025-11-30","100","Shikha Chaturvedi","Accepted","","false","","SuccessFactors"
 "CP_1730000001010_I763161B","I763161","Project","Schneider - DSPC","Developer","2026-01-01","2026-11-30","100","Manish Kumar Sinha","Accepted","","false","","Data Science"

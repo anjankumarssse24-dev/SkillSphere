@@ -85,9 +85,9 @@ export default class EmployeeLogin extends Controller {
                 return;
             }
             
-            console.log("Role check:", user.role === "Employee");
+            console.log("Password match:", user.password === password, "Role check:", user.role === "Employee");
 
-            if (user.role !== "Employee") {
+            if (user.password !== password || user.role !== "Employee") {
                 console.error("Authentication failed - password or role mismatch");
                 MessageToast.show("Invalid Employee ID or Password");
                 return;

@@ -31,16 +31,10 @@ export default class SeniorManagerDashboard extends Controller {
     private currentChatSeniorManagerId: string = "";
     private aiInitialized: boolean = false;
     private typingIndicator: HTML | null = null;
-    private dashboardLoadSeq: number = 0;
 
     public onInit(): void {
         const router = this.getRouter();
         router.getRoute("SeniorManagerDashboard")?.attachPatternMatched(this.onRouteMatched, this);
-    }
-
-    public onExit(): void {
-        const router = this.getRouter();
-        router.getRoute("SeniorManagerDashboard")?.detachPatternMatched(this.onRouteMatched, this);
     }
 
     private getRouter(): Router {
@@ -100,12 +94,11 @@ export default class SeniorManagerDashboard extends Controller {
         // Set current senior manager ID
         this.currentSeniorManagerId = seniorManagerId || currentUser?.id;
         
-        // Load dashboard data with sequence guard to avoid stale overlapping loads.
-        const loadSeq = ++this.dashboardLoadSeq;
-        await this.loadDashboardData(loadSeq);
+        // Load dashboard data
+        await this.loadDashboardData();
     }
 
-    private async loadDashboardData(loadSeq: number): Promise<void> {
+    private async loadDashboardData(): Promise<void> {
         try {
             console.log("📊 Loading Senior Manager dashboard data...");
             
@@ -113,15 +106,9 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load all managers
             await this.loadAllManagers();
-            if (loadSeq !== this.dashboardLoadSeq) {
-                return;
-            }
             
             // Load organization metrics
             await this.loadOrganizationMetrics();
-            if (loadSeq !== this.dashboardLoadSeq) {
-                return;
-            }
             
             MessageToast.show("Dashboard data loaded successfully");
         } catch (error) {
@@ -179,15 +166,6 @@ export default class SeniorManagerDashboard extends Controller {
             // Populate manager dropdown for search
             const managerSelect = this.byId("orgManagerFilter") as Select;
             if (managerSelect) {
-                // Prevent duplicate options when route is matched multiple times.
-                managerSelect.removeAllItems();
-                managerSelect.addItem(
-                    new Item({
-                        key: "",
-                        text: "All Managers"
-                    })
-                );
-
                 managersOnly.forEach((mgr: any) => {
                     managerSelect.addItem(
                         new Item({

@@ -77,9 +77,9 @@ export default class SeniorManagerLogin extends Controller {
                 return;
             }
             
-            console.log("Role check:", user.role);
+            console.log("Password match:", user.password === password, "Role check:", user.role);
 
-            if (user.role !== "SeniorManager") {
+            if (user.password !== password || user.role !== "SeniorManager") {
                 console.error("Authentication failed - password or role mismatch");
                 MessageToast.show("Invalid Manager ID or Password");
                 return;

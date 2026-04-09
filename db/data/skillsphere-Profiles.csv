@@ -1,4 +1,4 @@
-"employeeId","specialization","role","location","tLevel","lastUpdated"
+employeeId,specialization,role,location,tLevel,lastUpdated
 "I770144","ABAP Developer","Developer","Whitefield, Bangalore","T1","2026-03-04T09:10:41.480Z"
 "I770145","Data Scientist","Data Scientist","Devanahalli Campuses, Bangalore","T2","2024-10-26T10:00:00.000Z"
 "I770146","S/4HANA","Backend Developer","Whitefield, Bangalore","T3","2024-10-26T10:00:00.000Z"

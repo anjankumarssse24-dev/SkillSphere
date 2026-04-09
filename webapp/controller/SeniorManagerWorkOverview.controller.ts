@@ -32,11 +32,9 @@ export default class SeniorManagerWorkOverview extends Controller {
     private currentChatSeniorManagerId: string | null = null;
     private aiInitialized: boolean = false;
     private typingIndicator: any = null;
-    private readonly debugLogStorageKey: string = "smWorkOverviewDebugLog";
 
     public onInit(): void {
         this.getRouter().getRoute("SeniorManagerWorkOverview")?.attachPatternMatched(this.onRouteMatched, this);
-        this.logDebug("onInit", "Work Overview controller initialized");
     }
 
     public onExit(): void {
@@ -59,7 +57,6 @@ export default class SeniorManagerWorkOverview extends Controller {
     }
 
     public onLogout(): void {
-        this.logDebug("onLogout", "Logout triggered from Work Overview");
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         if (currentUserModel) {
             currentUserModel.setData({
@@ -84,13 +81,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
 
-        this.logDebug("onRouteMatched", {
-            routeSeniorManagerId: seniorManagerId || null,
-            currentUserId: currentUser?.id || null,
-            isLoggedIn: !!currentUser?.isLoggedIn,
-            previousControllerSeniorManagerId: this.currentSeniorManagerId
-        });
-
         if (!currentUser?.isLoggedIn && !seniorManagerId) {
             MessageToast.show("Please login to access the work overview");
             this.getRouter().navTo("Landing");
@@ -108,18 +98,11 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.currentSeniorManagerId = resolvedSeniorManagerId;
 
         const loadSeq = ++this.workOverviewLoadSeq;
-        this.logDebug("onRouteMatched", `Starting load sequence ${loadSeq}`);
         await this.loadWorkOverview(loadSeq);
     }
 
     private async loadWorkOverview(loadSeq: number): Promise<void> {
         this.isLoadingWorkOverview = true;
-        this.logDebug("loadWorkOverview:start", {
-            loadSeq,
-            activeLoadSeq: this.workOverviewLoadSeq,
-            hasCachedData: !!this.cachedWorkData,
-            hasCachedColumnConfig: !!this.cachedColumnConfig
-        });
         try {
             const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
             if (page?.setBusy) {
@@ -128,7 +111,6 @@ export default class SeniorManagerWorkOverview extends Controller {
 
             // Reuse cached dataset on revisit to avoid repeated network and re-render stalls.
             if (this.cachedWorkData && this.cachedColumnConfig) {
-                this.logDebug("loadWorkOverview:cache", "Using cached work overview data");
                 this.getView()?.setModel(new JSONModel({
                     employees: this.cachedWorkData,
                     columnConfig: this.cachedColumnConfig
@@ -148,7 +130,6 @@ export default class SeniorManagerWorkOverview extends Controller {
 
             // STEP 1: Fetch ONLY T3/T4 profiles using OData filter
             console.log("📊 Step 1: Fetching T3/T4 profiles only...");
-            this.logDebug("loadWorkOverview:step1", "Fetching T3/T4 profiles");
             const profilesBinding = oDataModel.bindList("/Profiles", undefined, [], [
                 new Filter({
                     filters: [
@@ -166,7 +147,6 @@ export default class SeniorManagerWorkOverview extends Controller {
             console.log(`✅ Fetched ${profiles.length} T3/T4 profiles`);
 
             if (profiles.length === 0) {
-                this.logDebug("loadWorkOverview:step1", "No T3/T4 employees found");
                 this.getView()?.setModel(new JSONModel({ employees: [], columnConfig: {} }), "workOverview");
                 if (page?.setBusy) page.setBusy(false);
                 MessageToast.show("No T3/T4 employees found");
@@ -331,19 +311,12 @@ export default class SeniorManagerWorkOverview extends Controller {
             }), "workOverview");
 
             this.rebuildWorkOverviewColumns(maxProjects, maxEvaluations, maxInitiatives);
-            this.logDebug("loadWorkOverview:success", {
-                employees: employeesOverview.length,
-                maxProjects,
-                maxEvaluations,
-                maxInitiatives
-            });
 
             console.log(`✅ Work overview loaded: ${employeesOverview.length} T3/T4 employees`);
             if (page?.setBusy) page.setBusy(false);
 
         } catch (error) {
             console.error("❌ Error loading work overview:", error);
-            this.logDebug("loadWorkOverview:error", String(error));
             MessageToast.show("Error loading work overview. Please try again.");
             const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
             if (page?.setBusy) page.setBusy(false);
@@ -353,7 +326,6 @@ export default class SeniorManagerWorkOverview extends Controller {
             if (page?.setBusy) {
                 page.setBusy(false);
             }
-            this.logDebug("loadWorkOverview:end", { loadSeq, activeLoadSeq: this.workOverviewLoadSeq });
         }
     }
 
@@ -369,7 +341,6 @@ export default class SeniorManagerWorkOverview extends Controller {
     private rebuildWorkOverviewColumns(maxProjects: number, maxEvaluations: number, maxInitiatives: number): void {
         const table = this.byId("workOverviewTable") as Table;
         if (!table) {
-            this.logDebug("rebuildWorkOverviewColumns", "Table not found");
             return;
         }
 
@@ -379,24 +350,10 @@ export default class SeniorManagerWorkOverview extends Controller {
         }
 
         // Remove dynamic columns (keep only first 3 static columns)
-        let safetyCounter = 0;
-        while (table.getColumns().length > 3) {
-            const columnsNow = table.getColumns();
-            table.removeColumn(columnsNow[columnsNow.length - 1]);
-            safetyCounter++;
-
-            // Safety break to avoid UI freeze in case table metadata gets inconsistent.
-            if (safetyCounter > 1000) {
-                this.logDebug("rebuildWorkOverviewColumns", "Safety break triggered while removing dynamic columns");
-                break;
-            }
+        const existingColumns = table.getColumns();
+        while (existingColumns.length > 3) {
+            table.removeColumn(existingColumns[existingColumns.length - 1]);
         }
-        this.logDebug("rebuildWorkOverviewColumns", {
-            remainingStaticColumns: table.getColumns().length,
-            targetProjects: maxProjects,
-            targetEvaluations: maxEvaluations,
-            targetInitiatives: maxInitiatives
-        });
 
         // Create column headers only - UI5 will manage cell creation
         for (let i = 0; i < maxProjects; i++) {
@@ -501,29 +458,6 @@ export default class SeniorManagerWorkOverview extends Controller {
                 cells: allCellTemplates
             })
         });
-    }
-
-    private logDebug(stage: string, data?: any): void {
-        const timestamp = new Date().toISOString();
-        const payload = typeof data === "string" ? data : JSON.stringify(data ?? {});
-        const line = `[${timestamp}] ${stage}: ${payload}`;
-
-        try {
-            console.log(`[SM-WORK-OVERVIEW] ${line}`);
-        } catch {
-            // Ignore console failures.
-        }
-
-        try {
-            const win = window as any;
-            const existingRaw = sessionStorage.getItem(this.debugLogStorageKey);
-            const existing = existingRaw ? JSON.parse(existingRaw) : [];
-            const next = [...existing, line].slice(-250);
-            sessionStorage.setItem(this.debugLogStorageKey, JSON.stringify(next));
-            win.__smWorkOverviewDebugLog = next;
-        } catch {
-            // Ignore storage failures.
-        }
     }
 
     public onSearchWorkOverview(event: any): void {
