@@ -18,9 +18,13 @@ export default class Landing extends Controller {
     async loadManagers() {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const contexts = await listBinding.requestContexts();
-            const managers = contexts.map((context) => context.getObject());
+            const managers = contexts.map((context) => {
+                const manager = context.getObject();
+                return { ...manager, managerId: manager.employeeId };
+            });
             console.log(`✅ Loaded ${managers.length} managers for registration`);
             // Create local model for managers dropdown
             const managersModel = new JSONModel({ managers: managers });
@@ -98,12 +102,14 @@ export default class Landing extends Controller {
         const prefix = role === "Employee" ? "EMP" : "MGR";
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const entitySet = role === "Employee" ? "/Employees" : "/Managers";
-            const listBinding = oDataModel.bindList(entitySet);
+            const listBinding = oDataModel.bindList("/Employees");
+            if (role !== "Employee") {
+                listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
+            }
             const contexts = await listBinding.requestContexts();
             const existingIds = contexts.map((context) => {
                 const data = context.getObject();
-                return role === "Employee" ? data.employeeId : data.managerId;
+                return data.employeeId;
             });
             // Find next available number
             let counter = 1;
@@ -301,13 +307,15 @@ export default class Landing extends Controller {
             };
             usersBinding.create(userData);
             console.log("✅ User created");
-            // 2. Add to Managers
-            const managersBinding = oDataModel.bindList("/Managers");
+            // 2. Add manager row to Employees
+            const managersBinding = oDataModel.bindList("/Employees");
             const managerData = {
-                managerId: managerId,
+                employeeId: managerId,
                 name: name,
+                role: "Manager",
                 team: team,
                 subTeam: subTeam,
+                managerId: "",
                 email: email,
                 totalSkills: experience * 2, // Estimate based on experience
                 totalProjects: experience, // Estimate based on experience

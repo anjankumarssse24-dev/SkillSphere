@@ -69,13 +69,14 @@ export default class SeniorManagerLogin extends Controller {
             console.log("Senior Manager authenticated successfully:", user);
             // Find manager details
             console.log("Looking for manager with managerId:", user.id);
-            const mgrBinding = oDataModel.bindList("/Managers");
+            const mgrBinding = oDataModel.bindList("/Employees");
+            mgrBinding.filter([new Filter("employeeId", FilterOperator.EQ, managerIdUpper)]);
             const allMgrContexts = await mgrBinding.requestContexts(0, 100);
             console.log("Total managers in database:", allMgrContexts.length);
             let manager = null;
             for (const ctx of allMgrContexts) {
                 const mgr = ctx.getObject();
-                if (mgr.managerId === user.id || mgr.managerId === managerIdUpper) {
+                if (mgr.employeeId === user.id || mgr.employeeId === managerIdUpper) {
                     manager = mgr;
                     break;
                 }

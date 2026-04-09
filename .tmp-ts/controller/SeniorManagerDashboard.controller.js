@@ -79,11 +79,12 @@ export default class SeniorManagerDashboard extends Controller {
     async loadAllManagers() {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const managersBinding = oDataModel.bindList("/Managers");
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const contexts = await managersBinding.requestContexts(0, 100);
             const managers = contexts
                 .map((context) => context.getObject())
-                .filter((mgr) => !mgr.managerId?.startsWith("SMGR"));
+                .map((mgr) => ({ ...mgr, managerId: mgr.employeeId }));
             console.log(`✅ Loaded ${managers.length} managers`);
             // Load team size for each manager
             const managersWithTeamSize = await Promise.all(managers.map(async (mgr) => {
@@ -128,11 +129,10 @@ export default class SeniorManagerDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
             // Load all managers (exclude SMGR)
-            const managersBinding = oDataModel.bindList("/Managers");
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const managerContexts = await managersBinding.requestContexts(0, 1000);
-            const totalManagers = managerContexts
-                .map((ctx) => ctx.getObject())
-                .filter((m) => !m.managerId?.startsWith("SMGR")).length;
+            const totalManagers = managerContexts.length;
             // Load all employees (exclude manager rows)
             const employeesBinding = oDataModel.bindList("/Employees");
             const employeeContexts = await employeesBinding.requestContexts(0, 9999);
@@ -520,8 +520,8 @@ export default class SeniorManagerDashboard extends Controller {
     async getManagerName(managerId) {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("employeeId", FilterOperator.EQ, managerId)]);
             const contexts = await listBinding.requestContexts(0, 1);
             if (contexts.length > 0) {
                 const manager = contexts[0].getObject();

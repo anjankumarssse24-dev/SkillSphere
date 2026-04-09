@@ -75,8 +75,11 @@ export default class ManagerDashboard extends Controller {
         console.log("📊 Restoring manager session for:", managerId);
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             const contexts = await listBinding.requestContexts(0, 1);
             if (contexts.length > 0) {
                 const manager = contexts[0].getObject();
@@ -84,13 +87,13 @@ export default class ManagerDashboard extends Controller {
                 // Restore currentUser model
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser");
                 currentUserModel?.setData({
-                    id: manager.managerId,
+                    id: manager.employeeId,
                     name: manager.name,
                     role: 'Manager',
                     team: manager.team,
                     subTeam: manager.subTeam,
                     email: manager.email,
-                    managerId: manager.managerId,
+                    managerId: manager.employeeId,
                     isLoggedIn: true
                 });
                 console.log("✅ Manager session restored successfully");
@@ -188,9 +191,12 @@ export default class ManagerDashboard extends Controller {
     async loadAllManagers() {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const contexts = await listBinding.requestContexts();
-            const allManagers = contexts.map((context) => context.getObject());
+            const allManagers = contexts
+                .map((context) => context.getObject())
+                .map((manager) => ({ ...manager, managerId: manager.employeeId }));
             console.log(`✅ Loaded ${allManagers.length} managers for search dropdown`);
             // Create managers model for the dropdown
             const managersModel = new JSONModel({ managers: allManagers });

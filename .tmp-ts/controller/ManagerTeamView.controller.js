@@ -76,15 +76,18 @@ export default class ManagerTeamView extends Controller {
         console.log("📊 Loading manager information for:", managerId);
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const listBinding = oDataModel.bindList("/Managers");
-            listBinding.filter([new Filter("managerId", FilterOperator.EQ, managerId)]);
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, managerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             const contexts = await listBinding.requestContexts(0, 1);
             if (contexts.length > 0) {
                 const manager = contexts[0].getObject();
                 console.log("✅ Manager info loaded:", manager);
                 // Create a model for manager team info to display in the header
                 const managerTeamInfoModel = new JSONModel({
-                    managerId: manager.managerId,
+                    managerId: manager.employeeId,
                     managerName: manager.name,
                     team: manager.team,
                     specialization: manager.specialization
@@ -198,9 +201,12 @@ export default class ManagerTeamView extends Controller {
     async loadAllManagers() {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel();
-            const listBinding = oDataModel.bindList("/Managers");
+            const listBinding = oDataModel.bindList("/Employees");
+            listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const contexts = await listBinding.requestContexts();
-            const allManagers = contexts.map((context) => context.getObject());
+            const allManagers = contexts
+                .map((context) => context.getObject())
+                .map((manager) => ({ ...manager, managerId: manager.employeeId }));
             console.log(`✅ Loaded ${allManagers.length} managers for search dropdown`);
             // Create managers model for the dropdown
             const managersModel = new JSONModel({ managers: allManagers });

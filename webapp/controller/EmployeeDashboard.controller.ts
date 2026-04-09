@@ -1914,7 +1914,8 @@ export default class EmployeeDashboard extends Controller {
     private async loadManagersListForDropdown(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const managersBinding = oDataModel.bindList("/Managers");
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await managersBinding.requestContexts(0, 1000);
             const managers = contexts.map((ctx: any) => ctx.getObject())

@@ -65,14 +65,15 @@ export default class ManagerLogin extends Controller {
             console.log("Manager authenticated successfully:", user);
             // Find manager details by matching managerId with user.id
             console.log("Looking for manager with managerId:", user.id);
-            const mgrBinding = oDataModel.bindList("/Managers");
+            const mgrBinding = oDataModel.bindList("/Employees");
+            mgrBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             const allMgrContexts = await mgrBinding.requestContexts(0, 100);
             console.log("Total managers in database:", allMgrContexts.length);
             let manager = null;
             for (const ctx of allMgrContexts) {
                 const mgr = ctx.getObject();
-                console.log("Checking manager:", mgr.managerId, "against user:", user.id);
-                if (mgr.managerId === user.id || mgr.managerId === managerIdUpper) {
+                console.log("Checking manager:", mgr.employeeId, "against user:", user.id);
+                if (mgr.employeeId === user.id || mgr.employeeId === managerIdUpper) {
                     manager = mgr;
                     break;
                 }
@@ -85,7 +86,7 @@ export default class ManagerLogin extends Controller {
                 role: user.role,
                 team: user.team || (manager?.team || ""),
                 subTeam: user.subTeam || (manager?.subTeam || ""),
-                managerId: manager?.managerId || user.id,
+                managerId: manager?.employeeId || user.id,
                 email: manager?.email || `${user.id}@company.com`,
                 isLoggedIn: true
             };

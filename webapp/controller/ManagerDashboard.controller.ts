@@ -2624,8 +2624,11 @@ private initializeAIChat(): void {
     private async getCurrentManagerName(): Promise<string> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const managersBinding = oDataModel.bindList("/Managers");
-            managersBinding.filter([new Filter("managerId", FilterOperator.EQ, this.currentManagerId)]);
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, this.currentManagerId),
+                new Filter("role", FilterOperator.EQ, "Manager")
+            ]);
             
             const contexts = await managersBinding.requestContexts(0, 1);
             if (contexts.length > 0) {
@@ -2642,7 +2645,8 @@ private initializeAIChat(): void {
     private async loadManagersForProjectDialog(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const managersBinding = oDataModel.bindList("/Managers");
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
             const contexts = await managersBinding.requestContexts(0, 1000);
             const managers = contexts.map((ctx: any) => ctx.getObject())
