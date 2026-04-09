@@ -528,9 +528,26 @@
     bottom: 20px;
     right: 20px;
     z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    border-radius: 28px !important;
-    padding: 12px 20px !important;
+}
+
+.aiAssistantFloatingButton .sapMBtnInner {
+    border-radius: 999px !important;
+    height: 2.75rem;
+    padding: 0 1rem !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aiAssistantFloatingButton .sapMBtnContent {
+    line-height: 1;
+}
+
+.aiAssistantFloatingButton .sapMBtnIcon {
+    margin-right: 0.35rem;
+    margin-top: 0;
+    line-height: 1;
 }
 
 .messageBox {
@@ -618,6 +635,11 @@
         right: 14px;
         bottom: 14px;
     }
+
+    .aiAssistantFloatingButton .sapMBtnInner {
+        height: 2.5rem;
+        padding: 0 0.85rem !important;
+    }
 }
 
 @keyframes blink {
@@ -700,4 +722,30 @@
 
 .smWorkOverviewFilterGroup {
     margin-left: 100px;
+}
+
+/* Senior Manager Team Overview overflow guard */
+[id$="managersSection"] {
+    overflow-x: hidden;
+}
+
+[id$="managersSection"] .sapMPanelContent,
+[id$="managersSection"] .sapMListTbl,
+[id$="managersSection"] .sapMListTblCnt {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.smCenteredPanel {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Hide ResponsiveTable row-action popin label (TABLE_ROW_ACTIONS) only for SM employee table */
+[id$="individualEmployeesTable"] .sapMListTblSubCntRowNav .sapMListTblSubCntHdr,
+[id$="individualEmployeesTable"] .sapMListTblSubCntRowAction .sapMListTblSubCntHdr,
+[id$="individualEmployeesTable"] .sapMListTblSubCntRowActionLabel,
+[id$="individualEmployeesTable"] .sapMListTblSubCntRow[data-sap-ui-rowaction] .sapMListTblSubCntHdr,
+[id$="individualEmployeesTable"] .sapMListTblSubCntHdr[data-sap-ui-rowaction] {
+    display: none !important;
 }

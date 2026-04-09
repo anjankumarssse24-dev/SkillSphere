@@ -31,10 +31,16 @@ export default class SeniorManagerDashboard extends Controller {
     private currentChatSeniorManagerId: string = "";
     private aiInitialized: boolean = false;
     private typingIndicator: HTML | null = null;
+    private dashboardLoadSeq: number = 0;
 
     public onInit(): void {
         const router = this.getRouter();
         router.getRoute("SeniorManagerDashboard")?.attachPatternMatched(this.onRouteMatched, this);
+    }
+
+    public onExit(): void {
+        const router = this.getRouter();
+        router.getRoute("SeniorManagerDashboard")?.detachPatternMatched(this.onRouteMatched, this);
     }
 
     private getRouter(): Router {
@@ -94,11 +100,12 @@ export default class SeniorManagerDashboard extends Controller {
         // Set current senior manager ID
         this.currentSeniorManagerId = seniorManagerId || currentUser?.id;
         
-        // Load dashboard data
-        await this.loadDashboardData();
+        // Load dashboard data with sequence guard to avoid stale overlapping loads.
+        const loadSeq = ++this.dashboardLoadSeq;
+        await this.loadDashboardData(loadSeq);
     }
 
-    private async loadDashboardData(): Promise<void> {
+    private async loadDashboardData(loadSeq: number): Promise<void> {
         try {
             console.log("📊 Loading Senior Manager dashboard data...");
             
@@ -106,9 +113,15 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load all managers
             await this.loadAllManagers();
+            if (loadSeq !== this.dashboardLoadSeq) {
+                return;
+            }
             
             // Load organization metrics
             await this.loadOrganizationMetrics();
+            if (loadSeq !== this.dashboardLoadSeq) {
+                return;
+            }
             
             MessageToast.show("Dashboard data loaded successfully");
         } catch (error) {
@@ -166,6 +179,15 @@ export default class SeniorManagerDashboard extends Controller {
             // Populate manager dropdown for search
             const managerSelect = this.byId("orgManagerFilter") as Select;
             if (managerSelect) {
+                // Prevent duplicate options when route is matched multiple times.
+                managerSelect.removeAllItems();
+                managerSelect.addItem(
+                    new Item({
+                        key: "",
+                        text: "All Managers"
+                    })
+                );
+
                 managersOnly.forEach((mgr: any) => {
                     managerSelect.addItem(
                         new Item({
@@ -210,7 +232,7 @@ export default class SeniorManagerDashboard extends Controller {
 
             // Load all employees (exclude manager rows)
             const employeesBinding = oDataModel.bindList("/Employees");
-            const employeeContexts = await employeesBinding.requestContexts(0, 9999);
+            const employeeContexts = await employeesBinding.requestContexts(0, 1000);
             const allEmployees = employeeContexts.map((ctx: any) => ctx.getObject())
                 .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
             const totalEmployees = allEmployees.length;
@@ -221,7 +243,7 @@ export default class SeniorManagerDashboard extends Controller {
 
             // Load all skills — unique count + top skills by frequency
             const skillsBinding = oDataModel.bindList("/Skills");
-            const skillContexts = await skillsBinding.requestContexts(0, 9999);
+            const skillContexts = await skillsBinding.requestContexts(0, 2000);
             const allSkills = skillContexts.map((ctx: any) => ctx.getObject());
             const uniqueSkillsCount = new Set(allSkills.map((s: any) => s.skillName)).size;
 
@@ -236,7 +258,7 @@ export default class SeniorManagerDashboard extends Controller {
 
             // Active current projects — determine who is on project today
             const cpBinding = oDataModel.bindList("/CurrentProjects");
-            const cpContexts = await cpBinding.requestContexts(0, 9999);
+            const cpContexts = await cpBinding.requestContexts(0, 1000);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const activeEmployeeIds = new Set<string>();
@@ -319,13 +341,13 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load all employees
             const employeesBinding = oDataModel.bindList("/Employees");
-            const employeeContexts = await employeesBinding.requestContexts(0, 9999);
+            const employeeContexts = await employeesBinding.requestContexts(0, 1000);
             const allEmployees = employeeContexts.map((ctx: any) => ctx.getObject())
                 .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
             
             // Load all profiles for T-Level (filter only T3 and T4)
             const profilesBinding = oDataModel.bindList("/Profiles");
-            const profileContexts = await profilesBinding.requestContexts(0, 9999);
+            const profileContexts = await profilesBinding.requestContexts(0, 1000);
             const profiles = profileContexts.map((ctx: any) => ctx.getObject());
             const profileMap = new Map(profiles.map((p: any) => [p.employeeId, p]));
             
@@ -337,7 +359,7 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load all current projects
             const cpBinding = oDataModel.bindList("/CurrentProjects");
-            const cpContexts = await cpBinding.requestContexts(0, 9999);
+            const cpContexts = await cpBinding.requestContexts(0, 1000);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
@@ -795,7 +817,7 @@ export default class SeniorManagerDashboard extends Controller {
                 employeesBinding.filter(filters);
             }
             
-            const contexts = await employeesBinding.requestContexts(0, 9999);
+            const contexts = await employeesBinding.requestContexts(0, 1000);
             const allEmployees = contexts.map((ctx: any) => ctx.getObject())
                 .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
             
@@ -1110,6 +1132,7 @@ export default class SeniorManagerDashboard extends Controller {
 
             const statusControl = this.byId("smgrDialogWorkStatus") as any;
             statusControl?.setText(this.formatWorkingStatus(employee.working_on_project));
+            statusControl?.setIcon(this.formatWorkingStatusIcon(employee.working_on_project));
             statusControl?.setState(this.formatWorkingStatusState(employee.working_on_project));
 
             const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -1233,6 +1256,14 @@ export default class SeniorManagerDashboard extends Controller {
     // Formatters
     public formatWorkingStatus(workingOnProject: boolean): string {
         return workingOnProject ? "Working on Project" : "Available";
+    }
+
+    public formatWorkingStatusWithArrow(workingOnProject: boolean): string {
+        return workingOnProject ? "Working on Project >" : "Available";
+    }
+
+    public formatWorkingStatusIcon(workingOnProject: boolean): string {
+        return workingOnProject ? "sap-icon://navigation-right-arrow" : "sap-icon://accept";
     }
 
     public formatWorkingStatusState(workingOnProject: boolean): string {

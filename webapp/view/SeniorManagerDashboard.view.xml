@@ -148,9 +148,9 @@
                     <uxap:ObjectPageSubSection id="managersSubSection">
                         <uxap:blocks>
                             <m:VBox width="100%">
-                                <m:Panel id="managersPanel" headerText="Managers" class="sapUiMediumMargin" width="95%">
+                                <m:Panel id="managersPanel" headerText="Managers" class="sapUiMediumMarginTopBottom smCenteredPanel" width="95%">
                                     <m:content>
-                                        <m:Table id="managersTable" items="{allManagers>/managers}" class="sapUiResponsiveMargin" mode="SingleSelectMaster" selectionChange="onManagerSelect" fixedLayout="true" autoPopinMode="true" noDataText="No managers with direct reports found">
+                                        <m:Table id="managersTable" items="{allManagers>/managers}" class="sapUiNoMargin" mode="SingleSelectMaster" selectionChange="onManagerSelect" fixedLayout="true" autoPopinMode="true" width="100%" noDataText="No managers with direct reports found">
                                             <m:columns>
                                                 <m:Column minScreenWidth="Phone" demandPopin="false">
                                                     <m:Text text="Manager Name"/>
@@ -161,10 +161,10 @@
                                                 <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Team"/>
                                                 </m:Column>
-                                                <m:Column minScreenWidth="Desktop" demandPopin="true" hAlign="Center">
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Team Size"/>
                                                 </m:Column>
-                                                <m:Column minScreenWidth="Phone" demandPopin="false" hAlign="End" width="8rem">
+                                                <m:Column  minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Actions"/>
                                                 </m:Column>
                                             </m:columns>
@@ -183,9 +183,9 @@
                                     </m:content>
                                 </m:Panel>
 
-                                <m:Panel id="individualEmployeesPanel" headerText="Employees" class="sapUiMediumMargin" width="95%">
+                                <m:Panel id="individualEmployeesPanel" headerText="Employees" class="sapUiMediumMarginTopBottom smCenteredPanel" width="95%">
                                     <m:content>
-                                        <m:Table id="individualEmployeesTable" items="{allManagers>/individualEmployees}" class="sapUiResponsiveMargin" mode="None" fixedLayout="true" autoPopinMode="true" noDataText="No individual employees found">
+                                        <m:Table id="individualEmployeesTable" items="{allManagers>/individualEmployees}" class="sapUiNoMargin" mode="None" fixedLayout="true" autoPopinMode="true" width="100%" noDataText="No individual employees found">
                                             <m:columns>
                                                 <m:Column minScreenWidth="Phone" demandPopin="true">
                                                     <m:Text text="Employee Name"/>
@@ -196,18 +196,18 @@
                                                 <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Team"/>
                                                 </m:Column>
-                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline" hAlign="Center">
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Experience (Years)"/>
                                                 </m:Column>
-                                                <m:Column minScreenWidth="Desktop" demandPopin="true">
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Specialization"/>
                                                 </m:Column>
-                                                <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Current Status"/>
                                                 </m:Column>
                                             </m:columns>
                                             <m:items>
-                                                <m:ColumnListItem type="Navigation" press="onViewIndividualEmployeeDetails">
+                                                <m:ColumnListItem type="Active" press="onViewIndividualEmployeeDetails">
                                                     <m:cells>
                                                         <m:ObjectIdentifier title="{allManagers>name}"/>
                                                         <m:Text text="{allManagers>managerId}"/>
@@ -215,7 +215,7 @@
                                                         <m:Text text="{allManagers>displayExperience}" textAlign="Center"/>
                                                         <m:Text text="{allManagers>specialization}"/>
                                                         <m:ObjectStatus 
-                                                            text="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatus'}"
+                                                            text="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatusWithArrow'}"
                                                             state="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatusState'}"/>
                                                     </m:cells>
                                                 </m:ColumnListItem>

@@ -5,7 +5,7 @@
     xmlns:core="sap.ui.core"
     displayBlock="true">
 
-    <m:Page id="seniorManagerWorkOverviewPage" class="smWorkOverviewPage" title="Current Work Overview" showNavButton="true" navButtonPress="onNavBack" enableScrolling="false">
+    <m:Page id="seniorManagerWorkOverviewPage" class="smWorkOverviewPage" title="Current Work Overview" showNavButton="true" navButtonPress="onNavBack" enableScrolling="true">
         <m:headerContent>
             <m:Button id="seniorManagerWorkOverviewLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
         </m:headerContent>
@@ -26,7 +26,7 @@
 
                 <m:Panel class="sapUiMediumMargin smWorkOverviewPanel" backgroundDesign="Solid" width="95%">
                     <m:content>
-                        <m:ScrollContainer id="workOverviewHorizontalScroll" width="100%" height="100%" horizontal="true" vertical="true" class="smWorkOverviewScroll">
+                        <m:ScrollContainer id="workOverviewHorizontalScroll" width="100%" height="100%" horizontal="true" vertical="false" class="smWorkOverviewScroll">
                             <m:Table id="workOverviewTable"
                                 class="smWorkOverviewTable"
                                 growing="true"
@@ -34,7 +34,8 @@
                                 alternateRowColors="true"
                                 mode="None"
                                 fixedLayout="false"
-                                width="auto">
+                                width="auto"
+                                noDataText="No employees to display">
                                 <m:headerToolbar>
                                     <m:OverflowToolbar design="Transparent">
                                         <m:Title text="Senior Team Members (T3 &amp; T4 Only)" level="H5"/>
@@ -83,5 +84,96 @@
                 </m:Panel>
             </m:VBox>
         </m:content>
+
+        <!-- AI Assistant Floating Button -->
+        <m:Button
+            icon="sap-icon://message-assistant"
+            text="AI Assistant"
+            type="Emphasized"
+            press="onOpenAIAssistant"
+            class="aiAssistantFloatingButton"
+            tooltip="Open AI Assistant"/>
+        
+        <!-- AI Assistant Dialog -->
+        <m:Dialog
+            id="aiAssistantDialogWorkOverview"
+            title="SkillSphere AI Assistant - Senior Manager"
+            contentWidth="600px"
+            contentHeight="700px"
+            class="aiAssistantDialog"
+            resizable="true"
+            draggable="true">
+            
+            <m:customHeader>
+                <m:Bar>
+                    <m:contentLeft>
+                        <core:Icon src="sap-icon://discussion" size="1.5rem" class="sapUiTinyMarginBegin"/>
+                        <m:Title text="AI Assistant" class="sapUiTinyMarginBegin"/>
+                    </m:contentLeft>
+                    <m:contentRight>
+                        <m:Button icon="sap-icon://decline" press="onCloseAIDialog" tooltip="Close"/>
+                    </m:contentRight>
+                </m:Bar>
+            </m:customHeader>
+            
+            <m:content>
+                <m:VBox height="100%" justifyContent="SpaceBetween">
+                    
+                    <!-- Chat Messages Area -->
+                    <m:ScrollContainer
+                        id="chatContainerWorkOverview"
+                        height="520px"
+                        vertical="true"
+                        class="sapUiSmallMargin aiChatScrollArea">
+                        <m:VBox id="messagesContainerWorkOverview" class="sapUiSmallMargin aiMessagesContainer"/>
+                    </m:ScrollContainer>
+                    
+                    <!-- Quick Action Buttons for Senior Manager -->
+                    <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
+                        <m:Button 
+                            text="Availability?" 
+                            icon="sap-icon://org-chart"
+                            press="onQuickAction"
+                            class="sapUiTinyMarginEnd"
+                            type="Emphasized"/>
+                        <m:Button 
+                            text="Allocation" 
+                            icon="sap-icon://work-history"
+                            press="onQuickAction"
+                            class="sapUiTinyMarginEnd"
+                            type="Emphasized"/>
+                        <m:Button 
+                            text="Team Summary" 
+                            icon="sap-icon://learning-assistant"
+                            press="onQuickAction"
+                            type="Emphasized"/>
+                    </m:HBox>
+                    
+                    <!-- Input Area -->
+                    <m:Bar class="aiInputBar">
+                        <m:contentLeft>
+                            <m:Input
+                                id="messageInputWorkOverview"
+                                placeholder="Ask me about your organization..."
+                                width="100%"
+                                submit="onSendMessage"
+                                class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
+                        </m:contentLeft>
+                        <m:contentRight>
+                            <m:Button
+                                icon="sap-icon://paper-plane"
+                                type="Emphasized"
+                                press="onSendMessage"
+                                tooltip="Send Message"/>
+                        </m:contentRight>
+                    </m:Bar>
+                </m:VBox>
+            </m:content>
+            
+            <m:beginButton>
+                <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
+            </m:beginButton>
+            
+        </m:Dialog>
     </m:Page>
 </mvc:View>
