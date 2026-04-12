@@ -6,14 +6,14 @@
       "source": "^/odata/v4/skillsphere/(.*)$",
       "target": "/odata/v4/skillsphere/$1",
       "destination": "skillsphere-srv-api",
-      "authenticationType": "none",
+      "authenticationType": "xsuaa",
       "csrfProtection": true
     },
     {
       "source": "^(.*)$",
       "target": "$1",
       "service": "html5-apps-repo-rt",
-      "authenticationType": "none"
+      "authenticationType": "xsuaa"
     }
   ]
 }

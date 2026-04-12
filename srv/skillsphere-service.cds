@@ -1,10 +1,22 @@
 using skillsphere from '../db/schema';
 @path: 'skillsphere' 
+@requires: 'authenticated-user'
 /**
  * SkillSphere Service - Main OData V4 service
  * Exposes all entities and provides custom actions for authentication
  */
 service SkillSphereService {
+
+  action currentUserContext() returns {
+    authenticated: Boolean;
+    authorized: Boolean;
+    email: String;
+    employeeId: String;
+    name: String;
+    role: String;
+    targetDashboard: String;
+    message: String;
+  };
   
   // User Management
   entity Users as projection on skillsphere.Users;
@@ -71,6 +83,7 @@ service SkillSphereService {
   };
   
   // AI Assistant Actions
+  @requires: ['Employee', 'Manager', 'SeniorManager']
   action askAIAssistant(
     query: String,
     employeeId: String  // ← Make sure this parameter exists!
@@ -80,6 +93,7 @@ service SkillSphereService {
     error: String;
   };
 
+  @requires: ['Manager', 'SeniorManager']
   action managerQuery(
     managerId: String,
     queryType: String,
@@ -90,6 +104,7 @@ service SkillSphereService {
     success: Boolean;
   };
 
+  @requires: 'SeniorManager'
   action seniorManagerQuery(
     seniorManagerId: String,
     queryType: String,

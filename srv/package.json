@@ -21,9 +21,9 @@
   },
   "cds": {
     "requires": {
-      "auth": "dummy",
+      "auth": "mocked",
       "[production]": {
-        "auth": "dummy"
+        "auth": "xsuaa"
       }
     }
   }

@@ -27,7 +27,59 @@ super.init();
 
         // enable routing
         this.getRouter().initialize();
+
+        // Resolve authenticated user and redirect to role-based dashboard.
+        void this.redirectAuthenticatedUser();
 }
+
+    private async redirectAuthenticatedUser(): Promise<void> {
+        try {
+            const oDataModel = this.getModel() as any;
+            if (!oDataModel) {
+                return;
+            }
+
+            const actionBinding = oDataModel.bindContext("/currentUserContext(...)");
+            await actionBinding.execute();
+            const context = actionBinding.getBoundContext();
+            const userContext = context?.getObject();
+
+            if (!userContext || !userContext.authorized) {
+                return;
+            }
+
+            const currentUserModel = this.getModel("currentUser") as JSONModel;
+            currentUserModel.setData({
+                id: userContext.employeeId,
+                name: userContext.name,
+                role: userContext.role,
+                email: userContext.email,
+                isLoggedIn: true
+            });
+
+            if (userContext.targetDashboard === "SeniorManagerDashboard") {
+                this.getRouter().navTo("SeniorManagerDashboard", {
+                    seniorManagerId: userContext.employeeId
+                }, undefined, true);
+                return;
+            }
+
+            if (userContext.targetDashboard === "ManagerDashboard") {
+                this.getRouter().navTo("ManagerDashboard", {
+                    managerId: userContext.employeeId
+                }, undefined, true);
+                return;
+            }
+
+            if (userContext.targetDashboard === "EmployeeDashboard") {
+                this.getRouter().navTo("EmployeeDashboard", {
+                    employeeId: userContext.employeeId
+                }, undefined, true);
+            }
+        } catch (error) {
+            console.warn("Auto-redirect skipped:", error);
+        }
+    }
 
     private initializeModels(): void {
         // Initialize current user model
@@ -35,6 +87,7 @@ super.init();
             id: null,
             name: null,
             role: null,
+            email: null,
             isLoggedIn: false
         });
         this.setModel(currentUserModel, "currentUser");

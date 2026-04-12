@@ -16,7 +16,7 @@
     "resources": "resources.json",
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/skillsphere/",
+        "uri": "odata/v4/skillsphere/",
         "type": "OData",
         "settings": {
           "odataVersion": "4.0",

@@ -3,6 +3,7 @@
  * Handles business logic, validations, and custom actions
  */
 const cds = require('@sap/cds');
+const util = require('node:util');
 const AICoreClient = require('./utils/aicore-client-orchestration');
 
 module.exports = cds.service.impl(async function() {
@@ -49,6 +50,195 @@ module.exports = cds.service.impl(async function() {
     }
     return aiClient;
   }
+
+  this.on('currentUserContext', async req => {
+    console.log('================ currentUserContext BEGIN ================');
+    console.log('req.user (full):', util.inspect(req.user, { depth: 6, colors: false }));
+    console.log('req.user keys:', Object.keys(req.user || {}));
+    console.log('req.user.attr (full):', util.inspect(req.user?.attr || {}, { depth: 6, colors: false }));
+    console.log('req.user.authInfo (full):', util.inspect(req.user?.authInfo || {}, { depth: 4, colors: false }));
+
+    const principalId = req.user?.id || '';
+    const principalEmail = req.user?.attr?.email || req.user?.attr?.mail || principalId;
+    const jwtPayload =
+      req.user?.authInfo?.token ||
+      req.user?.tokenInfo?.getPayload?.() ||
+      {};
+
+    console.log('jwtPayload (full):', util.inspect(jwtPayload, { depth: 8, colors: false }));
+
+    const toScopeList = value => {
+      if (!value) return [];
+      if (Array.isArray(value)) return value.filter(Boolean);
+      if (value instanceof Set) return Array.from(value).filter(Boolean);
+      if (typeof value === 'string' && value.includes(' ')) {
+        return value.split(' ').map(v => v.trim()).filter(Boolean);
+      }
+      if (typeof value === 'string') return [value];
+      if (typeof value === 'object') return Object.keys(value).filter(Boolean);
+      return [];
+    };
+
+    const roleCollections = toScopeList(jwtPayload?.['xs.system.attributes']?.['xs.rolecollections']);
+
+    const grantedScopes = [
+      ...toScopeList(req.user?._roles),
+      ...toScopeList(req.user?.scopes),
+      ...toScopeList(req.user?.attr?.scope),
+      ...toScopeList(req.user?.attr?.scopes),
+      ...toScopeList(req.user?.attr?.authorities),
+      ...toScopeList(jwtPayload?.scope),
+      ...toScopeList(jwtPayload?.scp),
+      ...toScopeList(jwtPayload?.authorities)
+    ].filter(Boolean);
+
+    const uniqueScopes = Array.from(new Set(grantedScopes));
+    const uniqueRoleCollections = Array.from(new Set(roleCollections));
+
+    console.log('raw scope sources:', {
+      reqUserRoles: util.inspect(req.user?._roles, { depth: 6, colors: false }),
+      reqUserScopes: util.inspect(req.user?.scopes, { depth: 6, colors: false }),
+      reqAttrScope: util.inspect(req.user?.attr?.scope, { depth: 6, colors: false }),
+      reqAttrScopes: util.inspect(req.user?.attr?.scopes, { depth: 6, colors: false }),
+      reqAuthorities: util.inspect(req.user?.attr?.authorities, { depth: 6, colors: false }),
+      jwtScope: util.inspect(jwtPayload?.scope, { depth: 6, colors: false }),
+      jwtScp: util.inspect(jwtPayload?.scp, { depth: 6, colors: false }),
+      jwtAuthorities: util.inspect(jwtPayload?.authorities, { depth: 6, colors: false }),
+      jwtRoleCollections: util.inspect(jwtPayload?.['xs.system.attributes']?.['xs.rolecollections'], { depth: 6, colors: false })
+    });
+
+    const normalize = value => String(value || '').trim().toLowerCase();
+
+    const hasRole = roleName => {
+      if (req.user?.is?.(roleName)) return true;
+
+      const normalizedRole = normalize(roleName);
+
+      const fromScopes = uniqueScopes.some(scope => {
+        const normalizedScope = normalize(scope);
+        return (
+          normalizedScope === normalizedRole ||
+          normalizedScope.endsWith(`.${normalizedRole}`)
+        );
+      });
+
+      if (fromScopes) return true;
+
+      return uniqueRoleCollections.some(collection => {
+        const normalizedCollection = normalize(collection);
+        return (
+          normalizedCollection === normalizedRole ||
+          normalizedCollection.endsWith(`.${normalizedRole}`)
+        );
+      });
+    };
+
+    const hasSeniorManagerRole = hasRole('SeniorManager');
+    const hasManagerRole = hasRole('Manager');
+    const hasEmployeeRole = hasRole('Employee');
+
+    console.log('role evaluation matrix:', {
+      hasSeniorManagerRole,
+      hasManagerRole,
+      hasEmployeeRole,
+      uniqueScopes,
+      uniqueRoleCollections
+    });
+
+    console.log('🪪 BTP token role claims:', {
+      principalId,
+      principalEmail,
+      userIsEmployee: req.user?.is?.('Employee') || false,
+      userIsManager: req.user?.is?.('Manager') || false,
+      userIsSeniorManager: req.user?.is?.('SeniorManager') || false,
+      _roles: req.user?._roles || null,
+      scopes: req.user?.scopes || null,
+      attrScope: req.user?.attr?.scope || null,
+      attrScopes: req.user?.attr?.scopes || null,
+      authorities: req.user?.attr?.authorities || null,
+      jwtScope: jwtPayload?.scope || null,
+      jwtScp: jwtPayload?.scp || null,
+      jwtAuthorities: jwtPayload?.authorities || null,
+      jwtXsUserAttributes: jwtPayload?.['xs.user.attributes'] || null,
+      jwtXsRoleCollections: jwtPayload?.['xs.system.attributes']?.['xs.rolecollections'] || null
+    });
+
+    console.log('🔐 currentUserContext input:', {
+      principalId,
+      principalEmail,
+      grantedScopes: uniqueScopes,
+      roleCollections: uniqueRoleCollections,
+      hasSeniorManagerRole,
+      hasManagerRole,
+      hasEmployeeRole,
+      rawRoleContainerType: typeof req.user?._roles,
+      rawScopesContainerType: typeof req.user?.scopes
+    });
+
+    let resolvedRole = '';
+    let targetDashboard = '';
+
+    if (hasSeniorManagerRole) {
+      resolvedRole = 'SeniorManager';
+      targetDashboard = 'SeniorManagerDashboard';
+    } else if (hasManagerRole) {
+      resolvedRole = 'Manager';
+      targetDashboard = 'ManagerDashboard';
+    } else if (hasEmployeeRole) {
+      resolvedRole = 'Employee';
+      targetDashboard = 'EmployeeDashboard';
+    }
+
+    if (!resolvedRole) {
+      console.warn('⛔ currentUserContext authorization failed: no supported role found', {
+        principalId,
+        principalEmail,
+        grantedScopes: uniqueScopes,
+        roleCollections: uniqueRoleCollections
+      });
+      console.log('================ currentUserContext END (DENY) ================');
+      return {
+        authenticated: true,
+        authorized: false,
+        email: principalEmail,
+        employeeId: '',
+        name: '',
+        role: '',
+        targetDashboard: '',
+        message: 'No business role assigned. Please contact administrator.'
+      };
+    }
+
+    let employee = null;
+    if (principalEmail) {
+      employee = await SELECT.one.from(Employees).where({ email: principalEmail });
+    }
+    if (!employee && principalId) {
+      employee = await SELECT.one.from(Employees).where({ employeeId: principalId });
+    }
+
+    console.log('✅ currentUserContext resolved:', {
+      principalId,
+      principalEmail,
+      resolvedRole,
+      targetDashboard,
+      employeeFound: !!employee,
+      employeeId: employee?.employeeId || principalId,
+      employeeName: employee?.name || principalEmail || principalId
+    });
+    console.log('================ currentUserContext END (ALLOW) ================');
+
+    return {
+      authenticated: true,
+      authorized: true,
+      email: principalEmail,
+      employeeId: employee?.employeeId || principalId,
+      name: employee?.name || principalEmail || principalId,
+      role: resolvedRole,
+      targetDashboard,
+      message: 'Authenticated'
+    };
+  });
 
   /**
    * AI Assistant for EMPLOYEES - with personal context
