@@ -630,7 +630,38 @@
     .messageBox {
         max-width: 92%;
     }
+}
 
+/* ===== Workforce Overview Table ===== */
+#workforceOverviewPanel {
+    border: 1px solid #dde3ed;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+#workforceOverviewTable .sapMListTblRow {
+    border-bottom: 1px solid #e8eaf0;
+}
+
+#workforceOverviewTable .sapMListTblCell {
+    padding: 0.75rem 0.625rem;
+}
+
+#workforceOverviewTable .sapMListTblHeader {
+    background: linear-gradient(135deg, #354a5f 0%, #2c3e50 100%);
+}
+
+#workforceOverviewTable .sapMListTblHeaderCell .sapMText,
+#workforceOverviewTable .sapMListTblHeader .sapMText {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.8125rem;
+}
+
+#workforceOverviewTable .sapMListTblRow:hover {
+    background-color: #f0f5ff !important;
+}
     .aiAssistantFloatingButton {
         right: 14px;
         bottom: 14px;

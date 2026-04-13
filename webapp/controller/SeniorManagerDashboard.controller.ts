@@ -20,6 +20,7 @@ import HTML from "sap/ui/core/HTML";
 import ListBinding from "sap/ui/model/ListBinding";
 import OverflowToolbar from "sap/m/OverflowToolbar";
 import ObjectStatus from "sap/m/ObjectStatus";
+import ObjectIdentifier from "sap/m/ObjectIdentifier";
 
 /**
  * @namespace skillsphere.controller
@@ -109,6 +110,9 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load organization metrics
             await this.loadOrganizationMetrics();
+
+            // Load workforce overview
+            await this.loadWorkforceOverview();
             
             MessageToast.show("Dashboard data loaded successfully");
         } catch (error) {
@@ -1599,5 +1603,262 @@ export default class SeniorManagerDashboard extends Controller {
                 oScrollContainer.scrollTo(0, 10000);
             }
         }, 100);
+    }
+
+    // ==================== WORKFORCE OVERVIEW ====================
+
+    private allWorkforceRows: any[] = [];
+    private maxPrj: number = 0;
+    private maxEvl: number = 0;
+    private maxInit: number = 0;
+
+    /**
+     * Map specialization to technology category (S/4HANA, BTP, Data Science)
+     */
+    private mapTechCategory(specialization: string): string {
+        if (!specialization) return "";
+        const s = specialization.toLowerCase();
+        // S/4HANA category
+        if (s.includes("s/4") || s.includes("s4") || s.includes("abap") || s.includes("hana") || s.includes("procurement") || s.includes("ariba") || s.includes("fico") || s.includes("mm ") || s.includes("sd ") || s.includes("successfactor") || s.includes("erp")) return "S/4HANA";
+        // BTP category
+        if (s.includes("btp") || s.includes("fiori") || s.includes("ui5") || s.includes("sapui5") || s.includes("cap") || s.includes("integration") || s.includes("cloud foundry") || s.includes("innovation") || s.includes("full stack") || s.includes("frontend") || s.includes("devops") || s.includes("backend")) return "BTP";
+        // Data Science category
+        if (s.includes("data sci") || s.includes("data scientist") || s.includes("ai") || s.includes("ml") || s.includes("machine learning") || s.includes("analytics") || s.includes("sac")) return "Data Science";
+        // Remaining developer/architect roles → BTP
+        if (s.includes("developer") || s.includes("architect") || s.includes("engineer") || s.includes("test") || s.includes("qa")) return "BTP";
+        return "";
+    }
+
+    /**
+     * Load workforce overview - merges employees, profiles, current projects, initiatives
+     */
+    private async loadWorkforceOverview(): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            // Load all employees
+            const empBinding = oDataModel.bindList("/Employees");
+            const empContexts = await empBinding.requestContexts(0, 500);
+            const employees = empContexts.map((ctx: any) => ctx.getObject());
+
+            // Load all profiles
+            const profBinding = oDataModel.bindList("/Profiles");
+            const profContexts = await profBinding.requestContexts(0, 500);
+            const profiles = profContexts.map((ctx: any) => ctx.getObject());
+            const profileMap: any = {};
+            profiles.forEach((p: any) => { profileMap[p.employeeId] = p; });
+
+            // Load all current projects
+            const cpBinding = oDataModel.bindList("/CurrentProjects");
+            const cpContexts = await cpBinding.requestContexts(0, 1000);
+            const currentProjects = cpContexts.map((ctx: any) => ctx.getObject());
+
+            // Load all initiatives from Initiatives entity
+            const initBinding = oDataModel.bindList("/Initiatives");
+            const initContexts = await initBinding.requestContexts(0, 500);
+            const initiatives = initContexts.map((ctx: any) => ctx.getObject());
+
+            // Group current projects by employee and type
+            const empProjects: any = {};
+            const empEvaluations: any = {};
+            const empInitFromCP: any = {};
+
+            currentProjects.forEach((cp: any) => {
+                if (cp.assignmentStatus === "Completed" || cp.assignmentStatus === "Rejected") return;
+                const eid = cp.employeeId;
+                if (cp.type === "Project") {
+                    if (!empProjects[eid]) empProjects[eid] = [];
+                    empProjects[eid].push(cp);
+                } else if (cp.type === "Evaluation") {
+                    if (!empEvaluations[eid]) empEvaluations[eid] = [];
+                    empEvaluations[eid].push(cp);
+                } else if (cp.type === "Initiative") {
+                    if (!empInitFromCP[eid]) empInitFromCP[eid] = [];
+                    empInitFromCP[eid].push(cp);
+                }
+            });
+
+            // Group initiatives from Initiatives entity
+            const empInitFromEntity: any = {};
+            initiatives.forEach((init: any) => {
+                if (init.status === "Completed") return;
+                const eid = init.employeeId;
+                if (!empInitFromEntity[eid]) empInitFromEntity[eid] = [];
+                empInitFromEntity[eid].push(init);
+            });
+
+            // Format entry helper
+            const formatEntry = (name: string, pct: any) => {
+                return pct ? `${name} (${pct}%)` : name;
+            };
+
+            // Build rows
+            const rows: any[] = [];
+
+            employees.forEach((emp: any) => {
+                const profile = profileMap[emp.employeeId] || {};
+                const tLevel = profile.tLevel || emp.tLevel || "";
+                const specialization = profile.specialization || "";
+                let techCategory = this.mapTechCategory(specialization);
+
+                const projects = empProjects[emp.employeeId] || [];
+                const evaluations = empEvaluations[emp.employeeId] || [];
+
+                // Fallback: derive tech from employee role or from their projects' technology
+                if (!techCategory && emp.role) {
+                    techCategory = this.mapTechCategory(emp.role);
+                }
+                if (!techCategory && projects.length > 0 && projects[0].technology) {
+                    techCategory = this.mapTechCategory(projects[0].technology);
+                }
+
+                // Merge initiatives from both sources, deduplicate by name
+                const initCP = (empInitFromCP[emp.employeeId] || []).map((cp: any) => ({
+                    name: cp.projectName, pct: cp.utilizationPercent
+                }));
+                const initEntity = (empInitFromEntity[emp.employeeId] || []).map((i: any) => ({
+                    name: i.initiativeName, pct: i.utilizationPercent
+                }));
+                const seenNames = new Set<string>();
+                const allInits: any[] = [];
+                [...initCP, ...initEntity].forEach((item: any) => {
+                    if (!seenNames.has(item.name)) {
+                        seenNames.add(item.name);
+                        allInits.push(item);
+                    }
+                });
+
+                const row: any = {
+                    name: emp.name,
+                    employeeId: emp.employeeId,
+                    tLevel: tLevel,
+                    techCategory: techCategory,
+                    projects: projects.map((p: any) => formatEntry(p.projectName, p.utilizationPercent)),
+                    evaluations: evaluations.map((e: any) => formatEntry(e.projectName, e.utilizationPercent)),
+                    initiatives: allInits.map((i: any) => formatEntry(i.name, i.pct))
+                };
+                rows.push(row);
+            });
+
+            // Sort by T-Level descending (T4 first) then name
+            rows.sort((a: any, b: any) => {
+                if (a.tLevel !== b.tLevel) return b.tLevel.localeCompare(a.tLevel);
+                return a.name.localeCompare(b.name);
+            });
+
+            this.allWorkforceRows = rows;
+            console.log(`✅ Workforce overview: ${rows.length} employees`);
+
+            // Apply default filter (T3 & T4) and build table
+            const defaultFiltered = rows.filter((r: any) => r.tLevel === 'T3' || r.tLevel === 'T4');
+            this.buildWorkforceTable(defaultFiltered);
+        } catch (error) {
+            console.error("❌ Error loading workforce overview:", error);
+        }
+    }
+
+    /**
+     * Build the workforce table dynamically based on max column counts
+     */
+    private buildWorkforceTable(rows: any[]): void {
+        const container = this.byId("workforceTableContainer") as VBox;
+        if (!container) return;
+        container.destroyItems();
+
+        // Compute max columns from the FILTERED rows
+        let maxP = 0, maxE = 0, maxI = 0;
+        rows.forEach((r: any) => {
+            if (r.projects.length > maxP) maxP = r.projects.length;
+            if (r.evaluations.length > maxE) maxE = r.evaluations.length;
+            if (r.initiatives.length > maxI) maxI = r.initiatives.length;
+        });
+        this.maxPrj = Math.min(maxP, 5) || 1;
+        this.maxEvl = Math.min(maxE, 5) || 1;
+        this.maxInit = Math.min(maxI, 5) || 1;
+
+        console.log(`📊 Building table: ${rows.length} rows, cols: P=${this.maxPrj} E=${this.maxEvl} I=${this.maxInit}`);
+
+        const oTable = new Table({
+            alternateRowColors: true,
+            growing: true,
+            growingThreshold: 50,
+            fixedLayout: true,
+            sticky: ["ColumnHeaders"],
+            noDataText: "No employees found for selected filters"
+        }).addStyleClass("workforceOverviewDynTable");
+
+        // Add columns: Employee, T-Lev, Tech
+        oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: "Employee" }) }));
+        oTable.addColumn(new Column({ width: "5rem", hAlign: "Center", header: new Text({ text: "T-Lev" }) }));
+        oTable.addColumn(new Column({ width: "7rem", hAlign: "Center", header: new Text({ text: "Tech" }) }));
+
+        // Dynamic Project columns
+        for (let i = 0; i < this.maxPrj; i++) {
+            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Prj ${i + 1}` }) }));
+        }
+        // Dynamic Evaluation columns
+        for (let i = 0; i < this.maxEvl; i++) {
+            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Evl ${i + 1}` }) }));
+        }
+        // Dynamic Initiative columns
+        for (let i = 0; i < this.maxInit; i++) {
+            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Init ${i + 1}` }) }));
+        }
+
+        // Add rows
+        rows.forEach((row: any) => {
+            const cli = new ColumnListItem();
+
+            // Employee
+            const oi = new ObjectIdentifier({ title: row.name, text: row.employeeId });
+            cli.addCell(oi);
+
+            // T-Level
+            const tState = row.tLevel === "T4" ? "Success" : row.tLevel === "T3" ? "Warning" : row.tLevel === "T2" ? "Information" : "None";
+            cli.addCell(new ObjectStatus({ text: row.tLevel, state: tState }));
+
+            // Tech
+            const techState = row.techCategory === "S/4HANA" ? "Error" : row.techCategory === "BTP" ? "Success" : row.techCategory === "Data Science" ? "Information" : "None";
+            cli.addCell(new ObjectStatus({ text: row.techCategory, state: techState }));
+
+            // Projects
+            for (let i = 0; i < this.maxPrj; i++) {
+                cli.addCell(new Text({ text: row.projects[i] || "" }));
+            }
+            // Evaluations
+            for (let i = 0; i < this.maxEvl; i++) {
+                cli.addCell(new Text({ text: row.evaluations[i] || "" }));
+            }
+            // Initiatives
+            for (let i = 0; i < this.maxInit; i++) {
+                cli.addCell(new Text({ text: row.initiatives[i] || "" }));
+            }
+
+            oTable.addItem(cli);
+        });
+
+        container.addItem(oTable);
+    }
+
+    /**
+     * Filter workforce overview by T-Level and Technology
+     */
+    public onWorkforceFilterChange(): void {
+        const tLevelFilter = (this.byId("wfTLevelFilter") as Select)?.getSelectedKey() || "";
+        const techFilter = (this.byId("wfTechFilter") as Select)?.getSelectedKey() || "";
+
+        let filtered = this.allWorkforceRows;
+
+        if (tLevelFilter === "T3_T4") {
+            filtered = filtered.filter((r: any) => r.tLevel === 'T3' || r.tLevel === 'T4');
+        } else if (tLevelFilter) {
+            filtered = filtered.filter((r: any) => r.tLevel === tLevelFilter);
+        }
+
+        if (techFilter) {
+            filtered = filtered.filter((r: any) => r.techCategory === techFilter);
+        }
+
+        this.buildWorkforceTable(filtered);
     }
 }

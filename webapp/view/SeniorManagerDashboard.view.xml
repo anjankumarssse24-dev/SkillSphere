@@ -142,6 +142,50 @@
                 </uxap:subSections>
             </uxap:ObjectPageSection>
 
+            <!-- Workforce Overview Section (2nd nav) -->
+            <uxap:ObjectPageSection id="workforceOverviewSection" title="Workforce Overview" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="workforceOverviewSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="workforceOverviewPanel" class="sapUiMediumMargin" width="97%">
+                                <m:headerToolbar>
+                                    <m:OverflowToolbar>
+                                        <m:Title text="Employee Work Allocation Matrix" level="H3"/>
+                                        <m:ToolbarSpacer/>
+                                        <m:Label text="T-Level:" class="sapUiSmallMarginEnd"/>
+                                        <m:Select id="wfTLevelFilter" width="8rem" change="onWorkforceFilterChange" selectedKey="T3_T4">
+                                            <core:Item key="T3_T4" text="T3 &amp; T4"/>
+                                            <core:Item key="T4" text="T4"/>
+                                            <core:Item key="T3" text="T3"/>
+                                            <core:Item key="T2" text="T2"/>
+                                            <core:Item key="T1" text="T1"/>
+                                            <core:Item key="" text="All"/>
+                                        </m:Select>
+                                        <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
+                                        <m:Label text="Technology:" class="sapUiSmallMarginEnd"/>
+                                        <m:Select id="wfTechFilter" width="10rem" change="onWorkforceFilterChange">
+                                            <core:Item key="" text="All"/>
+                                            <core:Item key="S/4HANA" text="S/4HANA"/>
+                                            <core:Item key="BTP" text="BTP"/>
+                                            <core:Item key="Data Science" text="Data Science"/>
+                                        </m:Select>
+                                    </m:OverflowToolbar>
+                                </m:headerToolbar>
+                                <m:content>
+                                    <m:ScrollContainer
+                                        height="600px"
+                                        width="100%"
+                                        horizontal="true"
+                                        vertical="true">
+                                        <m:VBox id="workforceTableContainer"/>
+                                    </m:ScrollContainer>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
             <!-- Manager Overview Section -->
             <uxap:ObjectPageSection id="managersSection" title="Team Overview" titleUppercase="false">
                 <uxap:subSections>
