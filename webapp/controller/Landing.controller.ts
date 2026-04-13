@@ -11,6 +11,7 @@ import VBox from "sap/m/VBox";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
+import LocalAuth from "../service/LocalAuth";
 
 /**
  * @namespace skillsphere.controller
@@ -26,9 +27,10 @@ export default class Landing extends Controller {
         });
         this.getView()?.setModel(accessModel, "access");
 
-        // Landing page initialization
-        this.loadManagers();
-        void this.loadAuthorizationState();
+        if (!LocalAuth.isLocalMode()) {
+            this.loadManagers();
+            void this.loadAuthorizationState();
+        }
     }
 
     private async loadAuthorizationState(): Promise<void> {
@@ -104,8 +106,11 @@ export default class Landing extends Controller {
     }
 
     public onManagerLoginPress(): void {
-        // Navigate directly to Manager Login (handles both Manager and Senior Manager)
         this.getRouter().navTo("ManagerLogin");
+    }
+
+    public onSeniorManagerLoginPress(): void {
+        this.getRouter().navTo("SeniorManagerLogin");
     }
 
     public onSelectManagerRole(): void {

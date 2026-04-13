@@ -29,9 +29,21 @@
                 
                 <!-- Main Panels -->
                 <m:FlexBox wrap="Wrap" justifyContent="Center" alignItems="Start" class="sapUiLargeMarginTop">
+                    <m:Panel class="skillSphereCard" width="360px" headerText="Local Login" backgroundDesign="Solid" visible="{appConfig>/isLocalMode}">
+                        <m:content>
+                            <m:VBox alignItems="Stretch" class="sapUiMediumMargin">
+                                <m:Title text="Choose Test Role" level="H3" textAlign="Center" class="sapUiSmallMarginBottom"/>
+                                <m:Text text="Local mode is enabled. Use the dedicated login screen for one of the configured test users." textAlign="Center" class="sapUiMediumMarginBottom"/>
+                                <m:MessageStrip text="Employee: I770144 / password123&#10;Manager: MGR003 / manager123&#10;Senior Manager: SMGR01 / manager123" type="Information" showIcon="true" class="sapUiMediumMarginBottom"/>
+                                <m:Button text="Employee Login" type="Emphasized" icon="sap-icon://employee" class="sapUiSmallMarginBottom" press="onEmployeeLoginPress"/>
+                                <m:Button text="Manager Login" type="Emphasized" icon="sap-icon://manager" class="sapUiSmallMarginBottom" press="onManagerLoginPress"/>
+                                <m:Button text="Senior Manager Login" type="Emphasized" icon="sap-icon://management-review" press="onSeniorManagerLoginPress"/>
+                            </m:VBox>
+                        </m:content>
+                    </m:Panel>
                     
                     <!-- Registration Panel -->
-                    <m:Panel class="skillSphereCard" width="300px" headerText="Registration" backgroundDesign="Solid">
+                    <m:Panel class="skillSphereCard" width="300px" headerText="Registration" backgroundDesign="Solid" visible="{= !${appConfig>/isLocalMode} }">
                         <m:content>
                             <m:VBox alignItems="Center" class="sapUiMediumMargin">
                                 <core:Icon src="sap-icon://add-employee" size="4rem" color="#0070f2" class="sapUiMediumMarginBottom"/>

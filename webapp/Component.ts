@@ -3,6 +3,7 @@ import { createDeviceModel } from "./model/models";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import { DataManager } from "./service/DataManager";
 import MessageToast from "sap/m/MessageToast";
+import LocalAuth from "./service/LocalAuth";
 
 /**
  * @namespace skillsphere
@@ -35,6 +36,11 @@ super.init();
 
     private async redirectAuthenticatedUser(): Promise<void> {
         try {
+            if (LocalAuth.isLocalMode()) {
+                this.getRouter().navTo("Landing", {}, undefined, true);
+                return;
+            }
+
             const oDataModel = this.getModel() as any;
             if (!oDataModel) {
                 return;
@@ -103,6 +109,12 @@ super.init();
             message: null
         });
         this.setModel(viewStateModel, "viewState");
+
+        const appConfigModel = new JSONModel({
+            isLocalMode: LocalAuth.isLocalMode(),
+            mockUsers: LocalAuth.getMockUsers()
+        });
+        this.setModel(appConfigModel, "appConfig");
 
         // Add DataManager to global scope for easy access
         (window as any).dataManager = DataManager.getInstance();

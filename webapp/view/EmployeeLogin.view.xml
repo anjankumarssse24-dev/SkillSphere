@@ -11,6 +11,7 @@
                 <m:Panel class="skillSphereLoginCard" width="350px" headerText="Employee Login">
                     <m:content>
                         <m:VBox class="sapUiMediumMargin">
+                            <m:MessageStrip text="Local test user: I770144 / password123" type="Information" showIcon="true" visible="{appConfig>/isLocalMode}" class="sapUiMediumMarginBottom"/>
                             <m:Label text="Employee ID:" class="sapUiSmallMarginBottom"/>
                             <m:Input 
                                 id="employeeId" 

@@ -63,11 +63,12 @@
         "kind": "sqlite",
         "model": "db"
       },
+      "auth": "dummy",
       "[production]": {
         "db": {
           "kind": "sqlite"
         },
-        "auth": "dummy"
+        "auth": "xsuaa"
       }
     }
   }

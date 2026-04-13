@@ -13,6 +13,7 @@
                     <m:content>
                         <m:VBox class="sapUiMediumMargin">
                             <core:Icon src="sap-icon://management-review" size="3rem" color="#dc3545" class="sapUiSmallMarginBottom"/>
+                            <m:MessageStrip text="Local test user: SMGR01 / manager123" type="Information" showIcon="true" visible="{appConfig>/isLocalMode}" class="sapUiMediumMarginBottom"/>
                             <m:Label text="Manager ID:" class="sapUiSmallMarginBottom"/>
                             <m:Input 
                                 id="seniorManagerId" 

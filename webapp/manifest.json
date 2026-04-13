@@ -128,6 +128,21 @@
           "target": ["TargetLanding"]
         },
         {
+          "name": "EmployeeLogin",
+          "pattern": "employee-login",
+          "target": ["TargetEmployeeLogin"]
+        },
+        {
+          "name": "ManagerLogin",
+          "pattern": "manager-login",
+          "target": ["TargetManagerLogin"]
+        },
+        {
+          "name": "SeniorManagerLogin",
+          "pattern": "senior-manager-login",
+          "target": ["TargetSeniorManagerLogin"]
+        },
+        {
           "name": "EmployeeDashboard",
           "pattern": "employee-dashboard/{employeeId}",
           "target": ["TargetEmployeeDashboard"]
@@ -157,6 +172,18 @@
         "TargetLanding": {
           "id": "Landing",
           "name": "Landing"
+        },
+        "TargetEmployeeLogin": {
+          "id": "EmployeeLogin",
+          "name": "EmployeeLogin"
+        },
+        "TargetManagerLogin": {
+          "id": "ManagerLogin",
+          "name": "ManagerLogin"
+        },
+        "TargetSeniorManagerLogin": {
+          "id": "SeniorManagerLogin",
+          "name": "SeniorManagerLogin"
         },
         "TargetEmployeeDashboard": {
           "id": "EmployeeDashboard",

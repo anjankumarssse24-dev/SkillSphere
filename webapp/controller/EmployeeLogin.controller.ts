@@ -2,6 +2,8 @@
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import Input from "sap/m/Input";
+import LocalAuth from "../service/LocalAuth";
 
 export default class EmployeeLogin extends Controller {
 
@@ -22,6 +24,23 @@ export default class EmployeeLogin extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             if (!oDataModel) {
                 MessageToast.show("Service not available. Please try again.");
+                return;
+            }
+
+            if (LocalAuth.isLocalMode()) {
+                const employeeId = (this.byId("employeeId") as Input)?.getValue().trim();
+                const password = (this.byId("employeePassword") as Input)?.getValue().trim();
+                const result = await LocalAuth.authenticate("Employee", employeeId, password, oDataModel);
+
+                if (!result.success || !result.user || !result.navigation) {
+                    MessageToast.show(result.message || "Login failed. Please try again.");
+                    return;
+                }
+
+                const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+                currentUserModel.setData(result.user);
+                MessageToast.show("Welcome, " + result.user.name + "!");
+                this.getRouter().navTo(result.navigation.routeName, result.navigation.parameters);
                 return;
             }
 

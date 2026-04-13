@@ -11,6 +11,7 @@
                 <m:Panel class="skillSphereLoginCard" width="350px" headerText="Manager Login">
                     <m:content>
                         <m:VBox class="sapUiMediumMargin">
+                            <m:MessageStrip text="Local test user: MGR003 / manager123" type="Information" showIcon="true" visible="{appConfig>/isLocalMode}" class="sapUiMediumMarginBottom"/>
                             <m:Label text="Manager ID:" class="sapUiSmallMarginBottom"/>
                             <m:Input 
                                 id="managerId" 
