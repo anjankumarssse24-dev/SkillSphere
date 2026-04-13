@@ -41,23 +41,6 @@ service SkillSphereService {
   // Custom Actions
   
   /**
-   * Login action - Authenticate user credentials
-   * @param username - User's login name
-   * @param password - User's password
-   * @returns Authentication result with user data
-   */
-  action login(username: String, password: String) returns {
-    success: Boolean;
-    user: {
-      id: String;
-      name: String;
-      role: String;
-      team: String;
-    };
-    message: String;
-  };
-  
-  /**
    * Get employee statistics
    * @param employeeId - Employee ID
    * @returns Statistics including skill count, project count

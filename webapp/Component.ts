@@ -2,6 +2,7 @@ import BaseComponent from "sap/ui/core/UIComponent";
 import { createDeviceModel } from "./model/models";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import { DataManager } from "./service/DataManager";
+import MessageToast from "sap/m/MessageToast";
 
 /**
  * @namespace skillsphere
@@ -45,6 +46,10 @@ super.init();
             const userContext = context?.getObject();
 
             if (!userContext || !userContext.authorized) {
+                if (userContext?.authenticated && userContext?.message) {
+                    MessageToast.show(userContext.message);
+                }
+                this.getRouter().navTo("Landing", {}, undefined, true);
                 return;
             }
 

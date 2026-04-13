@@ -39,7 +39,7 @@ export default class EmployeeLogin extends Controller {
                     employeeId: userContext?.employeeId,
                     message: userContext?.message
                 });
-                MessageToast.show("Access denied. Employee role required.");
+                MessageToast.show(userContext?.message || "Access denied. Employee role required.");
                 return;
             }
 

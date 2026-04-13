@@ -34,7 +34,7 @@ export default class SeniorManagerLogin extends Controller {
             const userContext = actionBinding.getBoundContext()?.getObject();
 
             if (!userContext?.authorized || userContext.role !== "SeniorManager") {
-                MessageToast.show("Access denied. Senior Manager role required.");
+                MessageToast.show(userContext?.message || "Access denied. Senior Manager role required.");
                 return;
             }
 

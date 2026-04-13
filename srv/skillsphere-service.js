@@ -3,7 +3,6 @@
  * Handles business logic, validations, and custom actions
  */
 const cds = require('@sap/cds');
-const util = require('node:util');
 const AICoreClient = require('./utils/aicore-client-orchestration');
 
 module.exports = cds.service.impl(async function() {
@@ -52,20 +51,13 @@ module.exports = cds.service.impl(async function() {
   }
 
   this.on('currentUserContext', async req => {
-    console.log('================ currentUserContext BEGIN ================');
-    console.log('req.user (full):', util.inspect(req.user, { depth: 6, colors: false }));
-    console.log('req.user keys:', Object.keys(req.user || {}));
-    console.log('req.user.attr (full):', util.inspect(req.user?.attr || {}, { depth: 6, colors: false }));
-    console.log('req.user.authInfo (full):', util.inspect(req.user?.authInfo || {}, { depth: 4, colors: false }));
-
     const principalId = req.user?.id || '';
     const principalEmail = req.user?.attr?.email || req.user?.attr?.mail || principalId;
+    const tokenInfo = req.user?.authInfo?.getTokenInfo?.() || req.user?.tokenInfo;
     const jwtPayload =
+      tokenInfo?.getPayload?.() ||
       req.user?.authInfo?.token ||
-      req.user?.tokenInfo?.getPayload?.() ||
       {};
-
-    console.log('jwtPayload (full):', util.inspect(jwtPayload, { depth: 8, colors: false }));
 
     const toScopeList = value => {
       if (!value) return [];
@@ -84,6 +76,7 @@ module.exports = cds.service.impl(async function() {
     const grantedScopes = [
       ...toScopeList(req.user?._roles),
       ...toScopeList(req.user?.scopes),
+      ...toScopeList(req.user?.roles),
       ...toScopeList(req.user?.attr?.scope),
       ...toScopeList(req.user?.attr?.scopes),
       ...toScopeList(req.user?.attr?.authorities),
@@ -94,18 +87,6 @@ module.exports = cds.service.impl(async function() {
 
     const uniqueScopes = Array.from(new Set(grantedScopes));
     const uniqueRoleCollections = Array.from(new Set(roleCollections));
-
-    console.log('raw scope sources:', {
-      reqUserRoles: util.inspect(req.user?._roles, { depth: 6, colors: false }),
-      reqUserScopes: util.inspect(req.user?.scopes, { depth: 6, colors: false }),
-      reqAttrScope: util.inspect(req.user?.attr?.scope, { depth: 6, colors: false }),
-      reqAttrScopes: util.inspect(req.user?.attr?.scopes, { depth: 6, colors: false }),
-      reqAuthorities: util.inspect(req.user?.attr?.authorities, { depth: 6, colors: false }),
-      jwtScope: util.inspect(jwtPayload?.scope, { depth: 6, colors: false }),
-      jwtScp: util.inspect(jwtPayload?.scp, { depth: 6, colors: false }),
-      jwtAuthorities: util.inspect(jwtPayload?.authorities, { depth: 6, colors: false }),
-      jwtRoleCollections: util.inspect(jwtPayload?.['xs.system.attributes']?.['xs.rolecollections'], { depth: 6, colors: false })
-    });
 
     const normalize = value => String(value || '').trim().toLowerCase();
 
@@ -137,42 +118,19 @@ module.exports = cds.service.impl(async function() {
     const hasManagerRole = hasRole('Manager');
     const hasEmployeeRole = hasRole('Employee');
 
-    console.log('role evaluation matrix:', {
-      hasSeniorManagerRole,
-      hasManagerRole,
-      hasEmployeeRole,
-      uniqueScopes,
-      uniqueRoleCollections
-    });
-
-    console.log('🪪 BTP token role claims:', {
+    console.log('🪪 currentUserContext role summary:', {
       principalId,
       principalEmail,
       userIsEmployee: req.user?.is?.('Employee') || false,
       userIsManager: req.user?.is?.('Manager') || false,
       userIsSeniorManager: req.user?.is?.('SeniorManager') || false,
-      _roles: req.user?._roles || null,
-      scopes: req.user?.scopes || null,
-      attrScope: req.user?.attr?.scope || null,
-      attrScopes: req.user?.attr?.scopes || null,
-      authorities: req.user?.attr?.authorities || null,
-      jwtScope: jwtPayload?.scope || null,
-      jwtScp: jwtPayload?.scp || null,
-      jwtAuthorities: jwtPayload?.authorities || null,
-      jwtXsUserAttributes: jwtPayload?.['xs.user.attributes'] || null,
-      jwtXsRoleCollections: jwtPayload?.['xs.system.attributes']?.['xs.rolecollections'] || null
-    });
-
-    console.log('🔐 currentUserContext input:', {
-      principalId,
-      principalEmail,
-      grantedScopes: uniqueScopes,
-      roleCollections: uniqueRoleCollections,
+      scopeCount: uniqueScopes.length,
+      roleCollectionCount: uniqueRoleCollections.length,
+      firstScopes: uniqueScopes.slice(0, 5),
+      firstRoleCollections: uniqueRoleCollections.slice(0, 5),
       hasSeniorManagerRole,
       hasManagerRole,
-      hasEmployeeRole,
-      rawRoleContainerType: typeof req.user?._roles,
-      rawScopesContainerType: typeof req.user?.scopes
+      hasEmployeeRole
     });
 
     let resolvedRole = '';
@@ -196,7 +154,6 @@ module.exports = cds.service.impl(async function() {
         grantedScopes: uniqueScopes,
         roleCollections: uniqueRoleCollections
       });
-      console.log('================ currentUserContext END (DENY) ================');
       return {
         authenticated: true,
         authorized: false,
@@ -217,6 +174,24 @@ module.exports = cds.service.impl(async function() {
       employee = await SELECT.one.from(Employees).where({ employeeId: principalId });
     }
 
+    if (!employee) {
+      console.warn('⛔ currentUserContext authorization failed: no employee profile mapping found', {
+        principalId,
+        principalEmail,
+        resolvedRole
+      });
+      return {
+        authenticated: true,
+        authorized: false,
+        email: principalEmail,
+        employeeId: '',
+        name: '',
+        role: '',
+        targetDashboard: '',
+        message: 'No employee profile mapping found. Please contact administrator.'
+      };
+    }
+
     console.log('✅ currentUserContext resolved:', {
       principalId,
       principalEmail,
@@ -226,7 +201,6 @@ module.exports = cds.service.impl(async function() {
       employeeId: employee?.employeeId || principalId,
       employeeName: employee?.name || principalEmail || principalId
     });
-    console.log('================ currentUserContext END (ALLOW) ================');
 
     return {
       authenticated: true,
@@ -510,41 +484,6 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     }
   });
 
-
-  /**
-   * Login Action - Authenticate user credentials
-   * Clear any existing chat history for this user on login
-   */
-  this.on('login', async (req) => {
-    const { username, password } = req.data;
-    if (!username) {
-      return { success: false, user: null, message: 'Username is required' };
-    }
-
-    // Password-based login is deprecated; Users now stores identity/auth metadata only.
-    const user = await SELECT.one.from(Users).where({ id: username });
-    
-    if (user) {
-      const person = await SELECT.one.from(Employees).where({ employeeId: user.id });
-
-      // Clear chat history for this user on login to start fresh
-      const userId = user.id;
-      try { getAIClient().clearUserChat(userId); } catch(_) {}
-      console.log(`🔐 User logged in: ${user.id} (${user.role}), chat cleared`);
-      
-      return {
-        success: true,
-        user: {
-          id: user.id,
-          name: person?.name || user.id,
-          role: user.role,
-          team: person?.team || ''
-        },
-        message: 'Login successful'
-      };
-    }
-    return { success: false, user: null, message: 'Invalid credentials' };
-  });
 
   /**
    * Clear Chat Action - Clear chat history for a specific user

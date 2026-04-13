@@ -5,7 +5,7 @@ employeeId,name,team,subTeam,managerId,email,experience,totalSkills,totalProject
 "I770166","Deepa Iyer","CIS","Team3","MGR006","deepa.iyer@company.com","13","7","3","Developer","Pune","T3","L1"
 "I770167","Naveen Kumar","CIS","Team2","MGR006","naveen.kumar@company.com","3","6","4","Developer","Whitefield Bangalore","T2","L2"
 "I770168","Swati Pillai","CIS","Team5","MGR006","swati.pillai@company.com","14","8","5","Backend Developer","Devanahalli Campuses Bangalore","T3","L1"
-"I750145","Sreeja Reddy","CIS","Team8","MGR003","sreejareddykattekommula@sap.com","0.33","2","1","Developer","Whitefield, Bangalore","T1","L1"
+"I750145","Sreeja Reddy","CIS","Team8","MGR003","sreeja.reddy.kattekommula@sap.com","0.33","2","1","Developer","Whitefield, Bangalore","T1","L1"
 "I346659","Rubal Gupta","CIS","Team8","MGR003","rubal.gupta@sap.com","0","2","0","Architect","Whitefield, Bangalore","T2","L1"
 "I769086","Lakshmi Priya","CIS","Team8","MGR003","lakshmi.priya.a@sap.com","0.17","1","1","Data Scientist","Whitefield, Bangalore","T1","L1"
 "I763161","Shrikrushna Kulkarni","CIS","Team8","MGR003","shrikrushna.kulkarni@sap.com","8.5","2","2","Developer","Whitefield, Bangalore","T1","L1"

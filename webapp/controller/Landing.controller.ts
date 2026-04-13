@@ -18,8 +18,44 @@ import FilterOperator from "sap/ui/model/FilterOperator";
 export default class Landing extends Controller {
 
     public onInit(): void {
+        const accessModel = new JSONModel({
+            showUnauthorized: false,
+            email: "",
+            message: "",
+            contact: "Please contact your SkillSphere administrator."
+        });
+        this.getView()?.setModel(accessModel, "access");
+
         // Landing page initialization
         this.loadManagers();
+        void this.loadAuthorizationState();
+    }
+
+    private async loadAuthorizationState(): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const accessModel = this.getView()?.getModel("access") as JSONModel;
+
+            if (!oDataModel || !accessModel) {
+                return;
+            }
+
+            const actionBinding = oDataModel.bindContext("/currentUserContext(...)");
+            await actionBinding.execute();
+            const userContext = actionBinding.getBoundContext()?.getObject();
+
+            const unauthorized = !!userContext?.authenticated && !userContext?.authorized;
+            accessModel.setData({
+                showUnauthorized: unauthorized,
+                email: userContext?.email || "",
+                message: unauthorized
+                    ? (userContext?.message || "You are signed in but not assigned a SkillSphere role.")
+                    : "",
+                contact: "Please contact your SkillSphere administrator."
+            });
+        } catch (error) {
+            console.warn("Authorization state check skipped:", error);
+        }
     }
 
     private getRouter(): Router {
@@ -55,9 +91,9 @@ export default class Landing extends Controller {
         // Load latest managers data
         await this.loadManagers();
         
-        const dialog = this.byId("registrationDialog") as Dialog;
+        const dialog = this.byId("landingRegistrationDialog") as Dialog;
         // Reset form to default (Employee)
-        const segmentedButton = this.byId("regRoleSegmented") as SegmentedButton;
+        const segmentedButton = this.byId("landingRegRoleSegmented") as SegmentedButton;
         segmentedButton.setSelectedKey("Employee");
         this.onRoleChange();
         dialog.open();
@@ -74,20 +110,20 @@ export default class Landing extends Controller {
 
     public onSelectManagerRole(): void {
         // Close dialog and navigate to Manager Login
-        const dialog = this.byId("managerRoleDialog") as Dialog;
+        const dialog = this.byId("landingManagerRoleDialog") as Dialog;
         dialog.close();
         this.getRouter().navTo("ManagerLogin");
     }
 
     public onSelectSeniorManagerRole(): void {
         // Close dialog and navigate to Senior Manager Login
-        const dialog = this.byId("managerRoleDialog") as Dialog;
+        const dialog = this.byId("landingManagerRoleDialog") as Dialog;
         dialog.close();
         this.getRouter().navTo("SeniorManagerLogin");
     }
 
     public onCloseManagerRoleDialog(): void {
-        const dialog = this.byId("managerRoleDialog") as Dialog;
+        const dialog = this.byId("landingManagerRoleDialog") as Dialog;
         dialog.close();
     }
 
@@ -95,13 +131,13 @@ export default class Landing extends Controller {
      * Toggle visibility of role-specific fields
      */
     public onRoleChange(): void {
-        const segmentedButton = this.byId("regRoleSegmented") as SegmentedButton;
+        const segmentedButton = this.byId("landingRegRoleSegmented") as SegmentedButton;
         const selectedRole = segmentedButton.getSelectedKey();
         
-        const employeeIdSection = this.byId("employeeIdSection") as VBox;
-        const employeeFields = this.byId("employeeSpecificFields") as VBox;
-        const managerFields = this.byId("managerSpecificFields") as VBox;
-        const subTeamSelect = this.byId("regSubTeam") as Select;
+        const employeeIdSection = this.byId("landingEmployeeIdSection") as VBox;
+        const employeeFields = this.byId("landingEmployeeSpecificFields") as VBox;
+        const managerFields = this.byId("landingManagerSpecificFields") as VBox;
+        const subTeamSelect = this.byId("landingRegSubTeam") as Select;
         
         if (selectedRole === "Employee") {
             employeeIdSection.setVisible(true);
@@ -165,14 +201,12 @@ export default class Landing extends Controller {
      */
     public async onRegisterUser(): Promise<void> {
         // Get form inputs
-        const segmentedButton = this.byId("regRoleSegmented") as SegmentedButton;
-        const nameInput = this.byId("regName") as Input;
-        const emailInput = this.byId("regEmail") as Input;
-        const experienceInput = this.byId("regExperience") as StepInput;
-        const teamSelect = this.byId("regTeam") as Select;
-        const subTeamSelect = this.byId("regSubTeam") as Select;
-        const passwordInput = this.byId("regPassword") as Input;
-        const confirmPasswordInput = this.byId("regConfirmPassword") as Input;
+        const segmentedButton = this.byId("landingRegRoleSegmented") as SegmentedButton;
+        const nameInput = this.byId("landingRegName") as Input;
+        const emailInput = this.byId("landingRegEmail") as Input;
+        const experienceInput = this.byId("landingRegExperience") as StepInput;
+        const teamSelect = this.byId("landingRegTeam") as Select;
+        const subTeamSelect = this.byId("landingRegSubTeam") as Select;
 
         const role = segmentedButton.getSelectedKey();
         const name = nameInput.getValue().trim();
@@ -180,11 +214,8 @@ export default class Landing extends Controller {
         const experience = experienceInput.getValue();
         const team = teamSelect.getSelectedKey();
         const subTeam = subTeamSelect.getSelectedKey();
-        const password = passwordInput.getValue();
-        const confirmPassword = confirmPasswordInput.getValue();
-
         // Validate basic fields
-        if (!name || !email || !team || !subTeam || !password || !confirmPassword) {
+        if (!name || !email || !team || !subTeam) {
             MessageBox.error("Please fill all required fields");
             return;
         }
@@ -195,17 +226,6 @@ export default class Landing extends Controller {
             return;
         }
 
-        // Validate password
-        if (password.length < 6) {
-            MessageBox.error("Password must be at least 6 characters long");
-            return;
-        }
-
-        if (password !== confirmPassword) {
-            MessageBox.error("Passwords do not match");
-            return;
-        }
-
         // Get role-specific fields
         let userId = "";
         let managerId = "";
@@ -213,8 +233,8 @@ export default class Landing extends Controller {
         let managerExperience = 0;
 
         if (role === "Employee") {
-            const employeeIdInput = this.byId("regEmployeeId") as Input;
-            const managerSelect = this.byId("regManager") as Select;
+            const employeeIdInput = this.byId("landingRegEmployeeId") as Input;
+            const managerSelect = this.byId("landingRegManager") as Select;
             
             userId = employeeIdInput.getValue().trim();
             managerId = managerSelect.getSelectedKey();
@@ -230,8 +250,8 @@ export default class Landing extends Controller {
                 return;
             }
         } else {
-            const managementAreaInput = this.byId("regManagementArea") as Input;
-            const managerExperienceInput = this.byId("regManagerExperience") as StepInput;
+            const managementAreaInput = this.byId("landingRegManagementArea") as Input;
+            const managerExperienceInput = this.byId("landingRegManagerExperience") as StepInput;
             
             managementArea = managementAreaInput.getValue().trim();
             managerExperience = managerExperienceInput.getValue();
@@ -250,9 +270,9 @@ export default class Landing extends Controller {
 
             // Register based on role
             if (role === "Employee") {
-                await this.registerEmployee(userId, name, email, team, subTeam, managerId, experience, password);
+                await this.registerEmployee(userId, name, email, team, subTeam, managerId, experience);
             } else {
-                await this.registerManager(userId, name, email, team, subTeam, managementArea, managerExperience, password);
+                await this.registerManager(userId, name, email, team, subTeam, managementArea, managerExperience);
             }
 
             MessageBox.success(`Registration successful! Your ${role} ID is: ${userId}`, {
@@ -277,8 +297,7 @@ export default class Landing extends Controller {
         team: string,
         subTeam: string,
         managerId: string,
-        experience: number,
-        password: string
+        experience: number
     ): Promise<void> {
         console.log("Registering employee:", { employeeId, name, email, team, subTeam, managerId, experience });
 
@@ -350,8 +369,7 @@ export default class Landing extends Controller {
         team: string,
         subTeam: string,
         managementArea: string,
-        experience: number,
-        password: string
+        experience: number
     ): Promise<void> {
         console.log("Registering manager:", { managerId, name, email, team, subTeam, managementArea, experience });
 
@@ -413,7 +431,7 @@ export default class Landing extends Controller {
     }
 
     public onCloseRegisterDialog(): void {
-        const dialog = this.byId("registrationDialog") as Dialog;
+        const dialog = this.byId("landingRegistrationDialog") as Dialog;
         dialog.close();
         
         // Clear all form fields
