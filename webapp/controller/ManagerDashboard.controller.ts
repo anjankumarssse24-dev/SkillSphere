@@ -25,6 +25,8 @@ export default class ManagerDashboard extends Controller {
     private currentManagerId: string | null = null;
     private currentDialogEmployeeId: string = "";
     private managerAddProjectDialog?: Dialog;
+    private createMasterProjectDialog?: Dialog;
+    private editMasterProjectDialog?: Dialog;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -221,6 +223,9 @@ export default class ManagerDashboard extends Controller {
             
             // Load all managers for the search dropdown
             await this.loadAllManagers();
+            
+            // Load master projects for this manager
+            await this.loadMasterProjects();
             
         } catch (error) {
             console.error("❌ Error loading manager data:", error);
@@ -2662,6 +2667,311 @@ private initializeAIChat(): void {
             this.getView()?.setModel(new JSONModel({ managers: [] }), "pmList");
             this.getView()?.setModel(new JSONModel({ managers: [] }), "lmList");
         }
+    }
+
+    // ==================== MASTER PROJECT MANAGEMENT ====================
+
+    /**
+     * Load master projects for this manager from Projects entity
+     */
+    public async loadMasterProjects(): Promise<void> {
+        if (!this.currentManagerId) return;
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Projects");
+            listBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
+
+            const contexts = await listBinding.requestContexts(0, 500);
+            const projects = contexts.map((ctx: any) => ctx.getObject());
+
+            console.log(`✅ Loaded ${projects.length} master projects for manager ${this.currentManagerId}`);
+
+            const masterProjectsModel = new JSONModel({ projects: projects, allProjects: projects });
+            this.getView()?.setModel(masterProjectsModel, "masterProjects");
+        } catch (error) {
+            console.error("❌ Error loading master projects:", error);
+            this.getView()?.setModel(new JSONModel({ projects: [], allProjects: [] }), "masterProjects");
+        }
+    }
+
+    /**
+     * Search/filter master projects
+     */
+    public onMasterProjectSearch(event: Event): void {
+        const query = ((event.getParameter as any)("newValue") || "").toLowerCase();
+        const model = this.getView()?.getModel("masterProjects") as JSONModel;
+        if (!model) return;
+        const allProjects = model.getProperty("/allProjects") || [];
+        if (!query) {
+            model.setProperty("/projects", allProjects);
+            return;
+        }
+        const filtered = allProjects.filter((p: any) =>
+            (p.projectName || "").toLowerCase().includes(query) ||
+            (p.technology || "").toLowerCase().includes(query) ||
+            (p.status || "").toLowerCase().includes(query)
+        );
+        model.setProperty("/projects", filtered);
+    }
+
+    /**
+     * Open Create Master Project dialog
+     */
+    public async onCreateMasterProject(): Promise<void> {
+        if (this.createMasterProjectDialog) {
+            this.createMasterProjectDialog.destroy();
+            this.createMasterProjectDialog = undefined;
+        }
+
+        const currentManagerName = await this.getCurrentManagerName();
+
+        const newProjectModel = new JSONModel({
+            projectName: "",
+            technology: "",
+            startDate: null,
+            endDate: null,
+            status: "Active",
+            description: "",
+            accountExecutiveManager: "",
+            projectOrchestrator: "",
+            projectManager: currentManagerName
+        });
+        this.getView()?.setModel(newProjectModel, "newMasterProject");
+
+        this.createMasterProjectDialog = await Fragment.load({
+            name: "skillsphere.view.dialogs.CreateMasterProjectDialog",
+            controller: this
+        }) as Dialog;
+        this.getView()?.addDependent(this.createMasterProjectDialog);
+        this.createMasterProjectDialog.open();
+    }
+
+    public onCloseMasterProjectDialog(): void {
+        this.createMasterProjectDialog?.close();
+    }
+
+    /**
+     * Save a new master project
+     */
+    public async onSaveMasterProject(): Promise<void> {
+        const model = this.getView()?.getModel("newMasterProject") as JSONModel;
+        const data = model?.getData();
+
+        if (!data?.projectName) {
+            MessageToast.show("Please enter a project name");
+            return;
+        }
+        if (!data?.technology) {
+            MessageToast.show("Please select a technology");
+            return;
+        }
+
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return null;
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+            } catch { return null; }
+        };
+
+        const startDateISO = convertToISODate(data.startDate);
+        const endDateISO = convertToISODate(data.endDate);
+
+        let duration = "";
+        if (startDateISO && endDateISO) {
+            const diffDays = Math.ceil(Math.abs(new Date(endDateISO).getTime() - new Date(startDateISO).getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays < 30) {
+                duration = `${diffDays} days`;
+            } else if (diffDays < 365) {
+                const mo = Math.floor(diffDays / 30);
+                duration = `${mo} months`;
+            } else {
+                const yr = Math.floor(diffDays / 365);
+                const mo = Math.floor((diffDays % 365) / 30);
+                duration = mo > 0 ? `${yr} years ${mo} months` : `${yr} years`;
+            }
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const projectId = `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+            const listBinding = oDataModel.bindList("/Projects");
+            listBinding.create({
+                projectId: projectId,
+                employeeId: "",
+                projectName: data.projectName,
+                role: "",
+                startDate: startDateISO,
+                endDate: endDateISO,
+                evaluationStartDate: null,
+                evaluationEndDate: null,
+                status: data.status || "Active",
+                description: data.description || "",
+                duration: duration,
+                projectManager: data.projectManager || "",
+                accountExecutiveManager: data.accountExecutiveManager || "",
+                lineManagerPOC: data.projectManager || "",
+                projectOrchestrator: data.projectOrchestrator || "",
+                technology: data.technology || "",
+                addedByManager: this.currentManagerId || ""
+            });
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 600));
+
+            MessageToast.show("Project created successfully");
+            this.createMasterProjectDialog?.close();
+
+            // Refresh master projects list
+            await this.loadMasterProjects();
+        } catch (error) {
+            console.error("❌ Error creating master project:", error);
+            MessageToast.show("Error creating project");
+        }
+    }
+
+    /**
+     * Format project status state
+     */
+    public formatProjectStatusState(status: string): string {
+        switch (status) {
+            case "Active": return "Success";
+            case "Completed": return "None";
+            case "On Hold": return "Warning";
+            default: return "None";
+        }
+    }
+
+    /**
+     * Edit a master project
+     */
+    public async onEditMasterProject(oEvent: Event): Promise<void> {
+        const oSource = (oEvent.getSource() as any);
+        const oContext = oSource.getBindingContext("masterProjects");
+        const projectData = oContext.getObject();
+
+        const editModel = new JSONModel({
+            projectId: projectData.projectId,
+            projectName: projectData.projectName,
+            technology: projectData.technology,
+            startDate: projectData.startDate,
+            endDate: projectData.endDate,
+            status: projectData.status,
+            description: projectData.description || ""
+        });
+        this.getView()?.setModel(editModel, "editMasterProject");
+
+        if (!this.editMasterProjectDialog) {
+            this.editMasterProjectDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.EditMasterProjectDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.editMasterProjectDialog);
+        }
+        this.editMasterProjectDialog.open();
+    }
+
+    /**
+     * Save edited master project
+     */
+    public async onSaveEditMasterProject(): Promise<void> {
+        const editModel = this.getView()?.getModel("editMasterProject") as JSONModel;
+        const data = editModel.getData();
+
+        if (!data.projectName || !data.technology) {
+            MessageToast.show("Please fill in required fields");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            // Calculate duration
+            let duration = "";
+            if (data.startDate && data.endDate) {
+                const start = new Date(data.startDate);
+                const end = new Date(data.endDate);
+                const diffDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+                if (diffDays < 30) {
+                    duration = `${diffDays} days`;
+                } else if (diffDays < 365) {
+                    const mo = Math.floor(diffDays / 30);
+                    duration = `${mo} months`;
+                } else {
+                    const yr = Math.floor(diffDays / 365);
+                    const mo = Math.floor((diffDays % 365) / 30);
+                    duration = mo > 0 ? `${yr} years ${mo} months` : `${yr} years`;
+                }
+            }
+
+            const listBinding = oDataModel.bindList("/Projects");
+            listBinding.filter([new Filter("projectId", FilterOperator.EQ, data.projectId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length > 0) {
+                const ctx = contexts[0];
+                ctx.setProperty("projectName", data.projectName);
+                ctx.setProperty("technology", data.technology);
+                ctx.setProperty("startDate", data.startDate || null);
+                ctx.setProperty("endDate", data.endDate || null);
+                ctx.setProperty("status", data.status || "Active");
+                ctx.setProperty("description", data.description || "");
+                ctx.setProperty("duration", duration);
+
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 600));
+
+                MessageToast.show("Project updated successfully");
+                this.editMasterProjectDialog?.close();
+                await this.loadMasterProjects();
+            } else {
+                MessageToast.show("Project not found");
+            }
+        } catch (error) {
+            console.error("❌ Error updating master project:", error);
+            MessageToast.show("Error updating project");
+        }
+    }
+
+    /**
+     * Delete a master project
+     */
+    public async onDeleteMasterProject(oEvent: Event): Promise<void> {
+        const oSource = (oEvent.getSource() as any);
+        const oContext = oSource.getBindingContext("masterProjects");
+        const projectData = oContext.getObject();
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Projects");
+            listBinding.filter([new Filter("projectId", FilterOperator.EQ, projectData.projectId)]);
+
+            const contexts = await listBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                contexts[0].delete();
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 600));
+
+                MessageToast.show("Project deleted successfully");
+                await this.loadMasterProjects();
+            } else {
+                MessageToast.show("Project not found");
+            }
+        } catch (error) {
+            console.error("❌ Error deleting master project:", error);
+            MessageToast.show("Error deleting project");
+        }
+    }
+
+    /**
+     * Close edit master project dialog
+     */
+    public onCloseEditMasterProjectDialog(): void {
+        this.editMasterProjectDialog?.close();
     }
 
     public async onManagerAddProject(): Promise<void> {

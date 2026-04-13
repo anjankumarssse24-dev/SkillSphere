@@ -1,0 +1,57 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Assign Employee to Project"
+        contentWidth="500px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Project:" class="sapUiTinyMarginBottom"/>
+                <Text text="{assignEmployee>/projectName}" class="sapUiMediumMarginBottom sapThemeHighlight-asTextColor"/>
+                
+                <Label text="Select Employee:" required="true" class="sapUiSmallMarginTop"/>
+                <ComboBox
+                    id="assignEmployeeCombo"
+                    selectedKey="{assignEmployee>/selectedEmployeeId}"
+                    placeholder="Select an employee..."
+                    width="100%"
+                    items="{assignEmployee>/employees}">
+                    <core:Item key="{assignEmployee>employeeId}" text="{assignEmployee>name} ({assignEmployee>employeeId})"/>
+                </ComboBox>
+
+                <Label text="Role in Project:" class="sapUiSmallMarginTop"/>
+                <ComboBox
+                    selectedKey="{assignEmployee>/role}"
+                    placeholder="Select role"
+                    width="100%">
+                    <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Tech Lead" text="Tech Lead"/>
+                    <core:Item key="Solution Architect" text="Solution Architect"/>
+                    <core:Item key="Team Member" text="Team Member"/>
+                    <core:Item key="QA Engineer" text="QA Engineer"/>
+                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                </ComboBox>
+
+                <MessageStrip text="The employee will receive this project assignment. The project manager defaults to you." 
+                              type="Information" 
+                              showIcon="true" 
+                              class="sapUiSmallMarginTop"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Assign"
+                type="Emphasized"
+                press="onConfirmAssignEmployee" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseAssignEmployeeDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

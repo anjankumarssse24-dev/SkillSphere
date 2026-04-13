@@ -260,17 +260,24 @@
                                                                 visible="{= ${currentProjects>assignmentStatus} === 'Pending' }"
                                                                 class="sapUiTinyMarginEnd"/>
                                                             <m:Button 
+                                                                icon="sap-icon://complete" 
+                                                                type="Accept"
+                                                                press="onCompleteWork" 
+                                                                tooltip="Mark as Completed"
+                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' &amp;&amp; ${currentProjects>assignmentStatus} !== 'Completed' }"
+                                                                class="sapUiTinyMarginEnd"/>
+                                                            <m:Button 
                                                                 icon="sap-icon://edit" 
                                                                 press="onEditCurrentProject" 
                                                                 tooltip="Edit"
-                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' }"
+                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' &amp;&amp; ${currentProjects>assignmentStatus} !== 'Completed' }"
                                                                 class="sapUiTinyMarginEnd"/>
                                                             <m:Button 
                                                                 icon="sap-icon://delete" 
                                                                 type="Reject" 
                                                                 press="onDeleteCurrentProject" 
                                                                 tooltip="Delete"
-                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' }"/>
+                                                                visible="{= ${currentProjects>assignmentStatus} !== 'Pending' &amp;&amp; ${currentProjects>assignmentStatus} !== 'Completed' }"/>
                                                         </m:HBox>
                                                     </m:cells>
                                                 </m:ColumnListItem>
@@ -339,66 +346,53 @@
                 </uxap:subSections>
             </uxap:ObjectPageSection>
 
-            <!-- Projects Section -->
+            <!-- Completed Projects Section -->
             <uxap:ObjectPageSection id="projectsSection" title="My Projects" titleUppercase="false">
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection id="projectsSubSection">
                         <uxap:blocks>
                             <m:VBox id="projectsVBox" class="sapUiMediumMargin">
                                 <m:Toolbar id="projectsToolbar">
-                                    <m:Title id="projectsTitle" text="Projects"/>
+                                    <m:Title id="projectsTitle" text="Completed Projects"/>
                                     <m:ToolbarSpacer id="projectsToolbarSpacer"/>
-                                    <m:Button id="addProjectBtn" text="Add Project" icon="sap-icon://add" type="Emphasized" press="onAddProject"/>
                                 </m:Toolbar>
                                 
-                                <m:Table id="projectsTable" items="{projects>/projects}" class="sapUiSmallMarginTop">
+                                <m:Table id="projectsTable" items="{completedProjects>/projects}" class="sapUiSmallMarginTop"
+                                         noDataText="No completed projects yet">
                                     <m:columns>
+                                        <m:Column id="projectTypeCol">
+                                            <m:Text id="projectTypeHeader" text="Type"/>
+                                        </m:Column>
                                         <m:Column id="projectNameCol">
-                                            <m:Text id="projectNameHeader" text="Project Name"/>
+                                            <m:Text id="projectNameHeader" text="Name"/>
                                         </m:Column>
                                         <m:Column id="roleCol">
                                             <m:Text id="roleHeader" text="Role"/>
                                         </m:Column>
-                                        <m:Column id="durationCol">
-                                            <m:Text id="durationHeader" text="Duration"/>
-                                        </m:Column>
                                         <m:Column id="projectManagerCol">
                                             <m:Text id="projectManagerHeader" text="Project Manager"/>
                                         </m:Column>
-                                        <m:Column id="aemCol">
-                                            <m:Text id="aemHeader" text="AEM"/>
+                                        <m:Column id="projectStartCol" hAlign="Center">
+                                            <m:Text id="projectStartHeader" text="Start Date"/>
                                         </m:Column>
-                                        <m:Column id="lineManagerCol">
-                                            <m:Text id="lineManagerHeader" text="Line Manager/POC"/>
+                                        <m:Column id="projectEndCol" hAlign="Center">
+                                            <m:Text id="projectEndHeader" text="End Date"/>
                                         </m:Column>
-                                        <m:Column id="orchestratorCol">
-                                            <m:Text id="orchestratorHeader" text="Project Orchestrator"/>
-                                        </m:Column>
-                                        <m:Column id="addedByCol" width="140px">
-                                            <m:Text id="addedByHeader" text="Source"/>
-                                        </m:Column>
-                                        <m:Column id="projectActionsCol" width="150px">
-                                            <m:Text id="projectActionsHeader" text="Actions"/>
+                                        <m:Column id="projectAllocCol" hAlign="Center">
+                                            <m:Text id="projectAllocHeader" text="Allocation"/>
                                         </m:Column>
                                     </m:columns>
                                     <m:items>
                                         <m:ColumnListItem id="projectItem">
-                                            <m:Text id="projectNameText" text="{projects>projectName}"/>
-                                            <m:Text id="roleText" text="{projects>role}"/>
-                                            <m:Text id="durationText" text="{projects>duration}"/>
-                                            <m:Text id="projectManagerText" text="{projects>projectManager}"/>
-                                            <m:Text id="aemText" text="{projects>accountExecutiveManager}"/>
-                                            <m:Text id="lineManagerText" text="{projects>lineManagerPOC}"/>
-                                            <m:Text id="orchestratorText" text="{projects>projectOrchestrator}"/>
                                             <m:ObjectStatus
-                                                text="{= ${projects>addedByManager} ? 'Added by Manager' : 'Self Added'}"
-                                                state="{= ${projects>addedByManager} ? 'Warning' : 'None'}"
-                                                icon="{= ${projects>addedByManager} ? 'sap-icon://manager' : ''}"
-                                                tooltip="{= ${projects>addedByManager} ? ('Added by: ' + ${projects>addedByManager}) : 'Added by employee'}"/>
-                                            <m:HBox id="projectActionsHBox">
-                                                <m:Button id="editProjectBtn" icon="sap-icon://edit" press="onEditProject" tooltip="Edit Project"/>
-                                                <m:Button id="deleteProjectBtn" icon="sap-icon://delete" type="Reject" press="onDeleteProject" tooltip="Delete Project"/>
-                                            </m:HBox>
+                                                text="{completedProjects>type}"
+                                                state="{= ${completedProjects>type} === 'Project' ? 'Success' : ${completedProjects>type} === 'Evaluation' ? 'Warning' : 'Information' }"/>
+                                            <m:Text id="projectNameText" text="{completedProjects>projectName}"/>
+                                            <m:Text id="roleText" text="{completedProjects>role}"/>
+                                            <m:Text id="projectManagerText" text="{completedProjects>projectManager}"/>
+                                            <m:Text id="projectStartText" text="{completedProjects>startDate}"/>
+                                            <m:Text id="projectEndText" text="{completedProjects>endDate}"/>
+                                            <m:Text id="projectAllocText" text="{path: 'completedProjects>utilizationPercent', formatter: '.formatUtilizationPercent'}"/>
                                         </m:ColumnListItem>
                                     </m:items>
                                 </m:Table>

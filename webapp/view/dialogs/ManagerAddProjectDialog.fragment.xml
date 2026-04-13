@@ -28,15 +28,6 @@
                     <core:Item key="S/4HANA" text="S/4HANA"/>
                     <core:Item key="BTP" text="BTP (Business Technology Platform)"/>
                     <core:Item key="Data Science" text="Data Science"/>
-                    <core:Item key="AI/ML" text="AI/ML (Artificial Intelligence &amp; Machine Learning)"/>
-                    <core:Item key="ABAP" text="ABAP"/>
-                    <core:Item key="SAPUI5" text="SAPUI5"/>
-                    <core:Item key="Fiori" text="Fiori"/>
-                    <core:Item key="Ariba" text="Ariba"/>
-                    <core:Item key="SuccessFactors" text="SuccessFactors"/>
-                    <core:Item key="Analytics Cloud" text="Analytics Cloud"/>
-                    <core:Item key="Integration" text="Integration"/>
-                    <core:Item key="HANA" text="HANA"/>
                 </ComboBox>
 
                 <Label text="Employee Role in Project:" class="sapUiSmallMarginTop"/>

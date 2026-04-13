@@ -156,19 +156,29 @@ export default class EmployeeDashboard extends Controller {
     private async loadProjects(employeeId: string): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const projectsBinding = oDataModel.bindList("/Projects");
-            projectsBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const binding = oDataModel.bindList("/CurrentProjects");
+            binding.filter([
+                new Filter("employeeId", FilterOperator.EQ, employeeId),
+                new Filter("assignmentStatus", FilterOperator.EQ, "Completed")
+            ]);
             
-            const projectsContexts = await projectsBinding.requestContexts(0, 100);
-            const projects = projectsContexts.map((ctx: any) => ctx.getObject());
+            const contexts = await binding.requestContexts(0, 100);
+            const projects = contexts.map((ctx: any) => {
+                const obj = ctx.getObject();
+                return {
+                    ...obj,
+                    startDate: this.formatDate(obj.startDate),
+                    endDate: this.formatDate(obj.endDate)
+                };
+            });
             
-            console.log(`✅ Loaded ${projects.length} projects from OData`);
+            console.log(`✅ Loaded ${projects.length} completed projects from OData`);
             
             const projectsModel = new JSONModel({ projects: projects });
-            this.getView()?.setModel(projectsModel, "projects");
+            this.getView()?.setModel(projectsModel, "completedProjects");
         } catch (error) {
-            console.error("Error loading projects:", error);
-            this.getView()?.setModel(new JSONModel({ projects: [] }), "projects");
+            console.error("Error loading completed projects:", error);
+            this.getView()?.setModel(new JSONModel({ projects: [] }), "completedProjects");
         }
     }
 
@@ -207,7 +217,10 @@ export default class EmployeeDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const binding = oDataModel.bindList("/CurrentProjects");
-            binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            binding.filter([
+                new Filter("employeeId", FilterOperator.EQ, employeeId),
+                new Filter("assignmentStatus", FilterOperator.NE, "Completed")
+            ]);
             
             const contexts = await binding.requestContexts(0, 100);
             const data = contexts.map((ctx: any) => {
@@ -2102,6 +2115,41 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
+    /**
+     * Mark a work assignment as Completed - moves it to Completed Projects
+     */
+    public async onCompleteWork(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("currentProjects");
+        const currentProject = bindingContext?.getObject();
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProject.currentProjectId)]);
+            
+            const contexts = await listBinding.requestContexts(0, 1);
+            if (contexts.length > 0) {
+                contexts[0].setProperty("assignmentStatus", "Completed");
+                contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                await new Promise(resolve => setTimeout(resolve, 300));
+                listBinding.refresh();
+                
+                MessageToast.show("Work marked as completed");
+                const employeeId = this.currentEmployeeId;
+                if (employeeId) {
+                    await this.loadCurrentProjects(employeeId);
+                    await this.loadProjects(employeeId);
+                }
+            }
+        } catch (error) {
+            console.error("❌ Error completing work:", error);
+            MessageToast.show("Error marking work as completed");
+        }
+    }
+
     // ==================== UNIFIED WORK MANAGEMENT ====================
     
     private unifiedWorkDialog?: Dialog;
@@ -2202,33 +2250,43 @@ export default class EmployeeDashboard extends Controller {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CurrentProjects");
-            
-            const newData: any = {
-                currentProjectId: `WORK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                employeeId: employeeId,
-                type: data.type,
-                projectName: data.projectName,
-                startDate: startDateISO,
-                endDate: endDateISO,
-                utilizationPercent: parseInt(data.utilizationPercent),
-                assignmentStatus: "Self-Assigned",
-                assignedBy: null,
-                isEvaluation: data.type === "Evaluation",
-                createdAt: new Date().toISOString(),
-                lastUpdated: new Date().toISOString()
-            };
 
-            if (data.type === "Project" || data.type === "Evaluation") {
-                newData.role = data.role;
-                newData.projectManager = data.projectManager;
+            if (data.type === "Initiative") {
+                // Save Initiative to Initiatives entity
+                const listBinding = oDataModel.bindList("/Initiatives");
+                listBinding.create({
+                    initiativeId: `INIT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    employeeId: employeeId,
+                    initiativeName: data.projectName,
+                    description: data.description || "",
+                    startDate: startDateISO,
+                    endDate: endDateISO,
+                    utilizationPercent: parseInt(data.utilizationPercent),
+                    status: "Active",
+                    type: "Initiative"
+                });
+            } else {
+                // Save Project/Evaluation to CurrentProjects entity
+                const listBinding = oDataModel.bindList("/CurrentProjects");
+                const newData: any = {
+                    currentProjectId: `WORK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    employeeId: employeeId,
+                    type: data.type,
+                    projectName: data.projectName,
+                    role: data.role || "",
+                    projectManager: data.projectManager || "",
+                    startDate: startDateISO,
+                    endDate: endDateISO,
+                    utilizationPercent: parseInt(data.utilizationPercent),
+                    assignmentStatus: "Self-Assigned",
+                    assignedBy: null,
+                    isEvaluation: data.type === "Evaluation",
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString()
+                };
+                listBinding.create(newData);
             }
 
-            if (data.type !== "Project" && data.type !== "Evaluation") {
-                newData.description = data.description || "";
-            }
-            
-            listBinding.create(newData);
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
             await new Promise(resolve => setTimeout(resolve, 800));
             

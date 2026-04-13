@@ -1,0 +1,78 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Create New Master Project"
+        contentWidth="600px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Project Name:" required="true" />
+                <Input
+                    value="{newMasterProject>/projectName}"
+                    placeholder="Enter project name" />
+
+                <Label text="Technology / Tech Stack:" class="sapUiSmallMarginTop" required="true"/>
+                <ComboBox
+                    selectedKey="{newMasterProject>/technology}"
+                    placeholder="Select primary technology"
+                    width="100%">
+                    <core:Item key="S/4HANA" text="S/4HANA"/>
+                    <core:Item key="BTP" text="BTP (Business Technology Platform)"/>
+                    <core:Item key="Data Science" text="Data Science"/>
+                </ComboBox>
+
+                <Label text="Start Date:" class="sapUiSmallMarginTop" required="true"/>
+                <DatePicker
+                    value="{newMasterProject>/startDate}"
+                    placeholder="Select start date"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="End Date:" class="sapUiSmallMarginTop" required="true"/>
+                <DatePicker
+                    value="{newMasterProject>/endDate}"
+                    placeholder="Select end date"
+                    displayFormat="MM/dd/yyyy"/>
+
+                <Label text="Status:" class="sapUiSmallMarginTop"/>
+                <Select selectedKey="{newMasterProject>/status}" width="100%">
+                    <core:Item key="Active" text="Active"/>
+                    <core:Item key="Completed" text="Completed"/>
+                    <core:Item key="On Hold" text="On Hold"/>
+                </Select>
+
+                <Label text="Description:" class="sapUiSmallMarginTop"/>
+                <TextArea
+                    value="{newMasterProject>/description}"
+                    rows="3"
+                    width="100%"
+                    placeholder="Enter project description" />
+
+                <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{newMasterProject>/accountExecutiveManager}"
+                    placeholder="Represents business stakeholders" />
+
+                <Label text="Project Orchestrator:" class="sapUiSmallMarginTop"/>
+                <Input
+                    value="{newMasterProject>/projectOrchestrator}"
+                    placeholder="Coordinates frontend-backend integration" />
+
+                <MessageStrip text="You will be set as the Project Manager by default. You can assign employees after creating the project." 
+                              type="Information" 
+                              showIcon="true" 
+                              class="sapUiSmallMarginTop"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Create Project"
+                type="Emphasized"
+                press="onSaveMasterProject" />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                press="onCloseMasterProjectDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

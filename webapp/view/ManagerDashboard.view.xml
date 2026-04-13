@@ -21,6 +21,65 @@
         </uxap:headerTitle>
 
         <uxap:sections>
+            <!-- Master Projects Section -->
+            <uxap:ObjectPageSection id="masterProjectsSection" title="Master Projects" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="masterProjectsSubSection">
+                        <uxap:blocks>
+                            <m:Panel id="masterProjectsPanel" headerText="Project Registry" class="sapUiMediumMargin" width="95%">
+                                <m:headerToolbar>
+                                    <m:Toolbar>
+                                        <m:Title text="My Projects" level="H3"/>
+                                        <m:ToolbarSpacer/>
+                                        <m:SearchField id="masterProjectSearch" placeholder="Search projects..." liveChange="onMasterProjectSearch" width="15rem"/>
+                                        <m:Button text="Create New Project" icon="sap-icon://add" type="Emphasized" press="onCreateMasterProject"/>
+                                    </m:Toolbar>
+                                </m:headerToolbar>
+                                <m:content>
+                                    <m:Table id="masterProjectsTable" items="{masterProjects>/projects}" class="sapUiResponsiveMargin" mode="None" fixedLayout="false">
+                                        <m:columns>
+                                            <m:Column minScreenWidth="Phone" demandPopin="true">
+                                                <m:Text text="Project Name"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                <m:Text text="Technology"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Desktop" demandPopin="true">
+                                                <m:Text text="Start Date"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Desktop" demandPopin="true">
+                                                <m:Text text="End Date"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false">
+                                                <m:Text text="Status"/>
+                                            </m:Column>
+                                            <m:Column minScreenWidth="Phone" demandPopin="false" hAlign="End">
+                                                <m:Text text="Actions"/>
+                                            </m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{masterProjects>projectName}"/>
+                                                <m:Text text="{masterProjects>technology}"/>
+                                                <m:Text text="{masterProjects>startDate}"/>
+                                                <m:Text text="{masterProjects>endDate}"/>
+                                                <m:ObjectStatus 
+                                                    text="{masterProjects>status}"
+                                                    state="{path: 'masterProjects>status', formatter: '.formatProjectStatusState'}"/>
+                                                <m:HBox justifyContent="End">
+                                                    <m:Button icon="sap-icon://edit" tooltip="Edit Project" type="Ghost" press="onEditMasterProject" class="sapUiTinyMarginEnd"/>
+                                                    <m:Button icon="sap-icon://delete" tooltip="Delete Project" type="Ghost" press="onDeleteMasterProject"/>
+                                                </m:HBox>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
             <!-- Employee Search Section -->
             <uxap:ObjectPageSection id="searchSection" title="Employee Search" titleUppercase="false">
                 <uxap:subSections>
@@ -712,13 +771,13 @@
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Project to Employee" expandable="false">
                                 <m:content>
                                     <m:VBox class="sapUiSmallMargin">
-                                        <m:Label text="Select Project from Master Data:" class="sapUiTinyMarginBottom"/>
+                                        <m:Label text="Select Project:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="assignProjectComboBox"
                                                     items="{/Projects}"
                                                     placeholder="Select a project to assign..."
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">
-                                            <core:Item key="{projectId}" text="{projectName} ({projectManager})"/>
+                                            <core:Item key="{projectId}" text="{projectName} - {technology}"/>
                                         </m:ComboBox>
                                         <m:Button text="Assign Project" 
                                                   type="Emphasized" 

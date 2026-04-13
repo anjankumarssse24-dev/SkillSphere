@@ -12,23 +12,21 @@
                     selectedKey="{unifiedWork>/type}"
                     width="100%"
                     change="onUnifiedWorkTypeChange">
-                    <core:Item key="Project" text="Project (from Master Data)"/>
-                    <core:Item key="Evaluation" text="Evaluation (from Master Data)"/>
-                    <core:Item key="Initiative" text="Initiative (Self-Created)"/>
-                    <core:Item key="CAIA" text="CAIA (Self-Created)"/>
-                    <core:Item key="POC" text="POC (Self-Created)"/>
+                    <core:Item key="Project" text="Project"/>
+                    <core:Item key="Evaluation" text="Evaluation"/>
+                    <core:Item key="Initiative" text="Initiative"/>
                 </Select>
                 
-                <!-- For Project/Evaluation (from master data) -->
-                <VBox visible="{= ${unifiedWork>/type} === 'Project' || ${unifiedWork>/type} === 'Evaluation' }">
-                    <Label text="Select from Master Data:" required="true" class="sapUiSmallMarginTop" />
+                <!-- For Project (from master data) -->
+                <VBox visible="{= ${unifiedWork>/type} === 'Project' }">
+                    <Label text="Select Project:" required="true" class="sapUiSmallMarginTop" />
                     <ComboBox
                         selectedKey="{unifiedWork>/projectName}"
-                        placeholder="Choose project"
+                        placeholder="Choose project from master data"
                         width="100%"
                         items="{projectsList>/projects}"
                         selectionChange="onUnifiedProjectSelected">
-                        <core:Item key="{projectsList>projectName}" text="{projectsList>projectName}"/>
+                        <core:Item key="{projectsList>projectName}" text="{projectsList>projectName} - {projectsList>technology}"/>
                     </ComboBox>
                     
                     <Label text="Your Role:" required="true" class="sapUiSmallMarginTop" />
@@ -52,10 +50,33 @@
                     <Input value="{unifiedWork>/projectManager}" enabled="false" width="100%"/>
                 </VBox>
                 
-                <!-- For Initiative/CAIA/POC (self-created) -->
-                <VBox visible="{= ${unifiedWork>/type} === 'Initiative' || ${unifiedWork>/type} === 'CAIA' || ${unifiedWork>/type} === 'POC' }">
-                    <Label text="Name:" required="true" class="sapUiSmallMarginTop" />
-                    <Input value="{unifiedWork>/projectName}" placeholder="Enter name" width="100%"/>
+                <!-- For Evaluation -->
+                <VBox visible="{= ${unifiedWork>/type} === 'Evaluation' }">
+                    <Label text="Evaluation Name:" required="true" class="sapUiSmallMarginTop" />
+                    <Input value="{unifiedWork>/projectName}" placeholder="Enter evaluation name" width="100%"/>
+                    
+                    <Label text="Your Role:" required="true" class="sapUiSmallMarginTop" />
+                    <Select selectedKey="{unifiedWork>/role}" width="100%">
+                        <core:Item key="" text="-- Select Role --"/>
+                        <core:Item key="Developer" text="Developer"/>
+                        <core:Item key="Architect" text="Architect"/>
+                        <core:Item key="Backend Developer" text="Backend Developer"/>
+                        <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                        <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                        <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                        <core:Item key="Data Scientist" text="Data Scientist"/>
+                        <core:Item key="Data Analyst" text="Data Analyst"/>
+                        <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                        <core:Item key="QA Engineer" text="QA Engineer"/>
+                        <core:Item key="Tech Lead" text="Tech Lead"/>
+                        <core:Item key="Project Manager" text="Project Manager"/>
+                    </Select>
+                </VBox>
+                
+                <!-- For Initiative -->
+                <VBox visible="{= ${unifiedWork>/type} === 'Initiative' }">
+                    <Label text="Initiative Name:" required="true" class="sapUiSmallMarginTop" />
+                    <Input value="{unifiedWork>/projectName}" placeholder="Enter initiative name" width="100%"/>
                     
                     <Label text="Description:" class="sapUiSmallMarginTop" />
                     <TextArea value="{unifiedWork>/description}" rows="3" width="100%"/>
