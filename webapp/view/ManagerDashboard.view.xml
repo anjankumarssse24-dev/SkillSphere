@@ -44,6 +44,9 @@
                                             <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                 <m:Text text="Technology"/>
                                             </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                <m:Text text="Project Manager"/>
+                                            </m:Column>
                                             <m:Column minScreenWidth="Desktop" demandPopin="true">
                                                 <m:Text text="Start Date"/>
                                             </m:Column>
@@ -61,6 +64,7 @@
                                             <m:ColumnListItem>
                                                 <m:Text text="{masterProjects>projectName}"/>
                                                 <m:Text text="{masterProjects>technology}"/>
+                                                <m:Text text="{masterProjects>projectManager}"/>
                                                 <m:Text text="{masterProjects>startDate}"/>
                                                 <m:Text text="{masterProjects>endDate}"/>
                                                 <m:ObjectStatus 

@@ -18,67 +18,33 @@
                     <core:Icon src="sap-icon://work-history" size="1.2rem" color="#6a6d70"/>
                 </m:Toolbar>
 
-                <m:Toolbar class="smWorkOverviewLegend sapUiSmallMarginBottom">
-                    <m:Button text="Projects" type="Transparent" press="onJumpToProjects" class="sapUiTinyMarginEnd"/>
-                    <m:Button text="Evaluations" type="Transparent" press="onJumpToEvaluations" class="sapUiTinyMarginEnd"/>
-                    <m:Button text="Initiatives" type="Transparent" press="onJumpToInitiatives" class="sapUiTinyMarginEnd"/>
-                </m:Toolbar>
-
-                <m:Panel class="sapUiMediumMargin smWorkOverviewPanel" backgroundDesign="Solid" width="95%">
+                <m:Panel class="sapUiMediumMargin smWorkOverviewPanel" backgroundDesign="Solid" width="97%">
+                    <m:headerToolbar>
+                        <m:OverflowToolbar>
+                            <m:Title text="Employee Work Allocation Matrix" level="H3"/>
+                            <m:ToolbarSpacer/>
+                            <m:Label text="T-Level:" class="sapUiSmallMarginEnd"/>
+                            <m:MultiComboBox id="woTLevelFilter" width="12rem" selectionChange="onWorkOverviewFilterChange">
+                                <core:Item key="T5" text="T5"/>
+                                <core:Item key="T4" text="T4"/>
+                                <core:Item key="T3" text="T3"/>
+                                <core:Item key="T2" text="T2"/>
+                                <core:Item key="T1" text="T1"/>
+                            </m:MultiComboBox>
+                            <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
+                            <m:Label text="Technology:" class="sapUiSmallMarginEnd"/>
+                            <m:MultiComboBox id="woTechFilter" width="12rem" selectionChange="onWorkOverviewFilterChange">
+                                <core:Item key="S/4HANA" text="S/4HANA"/>
+                                <core:Item key="BTP" text="BTP"/>
+                                <core:Item key="Data Science" text="Data Science"/>
+                            </m:MultiComboBox>
+                            <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
+                            <m:SearchField id="woSearchField" width="18rem" placeholder="Search by name or ID..." search="onSearchWorkOverview" showSearchButton="true"/>
+                        </m:OverflowToolbar>
+                    </m:headerToolbar>
                     <m:content>
-                        <m:ScrollContainer id="workOverviewHorizontalScroll" width="100%" height="100%" horizontal="true" vertical="false" class="smWorkOverviewScroll">
-                            <m:Table id="workOverviewTable"
-                                class="smWorkOverviewTable"
-                                growing="true"
-                                growingThreshold="20"
-                                alternateRowColors="true"
-                                mode="None"
-                                fixedLayout="false"
-                                width="auto"
-                                noDataText="No employees to display">
-                                <m:headerToolbar>
-                                    <m:OverflowToolbar design="Transparent">
-                                        <m:Title text="Senior Team Members (T3 &amp; T4 Only)" level="H5"/>
-                                        <m:HBox class="smWorkOverviewFilterGroup" alignItems="Center" renderType="Bare">
-                                            <m:Label text="T-Level:" class="sapUiTinyMarginEnd"/>
-                                            <m:ComboBox id="tLevelFilter"
-                                                width="10rem"
-                                                placeholder="All Levels"
-                                                selectionChange="onFilterWorkOverview">
-                                                <core:Item key="" text="All Levels"/>
-                                                <core:Item key="T3" text="T3"/>
-                                                <core:Item key="T4" text="T4"/>
-                                            </m:ComboBox>
-                                            <m:Label text="Specialization:" class="sapUiSmallMarginBegin sapUiTinyMarginEnd"/>
-                                            <m:ComboBox id="specializationFilter"
-                                                width="12rem"
-                                                placeholder="All Specializations"
-                                                selectionChange="onFilterWorkOverview">
-                                                <core:Item key="" text="All Specializations"/>
-                                                <core:Item key="S/4HANA" text="S/4HANA"/>
-                                                <core:Item key="BTP" text="BTP"/>
-                                                <core:Item key="Data Science" text="Data Science"/>
-                                            </m:ComboBox>
-                                        </m:HBox>
-                                        <m:ToolbarSpacer/>
-                                        <m:SearchField width="22rem"
-                                            placeholder="Search by name..."
-                                            search="onSearchWorkOverview"
-                                            showSearchButton="true"/>
-                                    </m:OverflowToolbar>
-                                </m:headerToolbar>
-                                <m:columns>
-                                    <m:Column width="250px" hAlign="Left">
-                                        <m:Text text="Name"/>
-                                    </m:Column>
-                                    <m:Column width="120px" hAlign="Center">
-                                        <m:Text text="T-Level"/>
-                                    </m:Column>
-                                    <m:Column width="260px" hAlign="Left">
-                                        <m:Text text="Specialization"/>
-                                    </m:Column>
-                                </m:columns>
-                            </m:Table>
+                        <m:ScrollContainer height="auto" width="100%" horizontal="true" vertical="false">
+                            <m:VBox id="workOverviewTableContainer"/>
                         </m:ScrollContainer>
                     </m:content>
                 </m:Panel>

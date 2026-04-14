@@ -216,26 +216,56 @@ export default class EmployeeDashboard extends Controller {
     private async loadCurrentProjects(employeeId: string): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const binding = oDataModel.bindList("/CurrentProjects");
-            binding.filter([
+            
+            // Load projects from CurrentProjects (only type=Project, not completed)
+            const cpBinding = oDataModel.bindList("/CurrentProjects");
+            cpBinding.filter([
                 new Filter("employeeId", FilterOperator.EQ, employeeId),
+                new Filter("type", FilterOperator.EQ, "Project"),
                 new Filter("assignmentStatus", FilterOperator.NE, "Completed")
             ]);
-            
-            const contexts = await binding.requestContexts(0, 100);
-            const data = contexts.map((ctx: any) => {
+            const cpContexts = await cpBinding.requestContexts(0, 100);
+            const cpData = cpContexts.map((ctx: any) => {
                 const obj = ctx.getObject();
-                const formatted = {
+                return {
                     ...obj,
                     startDate: this.formatDate(obj.startDate),
-                    endDate: this.formatDate(obj.endDate)
+                    endDate: this.formatDate(obj.endDate),
+                    _source: "CurrentProjects"
                 };
-                return formatted;
             });
+
+            // Load evaluations & initiatives from Initiatives entity
+            const initBinding = oDataModel.bindList("/Initiatives");
+            initBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, employeeId)
+            ]);
+            const initContexts = await initBinding.requestContexts(0, 100);
+            const initData = initContexts.map((ctx: any) => {
+                const obj = ctx.getObject();
+                // Only include active Evaluation and Initiative types
+                if (obj.status === "Completed" || (obj.type !== "Evaluation" && obj.type !== "Initiative")) return null;
+                return {
+                    currentProjectId: obj.initiativeId,
+                    employeeId: obj.employeeId,
+                    type: obj.type,
+                    projectName: obj.initiativeName,
+                    role: obj.type === "Evaluation" ? "Evaluator" : "Contributor",
+                    projectManager: "Self-Managed",
+                    startDate: this.formatDate(obj.startDate),
+                    endDate: this.formatDate(obj.endDate),
+                    utilizationPercent: obj.utilizationPercent,
+                    assignmentStatus: "Accepted",
+                    description: obj.description,
+                    _source: "Initiatives",
+                    _initiativeId: obj.initiativeId
+                };
+            }).filter((item: any) => item !== null);
+
+            const allData = [...cpData, ...initData];
+            console.log(`✅ Loaded ${cpData.length} projects + ${initData.length} evals/inits = ${allData.length} total work items`);
             
-            console.log(`✅ Loaded ${data.length} current projects from OData`);
-            
-            const model = new JSONModel({ data: data });
+            const model = new JSONModel({ data: allData });
             this.getView()?.setModel(model, "currentProjects");
         } catch (error) {
             console.error("Error loading current projects:", error);
@@ -2093,25 +2123,39 @@ export default class EmployeeDashboard extends Controller {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CurrentProjects");
-            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProject.currentProjectId)]);
-            
-            const contexts = await listBinding.requestContexts(0, 1);
-            if (contexts.length > 0) {
-                contexts[0].delete();
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 300));
-                listBinding.refresh();
-                
-                MessageToast.show("Current project utilization deleted successfully");
-                const employeeId = this.currentEmployeeId;
-                if (employeeId) {
-                    await this.loadCurrentProjects(employeeId);
+
+            if (currentProject._source === "Initiatives") {
+                // Delete from Initiatives entity
+                const listBinding = oDataModel.bindList("/Initiatives");
+                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, currentProject._initiativeId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    contexts[0].delete();
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
+                }
+            } else {
+                // Delete from CurrentProjects entity
+                const listBinding = oDataModel.bindList("/CurrentProjects");
+                listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProject.currentProjectId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    contexts[0].delete();
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
                 }
             }
+
+            MessageToast.show("Work item deleted successfully");
+            const employeeId = this.currentEmployeeId;
+            if (employeeId) {
+                await this.loadCurrentProjects(employeeId);
+            }
         } catch (error) {
-            console.error("❌ Error deleting current project:", error);
-            MessageToast.show("Error deleting current project utilization");
+            console.error("❌ Error deleting work item:", error);
+            MessageToast.show("Error deleting work item");
         }
     }
 
@@ -2125,24 +2169,38 @@ export default class EmployeeDashboard extends Controller {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CurrentProjects");
-            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProject.currentProjectId)]);
-            
-            const contexts = await listBinding.requestContexts(0, 1);
-            if (contexts.length > 0) {
-                contexts[0].setProperty("assignmentStatus", "Completed");
-                contexts[0].setProperty("lastUpdated", new Date().toISOString());
-                
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 300));
-                listBinding.refresh();
-                
-                MessageToast.show("Work marked as completed");
-                const employeeId = this.currentEmployeeId;
-                if (employeeId) {
-                    await this.loadCurrentProjects(employeeId);
-                    await this.loadProjects(employeeId);
+
+            if (currentProject._source === "Initiatives") {
+                // Complete in Initiatives entity
+                const listBinding = oDataModel.bindList("/Initiatives");
+                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, currentProject._initiativeId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    contexts[0].setProperty("status", "Completed");
+                    contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
                 }
+            } else {
+                // Complete in CurrentProjects entity
+                const listBinding = oDataModel.bindList("/CurrentProjects");
+                listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProject.currentProjectId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    contexts[0].setProperty("assignmentStatus", "Completed");
+                    contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
+                }
+            }
+
+            MessageToast.show("Work marked as completed");
+            const employeeId = this.currentEmployeeId;
+            if (employeeId) {
+                await this.loadCurrentProjects(employeeId);
+                await this.loadProjects(employeeId);
             }
         } catch (error) {
             console.error("❌ Error completing work:", error);
@@ -2251,11 +2309,11 @@ export default class EmployeeDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-            if (data.type === "Initiative") {
-                // Save Initiative to Initiatives entity
+            if (data.type === "Initiative" || data.type === "Evaluation") {
+                // Save Initiative/Evaluation to Initiatives entity
                 const listBinding = oDataModel.bindList("/Initiatives");
                 listBinding.create({
-                    initiativeId: `INIT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    initiativeId: `${data.type === "Evaluation" ? "EVL" : "INIT"}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     initiativeName: data.projectName,
                     description: data.description || "",
@@ -2263,7 +2321,7 @@ export default class EmployeeDashboard extends Controller {
                     endDate: endDateISO,
                     utilizationPercent: parseInt(data.utilizationPercent),
                     status: "Active",
-                    type: "Initiative"
+                    type: data.type
                 });
             } else {
                 // Save Project/Evaluation to CurrentProjects entity
