@@ -55,6 +55,13 @@
                     width="100%">
                     <core:Item key="{projectManagerList>name}" text="{projectManagerList>name}"/>
                 </ComboBox>
+
+                <Label text="Region:" class="sapUiSmallMarginTop" required="true"/>
+                <Select selectedKey="{editMasterProject>/region}" width="100%">
+                    <core:Item key="APAC" text="APAC"/>
+                    <core:Item key="EMEA" text="EMEA"/>
+                    <core:Item key="AMERICAS" text="AMERICAS"/>
+                </Select>
             </VBox>
         </content>
         <beginButton>

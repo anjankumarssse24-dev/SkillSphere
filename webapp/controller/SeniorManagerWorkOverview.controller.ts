@@ -4,16 +4,16 @@ import MessageToast from "sap/m/MessageToast";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
-import Table from "sap/m/Table";
-import Column from "sap/m/Column";
-import ColumnListItem from "sap/m/ColumnListItem";
+import Table from "sap/ui/table/Table";
+import Column from "sap/ui/table/Column";
 import Text from "sap/m/Text";
 import VBox from "sap/m/VBox";
 import HBox from "sap/m/HBox";
-import Select from "sap/m/Select";
+import MultiComboBox from "sap/m/MultiComboBox";
 import ObjectIdentifier from "sap/m/ObjectIdentifier";
 import ObjectStatus from "sap/m/ObjectStatus";
 import Dialog from "sap/m/Dialog";
+import Label from "sap/m/Label";
 
 /**
  * @namespace skillsphere.controller
@@ -188,11 +188,18 @@ export default class SeniorManagerWorkOverview extends Controller {
                     techCategory = this.mapTechCategory(projectsList[0].technology);
                 }
 
+                // Calculate total allocation (sum of all utilization percentages)
+                const projectsUtil = projectsList.reduce((sum: number, p: any) => sum + (p.utilizationPercent || 0), 0);
+                const evaluationsUtil = evaluations.reduce((sum: number, e: any) => sum + (e.utilizationPercent || 0), 0);
+                const initiativesUtil = inits.reduce((sum: number, i: any) => sum + (i.utilizationPercent || 0), 0);
+                const totalAllocation = projectsUtil + evaluationsUtil + initiativesUtil;
+
                 const row: any = {
                     name: emp.name,
                     employeeId: emp.employeeId,
                     tLevel: tLevel,
                     techCategory: techCategory,
+                    totalAllocation: totalAllocation,
                     projects: projectsList.map((p: any) => formatEntry(p.projectName, p.utilizationPercent)),
                     evaluations: evaluations.map((e: any) => formatEntry(e.initiativeName, e.utilizationPercent)),
                     initiatives: inits.map((i: any) => formatEntry(i.initiativeName, i.utilizationPercent))
@@ -200,17 +207,27 @@ export default class SeniorManagerWorkOverview extends Controller {
                 rows.push(row);
             });
 
-            // Sort by T-Level descending (T4 first) then name
+            // Sort by Technology category first, then by name
             rows.sort((a: any, b: any) => {
-                if (a.tLevel !== b.tLevel) return b.tLevel.localeCompare(a.tLevel);
+                if (a.techCategory !== b.techCategory) {
+                    if (!a.techCategory) return 1;
+                    if (!b.techCategory) return -1;
+                    return a.techCategory.localeCompare(b.techCategory);
+                }
                 return a.name.localeCompare(b.name);
             });
 
             this.allWorkOverviewRows = rows;
             console.log(`✅ Work overview: ${rows.length} employees`);
 
-            // Apply default filter (T3 & T4) and build table
-            const defaultFiltered = rows.filter((r: any) => r.tLevel === 'T3' || r.tLevel === 'T4');
+            // Set default filter: T5, T4, T3
+            const tLevelFilter = this.byId("woTLevelFilter") as MultiComboBox;
+            if (tLevelFilter) {
+                tLevelFilter.setSelectedKeys(["T5", "T4", "T3"]);
+            }
+
+            // Apply default filter and build table
+            const defaultFiltered = rows.filter((r: any) => r.tLevel === 'T5' || r.tLevel === 'T4' || r.tLevel === 'T3');
             this.buildWorkOverviewTable(defaultFiltered);
 
             if (page?.setBusy) page.setBusy(false);
@@ -254,83 +271,135 @@ export default class SeniorManagerWorkOverview extends Controller {
 
         console.log(`📊 Building WO table: ${rows.length} rows, cols: P=${this.maxPrj} E=${this.maxEvl} I=${this.maxInit}`);
 
+        // Create JSON model for table data
+        const oTableModel = new JSONModel({ rows: rows });
+
         const oTable = new Table({
+            visibleRowCount: Math.min(rows.length, 20),
+            enableColumnReordering: true,
+            selectionMode: "None",
             alternateRowColors: true,
-            growing: true,
-            growingThreshold: 50,
-            fixedLayout: true,
-            sticky: ["ColumnHeaders"],
-            noDataText: "No employees found for selected filters"
+            columnHeaderVisible: true,
+            width: "100%",
+            noData: new Text({ text: "No employees found for selected filters" })
         }).addStyleClass("workforceOverviewDynTable");
 
-        // Add columns: Employee, T-Lev, Tech
-        oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: "Employee" }) }));
-        oTable.addColumn(new Column({ width: "5rem", hAlign: "Center", header: new Text({ text: "T-Lev" }) }));
-        oTable.addColumn(new Column({ width: "7rem", hAlign: "Center", header: new Text({ text: "Tech" }) }));
+        oTable.setModel(oTableModel);
+        oTable.bindRows("/rows");
+
+        // Add columns with templates: Employee, Allocation, Tech
+        oTable.addColumn(new Column({
+            width: "12rem",
+            label: new Label({ text: "Employee" }),
+            template: new ObjectIdentifier({
+                title: "{name}",
+                text: "{employeeId}"
+            })
+        }));
+
+        oTable.addColumn(new Column({
+            width: "6rem",
+            label: new Label({ text: "Alloc%" }),
+            hAlign: "Center",
+            template: new ObjectStatus({
+                text: "{totalAllocation}%",
+                state: {
+                    path: "totalAllocation",
+                    formatter: function (alloc: number) {
+                        return alloc > 100 ? "Error" : alloc > 80 ? "Warning" : "Success";
+                    }
+                }
+            })
+        }));
+
+        oTable.addColumn(new Column({
+            width: "6rem",
+            label: new Label({ text: "Tech" }),
+            hAlign: "Center",
+            template: new ObjectStatus({
+                text: "{techCategory}",
+                state: {
+                    path: "techCategory",
+                    formatter: function (tech: string) {
+                        return tech === "S/4HANA" ? "Error" : tech === "BTP" ? "Success" : tech === "Data Science" ? "Information" : "None";
+                    }
+                }
+            })
+        }));
 
         // Dynamic Project columns
         for (let i = 0; i < this.maxPrj; i++) {
-            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Prj ${i + 1}` }) }));
+            oTable.addColumn(new Column({
+                width: "10rem",
+                label: new Label({ text: `Prj ${i + 1}` }),
+                template: new Text({
+                    text: {
+                        path: `projects/${i}`,
+                        formatter: function (val: string) {
+                            return val || "-";
+                        }
+                    },
+                    wrapping: true,
+                    maxLines: 2
+                })
+            }));
         }
+
         // Dynamic Evaluation columns
         for (let i = 0; i < this.maxEvl; i++) {
-            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Evl ${i + 1}` }) }));
+            oTable.addColumn(new Column({
+                width: "10rem",
+                label: new Label({ text: `Evl ${i + 1}` }),
+                template: new Text({
+                    text: {
+                        path: `evaluations/${i}`,
+                        formatter: function (val: string) {
+                            return val || "-";
+                        }
+                    },
+                    wrapping: true,
+                    maxLines: 2
+                })
+            }));
         }
+
         // Dynamic Initiative columns
         for (let i = 0; i < this.maxInit; i++) {
-            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Init ${i + 1}` }) }));
+            oTable.addColumn(new Column({
+                width: "10rem",
+                label: new Label({ text: `Init ${i + 1}` }),
+                template: new Text({
+                    text: {
+                        path: `initiatives/${i}`,
+                        formatter: function (val: string) {
+                            return val || "-";
+                        }
+                    },
+                    wrapping: true,
+                    maxLines: 2
+                })
+            }));
         }
-
-        // Add rows
-        rows.forEach((row: any) => {
-            const cli = new ColumnListItem();
-
-            // Employee
-            cli.addCell(new ObjectIdentifier({ title: row.name, text: row.employeeId }));
-
-            // T-Level
-            const tState = row.tLevel === "T4" ? "Success" : row.tLevel === "T3" ? "Warning" : row.tLevel === "T2" ? "Information" : "None";
-            cli.addCell(new ObjectStatus({ text: row.tLevel, state: tState }));
-
-            // Tech
-            const techState = row.techCategory === "S/4HANA" ? "Error" : row.techCategory === "BTP" ? "Success" : row.techCategory === "Data Science" ? "Information" : "None";
-            cli.addCell(new ObjectStatus({ text: row.techCategory, state: techState }));
-
-            // Projects
-            for (let i = 0; i < this.maxPrj; i++) {
-                cli.addCell(new Text({ text: row.projects[i] || "" }));
-            }
-            // Evaluations
-            for (let i = 0; i < this.maxEvl; i++) {
-                cli.addCell(new Text({ text: row.evaluations[i] || "" }));
-            }
-            // Initiatives
-            for (let i = 0; i < this.maxInit; i++) {
-                cli.addCell(new Text({ text: row.initiatives[i] || "" }));
-            }
-
-            oTable.addItem(cli);
-        });
 
         container.addItem(oTable);
     }
 
     public onWorkOverviewFilterChange(): void {
-        const tLevelFilter = (this.byId("woTLevelFilter") as Select)?.getSelectedKey() || "";
-        const techFilter = (this.byId("woTechFilter") as Select)?.getSelectedKey() || "";
+        const tLevelMulti = this.byId("woTLevelFilter") as MultiComboBox;
+        const selectedTLevels = tLevelMulti?.getSelectedKeys() || [];
+        const techMulti = this.byId("woTechFilter") as MultiComboBox;
+        const selectedTechs = techMulti?.getSelectedKeys() || [];
         const searchField = this.byId("woSearchField") as any;
         const searchQuery = searchField?.getValue() || "";
 
         let filtered = this.allWorkOverviewRows;
 
-        if (tLevelFilter === "T3_T4") {
-            filtered = filtered.filter((r: any) => r.tLevel === 'T3' || r.tLevel === 'T4');
-        } else if (tLevelFilter) {
-            filtered = filtered.filter((r: any) => r.tLevel === tLevelFilter);
+        if (selectedTLevels.length > 0) {
+            filtered = filtered.filter((r: any) => selectedTLevels.includes(r.tLevel));
         }
 
-        if (techFilter) {
-            filtered = filtered.filter((r: any) => r.techCategory === techFilter);
+        if (selectedTechs.length > 0) {
+            filtered = filtered.filter((r: any) => selectedTechs.includes(r.techCategory));
         }
 
         if (searchQuery) {

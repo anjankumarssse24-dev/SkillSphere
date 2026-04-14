@@ -2812,7 +2812,8 @@ private initializeAIChat(): void {
             description: "",
             accountExecutiveManager: "",
             projectOrchestrator: "",
-            projectManager: currentManagerName
+            projectManager: currentManagerName,
+            region: ""
         });
         this.getView()?.setModel(newProjectModel, "newMasterProject");
 
@@ -2889,6 +2890,7 @@ private initializeAIChat(): void {
                 description: data.description || "",
                 duration: duration,
                 projectManager: data.projectManager || "",
+                region: data.region || "",
                 accountExecutiveManager: data.accountExecutiveManager || "",
                 lineManagerPOC: await this.getCurrentManagerName() || "",
                 projectOrchestrator: data.projectOrchestrator || "",
@@ -2940,7 +2942,8 @@ private initializeAIChat(): void {
             endDate: projectData.endDate,
             status: projectData.status,
             description: projectData.description || "",
-            projectManager: projectData.projectManager || ""
+            projectManager: projectData.projectManager || "",
+            region: projectData.region || ""
         });
         this.getView()?.setModel(editModel, "editMasterProject");
 
@@ -3002,6 +3005,7 @@ private initializeAIChat(): void {
                 ctx.setProperty("description", data.description || "");
                 ctx.setProperty("duration", duration);
                 ctx.setProperty("projectManager", data.projectManager || "");
+                ctx.setProperty("region", data.region || "");
 
                 await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
                 await new Promise(resolve => setTimeout(resolve, 600));
@@ -3243,6 +3247,7 @@ private initializeAIChat(): void {
                 projectName: project.projectName,
                 role: "", // Employee will set this when accepting
                 projectManager: project.projectManager || "",
+                region: project.region || "",
                 startDate: project.startDate,
                 endDate: project.endDate,
                 utilizationPercent: 100, // Default, employee can change

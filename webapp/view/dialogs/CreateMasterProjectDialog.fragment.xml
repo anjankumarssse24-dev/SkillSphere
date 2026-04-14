@@ -55,10 +55,13 @@
                     width="100%">
                     <core:Item key="{projectManagerList>name}" text="{projectManagerList>name}"/>
                 </ComboBox>
-                <MessageStrip text="Line Manager (LM) is automatically set to the manager creating this project. Select a Project Manager from T3, T4, or T5 employees." 
-                              type="Information" 
-                              showIcon="true" 
-                              class="sapUiSmallMarginTop"/>
+
+                <Label text="Region:" class="sapUiSmallMarginTop" required="true"/>
+                <Select selectedKey="{newMasterProject>/region}" width="100%">
+                    <core:Item key="APAC" text="APAC"/>
+                    <core:Item key="EMEA" text="EMEA"/>
+                    <core:Item key="AMERICAS" text="AMERICAS"/>
+                </Select>
 
                 <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
                 <Input

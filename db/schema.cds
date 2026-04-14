@@ -73,6 +73,7 @@ entity Projects {
   description : String;
   duration : String;
   projectManager : String;
+  region : String; // APAC, EMEA, AMERICAS
   technology : String; // S/4HANA, BTP, Data Science, AI/ML, etc.
   accountExecutiveManager : String;
   lineManagerPOC : String;
@@ -106,6 +107,7 @@ entity CurrentProjects {
   projectName : String;
   role : String;
   projectManager : String;
+  region : String; // APAC, EMEA, AMERICAS
   technology : String; // S/4HANA, BTP, Data Science, AI/ML, etc.
   startDate : Date;
   endDate : Date;

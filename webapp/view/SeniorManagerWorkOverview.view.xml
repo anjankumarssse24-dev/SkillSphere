@@ -24,28 +24,26 @@
                             <m:Title text="Employee Work Allocation Matrix" level="H3"/>
                             <m:ToolbarSpacer/>
                             <m:Label text="T-Level:" class="sapUiSmallMarginEnd"/>
-                            <m:Select id="woTLevelFilter" width="8rem" change="onWorkOverviewFilterChange" selectedKey="T3_T4">
-                                <core:Item key="T3_T4" text="T3 &amp; T4"/>
+                            <m:MultiComboBox id="woTLevelFilter" width="12rem" selectionChange="onWorkOverviewFilterChange">
+                                <core:Item key="T5" text="T5"/>
                                 <core:Item key="T4" text="T4"/>
                                 <core:Item key="T3" text="T3"/>
                                 <core:Item key="T2" text="T2"/>
                                 <core:Item key="T1" text="T1"/>
-                                <core:Item key="" text="All"/>
-                            </m:Select>
+                            </m:MultiComboBox>
                             <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
                             <m:Label text="Technology:" class="sapUiSmallMarginEnd"/>
-                            <m:Select id="woTechFilter" width="10rem" change="onWorkOverviewFilterChange">
-                                <core:Item key="" text="All"/>
+                            <m:MultiComboBox id="woTechFilter" width="12rem" selectionChange="onWorkOverviewFilterChange">
                                 <core:Item key="S/4HANA" text="S/4HANA"/>
                                 <core:Item key="BTP" text="BTP"/>
                                 <core:Item key="Data Science" text="Data Science"/>
-                            </m:Select>
+                            </m:MultiComboBox>
                             <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
                             <m:SearchField id="woSearchField" width="18rem" placeholder="Search by name or ID..." search="onSearchWorkOverview" showSearchButton="true"/>
                         </m:OverflowToolbar>
                     </m:headerToolbar>
                     <m:content>
-                        <m:ScrollContainer height="600px" width="100%" horizontal="true" vertical="true">
+                        <m:ScrollContainer height="auto" width="100%" horizontal="true" vertical="false">
                             <m:VBox id="workOverviewTableContainer"/>
                         </m:ScrollContainer>
                     </m:content>
