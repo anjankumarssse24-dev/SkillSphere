@@ -40,7 +40,7 @@
   },
   "scripts": {
     "start": "cds watch",
-    "start-ui": "fiori run --open \"test/flp.html#app-preview\"",
+    "start-ui": "fiori run --config ./ui5-local.yaml --open \"test/flp.html#app-preview\"",
     "start-with-ui": "concurrently \"npm run start\" \"npm run start-ui\"",
     "start-local": "fiori run --config ./ui5-local.yaml --open \"test/flp.html#app-preview\"",
     "build": "cds build --production",

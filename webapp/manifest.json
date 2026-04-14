@@ -70,6 +70,7 @@
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
+        "sap.ui.fl": {},
         "sap.f": {},
         "sap.ui.table": {},
         "sap.viz": {},
