@@ -26,6 +26,8 @@ POC_1730000004012_I763161,I763161,Roche-Email,POC: Roche Email Integration,2025-
 INIT_MGR003_001,I770144,SAP BTP Exploration,Initiative: Explore SAP BTP capabilities,2025-02-01,2025-05-31,38,Completed,Initiative,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
 INIT_MGR003_002,I770144,ABAP Modernization,Initiative: Modernize ABAP code to cloud-ready,2025-06-01,2025-09-30,50,Completed,Initiative,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
 INIT_MGR003_003,I770144,GenAI Pilot,Initiative: Gen AI pilot for code generation,2026-04-01,2026-09-30,38,Active,Initiative,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
+EVL_AK_001,I770144,ABAP Code Quality Audit,Evaluation: Auditing ABAP code quality and standards compliance,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_AK_001,I770144,SkillSphere Platform Enhancement,Initiative: Enhancing SkillSphere platform features,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
 CAIA_MGR003_001,I750145,Architecture Review,CAIA: Architecture review sessions,2025-03-01,2025-06-30,25,Completed,CAIA,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
 CAIA_MGR003_002,I750145,Test Automation Study,CAIA: Study test automation best practices,2025-07-01,2025-09-30,25,Completed,CAIA,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
 CAIA_MGR003_003,I750145,Onboarding Support,CAIA: Support new joiner onboarding,2026-04-01,2026-06-30,25,Active,CAIA,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
@@ -51,3 +53,230 @@ INIT_MGR003_010,I763266,API Documentation,Initiative: Comprehensive API doc effo
 POC_MGR003_006,I763266,GraphQL POC,POC: GraphQL API layer prototype,2026-04-01,2026-06-30,50,Active,POC,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
 CAIA_MGR003_011,I346659,Architecture Consulting,CAIA: Internal architecture consulting,2025-02-01,2025-08-31,38,Completed,CAIA,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
 INIT_MGR003_011,I346659,Platform Modernization,Initiative: Platform modernization roadmap,2026-02-01,2026-08-31,50,Active,Initiative,2026-03-24T22:00:00.000Z,2026-03-24T22:00:00.000Z
+EVL_T4_001,I770156,ML Pipeline Performance Review,Evaluation: Reviewing ML pipeline throughput and accuracy,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_002,I770156,Data Governance Audit,Evaluation: Assessing data governance compliance,2026-04-01,2026-07-31,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_001,I770156,AI Ethics Framework,Initiative: Establishing AI ethics guidelines,2026-02-01,2026-08-31,25,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_003,I770158,S/4HANA Migration Readiness,Evaluation: Assessing readiness for S/4HANA migration,2026-03-15,2026-06-15,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_004,I770158,Procurement Module Assessment,Evaluation: Reviewing procurement module configuration,2026-04-01,2026-07-31,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_002,I770158,S/4HANA Best Practices Guide,Initiative: Authoring S/4HANA implementation best practices,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_005,I770161,BTP Extension Suite Review,Evaluation: Reviewing BTP extension suite adoption,2026-03-01,2026-05-31,22,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_003,I770161,BTP Developer Toolkit,Initiative: Building reusable BTP developer toolkit,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_006,I770165,AI Model Accuracy Assessment,Evaluation: Evaluating AI model prediction accuracy,2026-03-15,2026-06-30,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_004,I770165,ML Ops Automation,Initiative: Automating ML operations pipeline,2026-03-01,2026-09-30,25,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_005,I770165,GenAI Integration Study,Initiative: Studying GenAI integration patterns,2026-04-01,2026-10-31,15,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_007,I774159,SD Module Compliance Check,Evaluation: Checking SD module compliance standards,2026-04-01,2026-07-15,16,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_006,I774159,ERP Modernization Playbook,Initiative: Creating ERP modernization playbook,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_008,I774162,Data Lake Architecture Review,Evaluation: Reviewing data lake architecture design,2026-03-01,2026-06-30,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_009,I774162,Advanced ML Review,Evaluation: Reviewing advanced ML model performance,2026-04-02,2026-07-15,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_007,I774162,Data Mesh Architecture,Initiative: Designing data mesh architecture,2026-02-01,2026-08-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_010,I774165,Analytics Pipeline Benchmark,Evaluation: Benchmarking analytics pipeline performance,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_008,I774165,Real-time Dashboard POC,Initiative: Building real-time analytics dashboard,2026-03-01,2026-07-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_011,I774168,Integration Security Audit,Evaluation: Auditing integration suite security,2026-03-15,2026-06-15,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_009,I774168,API Gateway Standardization,Initiative: Standardizing API gateway patterns,2026-02-15,2026-08-31,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T4_012,I774171,Finance Module Gap Analysis,Evaluation: Analyzing finance module feature gaps,2026-04-01,2026-06-30,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T4_010,I774171,Finance Process Automation,Initiative: Automating finance processes,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_001,I770146,Procurement Workflow Review,Evaluation: Reviewing procurement workflow efficiency,2026-03-01,2026-05-31,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_001,I770146,Procurement Analytics,Initiative: Building procurement analytics reports,2026-02-01,2026-07-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_002,I770148,Cloud Foundry Health Check,Evaluation: Checking Cloud Foundry service health,2026-04-01,2026-06-30,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_002,I770148,BTP CI/CD Pipeline,Initiative: Setting up BTP CI/CD pipeline,2026-03-01,2026-08-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_003,I770150,Event Mesh Performance Review,Evaluation: Reviewing event mesh throughput,2026-03-15,2026-06-15,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_003,I770150,BTP Monitoring Suite,Initiative: Developing BTP monitoring tools,2026-02-15,2026-07-31,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_004,I770153,S/4HANA Cloud Stability Test,Evaluation: Testing S/4HANA cloud stability,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_004,I770153,Cloud Migration Handbook,Initiative: Writing cloud migration handbook,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_005,I770154,ABAP Code Quality Review,Evaluation: Reviewing ABAP code quality standards,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_005,I770154,ABAP Clean Code Guide,Initiative: Creating ABAP clean code guidelines,2026-03-01,2026-08-31,15,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_006,I770159,Master Data Quality Review,Evaluation: Reviewing master data quality metrics,2026-03-01,2026-05-31,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_006,I770159,S/4HANA UX Modernization,Initiative: Modernizing S/4HANA user experience,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_007,I770160,BTP Security Posture Review,Evaluation: Reviewing BTP security posture,2026-04-01,2026-06-30,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_007,I770160,Integration Best Practices,Initiative: Documenting integration best practices,2026-02-15,2026-07-31,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_008,I770163,DevOps Pipeline Assessment,Evaluation: Assessing DevOps pipeline maturity,2026-03-15,2026-06-15,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_008,I770163,S/4HANA DevOps Toolkit,Initiative: Building S/4HANA DevOps toolkit,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_009,I770164,Data Science Model Validation,Evaluation: Validating data science model outputs,2026-04-01,2026-07-31,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_009,I770164,Predictive Analytics Toolkit,Initiative: Developing predictive analytics toolkit,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_010,I770166,Demand Model Accuracy Check,Evaluation: Checking demand forecast model accuracy,2026-03-01,2026-05-31,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_010,I770166,Data Visualization Library,Initiative: Creating data visualization components,2026-03-01,2026-08-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_011,I770168,Sentiment Model Calibration,Evaluation: Calibrating sentiment analysis model,2026-04-01,2026-06-30,16,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_011,I770168,NLP Pipeline Enhancement,Initiative: Enhancing NLP processing pipeline,2026-02-15,2026-07-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_012,I774157,ML Model Drift Analysis,Evaluation: Analyzing ML model drift patterns,2026-03-15,2026-06-30,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_012,I774157,Data Quality Framework,Initiative: Building data quality framework,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_013,I774158,BTP Connectivity Assessment,Evaluation: Assessing BTP connectivity services,2026-04-01,2026-07-15,16,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_013,I774158,Integration Suite Accelerator,Initiative: Building integration accelerator package,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_014,I774160,S/4HANA Data Migration Audit,Evaluation: Auditing S/4HANA data migration quality,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_014,I774160,S/4HANA Data Cleansing,Initiative: Automating S/4HANA data cleansing,2026-03-01,2026-08-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_015,I774161,CAP Service Performance Review,Evaluation: Reviewing CAP service performance,2026-03-15,2026-06-15,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_016,I774161,Fiori Launchpad UX Audit,Evaluation: Auditing Fiori launchpad UX consistency,2026-04-01,2026-07-31,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_015,I774161,BTP Extension Factory,Initiative: Creating BTP extension factory framework,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_017,I774163,BTP Launchpad UX Review,Evaluation: Reviewing BTP launchpad user experience,2026-04-01,2026-07-31,15,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_016,I774163,Fullstack Template Library,Initiative: Building fullstack project templates,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_018,I774164,Data Quality Assessment,Evaluation: Assessing enterprise data quality,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_019,I774164,Feature Engineering Review,Evaluation: Reviewing feature engineering pipeline,2026-04-01,2026-07-15,16,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_017,I774164,AutoML Platform Design,Initiative: Designing AutoML platform,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_020,I774166,Data Pipeline Benchmark,Evaluation: Benchmarking data pipeline throughput,2026-03-15,2026-06-15,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_018,I774166,Streaming Analytics Engine,Initiative: Building streaming analytics engine,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_021,I774167,BTP Event Mesh Benchmark,Evaluation: Benchmarking event mesh performance,2026-04-01,2026-06-30,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_019,I774167,Event-Driven Architecture Guide,Initiative: Writing event-driven architecture guide,2026-02-01,2026-07-31,20,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_022,I774169,Predictive Model Validation,Evaluation: Validating predictive model outputs,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_020,I774169,Time Series Analysis Tool,Initiative: Building time series analysis toolkit,2026-03-01,2026-08-31,22,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_T3_023,I774170,MM Module Regression Test,Evaluation: Running MM module regression tests,2026-04-01,2026-07-15,18,Active,Evaluation,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+INIT_T3_021,I774170,S/4HANA Test Automation,Initiative: Automating S/4HANA test execution,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-01T10:00:00.000Z,2026-04-01T10:00:00.000Z
+EVL_780_T4_001,I780090,DevOps Pipeline Maturity Assessment,Evaluation: Assessing CI/CD pipeline maturity,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_001,I780090,Cloud Native Deployment Framework,Initiative: Building cloud-native deployment framework,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_002,I780090,GitOps Best Practices Guide,Initiative: Creating GitOps best practices documentation,2026-03-01,2026-07-31,15,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_003,I780134,BTP Architecture Review,Evaluation: Reviewing BTP solution architecture,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_003,I780134,BTP Reference Architecture,Initiative: Designing BTP reference architecture,2026-02-01,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_004,I780040,SAP Integration Assessment,Evaluation: Assessing SAP integration landscape,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_004,I780040,Cloud Integration Patterns,Initiative: Documenting cloud integration patterns,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_005,I780013,S/4HANA Solution Fit Analysis,Evaluation: Analyzing S/4HANA solution fit for clients,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_005,I780013,ERP Migration Accelerator,Initiative: Building ERP migration accelerator tools,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_006,I780013,SAP Activate Toolkit,Initiative: Creating SAP Activate methodology toolkit,2026-04-01,2026-10-31,15,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_007,I780084,BTP Migration Readiness Check,Evaluation: Checking BTP migration readiness,2026-03-15,2026-06-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_007,I780084,BTP Migration Playbook,Initiative: Writing BTP migration playbook,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_008,I780115,Enterprise Architecture Assessment,Evaluation: Assessing enterprise architecture alignment,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_008,I780115,Architecture Governance Framework,Initiative: Building architecture governance framework,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_009,I780077,AI/ML Model Performance Review,Evaluation: Reviewing AI/ML model performance metrics,2026-03-01,2026-06-30,22,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_009,I780077,Predictive Analytics Accelerator,Initiative: Building predictive analytics accelerator,2026-02-15,2026-08-31,25,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_010,I780016,ML Pipeline Efficiency Audit,Evaluation: Auditing ML pipeline efficiency,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_010,I780016,GenAI Adoption Roadmap,Initiative: Designing GenAI adoption roadmap,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_011,I780032,Kubernetes Cluster Health Check,Evaluation: Checking Kubernetes cluster health,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_011,I780032,Container Orchestration Guide,Initiative: Writing container orchestration best practices,2026-02-01,2026-07-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_012,I780018,System Architecture Compliance Review,Evaluation: Reviewing system architecture compliance,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_012,I780018,Technical Standards Document,Initiative: Creating technical standards documentation,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_013,I780018,Architecture Decision Records,Initiative: Establishing architecture decision records,2026-04-01,2026-10-31,15,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_014,I780136,Solution Design Quality Audit,Evaluation: Auditing solution design quality,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_014,I780136,Design Pattern Catalog,Initiative: Building enterprise design pattern catalog,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_015,I780100,Code Quality Metrics Review,Evaluation: Reviewing code quality metrics baseline,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_015,I780100,Engineering Excellence Program,Initiative: Launching engineering excellence program,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_016,I780023,Performance Optimization Assessment,Evaluation: Assessing performance optimization areas,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_016,I780023,Developer Productivity Toolkit,Initiative: Building developer productivity toolkit,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_017,I780125,Cloud Architecture Readiness Review,Evaluation: Reviewing cloud architecture readiness,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_017,I780125,Cloud Center of Excellence,Initiative: Establishing cloud center of excellence,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_018,I780104,Integration Landscape Assessment,Evaluation: Assessing integration landscape complexity,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_018,I780104,API Strategy Document,Initiative: Defining enterprise API strategy,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_019,I780113,AI Ethics Compliance Check,Evaluation: Checking AI ethics compliance standards,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_019,I780113,Responsible AI Framework,Initiative: Building responsible AI framework,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_020,I780107,Legacy Modernization Assessment,Evaluation: Assessing legacy system modernization needs,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_020,I780107,Modernization Blueprint,Initiative: Creating system modernization blueprint,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_021,I780091,Infrastructure Resilience Audit,Evaluation: Auditing infrastructure resilience,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_021,I780091,High Availability Patterns Guide,Initiative: Documenting high availability patterns,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_022,I780142,Platform Scalability Review,Evaluation: Reviewing platform scalability benchmarks,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_022,I780142,Performance Engineering Guide,Initiative: Writing performance engineering guidelines,2026-02-15,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_023,I780011,Technical Debt Assessment,Evaluation: Assessing technical debt impact,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_023,I780011,Tech Debt Remediation Roadmap,Initiative: Creating tech debt remediation roadmap,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_024,I780027,Cloud Native Architecture Review,Evaluation: Reviewing cloud native architecture,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_024,I780027,Microservices Reference Architecture,Initiative: Designing microservices reference architecture,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_025,I780069,DevSecOps Maturity Assessment,Evaluation: Assessing DevSecOps maturity level,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_025,I780069,Security Automation Pipeline,Initiative: Building security automation pipeline,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_026,I780098,AI Model Bias Analysis,Evaluation: Analyzing AI model bias and fairness,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_026,I780098,MLOps Maturity Model,Initiative: Developing MLOps maturity model,2026-02-15,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_027,I780053,Infrastructure Automation Review,Evaluation: Reviewing infrastructure automation coverage,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_027,I780053,IaC Template Library,Initiative: Building Infrastructure-as-Code template library,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_028,I780037,Code Review Process Audit,Evaluation: Auditing code review process effectiveness,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_028,I780037,Developer Onboarding Accelerator,Initiative: Creating developer onboarding accelerator,2026-02-01,2026-07-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_029,I780127,Solution Blueprint Validation,Evaluation: Validating solution blueprint accuracy,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_029,I780127,SAP Architecture Catalog,Initiative: Building SAP architecture solution catalog,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_030,I780006,Frontend Performance Benchmark,Evaluation: Benchmarking frontend app performance,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_030,I780006,UI Component Library,Initiative: Building reusable UI component library,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_031,I780044,Backend Optimization Review,Evaluation: Reviewing backend service optimization,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_031,I780044,API Performance Tuning Guide,Initiative: Writing API performance tuning guide,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_032,I780059,System Integration Assessment,Evaluation: Assessing system integration complexity,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_032,I780059,Integration Patterns Handbook,Initiative: Writing integration patterns handbook,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_033,I780082,Cloud Service Reliability Review,Evaluation: Reviewing cloud service reliability metrics,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_033,I780082,SRE Practices Adoption,Initiative: Adopting site reliability engineering practices,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_034,I780070,Technology Landscape Review,Evaluation: Reviewing current technology landscape,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_034,I780070,Tech Radar Publication,Initiative: Publishing quarterly tech radar report,2026-02-15,2026-08-31,15,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_035,I780048,Middleware Performance Audit,Evaluation: Auditing middleware performance bottlenecks,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_035,I780048,Middleware Modernization Plan,Initiative: Planning middleware modernization roadmap,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_036,I780120,Data Science Model Validation,Evaluation: Validating data science model accuracy,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_036,I780120,Data Literacy Program,Initiative: Launching enterprise data literacy program,2026-02-01,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T4_037,I780062,Full Stack Quality Assessment,Evaluation: Assessing full stack code quality,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T4_037,I780062,Cross-Platform Dev Guide,Initiative: Writing cross-platform development guide,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_001,I780001,Backend Service Health Review,Evaluation: Reviewing backend service health metrics,2026-03-15,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_001,I780001,Code Quality Improvement Plan,Initiative: Developing code quality improvement plan,2026-03-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_002,I780003,Data Pipeline Quality Check,Evaluation: Checking data pipeline quality metrics,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_002,I780003,Data Validation Framework,Initiative: Building data validation framework,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_003,I780004,Solution Architecture Review,Evaluation: Reviewing solution architecture documentation,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_003,I780004,Architecture Templates,Initiative: Creating reusable architecture templates,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_004,I780009,API Testing Coverage Review,Evaluation: Reviewing API testing coverage,2026-03-15,2026-07-15,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_004,I780009,Automated Testing Suite,Initiative: Building automated testing suite,2026-02-01,2026-07-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_005,I780010,Full Stack App Performance Review,Evaluation: Reviewing full stack app performance,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_005,I780010,Progressive Web App Toolkit,Initiative: Building progressive web app toolkit,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_006,I780015,ML Model Bias Check,Evaluation: Checking ML model bias metrics,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_006,I780015,Responsible ML Toolkit,Initiative: Building responsible ML evaluation toolkit,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_007,I780024,SAP Solution Design Review,Evaluation: Reviewing SAP solution design specs,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_007,I780024,Solution Design Templates,Initiative: Creating SAP solution design templates,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_008,I780026,Backend Security Audit,Evaluation: Auditing backend security vulnerabilities,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_008,I780026,Secure Coding Guidelines,Initiative: Writing secure coding guidelines,2026-02-01,2026-07-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_009,I780029,UI/UX Consistency Review,Evaluation: Reviewing UI/UX consistency across apps,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_009,I780029,UI Standards Library,Initiative: Building UI standards component library,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_010,I780033,Enterprise Architecture Gap Analysis,Evaluation: Analyzing enterprise architecture gaps,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_010,I780033,EA Governance Process,Initiative: Establishing EA governance process,2026-02-15,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_011,I780035,QA Process Maturity Assessment,Evaluation: Assessing QA process maturity,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_011,I780035,Test Automation Framework,Initiative: Building test automation framework,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_012,I780039,AI Model Training Efficiency Review,Evaluation: Reviewing AI model training efficiency,2026-03-01,2026-06-30,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_012,I780039,AutoML Pipeline Builder,Initiative: Building AutoML pipeline builder tool,2026-02-01,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_013,I780041,Data Governance Compliance Check,Evaluation: Checking data governance compliance,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_013,I780041,Data Catalog Enhancement,Initiative: Enhancing enterprise data catalog,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_014,I780045,Cloud Service Configuration Review,Evaluation: Reviewing cloud service configurations,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_014,I780045,Cloud Cost Optimization Guide,Initiative: Writing cloud cost optimization guide,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_015,I780047,API Response Time Benchmark,Evaluation: Benchmarking API response times,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_015,I780047,API Documentation Standards,Initiative: Establishing API documentation standards,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_016,I780050,Frontend Bundle Size Review,Evaluation: Reviewing frontend bundle size optimization,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_016,I780050,Web Performance Toolkit,Initiative: Building web performance optimization toolkit,2026-02-01,2026-07-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_017,I780054,SAP Module Configuration Audit,Evaluation: Auditing SAP module configuration,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_017,I780054,SAP Configuration Best Practices,Initiative: Documenting SAP configuration best practices,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_018,I780056,Application Stability Review,Evaluation: Reviewing application stability metrics,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_018,I780056,Monitoring Dashboard Suite,Initiative: Building application monitoring dashboard,2026-02-15,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_019,I780061,Backend Latency Analysis,Evaluation: Analyzing backend service latency patterns,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_019,I780061,Latency Optimization Guide,Initiative: Writing service latency optimization guide,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_020,I780063,System Integration Testing Review,Evaluation: Reviewing system integration test coverage,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_020,I780063,Integration Testing Framework,Initiative: Building integration testing framework,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_021,I780066,Frontend Accessibility Audit,Evaluation: Auditing frontend accessibility compliance,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_021,I780066,Accessible UI Toolkit,Initiative: Building accessible UI component toolkit,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_022,I780068,Data Model Quality Assessment,Evaluation: Assessing data model quality and consistency,2026-03-15,2026-07-15,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_022,I780068,Feature Store Development,Initiative: Developing ML feature store platform,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_023,I780072,Technical Specification Review,Evaluation: Reviewing technical specification documents,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_023,I780072,Specification Template Library,Initiative: Creating specification template library,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_024,I780076,Microservice Health Check,Evaluation: Checking microservice health and uptime,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_024,I780076,Service Mesh Adoption Plan,Initiative: Planning service mesh adoption,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_025,I780081,Database Performance Review,Evaluation: Reviewing database performance benchmarks,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_025,I780081,Database Optimization Toolkit,Initiative: Building database optimization toolkit,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_026,I780083,Data Quality Metrics Review,Evaluation: Reviewing data quality metrics dashboard,2026-04-01,2026-07-31,20,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_026,I780083,Data Profiling Automation,Initiative: Automating data profiling processes,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_027,I780088,NLP Model Accuracy Assessment,Evaluation: Assessing NLP model accuracy benchmarks,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_027,I780088,NLP Service Platform,Initiative: Building NLP-as-a-service platform,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_028,I780089,Statistical Model Validation,Evaluation: Validating statistical model outputs,2026-03-15,2026-07-15,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_028,I780089,Experiment Tracking Platform,Initiative: Building ML experiment tracking platform,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_029,I780093,Cloud Design Pattern Review,Evaluation: Reviewing cloud design pattern adherence,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_029,I780093,Cloud Design Pattern Catalog,Initiative: Building cloud design pattern catalog,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_030,I780096,Service Reliability Assessment,Evaluation: Assessing service reliability indicators,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_030,I780096,SLA Monitoring Dashboard,Initiative: Building SLA monitoring dashboard,2026-02-15,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_031,I780099,Full Stack Test Coverage Review,Evaluation: Reviewing full stack test coverage gaps,2026-03-15,2026-07-15,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_031,I780099,E2E Testing Suite,Initiative: Building end-to-end testing suite,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_032,I780102,Application Deployment Review,Evaluation: Reviewing application deployment processes,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_032,I780102,CI/CD Pipeline Templates,Initiative: Creating CI/CD pipeline templates,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_033,I780106,Backend Scalability Test,Evaluation: Testing backend service scalability,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_033,I780106,Performance Testing Suite,Initiative: Building performance testing suite,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_034,I780108,Frontend Component Review,Evaluation: Reviewing frontend component architecture,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_034,I780108,Design System Components,Initiative: Building design system component library,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_035,I780112,Full Stack Integration Review,Evaluation: Reviewing full stack integration points,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_035,I780112,Integration Testing Toolkit,Initiative: Building integration testing toolkit,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_036,I780114,DevOps Toolchain Assessment,Evaluation: Assessing DevOps toolchain effectiveness,2026-03-01,2026-06-30,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_036,I780114,DevOps Maturity Roadmap,Initiative: Creating DevOps maturity roadmap,2026-02-01,2026-08-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_037,I780119,Service Mesh Configuration Review,Evaluation: Reviewing service mesh configuration,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_037,I780119,Observability Framework,Initiative: Building observability framework,2026-03-01,2026-09-30,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_038,I780121,Application Security Scan Review,Evaluation: Reviewing application security scan results,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_038,I780121,Security Checklist Template,Initiative: Creating security checklist templates,2026-02-15,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_039,I780124,API Contract Testing Review,Evaluation: Reviewing API contract testing coverage,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_039,I780124,Consumer-Driven Contract Testing,Initiative: Implementing consumer-driven contract testing,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_040,I780126,UI Performance Benchmark,Evaluation: Benchmarking UI rendering performance,2026-03-15,2026-07-15,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_040,I780126,Frontend Performance Guide,Initiative: Writing frontend performance optimization guide,2026-02-01,2026-07-31,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_041,I780129,Full Stack Security Assessment,Evaluation: Assessing full stack security posture,2026-04-01,2026-07-31,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_041,I780129,Security Best Practices Guide,Initiative: Writing security best practices guide,2026-03-01,2026-09-30,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_042,I780132,CI/CD Pipeline Efficiency Review,Evaluation: Reviewing CI/CD pipeline efficiency,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_042,I780132,Pipeline Optimization Suite,Initiative: Building pipeline optimization tools,2026-02-15,2026-08-31,22,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_043,I780135,Microservice Architecture Review,Evaluation: Reviewing microservice architecture patterns,2026-03-15,2026-07-15,16,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_043,I780135,Service Decomposition Guide,Initiative: Writing service decomposition guidelines,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_044,I780137,Code Maintainability Assessment,Evaluation: Assessing code maintainability metrics,2026-04-01,2026-07-31,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_044,I780137,Clean Code Workshop Material,Initiative: Creating clean code workshop material,2026-02-01,2026-08-31,18,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+EVL_780_T3_045,I780140,React Performance Audit,Evaluation: Auditing React application performance,2026-03-01,2026-06-30,18,Active,Evaluation,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z
+INIT_780_T3_045,I780140,React Best Practices Guide,Initiative: Writing React best practices guide,2026-03-01,2026-09-30,20,Active,Initiative,2026-04-10T10:00:00.000Z,2026-04-10T10:00:00.000Z

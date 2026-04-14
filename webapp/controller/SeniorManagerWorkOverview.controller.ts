@@ -10,8 +10,8 @@ import ColumnListItem from "sap/m/ColumnListItem";
 import Text from "sap/m/Text";
 import VBox from "sap/m/VBox";
 import HBox from "sap/m/HBox";
-import ListBinding from "sap/ui/model/ListBinding";
-import OverflowToolbar from "sap/m/OverflowToolbar";
+import Select from "sap/m/Select";
+import ObjectIdentifier from "sap/m/ObjectIdentifier";
 import ObjectStatus from "sap/m/ObjectStatus";
 import Dialog from "sap/m/Dialog";
 
@@ -21,9 +21,10 @@ import Dialog from "sap/m/Dialog";
 export default class SeniorManagerWorkOverview extends Controller {
 
     private currentSeniorManagerId: string | null = null;
-    private cachedWorkData: any = null;
-    private cachedColumnConfig: any = null;
-    private readonly maxColumnsPerSection: number = 4;
+    private allWorkOverviewRows: any[] = [];
+    private maxPrj: number = 1;
+    private maxEvl: number = 1;
+    private maxInit: number = 1;
     private isLoadingWorkOverview: boolean = false;
     private workOverviewLoadSeq: number = 0;
     
@@ -68,8 +69,7 @@ export default class SeniorManagerWorkOverview extends Controller {
         }
 
         this.currentSeniorManagerId = null;
-        this.cachedWorkData = null;
-        this.cachedColumnConfig = null;
+        this.allWorkOverviewRows = [];
         this.isLoadingWorkOverview = false;
         this.getRouter().navTo("Landing");
         MessageToast.show("You have been logged out");
@@ -91,8 +91,7 @@ export default class SeniorManagerWorkOverview extends Controller {
 
         // If a different user logs in, clear cached view data to avoid stale state issues.
         if (this.currentSeniorManagerId && resolvedSeniorManagerId && this.currentSeniorManagerId !== resolvedSeniorManagerId) {
-            this.cachedWorkData = null;
-            this.cachedColumnConfig = null;
+            this.allWorkOverviewRows = [];
         }
 
         this.currentSeniorManagerId = resolvedSeniorManagerId;
@@ -105,216 +104,116 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.isLoadingWorkOverview = true;
         try {
             const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
-            if (page?.setBusy) {
-                page.setBusy(true);
-            }
-
-            // Reuse cached dataset on revisit to avoid repeated network and re-render stalls.
-            if (this.cachedWorkData && this.cachedColumnConfig) {
-                this.getView()?.setModel(new JSONModel({
-                    employees: this.cachedWorkData,
-                    columnConfig: this.cachedColumnConfig
-                }), "workOverview");
-
-                this.rebuildWorkOverviewColumns(
-                    this.cachedColumnConfig.projects,
-                    this.cachedColumnConfig.evaluations,
-                    this.cachedColumnConfig.initiatives
-                );
-                return;
-            }
+            if (page?.setBusy) page.setBusy(true);
 
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
 
-            // STEP 1: Fetch ONLY T3/T4 profiles using OData filter
-            console.log("📊 Step 1: Fetching T3/T4 profiles only...");
-            const profilesBinding = oDataModel.bindList("/Profiles", undefined, [], [
-                new Filter({
-                    filters: [
-                        new Filter("tLevel", FilterOperator.EQ, "T3"),
-                        new Filter("tLevel", FilterOperator.EQ, "T4")
-                    ],
-                    and: false
-                })
-            ]);
-            const profileContexts = await this.requestContextsWithTimeout(profilesBinding, 0, 100);
-            if (loadSeq !== this.workOverviewLoadSeq) {
-                return;
-            }
-            const profiles = profileContexts.map((ctx: any) => ctx.getObject());
-            console.log(`✅ Fetched ${profiles.length} T3/T4 profiles`);
+            // Load all employees
+            const empBinding = oDataModel.bindList("/Employees");
+            const empContexts = await empBinding.requestContexts(0, 500);
+            const employees = empContexts.map((ctx: any) => ctx.getObject());
 
-            if (profiles.length === 0) {
-                this.getView()?.setModel(new JSONModel({ employees: [], columnConfig: {} }), "workOverview");
-                if (page?.setBusy) page.setBusy(false);
-                MessageToast.show("No T3/T4 employees found");
-                return;
-            }
+            if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // STEP 2: Get employee IDs for these profiles
-            const seniorEmployeeIds = profiles.map((p: any) => p.employeeId);
-            console.log(`📊 Step 2: Found ${seniorEmployeeIds.length} T3/T4 employee IDs to fetch details for`);
+            // Load all profiles
+            const profBinding = oDataModel.bindList("/Profiles");
+            const profContexts = await profBinding.requestContexts(0, 500);
+            const profiles = profContexts.map((ctx: any) => ctx.getObject());
+            const profileMap: any = {};
+            profiles.forEach((p: any) => { profileMap[p.employeeId] = p; });
 
-            // STEP 3: Fetch employee details for ONLY these IDs
-            const employeeFilters = seniorEmployeeIds.map((id: string) =>
-                new Filter("employeeId", FilterOperator.EQ, id)
-            );
-            const employeesBinding = oDataModel.bindList("/Employees", undefined, [], [
-                new Filter({ filters: employeeFilters, and: false })
-            ]);
-            const employeeContexts = await this.requestContextsWithTimeout(employeesBinding, 0, 100);
-            if (loadSeq !== this.workOverviewLoadSeq) {
-                return;
-            }
-            const employees = employeeContexts
-                .map((ctx: any) => ctx.getObject())
-                .filter((emp: any) => emp.employeeId && !String(emp.employeeId).startsWith("MGR"));
-            console.log(`✅ Fetched ${employees.length} employee details`);
+            if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // Create profile map
-            const profileMap = new Map(profiles.map((p: any) => [p.employeeId, p]));
-            const seniorEmployeeIdSet = new Set(employees.map((emp: any) => emp.employeeId));
+            // Load all current projects
+            const cpBinding = oDataModel.bindList("/CurrentProjects");
+            const cpContexts = await cpBinding.requestContexts(0, 1000);
+            const currentProjects = cpContexts.map((ctx: any) => ctx.getObject());
 
-            // STEP 4: Fetch CurrentProjects for ONLY these employee IDs
-            console.log("📊 Step 3: Fetching current work items...");
-            const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
-            const cpContexts = await this.requestContextsWithTimeout(currentProjectsBinding, 0, 2000);
-            if (loadSeq !== this.workOverviewLoadSeq) {
-                return;
-            }
-            const currentProjects = cpContexts
-                .map((ctx: any) => ctx.getObject())
-                .filter((cp: any) => seniorEmployeeIdSet.has(cp.employeeId));
-            console.log(`✅ Fetched ${currentProjects.length} current projects`);
+            if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // STEP 5: Fetch Projects for evaluations (only for these employees)
-            const projectsBinding = oDataModel.bindList("/Projects");
-            const projectContexts = await this.requestContextsWithTimeout(projectsBinding, 0, 2000);
-            if (loadSeq !== this.workOverviewLoadSeq) {
-                return;
-            }
-            const projects = projectContexts
-                .map((ctx: any) => ctx.getObject())
-                .filter((proj: any) => seniorEmployeeIdSet.has(proj.employeeId));
-            console.log(`✅ Fetched ${projects.length} projects`);
+            // Load all initiatives from Initiatives entity
+            const initBinding = oDataModel.bindList("/Initiatives");
+            const initContexts = await initBinding.requestContexts(0, 500);
+            const initiatives = initContexts.map((ctx: any) => ctx.getObject());
 
-            // STEP 6: Build work map - only active items
-            const workByEmployee = new Map<string, any[]>();
+            if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // Process current projects
+            // Group current projects by employee - ONLY Projects from CurrentProjects
+            const empProjects: any = {};
             currentProjects.forEach((cp: any) => {
-                if (!cp.startDate || !cp.endDate) return;
-                const start = new Date(cp.startDate);
-                const end = new Date(cp.endDate);
-                start.setHours(0, 0, 0, 0);
-                end.setHours(0, 0, 0, 0);
-
-                if (today >= start && today <= end) {
-                    if (!workByEmployee.has(cp.employeeId)) {
-                        workByEmployee.set(cp.employeeId, []);
-                    }
-                    workByEmployee.get(cp.employeeId)?.push(cp);
+                if (cp.assignmentStatus === "Completed" || cp.assignmentStatus === "Rejected") return;
+                const eid = cp.employeeId;
+                if (cp.type === "Project") {
+                    if (!empProjects[eid]) empProjects[eid] = [];
+                    empProjects[eid].push(cp);
                 }
             });
 
-            // Process evaluations
-            projects.forEach((proj: any) => {
-                if (!proj.employeeId || !proj.evaluationStartDate || !proj.evaluationEndDate) return;
-                const start = new Date(proj.evaluationStartDate);
-                const end = new Date(proj.evaluationEndDate);
-                start.setHours(0, 0, 0, 0);
-                end.setHours(0, 0, 0, 0);
-
-                if (today >= start && today <= end) {
-                    if (!workByEmployee.has(proj.employeeId)) {
-                        workByEmployee.set(proj.employeeId, []);
-                    }
-                    workByEmployee.get(proj.employeeId)?.push({
-                        type: "Evaluation",
-                        projectName: proj.projectName,
-                        technology: proj.technology,
-                        utilizationPercent: proj.utilizationPercent || 0,
-                        startDate: proj.evaluationStartDate,
-                        endDate: proj.evaluationEndDate
-                    });
+            // Group evaluations and initiatives from Initiatives entity
+            const empEvaluations: any = {};
+            const empInitiatives: any = {};
+            initiatives.forEach((init: any) => {
+                if (init.status === "Completed") return;
+                const eid = init.employeeId;
+                if (init.type === "Evaluation") {
+                    if (!empEvaluations[eid]) empEvaluations[eid] = [];
+                    empEvaluations[eid].push(init);
+                } else if (init.type === "Initiative") {
+                    if (!empInitiatives[eid]) empInitiatives[eid] = [];
+                    empInitiatives[eid].push(init);
                 }
             });
 
-            // STEP 7: Count max items per category
-            let maxProjects = 0, maxEvaluations = 0, maxInitiatives = 0;
+            // Format entry helper
+            const formatEntry = (name: string, pct: any) => {
+                return pct ? `${name} (${pct}%)` : name;
+            };
 
-            const employeeWorkData = employees.map((emp: any) => {
-                const profile = profileMap.get(emp.employeeId);
-                const work = workByEmployee.get(emp.employeeId) || [];
-                const projectList = work.filter((item: any) => item.type === "Project");
-                const evalList = work.filter((item: any) => item.type === "Evaluation");
-                const initList = work.filter((item: any) => item.type === "Initiative");
+            // Build rows
+            const rows: any[] = [];
+            employees.forEach((emp: any) => {
+                const profile = profileMap[emp.employeeId] || {};
+                const tLevel = profile.tLevel || emp.tLevel || "";
+                const specialization = profile.specialization || "";
+                let techCategory = this.mapTechCategory(specialization);
 
-                maxProjects = Math.max(maxProjects, projectList.length);
-                maxEvaluations = Math.max(maxEvaluations, evalList.length);
-                maxInitiatives = Math.max(maxInitiatives, initList.length);
+                const projectsList = empProjects[emp.employeeId] || [];
+                const evaluations = empEvaluations[emp.employeeId] || [];
+                const inits = empInitiatives[emp.employeeId] || [];
 
-                return { emp, profile, projects: projectList, evaluations: evalList, initiatives: initList };
-            });
+                if (!techCategory && emp.role) {
+                    techCategory = this.mapTechCategory(emp.role);
+                }
+                if (!techCategory && projectsList.length > 0 && projectsList[0].technology) {
+                    techCategory = this.mapTechCategory(projectsList[0].technology);
+                }
 
-            maxProjects = Math.max(1, Math.min(this.maxColumnsPerSection, maxProjects));
-            maxEvaluations = Math.max(1, Math.min(this.maxColumnsPerSection, maxEvaluations));
-            maxInitiatives = Math.max(1, Math.min(this.maxColumnsPerSection, maxInitiatives));
-
-            // STEP 8: Build employee overview data
-            const employeesOverview = employeeWorkData.map(({ emp, profile, projects: projList, evaluations: evalList, initiatives: initList }: any) => {
-                const rowData: any = {
+                const row: any = {
                     name: emp.name,
                     employeeId: emp.employeeId,
-                    tLevel: profile?.tLevel || "-",
-                    specialization: emp.specialization || profile?.specialization || "-",
-                    projects: [],
-                    evaluations: [],
-                    initiatives: []
+                    tLevel: tLevel,
+                    techCategory: techCategory,
+                    projects: projectsList.map((p: any) => formatEntry(p.projectName, p.utilizationPercent)),
+                    evaluations: evaluations.map((e: any) => formatEntry(e.initiativeName, e.utilizationPercent)),
+                    initiatives: inits.map((i: any) => formatEntry(i.initiativeName, i.utilizationPercent))
                 };
-
-                for (let i = 0; i < maxProjects; i++) {
-                    rowData.projects.push({
-                        name: projList[i]?.projectName || "-",
-                        tech: projList[i]?.technology || "",
-                        util: projList[i] ? `${projList[i].utilizationPercent}%` : ""
-                    });
-                }
-
-                for (let i = 0; i < maxEvaluations; i++) {
-                    rowData.evaluations.push({
-                        name: evalList[i]?.projectName ? `${evalList[i]?.projectName} (Eval)` : "-",
-                        tech: evalList[i]?.technology || "",
-                        util: evalList[i] ? `${evalList[i].utilizationPercent}%` : ""
-                    });
-                }
-
-                for (let i = 0; i < maxInitiatives; i++) {
-                    rowData.initiatives.push({
-                        name: initList[i]?.projectName || "-",
-                        tech: initList[i]?.technology || "",
-                        util: initList[i] ? `${initList[i].utilizationPercent}%` : ""
-                    });
-                }
-
-                return rowData;
+                rows.push(row);
             });
 
-            this.cachedWorkData = employeesOverview;
-            this.cachedColumnConfig = { projects: maxProjects, evaluations: maxEvaluations, initiatives: maxInitiatives };
+            // Sort by T-Level descending (T4 first) then name
+            rows.sort((a: any, b: any) => {
+                if (a.tLevel !== b.tLevel) return b.tLevel.localeCompare(a.tLevel);
+                return a.name.localeCompare(b.name);
+            });
 
-            this.getView()?.setModel(new JSONModel({
-                employees: employeesOverview,
-                columnConfig: this.cachedColumnConfig
-            }), "workOverview");
+            this.allWorkOverviewRows = rows;
+            console.log(`✅ Work overview: ${rows.length} employees`);
 
-            this.rebuildWorkOverviewColumns(maxProjects, maxEvaluations, maxInitiatives);
+            // Apply default filter (T3 & T4) and build table
+            const defaultFiltered = rows.filter((r: any) => r.tLevel === 'T3' || r.tLevel === 'T4');
+            this.buildWorkOverviewTable(defaultFiltered);
 
-            console.log(`✅ Work overview loaded: ${employeesOverview.length} T3/T4 employees`);
             if (page?.setBusy) page.setBusy(false);
-
         } catch (error) {
             console.error("❌ Error loading work overview:", error);
             MessageToast.show("Error loading work overview. Please try again.");
@@ -323,222 +222,130 @@ export default class SeniorManagerWorkOverview extends Controller {
         } finally {
             this.isLoadingWorkOverview = false;
             const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
-            if (page?.setBusy) {
-                page.setBusy(false);
-            }
+            if (page?.setBusy) page.setBusy(false);
         }
     }
 
-    private async requestContextsWithTimeout(binding: any, start: number, length: number, timeoutMs: number = 12000): Promise<any[]> {
-        return await Promise.race([
-            binding.requestContexts(start, length),
-            new Promise<any[]>((_, reject) => {
-                setTimeout(() => reject(new Error(`Request timeout after ${timeoutMs}ms`)), timeoutMs);
-            })
-        ]);
+    private mapTechCategory(specialization: string): string {
+        if (!specialization) return "";
+        const s = specialization.toLowerCase();
+        if (s.includes("s/4") || s.includes("s4") || s.includes("abap") || s.includes("hana") || s.includes("procurement") || s.includes("ariba") || s.includes("fico") || s.includes("mm ") || s.includes("sd ") || s.includes("successfactor") || s.includes("erp")) return "S/4HANA";
+        if (s.includes("btp") || s.includes("fiori") || s.includes("ui5") || s.includes("sapui5") || s.includes("cap") || s.includes("integration") || s.includes("cloud foundry") || s.includes("innovation") || s.includes("full stack") || s.includes("frontend") || s.includes("devops") || s.includes("backend")) return "BTP";
+        if (s.includes("data sci") || s.includes("data scientist") || s.includes("ai") || s.includes("ml") || s.includes("machine learning") || s.includes("analytics") || s.includes("sac")) return "Data Science";
+        if (s.includes("developer") || s.includes("architect") || s.includes("engineer") || s.includes("test") || s.includes("qa")) return "BTP";
+        return "";
     }
 
-    private rebuildWorkOverviewColumns(maxProjects: number, maxEvaluations: number, maxInitiatives: number): void {
-        const table = this.byId("workOverviewTable") as Table;
-        if (!table) {
-            return;
-        }
+    private buildWorkOverviewTable(rows: any[]): void {
+        const container = this.byId("workOverviewTableContainer") as VBox;
+        if (!container) return;
+        container.destroyItems();
 
-        // Unbind existing items to clear templates
-        if (table.isBound("items")) {
-            table.unbindItems();
-        }
-
-        // Remove dynamic columns (keep only first 3 static columns)
-        const existingColumns = table.getColumns();
-        while (existingColumns.length > 3) {
-            table.removeColumn(existingColumns[existingColumns.length - 1]);
-        }
-
-        // Create column headers only - UI5 will manage cell creation
-        for (let i = 0; i < maxProjects; i++) {
-            table.addColumn(new Column({
-                width: "320px",
-                hAlign: "Left",
-                header: new Text({ text: `Project ${i + 1}` })
-            }));
-        }
-
-        for (let i = 0; i < maxEvaluations; i++) {
-            table.addColumn(new Column({
-                width: "320px",
-                hAlign: "Left",
-                header: new Text({ text: maxEvaluations > 1 ? `Evaluation ${i + 1}` : "Evaluation" })
-            }));
-        }
-
-        for (let i = 0; i < maxInitiatives; i++) {
-            table.addColumn(new Column({
-                width: "320px",
-                hAlign: "Left",
-                header: new Text({ text: maxInitiatives > 1 ? `Initiative ${i + 1}` : "Initiative" })
-            }));
-        }
-
-        // Build cell templates efficiently
-        const staticCellTemplates: any[] = [
-            new VBox({
-                items: [
-                    new Text({ text: "{workOverview>name}", wrapping: false }).addStyleClass("sapUiTinyMarginBottom"),
-                    new Text({ text: "{workOverview>employeeId}" }).addStyleClass("sapThemeTextSubtle-asColor")
-                ]
-            }),
-            new ObjectStatus({ text: "{workOverview>tLevel}", state: "Information" }),
-            new Text({ text: "{workOverview>specialization}", wrapping: true, maxLines: 2 })
-        ];
-
-        // Dynamic column templates - reuse same structure for all
-        const dynamicCellTemplates: any[] = [];
-
-        for (let i = 0; i < maxProjects; i++) {
-            dynamicCellTemplates.push(
-                new VBox({
-                    items: [
-                        new Text({ text: `{workOverview>projects/${i}/name}`, wrapping: false, maxLines: 1 }),
-                        new HBox({
-                            items: [
-                                new ObjectStatus({ text: `{workOverview>projects/${i}/tech}`, state: "Success" }).addStyleClass("sapUiTinyMarginEnd"),
-                                new ObjectStatus({ text: `{workOverview>projects/${i}/util}`, state: "Success" })
-                            ]
-                        }).addStyleClass("sapUiTinyMarginTop")
-                    ]
-                })
-            );
-        }
-
-        for (let i = 0; i < maxEvaluations; i++) {
-            dynamicCellTemplates.push(
-                new VBox({
-                    items: [
-                        new Text({ text: `{workOverview>evaluations/${i}/name}`, wrapping: false, maxLines: 1 }),
-                        new HBox({
-                            items: [
-                                new ObjectStatus({ text: `{workOverview>evaluations/${i}/tech}`, state: "Warning" }).addStyleClass("sapUiTinyMarginEnd"),
-                                new ObjectStatus({ text: `{workOverview>evaluations/${i}/util}`, state: "Warning" })
-                            ]
-                        }).addStyleClass("sapUiTinyMarginTop")
-                    ]
-                })
-            );
-        }
-
-        for (let i = 0; i < maxInitiatives; i++) {
-            dynamicCellTemplates.push(
-                new VBox({
-                    items: [
-                        new Text({ text: `{workOverview>initiatives/${i}/name}`, wrapping: false, maxLines: 1 }),
-                        new HBox({
-                            items: [
-                                new ObjectStatus({ text: `{workOverview>initiatives/${i}/tech}`, state: "Information" }).addStyleClass("sapUiTinyMarginEnd"),
-                                new ObjectStatus({ text: `{workOverview>initiatives/${i}/util}`, state: "Information" })
-                            ]
-                        }).addStyleClass("sapUiTinyMarginTop")
-                    ]
-                })
-            );
-        }
-
-        const allCellTemplates = [...staticCellTemplates, ...dynamicCellTemplates];
-
-        // Calculate and set table width only once
-        const staticWidth = 250 + 120 + 260;
-        const dynamicWidth = (maxProjects + maxEvaluations + maxInitiatives) * 320;
-        const totalWidth = Math.max(1200, staticWidth + dynamicWidth);
-        table.setWidth(`${totalWidth}px`);
-
-        // Bind items with all templates
-        table.bindItems({
-            path: "workOverview>/employees",
-            template: new ColumnListItem({
-                cells: allCellTemplates
-            })
+        // Compute max columns from the FILTERED rows
+        let maxP = 0, maxE = 0, maxI = 0;
+        rows.forEach((r: any) => {
+            if (r.projects.length > maxP) maxP = r.projects.length;
+            if (r.evaluations.length > maxE) maxE = r.evaluations.length;
+            if (r.initiatives.length > maxI) maxI = r.initiatives.length;
         });
-    }
+        this.maxPrj = Math.min(maxP, 5) || 1;
+        this.maxEvl = Math.min(maxE, 5) || 1;
+        this.maxInit = Math.min(maxI, 5) || 1;
 
-    public onSearchWorkOverview(event: any): void {
-        const query = event.getParameter("query") || event.getParameter("newValue") || "";
-        this.applyWorkOverviewFilters(query);
-    }
+        console.log(`📊 Building WO table: ${rows.length} rows, cols: P=${this.maxPrj} E=${this.maxEvl} I=${this.maxInit}`);
 
-    public onFilterWorkOverview(): void {
-        const table = this.byId("workOverviewTable") as Table;
-        const toolbar = table?.getHeaderToolbar() as OverflowToolbar;
-        const searchField = toolbar?.getContent()
-            .find((control: any) => control.getMetadata().getName() === "sap.m.SearchField") as any;
-        const query = searchField?.getValue() || "";
-        this.applyWorkOverviewFilters(query);
-    }
+        const oTable = new Table({
+            alternateRowColors: true,
+            growing: true,
+            growingThreshold: 50,
+            fixedLayout: true,
+            sticky: ["ColumnHeaders"],
+            noDataText: "No employees found for selected filters"
+        }).addStyleClass("workforceOverviewDynTable");
 
-    public onJumpToProjects(): void {
-        this.scrollToWorkSection("projects");
-    }
+        // Add columns: Employee, T-Lev, Tech
+        oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: "Employee" }) }));
+        oTable.addColumn(new Column({ width: "5rem", hAlign: "Center", header: new Text({ text: "T-Lev" }) }));
+        oTable.addColumn(new Column({ width: "7rem", hAlign: "Center", header: new Text({ text: "Tech" }) }));
 
-    public onJumpToEvaluations(): void {
-        this.scrollToWorkSection("evaluations");
-    }
-
-    public onJumpToInitiatives(): void {
-        this.scrollToWorkSection("initiatives");
-    }
-
-    private scrollToWorkSection(section: "projects" | "evaluations" | "initiatives"): void {
-        const model = this.getView()?.getModel("workOverview") as JSONModel;
-        const config = model?.getProperty("/columnConfig") || { projects: 0, evaluations: 0, initiatives: 0 };
-        const staticWidth = 250 + 120 + 260;
-
-        let x = staticWidth;
-        if (section === "evaluations") {
-            x = staticWidth + (config.projects || 0) * 320;
-        } else if (section === "initiatives") {
-            x = staticWidth + ((config.projects || 0) + (config.evaluations || 0)) * 320;
+        // Dynamic Project columns
+        for (let i = 0; i < this.maxPrj; i++) {
+            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Prj ${i + 1}` }) }));
+        }
+        // Dynamic Evaluation columns
+        for (let i = 0; i < this.maxEvl; i++) {
+            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Evl ${i + 1}` }) }));
+        }
+        // Dynamic Initiative columns
+        for (let i = 0; i < this.maxInit; i++) {
+            oTable.addColumn(new Column({ width: "14rem", header: new Text({ text: `Init ${i + 1}` }) }));
         }
 
-        const scrollContainer = this.byId("workOverviewHorizontalScroll") as any;
-        if (scrollContainer?.scrollTo) {
-            scrollContainer.scrollTo(x, 0, 300);
-        }
+        // Add rows
+        rows.forEach((row: any) => {
+            const cli = new ColumnListItem();
+
+            // Employee
+            cli.addCell(new ObjectIdentifier({ title: row.name, text: row.employeeId }));
+
+            // T-Level
+            const tState = row.tLevel === "T4" ? "Success" : row.tLevel === "T3" ? "Warning" : row.tLevel === "T2" ? "Information" : "None";
+            cli.addCell(new ObjectStatus({ text: row.tLevel, state: tState }));
+
+            // Tech
+            const techState = row.techCategory === "S/4HANA" ? "Error" : row.techCategory === "BTP" ? "Success" : row.techCategory === "Data Science" ? "Information" : "None";
+            cli.addCell(new ObjectStatus({ text: row.techCategory, state: techState }));
+
+            // Projects
+            for (let i = 0; i < this.maxPrj; i++) {
+                cli.addCell(new Text({ text: row.projects[i] || "" }));
+            }
+            // Evaluations
+            for (let i = 0; i < this.maxEvl; i++) {
+                cli.addCell(new Text({ text: row.evaluations[i] || "" }));
+            }
+            // Initiatives
+            for (let i = 0; i < this.maxInit; i++) {
+                cli.addCell(new Text({ text: row.initiatives[i] || "" }));
+            }
+
+            oTable.addItem(cli);
+        });
+
+        container.addItem(oTable);
     }
 
-    private applyWorkOverviewFilters(searchQuery: string = ""): void {
-        const table = this.byId("workOverviewTable") as Table;
-        const binding = table.getBinding("items") as ListBinding;
+    public onWorkOverviewFilterChange(): void {
+        const tLevelFilter = (this.byId("woTLevelFilter") as Select)?.getSelectedKey() || "";
+        const techFilter = (this.byId("woTechFilter") as Select)?.getSelectedKey() || "";
+        const searchField = this.byId("woSearchField") as any;
+        const searchQuery = searchField?.getValue() || "";
 
-        if (!binding || !this.cachedWorkData) {
-            return;
+        let filtered = this.allWorkOverviewRows;
+
+        if (tLevelFilter === "T3_T4") {
+            filtered = filtered.filter((r: any) => r.tLevel === 'T3' || r.tLevel === 'T4');
+        } else if (tLevelFilter) {
+            filtered = filtered.filter((r: any) => r.tLevel === tLevelFilter);
         }
 
-        // Apply filters in-memory using cached data for instant response
-        const filters: Filter[] = [];
-
-        const tLevelFilter = this.byId("tLevelFilter") as any;
-        const selectedTLevel = tLevelFilter?.getSelectedKey();
-        if (selectedTLevel) {
-            filters.push(new Filter("tLevel", FilterOperator.EQ, selectedTLevel));
-        }
-
-        const specializationFilter = this.byId("specializationFilter") as any;
-        const selectedSpecialization = specializationFilter?.getSelectedKey();
-        if (selectedSpecialization) {
-            filters.push(new Filter("specialization", FilterOperator.EQ, selectedSpecialization));
+        if (techFilter) {
+            filtered = filtered.filter((r: any) => r.techCategory === techFilter);
         }
 
         if (searchQuery) {
-            filters.push(new Filter({
-                filters: [
-                    new Filter("name", FilterOperator.Contains, searchQuery),
-                    new Filter("employeeId", FilterOperator.Contains, searchQuery)
-                ],
-                and: false
-            }));
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter((r: any) =>
+                (r.name && r.name.toLowerCase().includes(q)) ||
+                (r.employeeId && r.employeeId.toLowerCase().includes(q))
+            );
         }
 
-        // Apply combined filters
-        binding.filter(filters.length > 0 ? filters : []);
+        this.buildWorkOverviewTable(filtered);
+    }
+
+    public onSearchWorkOverview(event: any): void {
+        this.onWorkOverviewFilterChange();
     }
 
     // ==================== AI Assistant Methods ====================
@@ -819,62 +626,27 @@ export default class SeniorManagerWorkOverview extends Controller {
         const rows = this.getVisibleWorkRows();
         const total = rows.length;
 
-        const hasRealItem = (item: any): boolean => {
-            if (!item) {
-                return false;
-            }
-            const name = String(item.name || "").trim();
-            return !!name && name !== "-";
-        };
+        const hasItems = (arr: string[]): boolean => arr && arr.length > 0 && arr.some((s: string) => !!s);
 
-        const hasProject = (row: any): boolean => (row.projects || []).some((p: any) => hasRealItem(p));
-        const hasEvaluation = (row: any): boolean => (row.evaluations || []).some((e: any) => hasRealItem(e));
-        const hasInitiative = (row: any): boolean => (row.initiatives || []).some((i: any) => hasRealItem(i));
-
-        const availableRows = rows.filter((row: any) => !hasProject(row) && !hasEvaluation(row) && !hasInitiative(row));
+        const availableRows = rows.filter((row: any) => !hasItems(row.projects) && !hasItems(row.evaluations) && !hasItems(row.initiatives));
         const availableNames = availableRows.slice(0, 20).map((row: any) => `${row.name} (${row.employeeId})`);
 
-        const projectCount = rows.filter((row: any) => hasProject(row)).length;
-        const evaluationCount = rows.filter((row: any) => hasEvaluation(row)).length;
-        const initiativeCount = rows.filter((row: any) => hasInitiative(row)).length;
+        const projectCount = rows.filter((row: any) => hasItems(row.projects)).length;
+        const evaluationCount = rows.filter((row: any) => hasItems(row.evaluations)).length;
+        const initiativeCount = rows.filter((row: any) => hasItems(row.initiatives)).length;
 
         const t3Count = rows.filter((row: any) => row.tLevel === "T3").length;
         const t4Count = rows.filter((row: any) => row.tLevel === "T4").length;
 
-        const overloaded = rows
-            .filter((row: any) => {
-                const allItems = [...(row.projects || []), ...(row.evaluations || []), ...(row.initiatives || [])];
-                return allItems.some((item: any) => {
-                    const util = Number(String(item?.util || "").replace("%", ""));
-                    return !Number.isNaN(util) && util >= 80;
-                });
-            })
-            .slice(0, 20)
-            .map((row: any) => `${row.name} (${row.employeeId})`);
-
-        const tLevelFilter = (this.byId("tLevelFilter") as any)?.getSelectedKey() || "All";
-        const specializationFilter = (this.byId("specializationFilter") as any)?.getSelectedKey() || "All";
-
-        const formatItemList = (items: any[] = []): string => {
-            const formatted = items
-                .filter((item: any) => hasRealItem(item))
-                .map((item: any) => {
-                    const name = String(item?.name || "").trim();
-                    const util = String(item?.util || "").trim();
-                    return util ? `${name} (${util})` : name;
-                });
-
-            return formatted.length ? formatted.join(", ") : "None";
-        };
+        const tLevelFilter = (this.byId("woTLevelFilter") as any)?.getSelectedKey() || "All";
+        const techFilter = (this.byId("woTechFilter") as any)?.getSelectedKey() || "All";
 
         const employeeDetails = rows.map((row: any) => {
-            const employeeName = String(row?.name || "Unknown").trim();
-            const employeeId = String(row?.employeeId || "-").trim();
-            const projectsText = formatItemList(row?.projects || []);
-            const evaluationsText = formatItemList(row?.evaluations || []);
-            const initiativesText = formatItemList(row?.initiatives || []);
+            const projectsText = (row.projects || []).filter((s: string) => !!s).join(", ") || "None";
+            const evaluationsText = (row.evaluations || []).filter((s: string) => !!s).join(", ") || "None";
+            const initiativesText = (row.initiatives || []).filter((s: string) => !!s).join(", ") || "None";
 
-            return `${employeeName} (${employeeId}) - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
+            return `${row.name} (${row.employeeId}) - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
         });
 
         return [
@@ -889,10 +661,9 @@ export default class SeniorManagerWorkOverview extends Controller {
             `Employees with active initiatives: ${initiativeCount}`,
             `Currently available (no active work): ${availableRows.length}`,
             `T-Level filter: ${tLevelFilter}`,
-            `Specialization filter: ${specializationFilter}`,
+            `Technology filter: ${techFilter}`,
             "",
             `Available employees (up to 20): ${availableNames.length ? availableNames.join(", ") : "None"}`,
-            `Potentially overloaded (util >= 80%, up to 20): ${overloaded.length ? overloaded.join(", ") : "None"}`,
             "",
             "RESPONSE REQUIREMENT FOR SUMMARY/ALLOCATION QUESTIONS:",
             "Use actual data from the employee details below.",
@@ -909,17 +680,7 @@ export default class SeniorManagerWorkOverview extends Controller {
     }
 
     private getVisibleWorkRows(): any[] {
-        const table = this.byId("workOverviewTable") as Table;
-        const binding = table?.getBinding("items") as any;
-        if (binding?.getContexts) {
-            const visibleContexts = binding.getContexts(0, 1000) || [];
-            const visibleRows = visibleContexts.map((ctx: any) => ctx.getObject()).filter(Boolean);
-            if (visibleRows.length > 0) {
-                return visibleRows;
-            }
-        }
-
-        return this.cachedWorkData || [];
+        return this.allWorkOverviewRows || [];
     }
 
     /**
