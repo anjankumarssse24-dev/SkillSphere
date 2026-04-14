@@ -47,6 +47,19 @@
                     width="100%"
                     placeholder="Enter project description" />
 
+                <Label text="Project Manager:" class="sapUiSmallMarginTop" required="true"/>
+                <ComboBox
+                    selectedKey="{newMasterProject>/projectManager}"
+                    items="{projectManagerList>/managers}"
+                    placeholder="Select project manager"
+                    width="100%">
+                    <core:Item key="{projectManagerList>name}" text="{projectManagerList>name}"/>
+                </ComboBox>
+                <MessageStrip text="Line Manager (LM) is automatically set to the manager creating this project. Select a Project Manager from T3, T4, or T5 employees." 
+                              type="Information" 
+                              showIcon="true" 
+                              class="sapUiSmallMarginTop"/>
+
                 <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
                 <Input
                     value="{newMasterProject>/accountExecutiveManager}"
@@ -56,11 +69,6 @@
                 <Input
                     value="{newMasterProject>/projectOrchestrator}"
                     placeholder="Coordinates frontend-backend integration" />
-
-                <MessageStrip text="You will be set as the Project Manager by default. You can assign employees after creating the project." 
-                              type="Information" 
-                              showIcon="true" 
-                              class="sapUiSmallMarginTop"/>
             </VBox>
         </content>
         <beginButton>

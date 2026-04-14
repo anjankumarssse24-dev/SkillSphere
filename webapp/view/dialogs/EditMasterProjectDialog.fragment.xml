@@ -46,6 +46,15 @@
                     rows="3"
                     width="100%"
                     placeholder="Enter project description" />
+
+                <Label text="Project Manager:" class="sapUiSmallMarginTop" required="true"/>
+                <ComboBox
+                    selectedKey="{editMasterProject>/projectManager}"
+                    items="{projectManagerList>/managers}"
+                    placeholder="Select project manager"
+                    width="100%">
+                    <core:Item key="{projectManagerList>name}" text="{projectManagerList>name}"/>
+                </ComboBox>
             </VBox>
         </content>
         <beginButton>

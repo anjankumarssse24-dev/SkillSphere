@@ -2669,6 +2669,73 @@ private initializeAIChat(): void {
         }
     }
 
+    private async loadProjectManagerCandidates(): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            // Load T3/T4/T5 employees from Employees entity
+            const empBinding = oDataModel.bindList("/Employees");
+            empBinding.filter([new Filter({
+                filters: [
+                    new Filter("tLevel", FilterOperator.EQ, "T3"),
+                    new Filter("tLevel", FilterOperator.EQ, "T4"),
+                    new Filter("tLevel", FilterOperator.EQ, "T5")
+                ],
+                and: false
+            })]);
+            const empContexts = await empBinding.requestContexts(0, 500);
+            const employees = empContexts.map((ctx: any) => ctx.getObject())
+                .filter((e: any) => !String(e.employeeId).startsWith("MGR"));
+
+            // Also include all managers (role=Manager)
+            const mgrBinding = oDataModel.bindList("/Employees");
+            mgrBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
+            const mgrContexts = await mgrBinding.requestContexts(0, 100);
+            const managers = mgrContexts.map((ctx: any) => ctx.getObject());
+
+            // Merge without duplicates
+            const seen = new Set<string>();
+            const candidates: any[] = [];
+
+            // Add the current manager first
+            const currentManagerId = this.currentManagerId;
+            const currentMgr = managers.find((m: any) => m.employeeId === currentManagerId);
+            if (currentMgr) {
+                seen.add(currentMgr.employeeId);
+                candidates.push({ employeeId: currentMgr.employeeId, name: currentMgr.name });
+            }
+
+            // Add all managers
+            managers.forEach((m: any) => {
+                if (!seen.has(m.employeeId)) {
+                    seen.add(m.employeeId);
+                    candidates.push({ employeeId: m.employeeId, name: m.name });
+                }
+            });
+
+            // Add T3/T4/T5 employees
+            employees.forEach((e: any) => {
+                if (!seen.has(e.employeeId)) {
+                    seen.add(e.employeeId);
+                    candidates.push({ employeeId: e.employeeId, name: e.name });
+                }
+            });
+
+            // Sort: current manager first, then alphabetically
+            candidates.sort((a: any, b: any) => {
+                if (a.employeeId === currentManagerId) return -1;
+                if (b.employeeId === currentManagerId) return 1;
+                return a.name.localeCompare(b.name);
+            });
+
+            this.getView()?.setModel(new JSONModel({ managers: candidates }), "projectManagerList");
+            console.log(`✅ Loaded ${candidates.length} project manager candidates (T3/T4/T5 + managers)`);
+        } catch (error) {
+            console.error("Error loading project manager candidates:", error);
+            this.getView()?.setModel(new JSONModel({ managers: [] }), "projectManagerList");
+        }
+    }
+
     // ==================== MASTER PROJECT MANAGEMENT ====================
 
     /**
@@ -2689,6 +2756,15 @@ private initializeAIChat(): void {
 
             const masterProjectsModel = new JSONModel({ projects: projects, allProjects: projects });
             this.getView()?.setModel(masterProjectsModel, "masterProjects");
+
+            // Refresh the OData /Projects binding so the assign ComboBox picks up new/edited/deleted projects
+            const assignComboBox = this.byId("assignProjectComboBox") as any;
+            if (assignComboBox) {
+                const binding = assignComboBox.getBinding("items");
+                if (binding) {
+                    binding.refresh();
+                }
+            }
         } catch (error) {
             console.error("❌ Error loading master projects:", error);
             this.getView()?.setModel(new JSONModel({ projects: [], allProjects: [] }), "masterProjects");
@@ -2725,6 +2801,7 @@ private initializeAIChat(): void {
         }
 
         const currentManagerName = await this.getCurrentManagerName();
+        await this.loadProjectManagerCandidates();
 
         const newProjectModel = new JSONModel({
             projectName: "",
@@ -2813,7 +2890,7 @@ private initializeAIChat(): void {
                 duration: duration,
                 projectManager: data.projectManager || "",
                 accountExecutiveManager: data.accountExecutiveManager || "",
-                lineManagerPOC: data.projectManager || "",
+                lineManagerPOC: await this.getCurrentManagerName() || "",
                 projectOrchestrator: data.projectOrchestrator || "",
                 technology: data.technology || "",
                 addedByManager: this.currentManagerId || ""
@@ -2853,6 +2930,8 @@ private initializeAIChat(): void {
         const oContext = oSource.getBindingContext("masterProjects");
         const projectData = oContext.getObject();
 
+        await this.loadProjectManagerCandidates();
+
         const editModel = new JSONModel({
             projectId: projectData.projectId,
             projectName: projectData.projectName,
@@ -2860,7 +2939,8 @@ private initializeAIChat(): void {
             startDate: projectData.startDate,
             endDate: projectData.endDate,
             status: projectData.status,
-            description: projectData.description || ""
+            description: projectData.description || "",
+            projectManager: projectData.projectManager || ""
         });
         this.getView()?.setModel(editModel, "editMasterProject");
 
@@ -2921,6 +3001,7 @@ private initializeAIChat(): void {
                 ctx.setProperty("status", data.status || "Active");
                 ctx.setProperty("description", data.description || "");
                 ctx.setProperty("duration", duration);
+                ctx.setProperty("projectManager", data.projectManager || "");
 
                 await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
                 await new Promise(resolve => setTimeout(resolve, 600));
