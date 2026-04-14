@@ -44,6 +44,8 @@ builder:
         debug: false
         transformTypeScript: true
         transformModulesToUI5: true
+        transformAsyncToPromise: true
+        targetBrowsers: "Chrome 78"
         omitTSFromBuildResult: true
         excludePatterns:
           - "/resources/skillsphere/node_modules/**"

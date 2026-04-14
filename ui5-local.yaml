@@ -33,6 +33,8 @@ server:
         debug: true
         transformTypeScript: true
         transformModulesToUI5: true
+        transformAsyncToPromise: true
+        targetBrowsers: "Chrome 78"
         excludePatterns:
           - /Component-preload.js
     - name: fiori-tools-preview
@@ -61,3 +63,5 @@ builder:
         debug: true
         transformTypeScript: true
         transformModulesToUI5: true
+        transformAsyncToPromise: true
+        targetBrowsers: "Chrome 78"
