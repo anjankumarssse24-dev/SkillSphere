@@ -27,10 +27,12 @@ export default class ManagerDashboard extends Controller {
     private managerAddProjectDialog?: Dialog;
     private createMasterProjectDialog?: Dialog;
     private editMasterProjectDialog?: Dialog;
+    private managerProfileSnapshot: any = null;
 
     public onInit(): void {
         const router = this.getRouter();
         router.getRoute("ManagerDashboard")?.attachPatternMatched(this.onRouteMatched, this);
+        this.getView()?.setModel(new JSONModel({ isEditing: false }), "managerProfileUi");
     }
 
     private getRouter(): Router {
@@ -223,6 +225,9 @@ export default class ManagerDashboard extends Controller {
             
             // Load all managers for the search dropdown
             await this.loadAllManagers();
+
+            // Load manager's own editable profile for SSO-first onboarding.
+            await this.loadSelfProfile(currentManagerId);
             
             // Load master projects for this manager
             await this.loadMasterProjects();
@@ -260,6 +265,217 @@ export default class ManagerDashboard extends Controller {
             // Set empty model on error
             const emptyManagersModel = new JSONModel({ managers: [] });
             this.getView()?.setModel(emptyManagersModel, "managers");
+        }
+    }
+
+    private async loadSelfProfile(managerId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            const employeeBinding = oDataModel.bindList("/Employees");
+            employeeBinding.filter([new Filter("employeeId", FilterOperator.EQ, managerId)]);
+            const employeeContexts = await employeeBinding.requestContexts(0, 1);
+
+            if (employeeContexts.length === 0) {
+                this.getView()?.setModel(new JSONModel({}), "selfProfile");
+                return;
+            }
+
+            const employee = employeeContexts[0].getObject();
+            const profile = await this.getEmployeeProfile(managerId);
+            const selfProfile = {
+                employeeId: employee.employeeId || managerId,
+                name: employee.name || "",
+                email: employee.email || "",
+                team: employee.team || "",
+                subTeam: employee.subTeam || "",
+                experience: Number(employee.experience || 0),
+                location: profile?.location || employee.location || "",
+                tLevel: profile?.tLevel || employee.tLevel || "",
+                gradeLevel: profile?.gradeLevel || employee.gradeLevel || "",
+                professionalRole: profile?.role || "",
+                specialization: profile?.specialization || ""
+            };
+
+            this.getView()?.setModel(new JSONModel(selfProfile), "selfProfile");
+
+            const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+            currentUserModel?.setData({
+                ...(currentUserModel?.getData() || {}),
+                id: employee.employeeId,
+                managerId: employee.employeeId,
+                name: employee.name,
+                role: employee.role || "Manager",
+                team: employee.team,
+                subTeam: employee.subTeam,
+                email: employee.email,
+                location: selfProfile.location,
+                tLevel: selfProfile.tLevel,
+                gradeLevel: selfProfile.gradeLevel,
+                experience: selfProfile.experience,
+                isLoggedIn: true
+            });
+        } catch (error) {
+            console.error("❌ Error loading manager self profile:", error);
+            this.getView()?.setModel(new JSONModel({}), "selfProfile");
+        }
+    }
+
+    private isValidEmail(email: string): boolean {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    public onEditMyProfile(): void {
+        const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
+        this.managerProfileSnapshot = JSON.parse(JSON.stringify(selfProfileModel?.getData() || {}));
+
+        const managerProfileUiModel = this.getView()?.getModel("managerProfileUi") as JSONModel;
+        managerProfileUiModel?.setProperty("/isEditing", true);
+    }
+
+    public onCancelMyProfileEdit(): void {
+        const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
+        if (selfProfileModel && this.managerProfileSnapshot) {
+            selfProfileModel.setData(JSON.parse(JSON.stringify(this.managerProfileSnapshot)));
+        }
+
+        const managerProfileUiModel = this.getView()?.getModel("managerProfileUi") as JSONModel;
+        managerProfileUiModel?.setProperty("/isEditing", false);
+    }
+
+    public async onSaveMyProfile(): Promise<void> {
+        try {
+            const managerId = this.currentManagerId;
+            if (!managerId) {
+                MessageToast.show("Manager information not available");
+                return;
+            }
+
+            const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
+            const profileData = selfProfileModel?.getData();
+
+            if (!profileData?.name?.trim()) {
+                MessageToast.show("Please enter your name");
+                return;
+            }
+
+            if (!profileData?.email || !this.isValidEmail(profileData.email)) {
+                MessageToast.show("Please enter a valid email address");
+                return;
+            }
+
+            if (!profileData?.team?.trim()) {
+                MessageToast.show("Please enter your team");
+                return;
+            }
+
+            if (!profileData?.subTeam?.trim()) {
+                MessageToast.show("Please enter your sub-team");
+                return;
+            }
+
+            if (!profileData?.professionalRole?.trim()) {
+                MessageToast.show("Please enter your professional role");
+                return;
+            }
+
+            if (!profileData?.location?.trim()) {
+                MessageToast.show("Please enter your location");
+                return;
+            }
+
+            if (!profileData?.tLevel) {
+                MessageToast.show("Please select your T Level");
+                return;
+            }
+
+            if (!profileData?.gradeLevel) {
+                MessageToast.show("Please select your Grade Level");
+                return;
+            }
+
+            if (!profileData?.specialization?.trim()) {
+                MessageToast.show("Please enter your specialization");
+                return;
+            }
+
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const lastUpdated = new Date().toISOString();
+
+            const employeeBinding = oDataModel.bindList("/Employees");
+            employeeBinding.filter([new Filter("employeeId", FilterOperator.EQ, managerId)]);
+            const employeeContexts = await employeeBinding.requestContexts(0, 1);
+
+            if (employeeContexts.length === 0) {
+                MessageToast.show("Manager record not found");
+                return;
+            }
+
+            const employeeContext = employeeContexts[0];
+            employeeContext.setProperty("name", profileData.name.trim());
+            employeeContext.setProperty("email", profileData.email.trim());
+            employeeContext.setProperty("team", profileData.team.trim());
+            employeeContext.setProperty("subTeam", profileData.subTeam.trim());
+            employeeContext.setProperty("experience", Number(profileData.experience || 0));
+            employeeContext.setProperty("location", profileData.location.trim());
+            employeeContext.setProperty("tLevel", profileData.tLevel);
+            employeeContext.setProperty("gradeLevel", profileData.gradeLevel);
+
+            const profileBinding = oDataModel.bindList("/Profiles");
+            profileBinding.filter([new Filter("employeeId", FilterOperator.EQ, managerId)]);
+            const profileContexts = await profileBinding.requestContexts(0, 1);
+
+            if (profileContexts.length > 0) {
+                const profileContext = profileContexts[0];
+                profileContext.setProperty("role", profileData.professionalRole.trim());
+                profileContext.setProperty("location", profileData.location.trim());
+                profileContext.setProperty("tLevel", profileData.tLevel);
+                profileContext.setProperty("gradeLevel", profileData.gradeLevel);
+                profileContext.setProperty("specialization", profileData.specialization.trim());
+                profileContext.setProperty("lastUpdated", lastUpdated);
+            } else {
+                profileBinding.create({
+                    employeeId: managerId,
+                    role: profileData.professionalRole.trim(),
+                    location: profileData.location.trim(),
+                    tLevel: profileData.tLevel,
+                    gradeLevel: profileData.gradeLevel,
+                    specialization: profileData.specialization.trim(),
+                    lastUpdated: lastUpdated
+                });
+            }
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            employeeBinding.refresh();
+            profileBinding.refresh();
+
+            const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+            currentUserModel?.setData({
+                ...(currentUserModel?.getData() || {}),
+                id: managerId,
+                managerId: managerId,
+                name: profileData.name.trim(),
+                role: "Manager",
+                email: profileData.email.trim(),
+                team: profileData.team.trim(),
+                subTeam: profileData.subTeam.trim(),
+                location: profileData.location.trim(),
+                tLevel: profileData.tLevel,
+                gradeLevel: profileData.gradeLevel,
+                experience: Number(profileData.experience || 0),
+                isLoggedIn: true
+            });
+
+            await this.loadSelfProfile(managerId);
+
+            const managerProfileUiModel = this.getView()?.getModel("managerProfileUi") as JSONModel;
+            managerProfileUiModel?.setProperty("/isEditing", false);
+            this.managerProfileSnapshot = null;
+
+            MessageToast.show("Profile updated successfully");
+        } catch (error) {
+            console.error("❌ Error saving manager profile:", error);
+            MessageToast.show("Error saving profile");
         }
     }
 

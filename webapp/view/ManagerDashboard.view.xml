@@ -500,6 +500,143 @@
                     </uxap:ObjectPageSubSection>
                 </uxap:subSections>
             </uxap:ObjectPageSection>
+
+            <uxap:ObjectPageSection id="managerProfileSection" title="My Profile" titleUppercase="false">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="managerProfileSubSection">
+                        <uxap:blocks>
+                            <f:Card id="managerProfileCard" class="sapUiMediumMargin" width="95%">
+                                <f:content>
+                                    <m:VBox class="sapUiMediumMargin" width="100%">
+                                        <m:Title text="Complete or Update Your Profile" level="H3" class="sapUiMediumMarginBottom"/>
+                                        <m:Text text="Use this section after your first SSO login to fill the information that previously depended on registration." class="sapUiTinyMarginBottom"/>
+
+                                        <m:VBox visible="{= !${managerProfileUi>/isEditing} }" class="sapUiSmallMarginTop">
+                                            <m:Panel headerText="Identity" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
+                                                <m:content>
+                                                    <m:VBox class="sapUiSmallMargin">
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Full Name" design="Bold" width="14rem"/><m:Text text="{selfProfile>/name}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Email" design="Bold" width="14rem"/><m:Text text="{selfProfile>/email}"/></m:HBox>
+                                                    </m:VBox>
+                                                </m:content>
+                                            </m:Panel>
+
+                                            <m:Panel headerText="Organization" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
+                                                <m:content>
+                                                    <m:VBox class="sapUiSmallMargin">
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Team" design="Bold" width="14rem"/><m:Text text="{selfProfile>/team}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Sub-Team" design="Bold" width="14rem"/><m:Text text="{selfProfile>/subTeam}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Experience" design="Bold" width="14rem"/><m:Text text="{selfProfile>/experience}"/></m:HBox>
+                                                    </m:VBox>
+                                                </m:content>
+                                            </m:Panel>
+
+                                            <m:Panel headerText="Professional Profile" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
+                                                <m:content>
+                                                    <m:VBox class="sapUiSmallMargin">
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Role" design="Bold" width="14rem"/><m:Text text="{selfProfile>/professionalRole}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Location" design="Bold" width="14rem"/><m:Text text="{selfProfile>/location}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="T Level" design="Bold" width="14rem"/><m:Text text="{selfProfile>/tLevel}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Grade Level" design="Bold" width="14rem"/><m:Text text="{selfProfile>/gradeLevel}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Specialization" design="Bold" width="14rem"/><m:Text text="{selfProfile>/specialization}"/></m:HBox>
+                                                    </m:VBox>
+                                                </m:content>
+                                            </m:Panel>
+
+                                            <m:FlexBox justifyContent="End" class="sapUiMediumMarginTop" width="100%">
+                                                <m:Button text="Edit" type="Emphasized" icon="sap-icon://edit" press="onEditMyProfile"/>
+                                            </m:FlexBox>
+                                        </m:VBox>
+
+                                        <m:VBox visible="{managerProfileUi>/isEditing}" class="sapUiSmallMarginTop">
+                                            <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
+                                                <m:VBox width="48%">
+                                                    <m:Label text="Full Name" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Input value="{selfProfile>/name}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                </m:VBox>
+                                                <m:VBox width="48%">
+                                                    <m:Label text="Email" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Input value="{selfProfile>/email}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                </m:VBox>
+                                            </m:FlexBox>
+
+                                            <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
+                                                <m:VBox width="30%">
+                                                    <m:Label text="Team" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Input value="{selfProfile>/team}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                </m:VBox>
+                                                <m:VBox width="36%">
+                                                    <m:Label text="Sub-Team" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Input value="{selfProfile>/subTeam}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                </m:VBox>
+                                                <m:VBox width="30%">
+                                                    <m:Label text="Experience (Years)" class="sapUiTinyMarginBottom"/>
+                                                    <m:StepInput value="{selfProfile>/experience}" min="0" max="50" step="0.5" width="100%" class="sapUiMediumMarginBottom"/>
+                                                </m:VBox>
+                                            </m:FlexBox>
+
+                                            <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
+                                                <m:VBox width="48%">
+                                                    <m:Label text="Role" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Select selectedKey="{selfProfile>/professionalRole}" width="100%" class="sapUiMediumMarginBottom">
+                                                        <core:Item key="" text="-- Select Role --"/>
+                                                        <core:Item key="Manager" text="Manager"/>
+                                                        <core:Item key="Senior Manager" text="Senior Manager"/>
+                                                        <core:Item key="Delivery Manager" text="Delivery Manager"/>
+                                                        <core:Item key="Program Manager" text="Program Manager"/>
+                                                        <core:Item key="Project Manager" text="Project Manager"/>
+                                                        <core:Item key="People Manager" text="People Manager"/>
+                                                    </m:Select>
+                                                </m:VBox>
+                                                <m:VBox width="48%">
+                                                    <m:Label text="Location" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Select selectedKey="{selfProfile>/location}" width="100%" class="sapUiMediumMarginBottom">
+                                                        <core:Item key="" text="-- Select Location --"/>
+                                                        <core:Item key="Whitefield, Bangalore" text="Whitefield, Bangalore"/>
+                                                        <core:Item key="Devanahalli, Bangalore" text="Devanahalli, Bangalore"/>
+                                                        <core:Item key="Gurgaon" text="Gurgaon"/>
+                                                    </m:Select>
+                                                </m:VBox>
+                                            </m:FlexBox>
+
+                                            <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
+                                                <m:VBox width="30%">
+                                                    <m:Label text="T Level" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Select selectedKey="{selfProfile>/tLevel}" width="100%" class="sapUiMediumMarginBottom">
+                                                        <core:Item key="" text="-- Select T Level --"/>
+                                                        <core:Item key="T1" text="T1"/>
+                                                        <core:Item key="T2" text="T2"/>
+                                                        <core:Item key="T3" text="T3"/>
+                                                        <core:Item key="T4" text="T4"/>
+                                                    </m:Select>
+                                                </m:VBox>
+                                                <m:VBox width="30%">
+                                                    <m:Label text="Grade Level" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Select selectedKey="{selfProfile>/gradeLevel}" width="100%" class="sapUiMediumMarginBottom">
+                                                        <core:Item key="" text="-- Select Grade Level --"/>
+                                                        <core:Item key="L1" text="L1"/>
+                                                        <core:Item key="L2" text="L2"/>
+                                                        <core:Item key="L3" text="L3"/>
+                                                    </m:Select>
+                                                </m:VBox>
+                                                <m:VBox width="36%">
+                                                    <m:Label text="Specialization" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Input value="{selfProfile>/specialization}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                </m:VBox>
+                                            </m:FlexBox>
+
+                                            <m:FlexBox justifyContent="End" class="sapUiMediumMarginTop" width="100%">
+                                                <m:Button text="Cancel" type="Transparent" icon="sap-icon://decline" press="onCancelMyProfileEdit" class="sapUiTinyMarginEnd"/>
+                                                <m:Button text="Save Profile" type="Emphasized" icon="sap-icon://save" press="onSaveMyProfile"/>
+                                            </m:FlexBox>
+                                        </m:VBox>
+                                    </m:VBox>
+                                </f:content>
+                            </f:Card>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
         </uxap:sections>
     </uxap:ObjectPageLayout>
 

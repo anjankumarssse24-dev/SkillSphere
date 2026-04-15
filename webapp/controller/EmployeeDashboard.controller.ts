@@ -26,10 +26,12 @@ export default class EmployeeDashboard extends Controller {
     private caiaDialog?: Dialog;
     private pocDialog?: Dialog;
     private currentEmployeeId?: string;
+    private selfProfileSnapshot: any = null;
 
     public onInit(): void {
         const router = this.getRouter();
         router.getRoute("EmployeeDashboard")?.attachPatternMatched(this.onRouteMatched, this);
+        this.getView()?.setModel(new JSONModel({ isEditing: false }), "profileUi");
         
         console.log("EmployeeDashboard initialized - using OData V4");
     }
@@ -65,12 +67,15 @@ export default class EmployeeDashboard extends Controller {
             
             const empContexts = await empBinding.requestContexts(0, 1);
             
+            let employeeRecord: any = null;
+            let managerName = "";
+
             if (empContexts.length > 0) {
                 const employee = empContexts[0].getObject();
+                employeeRecord = employee;
                 console.log('✅ Employee data loaded:', employee);
                 
                 // Load manager name if managerId exists
-                let managerName = "";
                 if (employee.managerId) {
                     try {
                         const mgrBinding = oDataModel.bindList("/Employees");
@@ -100,9 +105,11 @@ export default class EmployeeDashboard extends Controller {
                     email: employee.email,
                     team: employee.team,
                     subTeam: employee.subTeam,
-                    specialization: employee.specialization,
                     location: employee.location,
                     tLevel: employee.tLevel,
+                    gradeLevel: employee.gradeLevel,
+                    experience: employee.experience,
+                    managerId: employee.managerId,
                     manager: managerName,
                     isLoggedIn: true
                 });
@@ -120,7 +127,13 @@ export default class EmployeeDashboard extends Controller {
             await this.loadCertifications(employeeId);
             
             // Load Profile
-            await this.loadProfile(employeeId);
+            const profile = await this.loadProfile(employeeId);
+
+            // Merge master data + profile data into a single editable self-profile model.
+            this.setSelfProfileModel(employeeRecord, profile, managerName);
+
+            // Load manager options for self-service updates.
+            await this.loadManagerOptions(employeeId);
             
             // Load Utilization data
             await this.loadCurrentProjects(employeeId);
@@ -182,7 +195,7 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
-    private async loadProfile(employeeId: string): Promise<void> {
+    private async loadProfile(employeeId: string): Promise<any> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const profilesBinding = oDataModel.bindList("/Profiles");
@@ -196,6 +209,7 @@ export default class EmployeeDashboard extends Controller {
                 
                 const profileModel = new JSONModel(profile);
                 this.getView()?.setModel(profileModel, "profile");
+                return profile;
             } else {
                 // Initialize empty profile
                 const emptyProfile = {
@@ -207,10 +221,85 @@ export default class EmployeeDashboard extends Controller {
                     gradeLevel: ""
                 };
                 this.getView()?.setModel(new JSONModel(emptyProfile), "profile");
+                return emptyProfile;
             }
         } catch (error) {
             console.error("Error loading profile:", error);
+            const emptyProfile = {
+                employeeId: employeeId,
+                specialization: "",
+                role: "",
+                location: "",
+                tLevel: "",
+                gradeLevel: ""
+            };
+            this.getView()?.setModel(new JSONModel(emptyProfile), "profile");
+            return emptyProfile;
         }
+    }
+
+    private async loadManagerOptions(currentEmployeeId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const managersBinding = oDataModel.bindList("/Employees");
+            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
+
+            const managerContexts = await managersBinding.requestContexts(0, 200);
+            const managers = managerContexts
+                .map((context: any) => context.getObject())
+                .filter((manager: any) => manager.employeeId !== currentEmployeeId)
+                .sort((left: any, right: any) => (left.name || "").localeCompare(right.name || ""));
+
+            this.getView()?.setModel(new JSONModel({ managers }), "managersList");
+        } catch (error) {
+            console.error("Error loading manager options:", error);
+            this.getView()?.setModel(new JSONModel({ managers: [] }), "managersList");
+        }
+    }
+
+    private setSelfProfileModel(employee: any, profile: any, managerName: string): void {
+        const selfProfile = {
+            employeeId: employee?.employeeId || this.currentEmployeeId || "",
+            name: employee?.name || "",
+            email: employee?.email || "",
+            team: employee?.team || "",
+            subTeam: employee?.subTeam || "",
+            managerId: employee?.managerId || "",
+            managerName: managerName || "",
+            experience: Number(employee?.experience || 0),
+            location: profile?.location || employee?.location || "",
+            tLevel: profile?.tLevel || employee?.tLevel || "",
+            gradeLevel: profile?.gradeLevel || employee?.gradeLevel || "",
+            professionalRole: profile?.role || "",
+            specialization: profile?.specialization || ""
+        };
+
+        this.getView()?.setModel(new JSONModel(selfProfile), "selfProfile");
+    }
+
+    private async getManagerNameById(managerId: string): Promise<string> {
+        if (!managerId) {
+            return "";
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const managerBinding = oDataModel.bindList("/Employees");
+            managerBinding.filter([new Filter("employeeId", FilterOperator.EQ, managerId)]);
+
+            const managerContexts = await managerBinding.requestContexts(0, 1);
+            if (managerContexts.length > 0) {
+                return managerContexts[0].getObject().name || "";
+            }
+        } catch (error) {
+            console.error("Error resolving manager name:", error);
+        }
+
+        return "";
+    }
+
+    private isValidEmail(email: string): boolean {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     }
 
     private async loadCurrentProjects(employeeId: string): Promise<void> {
@@ -1644,9 +1733,26 @@ export default class EmployeeDashboard extends Controller {
     }
 
     // Profile Management Methods
+    public onEditProfile(): void {
+        const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
+        this.selfProfileSnapshot = JSON.parse(JSON.stringify(selfProfileModel?.getData() || {}));
+
+        const profileUiModel = this.getView()?.getModel("profileUi") as JSONModel;
+        profileUiModel?.setProperty("/isEditing", true);
+    }
+
+    public onCancelProfileEdit(): void {
+        const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
+        if (selfProfileModel && this.selfProfileSnapshot) {
+            selfProfileModel.setData(JSON.parse(JSON.stringify(this.selfProfileSnapshot)));
+        }
+
+        const profileUiModel = this.getView()?.getModel("profileUi") as JSONModel;
+        profileUiModel?.setProperty("/isEditing", false);
+    }
+
     public async onSaveProfile(): Promise<void> {
         try {
-            // Get employee ID from currentUser model or currentEmployeeId property
             const employeeId = this.currentEmployeeId;
             
             if (!employeeId) {
@@ -1657,124 +1763,155 @@ export default class EmployeeDashboard extends Controller {
             
             console.log("Saving profile for employee:", employeeId);
 
-            const profileModel = this.getView()?.getModel("profile") as JSONModel;
-            const profileData = profileModel?.getData();
+            const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
+            const profileData = selfProfileModel?.getData();
 
-            // Validate required fields
-            if (!profileData?.role) {
-                MessageToast.show("Please select your role");
+            if (!profileData?.name?.trim()) {
+                MessageToast.show("Please enter your name");
                 return;
             }
             
-            if (!profileData?.location) {
-                MessageToast.show("Please select your location");
+            if (!profileData?.email || !this.isValidEmail(profileData.email)) {
+                MessageToast.show("Please enter a valid email address");
                 return;
             }
             
+            if (!profileData?.team?.trim()) {
+                MessageToast.show("Please enter your team");
+                return;
+            }
+            
+            if (!profileData?.subTeam?.trim()) {
+                MessageToast.show("Please enter your sub-team");
+                return;
+            }
+            
+            if (!profileData?.managerId?.trim()) {
+                MessageToast.show("Please enter your reporting manager ID");
+                return;
+            }
+
+            if (!profileData?.professionalRole?.trim()) {
+                MessageToast.show("Please enter your professional role");
+                return;
+            }
+
+            if (!profileData?.location?.trim()) {
+                MessageToast.show("Please enter your location");
+                return;
+            }
+
             if (!profileData?.tLevel) {
                 MessageToast.show("Please select your T Level");
                 return;
             }
-            
-            if (!profileData?.gradeLevel) {
-                MessageToast.show("Please select your Grade Level");
-                return;
-            }
-            
-            if (!profileData?.specialization) {
-                MessageToast.show("Please select your specialization");
-                return;
-            }
 
             if (!profileData?.gradeLevel) {
                 MessageToast.show("Please select your Grade Level");
                 return;
             }
 
-            // Add employeeId to profile data
-            const profileToSave = {
-                ...profileData,
-                employeeId: employeeId,
-                lastUpdated: new Date().toISOString()
-            };
+            if (!profileData?.specialization?.trim()) {
+                MessageToast.show("Please enter your specialization");
+                return;
+            }
 
-            // Save to OData - update employee profile
             try {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                const lastUpdated = new Date().toISOString();
                 
                 console.log('📝 Updating profile for employee:', employeeId);
                 console.log('📝 New values:', {
-                    role: profileData.role,
+                    professionalRole: profileData.professionalRole,
                     location: profileData.location,
                     tLevel: profileData.tLevel,
-                    specialization: profileData.specialization
+                    specialization: profileData.specialization,
+                    team: profileData.team,
+                    subTeam: profileData.subTeam,
+                    managerId: profileData.managerId
                 });
+
+                const employeeBinding = oDataModel.bindList("/Employees");
+                employeeBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+                const employeeContexts = await employeeBinding.requestContexts(0, 1);
+
+                if (employeeContexts.length === 0) {
+                    MessageToast.show("Employee record not found");
+                    return;
+                }
+
+                const employeeContext = employeeContexts[0];
+                employeeContext.setProperty("name", profileData.name.trim());
+                employeeContext.setProperty("email", profileData.email.trim());
+                employeeContext.setProperty("team", profileData.team.trim());
+                employeeContext.setProperty("subTeam", profileData.subTeam.trim());
+                employeeContext.setProperty("managerId", profileData.managerId.trim());
+                employeeContext.setProperty("experience", Number(profileData.experience || 0));
+                employeeContext.setProperty("location", profileData.location.trim());
+                employeeContext.setProperty("tLevel", profileData.tLevel);
+                employeeContext.setProperty("gradeLevel", profileData.gradeLevel);
                 
-                // Update the Profiles table
                 const profileBinding = oDataModel.bindList("/Profiles");
                 profileBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
                 
                 const profileContexts = await profileBinding.requestContexts(0, 1);
                 
                 if (profileContexts.length > 0) {
-                    // Profile exists, update it
                     const context = profileContexts[0];
                     
-                    context.setProperty("role", profileData.role);
-                    context.setProperty("location", profileData.location);
+                    context.setProperty("role", profileData.professionalRole.trim());
+                    context.setProperty("location", profileData.location.trim());
                     context.setProperty("tLevel", profileData.tLevel);
                     context.setProperty("gradeLevel", profileData.gradeLevel);
-                    context.setProperty("specialization", profileData.specialization);
-                    context.setProperty("gradeLevel", profileData.gradeLevel);
-                    context.setProperty("lastUpdated", new Date().toISOString());
+                    context.setProperty("specialization", profileData.specialization.trim());
+                    context.setProperty("lastUpdated", lastUpdated);
                     
                     console.log('📝 Profile properties set, submitting batch...');
                 } else {
-                    // Profile doesn't exist, create it
                     const newProfile = {
                         employeeId: employeeId,
-                        role: profileData.role,
-                        location: profileData.location,
+                        role: profileData.professionalRole.trim(),
+                        location: profileData.location.trim(),
                         tLevel: profileData.tLevel,
                         gradeLevel: profileData.gradeLevel,
-                        specialization: profileData.specialization,
-                        lastUpdated: new Date().toISOString()
+                        specialization: profileData.specialization.trim(),
+                        lastUpdated: lastUpdated
                     };
                     
                     profileBinding.create(newProfile);
                     console.log('📝 New profile created, submitting batch...');
                 }
                 
-                // Also update the Employees table to keep them in sync
-                const employeeBinding = oDataModel.bindList("/Employees");
-                employeeBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-                
-                const employeeContexts = await employeeBinding.requestContexts(0, 1);
-                
-                if (employeeContexts.length > 0) {
-                    const empContext = employeeContexts[0];
-                    empContext.setProperty("role", profileData.role);
-                    empContext.setProperty("location", profileData.location);
-                    empContext.setProperty("tLevel", profileData.tLevel);
-                    empContext.setProperty("gradeLevel", profileData.gradeLevel);
-                    empContext.setProperty("specialization", profileData.specialization);
-                    console.log('📝 Employee record also updated');
-                }
-                
-                // Submit all changes
                 const result = await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
                 console.log('✅ Batch submitted successfully:', result);
-                
-                // Wait for backend to process
-                await new Promise(resolve => setTimeout(resolve, 500));
-                
-                // Refresh both bindings
+
                 profileBinding.refresh();
                 employeeBinding.refresh();
-                
-                // Reload employee data and profile
+
+                const managerName = await this.getManagerNameById(profileData.managerId.trim());
+                const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+                currentUserModel?.setData({
+                    ...(currentUserModel?.getData() || {}),
+                    id: employeeId,
+                    employeeId: employeeId,
+                    name: profileData.name.trim(),
+                    email: profileData.email.trim(),
+                    team: profileData.team.trim(),
+                    subTeam: profileData.subTeam.trim(),
+                    location: profileData.location.trim(),
+                    tLevel: profileData.tLevel,
+                    gradeLevel: profileData.gradeLevel,
+                    experience: Number(profileData.experience || 0),
+                    managerId: profileData.managerId.trim(),
+                    manager: managerName,
+                    isLoggedIn: true
+                });
+
                 await this.loadEmployeeData(employeeId);
-                await this.loadProfile(employeeId);
+
+                const profileUiModel = this.getView()?.getModel("profileUi") as JSONModel;
+                profileUiModel?.setProperty("/isEditing", false);
+                this.selfProfileSnapshot = null;
                 
                 MessageToast.show("Profile updated successfully!");
             } catch (error) {
