@@ -496,7 +496,8 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     }
     
     try {
-      getAIClient().clearUserChat(userId);
+      const aiClient = await getAIClient(req);
+      await aiClient.clearUserChat(userId);
       console.log(`🗑️ Chat cleared for user: ${userId}`);
       return { success: true, message: 'Chat history cleared successfully' };
     } catch (error) {
@@ -542,47 +543,67 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
 
   // ============ BEFORE CREATE VALIDATIONS ============
 
+  const ensureUuidKey = (req, keyField) => {
+    req.data[keyField] = cds.utils.uuid();
+  };
+
   /**
-   * Skills - Generate ID and validate before creation
+   * Skills - Assign collision-safe UUID key
    */
   this.before('CREATE', 'Skills', async (req) => {
-    const skills = await SELECT.from(Skills);
-    req.data.skillId = `SKL${String(skills.length + 1).padStart(3, '0')}`;
+    ensureUuidKey(req, 'skillId');
   });
 
   /**
-   * Projects - Generate ID and validate before creation
+   * Projects - Assign collision-safe UUID key
    */
   this.before('CREATE', 'Projects', async (req) => {
-    const projects = await SELECT.from(Projects);
-    req.data.projectId = `PRJ${String(projects.length + 1).padStart(3, '0')}`;
+    ensureUuidKey(req, 'projectId');
   });
 
   /**
-   * CurrentProjects - Generate ID and timestamps
+   * CurrentProjects - Assign collision-safe UUID key and timestamps
    */
   this.before('CREATE', 'CurrentProjects', async (req) => {
-    const currentProjects = await SELECT.from(CurrentProjects);
-    req.data.currentProjectId = `CP${String(currentProjects.length + 1).padStart(4, '0')}`;
-    req.data.assignedDate = new Date().toISOString().split('T')[0];
+    ensureUuidKey(req, 'currentProjectId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
   });
 
   /**
-   * CAIAUtilization - Generate ID and timestamps
+   * Initiatives - Assign collision-safe UUID key and timestamps
+   */
+  this.before('CREATE', 'Initiatives', async (req) => {
+    ensureUuidKey(req, 'initiativeId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
+  });
+
+  /**
+   * CAIAUtilization - Assign collision-safe UUID key and timestamps
    */
   this.before('CREATE', 'CAIAUtilization', async (req) => {
-    const caiaRecords = await SELECT.from(CAIAUtilization);
-    req.data.caiaId = `CAIA${String(caiaRecords.length + 1).padStart(3, '0')}`;
-    req.data.startDate = new Date().toISOString().split('T')[0];
+    ensureUuidKey(req, 'caiaId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
   });
 
   /**
-   * POCUtilization - Generate ID and timestamps
+   * POCUtilization - Assign collision-safe UUID key and timestamps
    */
   this.before('CREATE', 'POCUtilization', async (req) => {
-    const pocRecords = await SELECT.from(POCUtilization);
-    req.data.pocId = `POC${String(pocRecords.length + 1).padStart(3, '0')}`;
-    req.data.startDate = new Date().toISOString().split('T')[0];
+    ensureUuidKey(req, 'pocId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
+  });
+
+  /**
+   * Certifications - Assign collision-safe UUID key and timestamps
+   */
+  this.before('CREATE', 'Certifications', async (req) => {
+    ensureUuidKey(req, 'certificationId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
   });
 
   // ============ BEFORE UPDATE HANDLERS ============

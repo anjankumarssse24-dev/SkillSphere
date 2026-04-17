@@ -14,6 +14,8 @@ import ObjectIdentifier from "sap/m/ObjectIdentifier";
 import ObjectStatus from "sap/m/ObjectStatus";
 import Dialog from "sap/m/Dialog";
 import Label from "sap/m/Label";
+import FormattedText from "sap/m/FormattedText";
+import HTML from "sap/ui/core/HTML";
 
 /**
  * @namespace skillsphere.controller
@@ -385,31 +387,7 @@ export default class SeniorManagerWorkOverview extends Controller {
     }
 
     public onWorkOverviewFilterChange(): void {
-        const tLevelMulti = this.byId("woTLevelFilter") as MultiComboBox;
-        const selectedTLevels = tLevelMulti?.getSelectedKeys() || [];
-        const techMulti = this.byId("woTechFilter") as MultiComboBox;
-        const selectedTechs = techMulti?.getSelectedKeys() || [];
-        const searchField = this.byId("woSearchField") as any;
-        const searchQuery = searchField?.getValue() || "";
-
-        let filtered = this.allWorkOverviewRows;
-
-        if (selectedTLevels.length > 0) {
-            filtered = filtered.filter((r: any) => selectedTLevels.includes(r.tLevel));
-        }
-
-        if (selectedTechs.length > 0) {
-            filtered = filtered.filter((r: any) => selectedTechs.includes(r.techCategory));
-        }
-
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            filtered = filtered.filter((r: any) =>
-                (r.name && r.name.toLowerCase().includes(q)) ||
-                (r.employeeId && r.employeeId.toLowerCase().includes(q))
-            );
-        }
-
+        const filtered = this.getVisibleWorkRows();
         this.buildWorkOverviewTable(filtered);
     }
 
@@ -568,7 +546,7 @@ export default class SeniorManagerWorkOverview extends Controller {
         input?.setValue("");
 
         // Show typing indicator
-        this.addTypingIndicator();
+        this.showTypingIndicator();
 
         // Query AI endpoint
         this.queryAIAssistant(userMessage);
@@ -578,19 +556,22 @@ export default class SeniorManagerWorkOverview extends Controller {
      * Add user message to chat UI
      */
     private addUserMessage(message: string): void {
-        const container = this.byId("messagesContainerWorkOverview") as any;
-        if (!container) {
-            return;
-        }
+        const oContainer = this.byId("messagesContainerWorkOverview") as any;
 
-        const userBox = new HBox({
-            justifyContent: "End"
-        }).addStyleClass("aiUserMessage");
+        const oMessageBox = new HBox({
+            justifyContent: "End",
+            items: [
+                new VBox({
+                    items: [
+                        new Text({
+                            text: message
+                        }).addStyleClass("userMessage sapUiSmallMargin")
+                    ]
+                }).addStyleClass("messageBox userMessageBox")
+            ]
+        }).addStyleClass("sapUiTinyMarginTop");
 
-        const msgText = new Text({ text: message, wrapping: true }).addStyleClass("aiUserText");
-        userBox.addItem(msgText);
-        container.addItem(userBox);
-
+        oContainer?.addItem(oMessageBox);
         this.scrollChatToBottom();
     }
 
@@ -598,39 +579,75 @@ export default class SeniorManagerWorkOverview extends Controller {
      * Add bot message to chat UI
      */
     private addBotMessage(message: string): void {
-        const container = this.byId("messagesContainerWorkOverview") as any;
-        if (!container) {
-            return;
-        }
+        const oContainer = this.byId("messagesContainerWorkOverview") as any;
 
-        const botBox = new HBox({
-            justifyContent: "Start"
-        }).addStyleClass("aiBotMessage");
+        const formattedHtml = this.parseMarkdown(message);
 
-        const msgText = new Text({ text: message, wrapping: true }).addStyleClass("aiBotText");
-        botBox.addItem(msgText);
-        container.addItem(botBox);
+        const oMessageBox = new HBox({
+            justifyContent: "Start",
+            width: "100%",
+            items: [
+                new VBox({
+                    width: "100%",
+                    items: [
+                        new FormattedText({
+                            htmlText: formattedHtml
+                        }).addStyleClass("botMessage sapUiSmallMargin")
+                    ]
+                }).addStyleClass("messageBox botMessageBox")
+            ]
+        }).addStyleClass("sapUiTinyMarginTop");
 
+        oContainer?.addItem(oMessageBox);
         this.scrollChatToBottom();
     }
 
     /**
-     * Add typing indicator
+     * Parse markdown to HTML for better formatting
      */
-    private addTypingIndicator(): void {
-        const container = this.byId("messagesContainerWorkOverview") as any;
-        if (!container) {
-            return;
-        }
+    private parseMarkdown(text: string): string {
+        let html = text;
 
-        const typingBox = new HBox({
-            justifyContent: "Start"
-        }).addStyleClass("aiTypingIndicator");
+        html = html
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
 
-        typingBox.addItem(new Text({ text: "AI is typing..." }).addStyleClass("aiTypingText"));
-        container.addItem(typingBox);
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        html = html.replace(/`(.+?)`/g, "<code>$1</code>");
+        html = html.replace(/\n/g, "<br>");
+        html = html.replace(/^[\s]*[\*\-]\s+(.+?)(?=<br>|$)/gm,
+            (match, content) => "&nbsp;&nbsp;&nbsp;• " + content.trim());
+        html = html.replace(/^[\s]*(\d+)\.\s+(.+?)(?=<br>|$)/gm,
+            (match, num, content) => "&nbsp;&nbsp;&nbsp;" + num + ". " + content.trim());
+        html = html.replace(/^#+\s+(.+?)(?=<br>|$)/gm,
+            (match, content) => "<strong style=\"font-size: 1.1em; color: #0070f2;\">" + content.trim() + "</strong>");
 
-        this.typingIndicator = typingBox;
+        return html;
+    }
+
+    /**
+     * Show typing indicator
+     */
+    private showTypingIndicator(): void {
+        const oContainer = this.byId("messagesContainerWorkOverview") as any;
+
+        this.typingIndicator = new HTML({
+            id: this.createId("typingIndicatorWorkOverview"),
+            content: '<div class="typing-indicator"><span></span><span></span><span></span></div>'
+        });
+
+        const oMessageBox = new HBox({
+            justifyContent: "Start",
+            items: [
+                new VBox({
+                    items: [this.typingIndicator]
+                }).addStyleClass("messageBox botMessageBox")
+            ]
+        }).addStyleClass("sapUiTinyMarginTop");
+
+        oContainer?.addItem(oMessageBox);
         this.scrollChatToBottom();
     }
 
@@ -707,8 +724,10 @@ export default class SeniorManagerWorkOverview extends Controller {
         const t3Count = rows.filter((row: any) => row.tLevel === "T3").length;
         const t4Count = rows.filter((row: any) => row.tLevel === "T4").length;
 
-        const tLevelFilter = (this.byId("woTLevelFilter") as any)?.getSelectedKey() || "All";
-        const techFilter = (this.byId("woTechFilter") as any)?.getSelectedKey() || "All";
+        const tLevelFilterKeys = ((this.byId("woTLevelFilter") as any)?.getSelectedKeys?.() || []) as string[];
+        const techFilterKeys = ((this.byId("woTechFilter") as any)?.getSelectedKeys?.() || []) as string[];
+        const tLevelFilter = tLevelFilterKeys.length > 0 ? tLevelFilterKeys.join(", ") : "All";
+        const techFilter = techFilterKeys.length > 0 ? techFilterKeys.join(", ") : "All";
 
         const employeeDetails = rows.map((row: any) => {
             const projectsText = (row.projects || []).filter((s: string) => !!s).join(", ") || "None";
@@ -749,7 +768,31 @@ export default class SeniorManagerWorkOverview extends Controller {
     }
 
     private getVisibleWorkRows(): any[] {
-        return this.allWorkOverviewRows || [];
+        const tLevelMulti = this.byId("woTLevelFilter") as MultiComboBox;
+        const selectedTLevels = tLevelMulti?.getSelectedKeys() || [];
+        const techMulti = this.byId("woTechFilter") as MultiComboBox;
+        const selectedTechs = techMulti?.getSelectedKeys() || [];
+        const searchField = this.byId("woSearchField") as any;
+        const searchQuery = (searchField?.getValue() || "").trim().toLowerCase();
+
+        let filtered = this.allWorkOverviewRows || [];
+
+        if (selectedTLevels.length > 0) {
+            filtered = filtered.filter((r: any) => selectedTLevels.includes(r.tLevel));
+        }
+
+        if (selectedTechs.length > 0) {
+            filtered = filtered.filter((r: any) => selectedTechs.includes(r.techCategory));
+        }
+
+        if (searchQuery) {
+            filtered = filtered.filter((r: any) =>
+                (r.name && r.name.toLowerCase().includes(searchQuery)) ||
+                (r.employeeId && r.employeeId.toLowerCase().includes(searchQuery))
+            );
+        }
+
+        return filtered;
     }
 
     /**

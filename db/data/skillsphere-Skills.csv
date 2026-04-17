@@ -1,401 +1,401 @@
-﻿skillId,skillName,category,employeeId,proficiencyLevel,yearsExperience,certificationStatus
-SKILL001,SAPUI5,Frontend,I770144,Advanced,6,Certified
-SKILL002,SAPUI5,Frontend,I770145,Intermediate,4,In Progress
-SKILL003,SAP HANA,Database,I770146,Advanced,8,Certified
-SKILL004,SAP HANA,Database,I770144,Intermediate,3,Not Certified
-SKILL005,Data Warehouse,Analytics,I770145,Expert,10,Certified
-SKILL006,SAP Analytics Cloud (SAC),Analytics,I770148,Advanced,7,Certified
-SKILL007,TypeScript,Frontend,I770145,Intermediate,4,Certified
-SKILL008,SAP BTP (Business Technology Platform),Cloud,I770148,Advanced,6,Certified
-SKILL009,Selenium,Testing,I770149,Intermediate,5,Certified
-SKILL010,Java,Backend,I770144,Expert,5,In Progress
-SKILL011,Python,Backend,I770144,Advanced,3,None
-SKILL012,Java,Backend,I770151,Proficient,1,Certified
-SKILL013,ABAP,Backend,I770151,Beginner,0,None
-SKILL014,SAP CAP,FullStack,I770151,Intermediate,1,In Progress
-SKILL015,SAPUI5,Frontend,I770151,Intermediate,1,In Progress
-SKILL016,Java,Backend,I770152,Intermediate,2,In Progress
-SKILL017,SAP Ariba,Procurement,I770154,Advanced,5,Certified
-SKILL018,Ariba Sourcing,Procurement,I770154,Proficient,4,In Progress
-SKILL019,JavaScript,Frontend,I770154,Intermediate,3,Not Certified
-SKILL020,SQL,Database,I770154,Advanced,5,Certified
-SKILL021,Ariba Analytics,Procurement,I770155,Proficient,4,Certified
-SKILL022,Power BI,Analytics,I770155,Expert,6,Certified
-SKILL023,SAP Analytics Cloud (SAC),Analytics,I770155,Advanced,3,In Progress
-SKILL024,Ariba Contracts,Procurement,I770155,Intermediate,2,Not Certified
-SKILL025,Ariba Integration,Procurement,I770156,Expert,6,Certified
-SKILL026,SAP PI/PO (Process Integration),Integration,I770156,Advanced,5,Certified
-SKILL027,REST API,Integration,I770156,Proficient,4,Certified
-SKILL028,Java,Backend,I770156,Advanced,6,Certified
-SKILL029,Selenium,Testing,I770157,Advanced,4,Certified
-SKILL030,SAP Test Automation,Testing,I770157,Proficient,3,In Progress
-SKILL031,ABAP,Backend,I770158,Expert,8,Certified
-SKILL032,SAP S/4HANA,FullStack,I770158,Advanced,7,Certified
-SKILL033,Cloud Foundry,Cloud,I770158,Proficient,5,Certified
-SKILL034,CI/CD,DevOps,I770158,Advanced,6,Certified
-SKILL035,Cloud Foundry,Cloud,I770159,Expert,7,Certified
-SKILL036,Node.js,Backend,I770159,Advanced,6,Certified
-SKILL037,React,Frontend,I770159,Proficient,4,Certified
-SKILL038,Docker,Cloud,I770159,Advanced,5,Certified
-SKILL039,SAP CAP,FullStack,I770160,Expert,6,Certified
-SKILL040,SAPUI5,Frontend,I770160,Advanced,5,Certified
-SKILL041,OData,Integration,I770160,Proficient,4,Certified
-SKILL042,SAP HANA Cloud,Database,I770160,Advanced,5,Certified
-SKILL043,SAP Integration Suite,Integration,I770161,Expert,8,Certified
-SKILL044,API Management,Integration,I770161,Advanced,6,Certified
-SKILL045,SAP CPI (Cloud Platform Integration),Integration,I770161,Proficient,5,Certified
-SKILL046,Microservices Architecture,FullStack,I770161,Advanced,6,Certified
-SKILL047,SAP Fiori,Frontend,I770162,Advanced,5,Certified
-SKILL048,SAPUI5,Frontend,I770162,Expert,6,Certified
-SKILL049,JavaScript,Frontend,I770162,Proficient,4,Certified
-SKILL050,Kubernetes,Cloud,I770163,Advanced,4,Certified
-SKILL051,Jenkins,DevOps,I770163,Proficient,3,Certified
-SKILL052,Git,DevOps,I770163,Advanced,5,Certified
-SKILL053,Python,Backend,I770164,Expert,7,Certified
-SKILL054,SQL,Database,I770164,Advanced,6,Certified
-SKILL055,Tableau,Analytics,I770164,Proficient,4,Certified
-SKILL056,Machine Learning,Analytics,I770164,Advanced,5,Certified
-SKILL057,SAP BusinessObjects,Analytics,I770165,Expert,8,Certified
-SKILL058,SAP BW/4HANA,Analytics,I770165,Advanced,7,Certified
-SKILL059,Power BI,Analytics,I770165,Proficient,5,Certified
-SKILL060,Python,Backend,I770165,Advanced,6,Certified
-SKILL061,SAP Analytics Cloud (SAC),Analytics,I770166,Expert,6,Certified
-SKILL062,Data Warehouse,Analytics,I770166,Advanced,5,Certified
-SKILL063,SAP Fiori,Frontend,I770166,Proficient,4,Certified
-SKILL064,SAP Analytics Cloud (SAC),Analytics,I770167,Expert,5,Certified
-SKILL065,Predictive Analytics,Analytics,I770167,Advanced,4,Certified
-SKILL066,SAP Datasphere,Analytics,I770167,Proficient,3,Certified
-SKILL067,Data Warehouse,Analytics,I770168,Expert,7,Certified
-SKILL068,SAP BW/4HANA,Analytics,I770168,Advanced,6,Certified
-SKILL069,SQL,Database,I770168,Proficient,5,Certified
-SKILL070,SAP HANA,Database,I770168,Advanced,5,Certified
-SKILL071,Python,Backend,I770152,Intermediate,2,In Progress
-SKILL072,SAPUI5,Frontend,I770152,Beginner,1,In Progress
-SKL_1761927259069_wwhw60whb,QUnit,Testing,I770144,Beginner,1,In Progress
-SKL_1761927472907_6bkbe87gr,Spring Boot,Backend,I770144,Beginner,2,Certified
-SKL_1761928865104_crfgpjl40,ABAP OO,Backend,I770144,Advanced,3,In Progress
-SKL_1762162035273_m57tremvq,Fiori Elements,Frontend,I770144,Proficient,1,Certified
-SKILL073,SAP BTP,Cloud,I750145,Beginner,0,Not Certified
-SKILL074,AI,Technology,I750145,Beginner,0,Not Certified
-SKILL075,AI,Technology,I346659,Intermediate,0,Not Certified
-SKILL076,SAP BTP,Cloud,I346659,Intermediate,0,Not Certified
-SKILL077,AI,Technology,I769086,Beginner,0,Not Certified
-SKILL078,ABAP,Backend,I763161,Intermediate,8,Not Certified
-SKILL079,Fiori,Frontend,I763161,Intermediate,8,Not Certified
-SKILL080,Data Science,Analytics,I755736,Intermediate,2.5,Not Certified
-SKILL081,ABAP,Backend,I749085,Beginner,0.5,Certified
-SKILL082,SAPUI5,Frontend,I749085,Beginner,0.5,Certified
-SKILL083,ABAP,Backend,I755719,Proficient,16,Certified
-SKILL084,ABAP,Backend,I763266,Proficient,4,Not Certified
-SKILL085,ABAP,Backend,I770144,Beginner,0.17,Not Certified
-SKILL086,SAPUI5,Frontend,I770144,Beginner,0.17,Not Certified
-SKILL087,CAP,Backend,I770144,Beginner,0.17,Not Certified
-SKILL088,SAP BTP,Cloud,I770144,Beginner,0.17,Not Certified
-SKL093,SAP BTP (Business Technology Platform),Cloud,I753890,Intermediate,0,None
-SKL095,SAP Fiori,Frontend,I770144,Beginner,3,In Progress
-SKL096,SAP HANA,Database,I770144,Proficient,2,Certified
-SKL097,REST API,Integration,I770144,Intermediate,3,In Progress
-SKL098,TypeScript,Frontend,I770164,Intermediate,5,None
-SKL099,Agile/Scrum,Methodology,I770165,Beginner,6,Certified
-SKL100,TypeScript,Frontend,I770165,Proficient,1,In Progress
-SKL101,SAP Fiori,Frontend,I770165,Beginner,8,In Progress
-SKL102,SAP S/4HANA,ERP,I770166,Intermediate,5,Certified
-SKL103,SAP BTP,Cloud,I770166,Beginner,5,Certified
-SKL104,TypeScript,Frontend,I770167,Beginner,7,In Progress
-SKL105,SAP Fiori,Frontend,I770167,Beginner,2,Certified
-SKL106,SAP ABAP,ERP,I770167,Intermediate,6,None
-SKL107,JIRA,Methodology,I770168,Proficient,1,None
-SKL108,JIRA,Methodology,I750145,Intermediate,3,None
-SKL109,SAP SuccessFactors,HCM,I750145,Advanced,1,None
-SKL110,SAP ABAP,ERP,I750145,Beginner,7,None
-SKL111,SQL,Database,I346659,Expert,1,None
-SKL112,SAP ABAP,ERP,I346659,Beginner,6,None
-SKL113,OData,Integration,I769086,Advanced,1,None
-SKL114,Java,Backend,I769086,Beginner,4,Certified
-SKL115,TypeScript,Frontend,I769086,Proficient,4,None
-SKL116,Agile/Scrum,Methodology,I763161,Expert,8,None
-SKL117,SAP FI,Finance,I763161,Advanced,2,None
-SKL118,SAP ABAP,ERP,I763161,Proficient,3,Certified
-SKL119,SAP Fiori,Frontend,I755736,Intermediate,5,In Progress
-SKL120,SAP FI,Finance,I749085,Intermediate,5,Certified
-SKL121,SAP MM,ERP,I749085,Advanced,1,None
-SKL122,SAP SD,ERP,I749085,Expert,1,None
-SKL123,SAP BTP,Cloud,I753890,Intermediate,5,None
-SKL124,Machine Learning,AI,I755719,Beginner,1,None
-SKL125,SAP FI,Finance,I763266,Expert,1,None
-SKL126,SAP Security,Security,I773926,Expert,3,In Progress
-SKL127,SAP Ariba,Procurement,I773926,Advanced,6,None
-SKL128,OData,Integration,I773926,Intermediate,2,None
-SKL129,SAP Work Zone,Portal,I774156,Expert,7,None
-SKL130,SAP S/4HANA,ERP,I780001,Proficient,6,None
-SKL131,SAP Analytics Cloud,Analytics,I780001,Proficient,4,Certified
-SKL132,Git,DevOps,I780001,Proficient,3,Certified
-SKL133,Git,DevOps,I780002,Expert,2,None
-SKL134,SAP Work Zone,Portal,I780002,Beginner,2,Certified
-SKL135,Python,Backend,I780003,Expert,8,Certified
-SKL136,Agile/Scrum,Methodology,I780003,Beginner,3,In Progress
-SKL137,SAP HANA,Database,I780003,Advanced,8,Certified
-SKL138,SAP Analytics Cloud,Analytics,I780004,Expert,2,Certified
-SKL139,JavaScript,Frontend,I780004,Advanced,2,None
-SKL140,REST API,Integration,I780004,Intermediate,7,In Progress
-SKL141,Python,Backend,I780005,Expert,8,Certified
-SKL142,SAP Work Zone,Portal,I780006,Expert,2,In Progress
-SKL143,Java,Backend,I780006,Intermediate,6,In Progress
-SKL144,SAP Security,Security,I780006,Advanced,1,Certified
-SKL145,REST API,Integration,I780007,Intermediate,5,Certified
-SKL146,SAP SD,ERP,I780007,Proficient,2,Certified
-SKL147,SAP BTP,Cloud,I780008,Intermediate,3,None
-SKL148,SAP Analytics Cloud,Analytics,I780009,Expert,4,None
-SKL149,SAP FI,Finance,I780010,Expert,3,Certified
-SKL150,Cloud Computing,Cloud,I780010,Intermediate,2,Certified
-SKL151,JIRA,Methodology,I780011,Expert,1,None
-SKL152,TypeScript,Frontend,I780011,Expert,3,Certified
-SKL153,SAP Security,Security,I780012,Proficient,1,Certified
-SKL154,SAP ABAP,ERP,I780012,Proficient,6,In Progress
-SKL155,SAP Analytics Cloud,Analytics,I780012,Expert,3,Certified
-SKL156,SAP ABAP,ERP,I780013,Beginner,6,In Progress
-SKL157,JavaScript,Frontend,I780013,Intermediate,3,None
-SKL158,Cloud Computing,Cloud,I780013,Advanced,6,In Progress
-SKL159,Cloud Computing,Cloud,I780014,Beginner,2,Certified
-SKL160,Machine Learning,AI,I780015,Intermediate,1,In Progress
-SKL161,SAP Fiori,Frontend,I780016,Advanced,1,Certified
-SKL162,SAP S/4HANA,ERP,I780016,Beginner,6,None
-SKL163,Cloud Computing,Cloud,I780017,Intermediate,5,None
-SKL164,SAP Basis,Infrastructure,I780017,Proficient,2,Certified
-SKL165,Git,DevOps,I780018,Proficient,6,Certified
-SKL166,SAP MM,ERP,I780018,Advanced,2,None
-SKL167,Data Analytics,Analytics,I780019,Intermediate,5,Certified
-SKL168,SAP MM,ERP,I780019,Proficient,8,In Progress
-SKL169,SAP BTP,Cloud,I780020,Proficient,4,None
-SKL170,Python,Backend,I780020,Expert,4,None
-SKL171,SAP Fiori,Frontend,I780020,Proficient,6,None
-SKL172,SAP S/4HANA,ERP,I780021,Advanced,4,Certified
-SKL173,REST API,Integration,I780022,Expert,6,In Progress
-SKL174,SAP SuccessFactors,HCM,I780022,Expert,5,None
-SKL175,SAP Work Zone,Portal,I780022,Beginner,1,Certified
-SKL176,OData,Integration,I780023,Beginner,4,None
-SKL177,Agile/Scrum,Methodology,I780023,Intermediate,1,None
-SKL178,SAP ABAP,ERP,I780024,Expert,7,Certified
-SKL179,SAP Ariba,Procurement,I780024,Intermediate,5,None
-SKL180,SAP Analytics Cloud,Analytics,I780025,Beginner,6,None
-SKL181,Git,DevOps,I780025,Proficient,7,In Progress
-SKL182,SAP BTP,Cloud,I780025,Advanced,8,In Progress
-SKL183,JavaScript,Frontend,I780026,Advanced,7,Certified
-SKL184,Python,Backend,I780026,Expert,6,None
-SKL185,SAP Basis,Infrastructure,I780026,Advanced,8,Certified
-SKL186,SAP SD,ERP,I780027,Expert,7,Certified
-SKL187,OData,Integration,I780028,Intermediate,7,None
-SKL188,SAP S/4HANA,ERP,I780028,Proficient,8,Certified
-SKL189,SAP Basis,Infrastructure,I780029,Intermediate,7,None
-SKL190,Machine Learning,AI,I780030,Beginner,8,In Progress
-SKL191,SAP ABAP,ERP,I780031,Intermediate,2,None
-SKL192,Git,DevOps,I780031,Advanced,1,None
-SKL193,Cloud Computing,Cloud,I780031,Proficient,4,In Progress
-SKL194,SAP SD,ERP,I780032,Proficient,5,In Progress
-SKL195,SAP Analytics Cloud,Analytics,I780032,Beginner,3,Certified
-SKL196,Machine Learning,AI,I780032,Expert,8,Certified
-SKL197,SAP Ariba,Procurement,I780033,Proficient,7,Certified
-SKL198,Data Analytics,Analytics,I780034,Proficient,7,Certified
-SKL199,SAP Ariba,Procurement,I780035,Advanced,5,None
-SKL200,SAP Security,Security,I780035,Advanced,4,In Progress
-SKL201,SAP Fiori,Frontend,I780035,Intermediate,3,None
-SKL202,SAP HANA,Database,I780036,Proficient,5,None
-SKL203,SAP MM,ERP,I780037,Advanced,7,None
-SKL204,SAP Fiori,Frontend,I780037,Expert,8,None
-SKL205,SAP Analytics Cloud,Analytics,I780038,Proficient,5,None
-SKL206,OData,Integration,I780039,Intermediate,6,In Progress
-SKL207,OData,Integration,I780040,Expert,1,None
-SKL208,Python,Backend,I780040,Intermediate,6,Certified
-SKL209,SAP Analytics Cloud,Analytics,I780041,Advanced,4,In Progress
-SKL210,Machine Learning,AI,I780042,Advanced,3,None
-SKL211,SAP Fiori,Frontend,I780042,Proficient,3,In Progress
-SKL212,SAP S/4HANA,ERP,I780043,Proficient,1,None
-SKL213,SAP SuccessFactors,HCM,I780044,Intermediate,6,None
-SKL214,SAP BTP,Cloud,I780045,Beginner,2,In Progress
-SKL215,Java,Backend,I780045,Advanced,7,Certified
-SKL216,SAP Basis,Infrastructure,I780045,Beginner,5,Certified
-SKL217,SAP UI5,Frontend,I780046,Intermediate,1,None
-SKL218,SAP HANA,Database,I780046,Beginner,2,None
-SKL219,Machine Learning,AI,I780046,Beginner,6,In Progress
-SKL220,SAP UI5,Frontend,I780047,Advanced,8,In Progress
-SKL221,REST API,Integration,I780047,Intermediate,4,In Progress
-SKL222,SAP Work Zone,Portal,I780048,Intermediate,5,None
-SKL223,SAP Basis,Infrastructure,I780049,Intermediate,5,In Progress
-SKL224,Java,Backend,I780049,Beginner,1,None
-SKL225,Data Analytics,Analytics,I780049,Intermediate,8,In Progress
-SKL226,Data Analytics,Analytics,I780050,Expert,2,Certified
-SKL227,Python,Backend,I780051,Advanced,4,None
-SKL228,Machine Learning,AI,I780052,Proficient,2,None
-SKL229,SAP BTP,Cloud,I780053,Advanced,6,None
-SKL230,SAP S/4HANA,ERP,I780053,Intermediate,2,In Progress
-SKL231,OData,Integration,I780054,Beginner,3,None
-SKL232,SAP BTP,Cloud,I780054,Proficient,4,Certified
-SKL233,SAP Ariba,Procurement,I780055,Expert,1,None
-SKL234,SAP MM,ERP,I780055,Beginner,4,None
-SKL235,JIRA,Methodology,I780055,Advanced,3,Certified
-SKL236,Python,Backend,I780056,Beginner,7,In Progress
-SKL237,SAP Fiori,Frontend,I780056,Intermediate,5,In Progress
-SKL238,Data Analytics,Analytics,I780056,Proficient,2,In Progress
-SKL239,SAP S/4HANA,ERP,I780057,Proficient,6,In Progress
-SKL240,TypeScript,Frontend,I780057,Beginner,5,Certified
-SKL241,SQL,Database,I780057,Advanced,6,None
-SKL242,JIRA,Methodology,I780058,Proficient,6,Certified
-SKL243,TypeScript,Frontend,I780059,Beginner,6,Certified
-SKL244,JIRA,Methodology,I780059,Proficient,1,In Progress
-SKL245,SAP FI,Finance,I780060,Beginner,4,None
-SKL246,TypeScript,Frontend,I780060,Beginner,8,Certified
-SKL247,REST API,Integration,I780060,Expert,8,Certified
-SKL248,Data Analytics,Analytics,I780061,Proficient,4,None
-SKL249,SAP Ariba,Procurement,I780061,Expert,7,Certified
-SKL250,SAP Work Zone,Portal,I780062,Expert,1,Certified
-SKL251,SAP CO,Finance,I780062,Proficient,4,None
-SKL252,SAP BTP,Cloud,I780062,Proficient,1,In Progress
-SKL253,SAP Fiori,Frontend,I780063,Proficient,6,None
-SKL254,SAP ABAP,ERP,I780064,Advanced,6,In Progress
-SKL255,Git,DevOps,I780065,Expert,2,None
-SKL256,SAP SD,ERP,I780065,Intermediate,2,Certified
-SKL257,Data Analytics,Analytics,I780065,Beginner,1,None
-SKL258,SAP BTP,Cloud,I780066,Intermediate,3,None
-SKL259,JIRA,Methodology,I780066,Expert,5,Certified
-SKL260,Machine Learning,AI,I780066,Expert,5,None
-SKL261,SAP CO,Finance,I780067,Advanced,6,In Progress
-SKL262,OData,Integration,I780068,Intermediate,7,In Progress
-SKL263,SAP Integration Suite,Integration,I780069,Expert,3,None
-SKL264,SAP SuccessFactors,HCM,I780070,Beginner,6,In Progress
-SKL265,SAP Analytics Cloud,Analytics,I780070,Advanced,6,None
-SKL266,SAP MM,ERP,I780070,Advanced,3,None
-SKL267,SQL,Database,I780071,Intermediate,7,None
-SKL268,Cloud Computing,Cloud,I780071,Advanced,5,In Progress
-SKL269,SAP FI,Finance,I780071,Beginner,7,None
-SKL270,Machine Learning,AI,I780072,Proficient,4,In Progress
-SKL271,Machine Learning,AI,I780073,Beginner,3,In Progress
-SKL272,SAP Analytics Cloud,Analytics,I780073,Intermediate,4,None
-SKL273,SAP Fiori,Frontend,I780074,Proficient,1,Certified
-SKL274,SAP BTP,Cloud,I780074,Proficient,4,None
-SKL275,JavaScript,Frontend,I780075,Intermediate,3,None
-SKL276,SAP UI5,Frontend,I780075,Advanced,2,Certified
-SKL277,SAP BTP,Cloud,I780075,Expert,5,In Progress
-SKL278,SAP SuccessFactors,HCM,I780076,Proficient,3,None
-SKL279,Cloud Computing,Cloud,I780077,Beginner,1,None
-SKL280,Java,Backend,I780078,Proficient,8,None
-SKL281,SAP FI,Finance,I780078,Expert,6,Certified
-SKL282,REST API,Integration,I780078,Advanced,6,None
-SKL283,Python,Backend,I780079,Expert,1,In Progress
-SKL284,SAP CO,Finance,I780079,Proficient,4,None
-SKL285,SAP MM,ERP,I780080,Beginner,7,None
-SKL286,SAP BTP,Cloud,I780080,Intermediate,6,None
-SKL287,SAP Basis,Infrastructure,I780080,Advanced,8,None
-SKL288,SQL,Database,I780081,Proficient,7,None
-SKL289,Data Analytics,Analytics,I780081,Expert,3,In Progress
-SKL290,Python,Backend,I780082,Beginner,7,Certified
-SKL291,SAP SuccessFactors,HCM,I780083,Proficient,6,None
-SKL292,Git,DevOps,I780083,Proficient,5,None
-SKL293,SAP MM,ERP,I780084,Intermediate,4,None
-SKL294,SAP CO,Finance,I780084,Beginner,5,Certified
-SKL295,JavaScript,Frontend,I780085,Advanced,3,None
-SKL296,Data Analytics,Analytics,I780086,Proficient,1,None
-SKL297,SAP Analytics Cloud,Analytics,I780086,Advanced,6,Certified
-SKL298,SAP Work Zone,Portal,I780087,Expert,2,None
-SKL299,SAP Fiori,Frontend,I780088,Expert,1,None
-SKL300,SAP Security,Security,I780088,Intermediate,8,None
-SKL301,TypeScript,Frontend,I780089,Proficient,5,Certified
-SKL302,SAP BTP,Cloud,I780089,Proficient,1,None
-SKL303,Cloud Computing,Cloud,I780089,Beginner,8,In Progress
-SKL304,Python,Backend,I780090,Proficient,4,Certified
-SKL305,JavaScript,Frontend,I780090,Expert,4,None
-SKL306,SAP Fiori,Frontend,I780091,Expert,7,None
-SKL307,SAP Security,Security,I780091,Proficient,7,Certified
-SKL308,SAP MM,ERP,I780092,Intermediate,1,None
-SKL309,SAP CO,Finance,I780092,Beginner,2,Certified
-SKL310,TypeScript,Frontend,I780092,Expert,8,In Progress
-SKL311,SAP SuccessFactors,HCM,I780093,Expert,7,None
-SKL312,Git,DevOps,I780094,Proficient,1,In Progress
-SKL313,SAP Work Zone,Portal,I780094,Proficient,7,Certified
-SKL314,JIRA,Methodology,I780095,Expert,3,None
-SKL315,SAP FI,Finance,I780095,Intermediate,3,Certified
-SKL316,SQL,Database,I780095,Expert,2,None
-SKL317,SAP Integration Suite,Integration,I780096,Advanced,8,In Progress
-SKL318,SAP Work Zone,Portal,I780097,Advanced,1,None
-SKL319,SAP Fiori,Frontend,I780097,Expert,1,None
-SKL320,SAP S/4HANA,ERP,I780098,Advanced,4,None
-SKL321,SAP MM,ERP,I780098,Advanced,5,None
-SKL322,SAP SuccessFactors,HCM,I780098,Proficient,7,In Progress
-SKL323,JIRA,Methodology,I780099,Expert,7,Certified
-SKL324,SAP S/4HANA,ERP,I780100,Proficient,6,Certified
-SKL325,OData,Integration,I780101,Beginner,7,Certified
-SKL326,REST API,Integration,I780102,Advanced,5,Certified
-SKL327,Java,Backend,I780103,Intermediate,6,In Progress
-SKL328,Data Analytics,Analytics,I780104,Beginner,3,Certified
-SKL329,SQL,Database,I780105,Advanced,7,In Progress
-SKL330,SAP CO,Finance,I780106,Intermediate,5,Certified
-SKL331,SAP SuccessFactors,HCM,I780106,Advanced,3,None
-SKL332,SAP Integration Suite,Integration,I780107,Proficient,3,In Progress
-SKL333,Cloud Computing,Cloud,I780107,Expert,6,Certified
-SKL334,REST API,Integration,I780108,Intermediate,2,In Progress
-SKL335,SAP FI,Finance,I780108,Proficient,8,None
-SKL336,Python,Backend,I780108,Expert,6,In Progress
-SKL337,SAP Integration Suite,Integration,I780109,Beginner,2,None
-SKL338,REST API,Integration,I780110,Expert,1,None
-SKL339,OData,Integration,I780111,Beginner,4,In Progress
-SKL340,SAP Basis,Infrastructure,I780112,Advanced,7,In Progress
-SKL341,SAP Security,Security,I780113,Expert,1,In Progress
-SKL342,JavaScript,Frontend,I780113,Beginner,6,None
-SKL343,Java,Backend,I780114,Expert,2,None
-SKL344,Python,Backend,I780114,Intermediate,2,None
-SKL345,JIRA,Methodology,I780114,Advanced,2,Certified
-SKL346,SAP UI5,Frontend,I780115,Beginner,6,None
-SKL347,Agile/Scrum,Methodology,I780115,Beginner,2,None
-SKL348,SQL,Database,I780115,Beginner,1,Certified
-SKL349,Machine Learning,AI,I780116,Beginner,2,Certified
-SKL350,SAP Security,Security,I780117,Advanced,2,Certified
-SKL351,SAP Integration Suite,Integration,I780118,Intermediate,8,In Progress
-SKL352,SAP BTP,Cloud,I780118,Proficient,2,None
-SKL353,SAP SuccessFactors,HCM,I780118,Advanced,1,None
-SKL354,JIRA,Methodology,I780119,Intermediate,5,None
-SKL355,JavaScript,Frontend,I780119,Advanced,1,None
-SKL356,SAP ABAP,ERP,I780120,Intermediate,2,Certified
-SKL357,Machine Learning,AI,I780120,Proficient,4,None
-SKL358,SAP MM,ERP,I780121,Beginner,7,None
-SKL359,SQL,Database,I780122,Expert,2,None
-SKL360,OData,Integration,I780123,Intermediate,6,Certified
-SKL361,SAP SD,ERP,I780123,Proficient,4,Certified
-SKL362,SAP SuccessFactors,HCM,I780123,Intermediate,6,None
-SKL363,Python,Backend,I780124,Intermediate,7,Certified
-SKL364,Data Analytics,Analytics,I780124,Advanced,8,In Progress
-SKL365,SAP BTP,Cloud,I780124,Beginner,6,None
-SKL366,Agile/Scrum,Methodology,I780125,Proficient,2,Certified
-SKL367,SAP Work Zone,Portal,I780126,Proficient,7,Certified
-SKL368,SAP Integration Suite,Integration,I780126,Advanced,6,None
-SKL369,SAP BTP,Cloud,I780126,Proficient,2,In Progress
-SKL370,TypeScript,Frontend,I780127,Intermediate,2,None
-SKL371,SAP UI5,Frontend,I780128,Expert,4,In Progress
-SKL372,SAP SuccessFactors,HCM,I780128,Expert,2,In Progress
-SKL373,SAP Security,Security,I780129,Intermediate,1,None
-SKL374,Agile/Scrum,Methodology,I780129,Expert,5,In Progress
-SKL375,OData,Integration,I780130,Expert,1,None
-SKL376,SAP S/4HANA,ERP,I780131,Intermediate,7,None
-SKL377,TypeScript,Frontend,I780131,Beginner,3,None
-SKL378,SAP S/4HANA,ERP,I780132,Advanced,7,In Progress
-SKL379,SAP UI5,Frontend,I780132,Proficient,1,None
-SKL380,SAP Fiori,Frontend,I780132,Beginner,3,Certified
-SKL381,SAP Fiori,Frontend,I780133,Intermediate,8,In Progress
-SKL382,Cloud Computing,Cloud,I780134,Intermediate,4,None
-SKL383,SAP UI5,Frontend,I780134,Expert,6,Certified
-SKL384,Java,Backend,I780135,Proficient,2,Certified
-SKL385,SAP Fiori,Frontend,I780135,Proficient,1,None
-SKL386,SAP UI5,Frontend,I780135,Beginner,3,Certified
-SKL387,Git,DevOps,I780136,Expert,7,Certified
-SKL388,SAP MM,ERP,I780137,Expert,7,In Progress
-SKL389,SAP HANA,Database,I780137,Proficient,6,None
-SKL390,SAP Ariba,Procurement,I780137,Advanced,7,Certified
-SKL391,Machine Learning,AI,I780138,Expert,5,None
-SKL392,SAP Fiori,Frontend,I780139,Proficient,1,None
-SKL393,Agile/Scrum,Methodology,I780139,Expert,3,In Progress
-SKL394,SAP BTP,Cloud,I780139,Proficient,5,None
-SKL395,JavaScript,Frontend,I780140,Beginner,6,In Progress
-SKL396,SAP Security,Security,I780140,Proficient,3,In Progress
-SKL397,SQL,Database,I780141,Intermediate,2,In Progress
-SKL398,SAP CO,Finance,I780141,Intermediate,7,In Progress
-SKL399,Data Analytics,Analytics,I780141,Proficient,8,In Progress
-SKL400,SAP CO,Finance,I780142,Advanced,2,In Progress
-SKL401,Cloud Computing,Cloud,I780142,Expert,2,Certified
+"skillId","skillName","category","employeeId","proficiencyLevel","yearsExperience","certificationStatus"
+"5d962b3b-be00-4e70-9117-59bf71954245","SAPUI5","Frontend","I770144","Advanced","6","Certified"
+"eee46453-c674-4491-a1aa-dfad236e17c7","SAPUI5","Frontend","I770145","Intermediate","4","In Progress"
+"68bce6f2-4427-4915-a2db-903f5f8c866a","SAP HANA","Database","I770146","Advanced","8","Certified"
+"5be17b4a-6032-4b24-bcb1-a0b9d7aa803f","SAP HANA","Database","I770144","Intermediate","3","Not Certified"
+"68027978-7a16-4ca9-bb8f-3423861653bd","Data Warehouse","Analytics","I770145","Expert","10","Certified"
+"cc99f209-30db-4272-a0b0-5a32253a9d5a","SAP Analytics Cloud (SAC)","Analytics","I770148","Advanced","7","Certified"
+"e39bac6d-f1a4-44ad-abfd-6247080c289e","TypeScript","Frontend","I770145","Intermediate","4","Certified"
+"aedd6967-0124-45b2-9ad8-aeb4982dba2a","SAP BTP (Business Technology Platform)","Cloud","I770148","Advanced","6","Certified"
+"0c301f92-24b0-4d8c-9ae5-848ca40513d9","Selenium","Testing","I770149","Intermediate","5","Certified"
+"f1e7ae8b-58ee-4a6c-9581-83e58ed30058","Java","Backend","I770144","Expert","5","In Progress"
+"9691c03e-7df4-4f51-96c9-3518fbe67875","Python","Backend","I770144","Advanced","3","None"
+"d9044315-8edb-451f-9f5a-aec037d55ffe","Java","Backend","I770151","Proficient","1","Certified"
+"4741954f-4fff-4a1e-ad49-07ee6605386b","ABAP","Backend","I770151","Beginner","0","None"
+"c1d58ce5-c973-4f9b-8767-b6fb5ed5e9e8","SAP CAP","FullStack","I770151","Intermediate","1","In Progress"
+"f42b2bb6-6d2e-4971-ae4a-fa429024e44d","SAPUI5","Frontend","I770151","Intermediate","1","In Progress"
+"6fcc2aa8-8aee-4efa-878f-52e8e23c41b7","Java","Backend","I770152","Intermediate","2","In Progress"
+"2a68eab7-983d-4c2c-b0a5-67390306c840","SAP Ariba","Procurement","I770154","Advanced","5","Certified"
+"18f9ff3b-c4ac-4e6d-9e28-ae236d1268a7","Ariba Sourcing","Procurement","I770154","Proficient","4","In Progress"
+"163b00fb-6452-412d-a3f4-508c9de3d0f5","JavaScript","Frontend","I770154","Intermediate","3","Not Certified"
+"80f3cc30-7712-4cf2-a069-4c7f7aad160f","SQL","Database","I770154","Advanced","5","Certified"
+"30ae6a4c-142f-472c-9481-a72345cb50fb","Ariba Analytics","Procurement","I770155","Proficient","4","Certified"
+"6fe54dfd-00ce-4783-8af0-ae87b912fad1","Power BI","Analytics","I770155","Expert","6","Certified"
+"c4cc080a-23f5-4095-ace2-20a36dfc9a84","SAP Analytics Cloud (SAC)","Analytics","I770155","Advanced","3","In Progress"
+"8cb994e6-acce-4082-9005-6d3621e2aa2a","Ariba Contracts","Procurement","I770155","Intermediate","2","Not Certified"
+"908e9232-1473-4ad8-8919-d465e3936dc1","Ariba Integration","Procurement","I770156","Expert","6","Certified"
+"cde66a84-f5e7-4c66-9309-caed8dbfd0f2","SAP PI/PO (Process Integration)","Integration","I770156","Advanced","5","Certified"
+"72f8f2c1-8614-4c7c-a8e6-f5f3274b77c9","REST API","Integration","I770156","Proficient","4","Certified"
+"710b49e7-58cb-4fd4-b87e-426b8c6392b1","Java","Backend","I770156","Advanced","6","Certified"
+"5fbdbdce-c080-4a0f-bcec-7928b2a748f2","Selenium","Testing","I770157","Advanced","4","Certified"
+"edbd489d-778b-4237-b0ea-09fd4b6ec01a","SAP Test Automation","Testing","I770157","Proficient","3","In Progress"
+"75417638-95b5-40b4-b386-bd0cffff8968","ABAP","Backend","I770158","Expert","8","Certified"
+"c365340e-a0fd-41a9-afb0-fff33e651b33","SAP S/4HANA","FullStack","I770158","Advanced","7","Certified"
+"1249b92d-2656-4834-a415-81edf5ee9183","Cloud Foundry","Cloud","I770158","Proficient","5","Certified"
+"86a41f32-1f6c-48bf-ab06-5cefd919e33e","CI/CD","DevOps","I770158","Advanced","6","Certified"
+"3eaaa8b3-a5a1-4d93-a03d-c3569ac43e7c","Cloud Foundry","Cloud","I770159","Expert","7","Certified"
+"c7a2ba09-501b-4927-ab2b-d97f37f09be7","Node.js","Backend","I770159","Advanced","6","Certified"
+"d0030402-bd7d-440f-ba27-2f5da3450dcd","React","Frontend","I770159","Proficient","4","Certified"
+"0c2646e3-8721-4ebe-9abb-c9187d47bfcb","Docker","Cloud","I770159","Advanced","5","Certified"
+"a5102a4f-c85e-4da9-96db-be5a1f946786","SAP CAP","FullStack","I770160","Expert","6","Certified"
+"e88ef4be-3f16-459a-bc14-ac1413e49f94","SAPUI5","Frontend","I770160","Advanced","5","Certified"
+"aaeee704-4089-434d-91a4-972db6d378a2","OData","Integration","I770160","Proficient","4","Certified"
+"7eab9efb-c293-4314-a73f-0afea871d38b","SAP HANA Cloud","Database","I770160","Advanced","5","Certified"
+"b822651a-35e0-4ce4-b8de-4e900b1b3215","SAP Integration Suite","Integration","I770161","Expert","8","Certified"
+"e8844505-f60d-4311-8cde-4ee3ba9c39d7","API Management","Integration","I770161","Advanced","6","Certified"
+"f9759503-dddc-4c87-add6-8262ca2f6330","SAP CPI (Cloud Platform Integration)","Integration","I770161","Proficient","5","Certified"
+"0d7c2846-4588-40e5-8312-912352e7011e","Microservices Architecture","FullStack","I770161","Advanced","6","Certified"
+"9482cd32-debc-4f74-aa9b-283c359bef22","SAP Fiori","Frontend","I770162","Advanced","5","Certified"
+"478d3ac1-4e02-4569-b30d-7366cae20420","SAPUI5","Frontend","I770162","Expert","6","Certified"
+"b28cac85-62b0-47fd-a3e5-0082b54884f6","JavaScript","Frontend","I770162","Proficient","4","Certified"
+"15641119-fe0d-413f-94b1-171073efa170","Kubernetes","Cloud","I770163","Advanced","4","Certified"
+"4da95dd8-2807-47d5-b99d-08d8aa2e0711","Jenkins","DevOps","I770163","Proficient","3","Certified"
+"e2c84c9e-0402-4a97-bf53-4755458eb341","Git","DevOps","I770163","Advanced","5","Certified"
+"1c85b786-de24-42cb-aba3-53fa47cf14f4","Python","Backend","I770164","Expert","7","Certified"
+"51e8f7e7-d49a-4e73-abc6-997d558f8f89","SQL","Database","I770164","Advanced","6","Certified"
+"f7cc7cd9-f265-4768-9f5f-cb3ebec98184","Tableau","Analytics","I770164","Proficient","4","Certified"
+"0aa0eda0-3bf4-456f-bb20-235616026ef9","Machine Learning","Analytics","I770164","Advanced","5","Certified"
+"8e151f0a-2e71-4943-bb6a-bce76929abfc","SAP BusinessObjects","Analytics","I770165","Expert","8","Certified"
+"f506ca65-71b3-4ea7-b6f5-3df8e0b6c4dd","SAP BW/4HANA","Analytics","I770165","Advanced","7","Certified"
+"f96bd9d7-6185-4ffa-8816-5974dcff1447","Power BI","Analytics","I770165","Proficient","5","Certified"
+"7398625e-5c56-472a-97d7-0c438a83a816","Python","Backend","I770165","Advanced","6","Certified"
+"153e8a69-712d-412a-9e43-361f9b4a1619","SAP Analytics Cloud (SAC)","Analytics","I770166","Expert","6","Certified"
+"84b8b8ff-9bb1-412a-960a-9737e3ad9ac5","Data Warehouse","Analytics","I770166","Advanced","5","Certified"
+"c6e56a8c-b2a2-4f7b-ac7c-05c487391d29","SAP Fiori","Frontend","I770166","Proficient","4","Certified"
+"70e68954-df17-49fe-a5b6-bf4aa1700a8b","SAP Analytics Cloud (SAC)","Analytics","I770167","Expert","5","Certified"
+"79993b86-b51c-4e79-86cd-15d0206ea449","Predictive Analytics","Analytics","I770167","Advanced","4","Certified"
+"5153c0c9-edc9-4c44-9862-8da63e5b9644","SAP Datasphere","Analytics","I770167","Proficient","3","Certified"
+"befcc985-e09d-4cf0-bf03-1fc45d4c656a","Data Warehouse","Analytics","I770168","Expert","7","Certified"
+"4c6e3be0-40d4-4119-bd5d-8ebbbc10b146","SAP BW/4HANA","Analytics","I770168","Advanced","6","Certified"
+"ba457123-f3ba-4838-be2a-b3e327237d61","SQL","Database","I770168","Proficient","5","Certified"
+"3c8f71ac-0b5c-44a5-a32d-0044c8ad4db4","SAP HANA","Database","I770168","Advanced","5","Certified"
+"dae030d0-346f-44fc-9288-fd0aac5c7494","Python","Backend","I770152","Intermediate","2","In Progress"
+"cecef836-c85c-4526-86f7-49c5015e8ffd","SAPUI5","Frontend","I770152","Beginner","1","In Progress"
+"4096fba7-c1e3-4496-b557-63cdd5344f47","QUnit","Testing","I770144","Beginner","1","In Progress"
+"2a6d450a-75bb-4718-b4dd-6ddeecc5f8ad","Spring Boot","Backend","I770144","Beginner","2","Certified"
+"21398a60-3321-4057-9ea1-6d3c449cb5bb","ABAP OO","Backend","I770144","Advanced","3","In Progress"
+"bb0c9f59-0492-4611-b96b-343762a6819c","Fiori Elements","Frontend","I770144","Proficient","1","Certified"
+"faeaa960-12c9-4087-a8c9-1077c2beea6b","SAP BTP","Cloud","I750145","Beginner","0","Not Certified"
+"01f6e4f9-a634-46a8-90ce-13562b392c29","AI","Technology","I750145","Beginner","0","Not Certified"
+"37b012ae-7a62-4b87-967f-70a65e3651db","AI","Technology","I346659","Intermediate","0","Not Certified"
+"5cc098d4-dab2-4c8e-9f5e-d1caf3b9a192","SAP BTP","Cloud","I346659","Intermediate","0","Not Certified"
+"348b5f48-5684-4a1a-ae93-e94d8f056775","AI","Technology","I769086","Beginner","0","Not Certified"
+"865a2999-e3af-42e4-b50b-ebe3e47c9a4f","ABAP","Backend","I763161","Intermediate","8","Not Certified"
+"48cddec7-d616-4d1d-9863-e0828c1724a9","Fiori","Frontend","I763161","Intermediate","8","Not Certified"
+"a2294e0a-e32b-4696-b9dd-c2e6a86ae732","Data Science","Analytics","I755736","Intermediate","2.5","Not Certified"
+"c91d096f-a856-4619-95a9-10b8c0ea73a1","ABAP","Backend","I749085","Beginner","0.5","Certified"
+"c7858a11-54ae-4c8f-94c8-38dc506bcdb8","SAPUI5","Frontend","I749085","Beginner","0.5","Certified"
+"798ad76e-ad38-48e7-9ddc-140acf820469","ABAP","Backend","I755719","Proficient","16","Certified"
+"8500f08e-304c-41c3-bbdf-49acfbfd3f8f","ABAP","Backend","I763266","Proficient","4","Not Certified"
+"0983432d-f1cf-4368-be9a-12d07e202742","ABAP","Backend","I770144","Beginner","0.17","Not Certified"
+"eaf0e761-a054-487b-9b4e-1553991d58f0","SAPUI5","Frontend","I770144","Beginner","0.17","Not Certified"
+"a93fd316-911b-4fbb-84ec-6d736fa54c22","CAP","Backend","I770144","Beginner","0.17","Not Certified"
+"5de1696b-e238-4cde-90f3-00b9175f7493","SAP BTP","Cloud","I770144","Beginner","0.17","Not Certified"
+"3abf4adc-dd63-4fb7-922c-8d2b3d8a9dd8","SAP BTP (Business Technology Platform)","Cloud","I753890","Intermediate","0","None"
+"8eaca6eb-0d76-4ad7-a0f1-372dcfc6351b","SAP Fiori","Frontend","I770144","Beginner","3","In Progress"
+"0e12062a-3243-4152-916b-f27dc54ab968","SAP HANA","Database","I770144","Proficient","2","Certified"
+"b00104e0-123c-4fb2-8a38-28098e243acf","REST API","Integration","I770144","Intermediate","3","In Progress"
+"d6180242-7450-4936-a055-cf6c8cb0ab03","TypeScript","Frontend","I770164","Intermediate","5","None"
+"bd880fd1-56f1-45ac-8364-4c68a48a6686","Agile/Scrum","Methodology","I770165","Beginner","6","Certified"
+"e42bcddd-9afd-4658-8150-852da6134f11","TypeScript","Frontend","I770165","Proficient","1","In Progress"
+"f635067a-72f2-4c8e-839a-94661898b1d6","SAP Fiori","Frontend","I770165","Beginner","8","In Progress"
+"cb09d9d5-884d-40db-8064-e1c31548e34f","SAP S/4HANA","ERP","I770166","Intermediate","5","Certified"
+"3b3f6686-1540-4730-8563-d831f9db5b2f","SAP BTP","Cloud","I770166","Beginner","5","Certified"
+"dbc1f14a-783e-4657-ba5d-b02831613b56","TypeScript","Frontend","I770167","Beginner","7","In Progress"
+"966b7753-cbf1-4158-a992-c78be2455229","SAP Fiori","Frontend","I770167","Beginner","2","Certified"
+"a3ae1e1e-5d2d-43e4-ac5e-01531cde1133","SAP ABAP","ERP","I770167","Intermediate","6","None"
+"5decc2d0-69cb-4d1c-a859-1883df2f9dcd","JIRA","Methodology","I770168","Proficient","1","None"
+"6ea351bd-c5d7-47a3-aaac-244e560ae237","JIRA","Methodology","I750145","Intermediate","3","None"
+"bde1b3d4-0206-4c7a-b804-492fd2e22bf1","SAP SuccessFactors","HCM","I750145","Advanced","1","None"
+"0ddde4f0-4662-41e0-b3bb-a1fdc5afebb2","SAP ABAP","ERP","I750145","Beginner","7","None"
+"b23c7f34-95c1-4567-b892-ae47d71592b0","SQL","Database","I346659","Expert","1","None"
+"824c9ea7-a4fe-4188-882c-128b7a206fe4","SAP ABAP","ERP","I346659","Beginner","6","None"
+"208b7db7-e382-4800-be0f-9c3405c9b25c","OData","Integration","I769086","Advanced","1","None"
+"74e0b19c-0082-4da1-a06c-bce86705e511","Java","Backend","I769086","Beginner","4","Certified"
+"19496ae6-8d5a-4ec4-8f88-016fa86e7deb","TypeScript","Frontend","I769086","Proficient","4","None"
+"89b3b0f5-e2b9-40d3-80e1-3426352a25ee","Agile/Scrum","Methodology","I763161","Expert","8","None"
+"87c9bcf6-42c4-4d3c-b4e9-e66eb6f152de","SAP FI","Finance","I763161","Advanced","2","None"
+"b6208e25-2af4-4838-b7c8-4a39c44418f4","SAP ABAP","ERP","I763161","Proficient","3","Certified"
+"b1d122b2-6929-439b-8548-e35c398a9db2","SAP Fiori","Frontend","I755736","Intermediate","5","In Progress"
+"20584704-88e2-4930-9751-12f294840947","SAP FI","Finance","I749085","Intermediate","5","Certified"
+"24e87cf3-1915-4c0c-97ab-51f3f3e49e19","SAP MM","ERP","I749085","Advanced","1","None"
+"d86fbe61-7ca2-4b7b-8a07-5328978f3ad1","SAP SD","ERP","I749085","Expert","1","None"
+"7b4c1222-986a-4b14-851e-3990df3c6ee3","SAP BTP","Cloud","I753890","Intermediate","5","None"
+"e8c19deb-2aef-4ba7-aa92-973148d66a4b","Machine Learning","AI","I755719","Beginner","1","None"
+"3167397d-e33e-481f-8883-1b145d249b07","SAP FI","Finance","I763266","Expert","1","None"
+"51f14e81-0a1f-4c81-901f-c2dc7caee533","SAP Security","Security","I773926","Expert","3","In Progress"
+"ad0f409e-9fa1-4446-9ab1-46c76351e429","SAP Ariba","Procurement","I773926","Advanced","6","None"
+"f8873972-17bb-45e2-be86-988cc3cef37c","OData","Integration","I773926","Intermediate","2","None"
+"55a78a44-c8ed-46ed-be1b-83b50cb253a8","SAP Work Zone","Portal","I774156","Expert","7","None"
+"04832bf8-597a-4add-be58-988824b934b6","SAP S/4HANA","ERP","I780001","Proficient","6","None"
+"18c847af-49cd-45c6-a715-1d8d1734a37e","SAP Analytics Cloud","Analytics","I780001","Proficient","4","Certified"
+"8dc433ae-4a1e-4d20-83aa-7a2b0178f15d","Git","DevOps","I780001","Proficient","3","Certified"
+"d4ffd50c-9133-4877-a514-128a68cfebd6","Git","DevOps","I780002","Expert","2","None"
+"04050501-2f16-456c-818a-720c6a49847c","SAP Work Zone","Portal","I780002","Beginner","2","Certified"
+"e6487497-6e07-4e8e-baeb-fcd4af7708f8","Python","Backend","I780003","Expert","8","Certified"
+"d8f10265-1623-4f74-a879-527f91e71267","Agile/Scrum","Methodology","I780003","Beginner","3","In Progress"
+"bccc9aee-dc92-44d8-919a-24516ba4ac4c","SAP HANA","Database","I780003","Advanced","8","Certified"
+"2374844d-75fb-4239-b212-6a65fb76775d","SAP Analytics Cloud","Analytics","I780004","Expert","2","Certified"
+"a70557a3-7759-4ba8-8a53-fde168435c87","JavaScript","Frontend","I780004","Advanced","2","None"
+"9dc0a039-776b-4e20-9f3a-318d9f3c2c5e","REST API","Integration","I780004","Intermediate","7","In Progress"
+"7ef4ed85-35f1-4b6e-beff-b1ba8976a85c","Python","Backend","I780005","Expert","8","Certified"
+"5c9127d1-d94b-400f-8118-056c9131b0e5","SAP Work Zone","Portal","I780006","Expert","2","In Progress"
+"232d9a0b-4a36-4387-a45a-854154d0f001","Java","Backend","I780006","Intermediate","6","In Progress"
+"721b07aa-9de8-42ab-864e-8cf567f52f63","SAP Security","Security","I780006","Advanced","1","Certified"
+"51f05923-6400-4b10-bd01-e41c2103ac08","REST API","Integration","I780007","Intermediate","5","Certified"
+"7c67dc5b-c138-4324-b3f8-1f051bdd1369","SAP SD","ERP","I780007","Proficient","2","Certified"
+"2815cc61-c595-4c50-befb-3da9672d171d","SAP BTP","Cloud","I780008","Intermediate","3","None"
+"7a4d1be2-0f3c-4a76-b5ba-526c6332926b","SAP Analytics Cloud","Analytics","I780009","Expert","4","None"
+"57b2f8f9-7fd1-4bb0-84fa-9b3bc869f33b","SAP FI","Finance","I780010","Expert","3","Certified"
+"560f38c6-48a0-4b78-9b00-324d5e5a2bc9","Cloud Computing","Cloud","I780010","Intermediate","2","Certified"
+"f5b9832b-b9f4-4a09-bb1d-883b7409b97c","JIRA","Methodology","I780011","Expert","1","None"
+"9aaccabc-43df-4cba-8d37-f00223de03a2","TypeScript","Frontend","I780011","Expert","3","Certified"
+"1cc30104-d8b5-45c4-8eea-55ddee4c5413","SAP Security","Security","I780012","Proficient","1","Certified"
+"318d749c-51f2-46c2-aafa-9891e135e63b","SAP ABAP","ERP","I780012","Proficient","6","In Progress"
+"39e49141-378b-490b-9151-63999e642b3d","SAP Analytics Cloud","Analytics","I780012","Expert","3","Certified"
+"4e3d547e-0ae4-437a-8a76-5da291365980","SAP ABAP","ERP","I780013","Beginner","6","In Progress"
+"c8464837-7242-476f-b253-4f743f6a3de1","JavaScript","Frontend","I780013","Intermediate","3","None"
+"7a3bc321-f245-4cce-82a8-34d1d40daa55","Cloud Computing","Cloud","I780013","Advanced","6","In Progress"
+"b70c1cf3-7217-4440-a46b-270fe1890484","Cloud Computing","Cloud","I780014","Beginner","2","Certified"
+"7ca36491-a6d3-4c48-87b1-f546f20fc9a6","Machine Learning","AI","I780015","Intermediate","1","In Progress"
+"32e62cdd-291c-4b48-b860-308e772c0314","SAP Fiori","Frontend","I780016","Advanced","1","Certified"
+"c83530d4-1844-4048-8586-af8c76f30114","SAP S/4HANA","ERP","I780016","Beginner","6","None"
+"42ca7a12-547d-4c18-89d6-b5d2c02fc2ad","Cloud Computing","Cloud","I780017","Intermediate","5","None"
+"b1349764-da53-4947-83a7-3c4356036f5a","SAP Basis","Infrastructure","I780017","Proficient","2","Certified"
+"180ab68c-f8dd-44aa-b427-82b14475e1b2","Git","DevOps","I780018","Proficient","6","Certified"
+"d6c05e00-7999-4914-bb76-1a6157aa3015","SAP MM","ERP","I780018","Advanced","2","None"
+"759e29c4-aa3c-48a7-aed5-6bd818e8f308","Data Analytics","Analytics","I780019","Intermediate","5","Certified"
+"8f7632da-9a84-481a-b385-7061e98764cc","SAP MM","ERP","I780019","Proficient","8","In Progress"
+"c5d7fe1c-f345-4afe-9110-f8c2d1fd4e07","SAP BTP","Cloud","I780020","Proficient","4","None"
+"7f826bc5-0e87-4bba-bfbf-6b1dbf49668a","Python","Backend","I780020","Expert","4","None"
+"15db1bc8-7c37-4cb6-a871-42c5380953a5","SAP Fiori","Frontend","I780020","Proficient","6","None"
+"f3afc298-26f2-4d56-9400-4dd95b8af32f","SAP S/4HANA","ERP","I780021","Advanced","4","Certified"
+"6fdb71be-4c8f-47a0-aca2-6e6824ba29df","REST API","Integration","I780022","Expert","6","In Progress"
+"dc8a8109-b866-4f29-8a8d-a529cdbcfd55","SAP SuccessFactors","HCM","I780022","Expert","5","None"
+"c2a5cb6a-e1cc-49c2-bcef-9347d152250c","SAP Work Zone","Portal","I780022","Beginner","1","Certified"
+"919268c0-3ab1-436e-97b1-f3943053c8c5","OData","Integration","I780023","Beginner","4","None"
+"aa732848-e9b5-4654-a641-092d157cc2c2","Agile/Scrum","Methodology","I780023","Intermediate","1","None"
+"32cd5d4b-2f88-4151-b593-7b945f5585e3","SAP ABAP","ERP","I780024","Expert","7","Certified"
+"90b26262-6547-4c1d-a7b6-94bd8f6793f6","SAP Ariba","Procurement","I780024","Intermediate","5","None"
+"37659e89-ffff-4a8b-b5b4-9cc45423d9eb","SAP Analytics Cloud","Analytics","I780025","Beginner","6","None"
+"d9e375eb-ef31-452c-922f-19a47905825f","Git","DevOps","I780025","Proficient","7","In Progress"
+"06dbd42f-4ffa-4f57-88c2-45a231a7fe03","SAP BTP","Cloud","I780025","Advanced","8","In Progress"
+"c49de4b5-07aa-4f81-b713-1425728140a8","JavaScript","Frontend","I780026","Advanced","7","Certified"
+"2f17f5e7-c097-4e7b-b20b-7e2a3a9af1fc","Python","Backend","I780026","Expert","6","None"
+"6b3bed02-0363-46cf-bcbc-d3ef835e1735","SAP Basis","Infrastructure","I780026","Advanced","8","Certified"
+"bfa93518-dbe4-4e4c-8296-81029bef73fd","SAP SD","ERP","I780027","Expert","7","Certified"
+"d0523a5f-375b-4c5c-bedc-7239177e36d1","OData","Integration","I780028","Intermediate","7","None"
+"9ead6b09-7f54-4180-a711-a0ea0becbbac","SAP S/4HANA","ERP","I780028","Proficient","8","Certified"
+"347e09e5-e8e3-40cd-9812-a6c6d38ece09","SAP Basis","Infrastructure","I780029","Intermediate","7","None"
+"a3094b52-f609-45f2-a92e-d04d201ad876","Machine Learning","AI","I780030","Beginner","8","In Progress"
+"854f506c-1e84-47d7-97f4-25582580ceb2","SAP ABAP","ERP","I780031","Intermediate","2","None"
+"26486ff8-98d8-42e8-a115-f40456504668","Git","DevOps","I780031","Advanced","1","None"
+"8492c051-1424-4483-ad07-2b850a9362f1","Cloud Computing","Cloud","I780031","Proficient","4","In Progress"
+"2782aef4-d93d-47a0-9c4f-6ed9d40ee3d2","SAP SD","ERP","I780032","Proficient","5","In Progress"
+"3781b493-bb57-4b6b-9f36-debb9a995271","SAP Analytics Cloud","Analytics","I780032","Beginner","3","Certified"
+"9fd1548d-066c-4187-9aac-91638a471223","Machine Learning","AI","I780032","Expert","8","Certified"
+"ab91467a-a267-4926-8821-115793918004","SAP Ariba","Procurement","I780033","Proficient","7","Certified"
+"0b4e7237-7bbc-4709-b361-33ae884e6d6b","Data Analytics","Analytics","I780034","Proficient","7","Certified"
+"1ac498b4-6bff-417a-8c61-be2f86c2b436","SAP Ariba","Procurement","I780035","Advanced","5","None"
+"4f4e86f1-c806-4971-835e-04a734d30717","SAP Security","Security","I780035","Advanced","4","In Progress"
+"a90d261b-be41-44c2-960f-68a8c053dca3","SAP Fiori","Frontend","I780035","Intermediate","3","None"
+"f11a7e10-8b69-4c81-9311-330794c8ba25","SAP HANA","Database","I780036","Proficient","5","None"
+"eece637e-cd52-4fa4-ad65-d5bf2f316985","SAP MM","ERP","I780037","Advanced","7","None"
+"f6df3dfe-a167-499e-847e-0717fc6f1a39","SAP Fiori","Frontend","I780037","Expert","8","None"
+"72f4c23e-5663-40fb-812b-937936e1814c","SAP Analytics Cloud","Analytics","I780038","Proficient","5","None"
+"c05c7e9e-c396-4568-8654-504771bfb218","OData","Integration","I780039","Intermediate","6","In Progress"
+"9ca534f8-d913-4ded-b256-6fa9d4b42414","OData","Integration","I780040","Expert","1","None"
+"287b134c-d8ef-47e8-9ac4-98913eefbd72","Python","Backend","I780040","Intermediate","6","Certified"
+"d24d0e18-3381-4e9a-914c-10c4b066083c","SAP Analytics Cloud","Analytics","I780041","Advanced","4","In Progress"
+"f6a8e877-6a15-41b8-bf86-fa68280c66ba","Machine Learning","AI","I780042","Advanced","3","None"
+"3e7bcf9e-9c4d-4340-b623-c093ccf1ef10","SAP Fiori","Frontend","I780042","Proficient","3","In Progress"
+"28edba08-618e-485c-9ba1-f24d9adbf70c","SAP S/4HANA","ERP","I780043","Proficient","1","None"
+"791e704b-7386-4636-aa69-5c96217522d3","SAP SuccessFactors","HCM","I780044","Intermediate","6","None"
+"cf7703ee-1de2-456b-bc52-dc8345763fd7","SAP BTP","Cloud","I780045","Beginner","2","In Progress"
+"b4c90ca1-d2a0-4023-8272-840609d5acd1","Java","Backend","I780045","Advanced","7","Certified"
+"90bf6c6a-1410-4e41-806d-9f714b02be05","SAP Basis","Infrastructure","I780045","Beginner","5","Certified"
+"f229eb2f-f580-4257-985f-8277d87eb701","SAP UI5","Frontend","I780046","Intermediate","1","None"
+"db5da540-9655-458d-81f4-20ea2adc4eb4","SAP HANA","Database","I780046","Beginner","2","None"
+"e6df4701-4dd6-41c8-ad64-e39138f6ac88","Machine Learning","AI","I780046","Beginner","6","In Progress"
+"b4ee326d-2f8e-472d-be38-bab486d7fe33","SAP UI5","Frontend","I780047","Advanced","8","In Progress"
+"21921a90-f244-4531-b596-09f69137a777","REST API","Integration","I780047","Intermediate","4","In Progress"
+"00be2dae-9683-4778-89ec-be6b9d22e1e3","SAP Work Zone","Portal","I780048","Intermediate","5","None"
+"6082b7fb-2bd5-4ae6-b6f1-c4175ed7051a","SAP Basis","Infrastructure","I780049","Intermediate","5","In Progress"
+"57eb51ed-04f2-401b-a962-b08a6ecc291f","Java","Backend","I780049","Beginner","1","None"
+"5aba7bd2-5f13-40cd-a63b-27d019cd8f13","Data Analytics","Analytics","I780049","Intermediate","8","In Progress"
+"8db26466-20af-47e1-8342-6e4d1037ef92","Data Analytics","Analytics","I780050","Expert","2","Certified"
+"40811292-f3cc-414c-98a2-133068e210c7","Python","Backend","I780051","Advanced","4","None"
+"6105a044-da5c-40dc-893f-02125641a142","Machine Learning","AI","I780052","Proficient","2","None"
+"a052c721-39e4-4754-9370-e39701782fd3","SAP BTP","Cloud","I780053","Advanced","6","None"
+"80d801e7-bba5-4e90-88b6-856c7bed3c82","SAP S/4HANA","ERP","I780053","Intermediate","2","In Progress"
+"82061dd9-4c0c-4d55-bc94-8a765a0a81c9","OData","Integration","I780054","Beginner","3","None"
+"b11245a3-d73a-4396-af6a-e12d757a4be9","SAP BTP","Cloud","I780054","Proficient","4","Certified"
+"342d3377-bd26-4c20-9534-498f6ecb9b96","SAP Ariba","Procurement","I780055","Expert","1","None"
+"a0659d27-e4dc-42ce-bdfe-7a306dc5afe2","SAP MM","ERP","I780055","Beginner","4","None"
+"0d34769d-d196-49f2-94a0-550ae0359fed","JIRA","Methodology","I780055","Advanced","3","Certified"
+"8fbc753b-46c7-43ac-87d0-ac23574450eb","Python","Backend","I780056","Beginner","7","In Progress"
+"ba693aa1-cc87-4b0d-b12b-46d0062f057b","SAP Fiori","Frontend","I780056","Intermediate","5","In Progress"
+"4517d9c7-e95e-4706-a421-5d34e32e17bd","Data Analytics","Analytics","I780056","Proficient","2","In Progress"
+"3b51916e-a1eb-44db-952f-746926ba6c36","SAP S/4HANA","ERP","I780057","Proficient","6","In Progress"
+"87f28cc3-c43d-4a47-873e-cd9ac2490574","TypeScript","Frontend","I780057","Beginner","5","Certified"
+"e4096131-1841-43a4-a7f3-4fb69c52cda4","SQL","Database","I780057","Advanced","6","None"
+"7053e915-261a-42c6-8df1-85842d39eaa1","JIRA","Methodology","I780058","Proficient","6","Certified"
+"74d0edfc-42d1-4f09-8f34-474d2d579ac3","TypeScript","Frontend","I780059","Beginner","6","Certified"
+"f13a188e-c241-4823-a53d-3383e02280bf","JIRA","Methodology","I780059","Proficient","1","In Progress"
+"c8fcbfed-ccb8-4480-b872-5a3a56273767","SAP FI","Finance","I780060","Beginner","4","None"
+"6a1bdee9-cfd9-42da-acae-fef2921d2d37","TypeScript","Frontend","I780060","Beginner","8","Certified"
+"b428d5bd-7c84-4038-82dc-7ffb831323cf","REST API","Integration","I780060","Expert","8","Certified"
+"3b9791f7-1bc1-4231-a76f-9fc9defa5594","Data Analytics","Analytics","I780061","Proficient","4","None"
+"a92d9fd1-a325-4c6e-935a-25bd0b6db2bc","SAP Ariba","Procurement","I780061","Expert","7","Certified"
+"ad53d200-72dd-4c37-9ee0-9f7105775720","SAP Work Zone","Portal","I780062","Expert","1","Certified"
+"2f997c93-4a6a-4350-b70f-effbe30758e2","SAP CO","Finance","I780062","Proficient","4","None"
+"39bdda31-8e40-4adc-a557-c293728d6009","SAP BTP","Cloud","I780062","Proficient","1","In Progress"
+"b91aae4b-1c57-4e20-b975-2f3c756466c5","SAP Fiori","Frontend","I780063","Proficient","6","None"
+"19a5cebd-f9d3-4a26-9979-53bda51fb0b3","SAP ABAP","ERP","I780064","Advanced","6","In Progress"
+"fd8ae840-5a76-439d-9259-a7243830a189","Git","DevOps","I780065","Expert","2","None"
+"eac4ba1d-a1cc-44d5-8cae-0ff227e40815","SAP SD","ERP","I780065","Intermediate","2","Certified"
+"9c4901c8-fa44-472e-a3b0-5ca048819a7e","Data Analytics","Analytics","I780065","Beginner","1","None"
+"b939a858-20f0-4304-9d60-c3a0ee4a1f51","SAP BTP","Cloud","I780066","Intermediate","3","None"
+"58f61098-b589-4710-b696-b13e106913a4","JIRA","Methodology","I780066","Expert","5","Certified"
+"7477a50e-63e2-4a5a-8f82-e6f17c842994","Machine Learning","AI","I780066","Expert","5","None"
+"7b23569d-37d2-4140-a148-d1558658c4b3","SAP CO","Finance","I780067","Advanced","6","In Progress"
+"4795856a-c3b4-41a8-ae90-ff929f5d3286","OData","Integration","I780068","Intermediate","7","In Progress"
+"25d50de3-2d7a-4a4e-b13c-597f2985d8ce","SAP Integration Suite","Integration","I780069","Expert","3","None"
+"8a69ab50-19ae-480d-b77e-19b817ee7650","SAP SuccessFactors","HCM","I780070","Beginner","6","In Progress"
+"3bafc248-723e-4f9b-8d4d-6ff1db4fb823","SAP Analytics Cloud","Analytics","I780070","Advanced","6","None"
+"e34c4ad2-2158-40fc-8579-193603ef6b20","SAP MM","ERP","I780070","Advanced","3","None"
+"b3705d7c-4928-4b20-b839-8d175e52b1d2","SQL","Database","I780071","Intermediate","7","None"
+"05d15965-0a5c-4095-8343-2ab643b141eb","Cloud Computing","Cloud","I780071","Advanced","5","In Progress"
+"2ea3a8dd-699f-4882-8216-e557e455e655","SAP FI","Finance","I780071","Beginner","7","None"
+"43fccd64-d5b2-4d49-aa51-7ce19a087797","Machine Learning","AI","I780072","Proficient","4","In Progress"
+"acf2babf-1675-4c2f-acfe-5898c62c634a","Machine Learning","AI","I780073","Beginner","3","In Progress"
+"a215bf6e-365a-4a0a-aad6-f6390cc52fc1","SAP Analytics Cloud","Analytics","I780073","Intermediate","4","None"
+"30e01fd6-18f6-4e83-abb5-4dceb8bed765","SAP Fiori","Frontend","I780074","Proficient","1","Certified"
+"f24d6bf3-4d5b-4e52-b410-9ee04849d50a","SAP BTP","Cloud","I780074","Proficient","4","None"
+"38fc4502-9790-4950-a391-cef60feaa9d5","JavaScript","Frontend","I780075","Intermediate","3","None"
+"5a9f9c4a-2203-4d20-bb43-0804cf81eccd","SAP UI5","Frontend","I780075","Advanced","2","Certified"
+"0cea3cd5-e776-4c86-ad8d-f28e4602c6c4","SAP BTP","Cloud","I780075","Expert","5","In Progress"
+"683f2b44-cda1-4e20-ba36-bb32e3298f00","SAP SuccessFactors","HCM","I780076","Proficient","3","None"
+"aad6584e-0cb1-4953-8392-7c20a3c25cc6","Cloud Computing","Cloud","I780077","Beginner","1","None"
+"16514c86-e2f0-4367-87cf-426ee76d55c6","Java","Backend","I780078","Proficient","8","None"
+"f26e29ab-c0b3-4756-a797-3fb53a346f00","SAP FI","Finance","I780078","Expert","6","Certified"
+"cc492f91-f94d-4844-b264-ee203bd411fb","REST API","Integration","I780078","Advanced","6","None"
+"23b72bca-7b0d-4d02-8526-70f42a56a3d8","Python","Backend","I780079","Expert","1","In Progress"
+"4079f049-0be2-4578-a04f-8a2747928abe","SAP CO","Finance","I780079","Proficient","4","None"
+"b50b85b3-d09b-47e1-9a1d-39e71b81ce80","SAP MM","ERP","I780080","Beginner","7","None"
+"b4581f9c-59b0-4507-9acb-1d765f33b8ac","SAP BTP","Cloud","I780080","Intermediate","6","None"
+"a9ee0010-fef0-4fc5-bdd9-762fac8ad12d","SAP Basis","Infrastructure","I780080","Advanced","8","None"
+"a5a48599-6154-4485-a283-24a9fb106afb","SQL","Database","I780081","Proficient","7","None"
+"1ed12142-c6d0-4f3b-8c9c-7bb9d7b73dca","Data Analytics","Analytics","I780081","Expert","3","In Progress"
+"a1a4fe90-e4b5-4746-a31a-cc0087ad35f5","Python","Backend","I780082","Beginner","7","Certified"
+"3978223e-e3ae-4bd3-9f46-01a10f7bc9d0","SAP SuccessFactors","HCM","I780083","Proficient","6","None"
+"1460fbb3-c5a8-4ae5-8b75-03d4758bdb72","Git","DevOps","I780083","Proficient","5","None"
+"841fb92e-d8c8-41ad-9163-6a66f7bca9d1","SAP MM","ERP","I780084","Intermediate","4","None"
+"1d5a4f82-ed3a-4a46-a6b1-658a6110ba47","SAP CO","Finance","I780084","Beginner","5","Certified"
+"2f67274c-4352-40ca-9e91-4b6b92d34cef","JavaScript","Frontend","I780085","Advanced","3","None"
+"e44008b9-c913-45a8-997c-0e6072eefe9d","Data Analytics","Analytics","I780086","Proficient","1","None"
+"de85c4c9-3de2-44a3-b5f5-93a8d291918e","SAP Analytics Cloud","Analytics","I780086","Advanced","6","Certified"
+"edccea47-47fe-4482-8f16-e03299759791","SAP Work Zone","Portal","I780087","Expert","2","None"
+"1590e80c-0db2-4ba7-bcaa-3ae72fba5840","SAP Fiori","Frontend","I780088","Expert","1","None"
+"e0f1ef56-9712-4335-9ee3-7b46663dde53","SAP Security","Security","I780088","Intermediate","8","None"
+"ed049796-7a78-4c40-b01a-6fdf507f0f72","TypeScript","Frontend","I780089","Proficient","5","Certified"
+"0b997383-1fec-491b-8309-240af8e97766","SAP BTP","Cloud","I780089","Proficient","1","None"
+"6892e623-5c30-4cf2-861f-2205c8a2df44","Cloud Computing","Cloud","I780089","Beginner","8","In Progress"
+"fb6d8df6-4bfc-43f4-8546-c133d4c77bea","Python","Backend","I780090","Proficient","4","Certified"
+"81b0c572-4abf-4026-84e6-986f193818f9","JavaScript","Frontend","I780090","Expert","4","None"
+"ea70a694-4c8e-4c5e-ae7a-0641f1ab5d83","SAP Fiori","Frontend","I780091","Expert","7","None"
+"966609c1-2fe4-4214-a56a-c85be8ccc81f","SAP Security","Security","I780091","Proficient","7","Certified"
+"d8ebfa74-5e7a-4518-86f4-ec82385bf43d","SAP MM","ERP","I780092","Intermediate","1","None"
+"09d4d3dc-2efa-4661-bb23-0cf28d8406ff","SAP CO","Finance","I780092","Beginner","2","Certified"
+"c6cb7160-743a-4a0b-86dd-d1128a534222","TypeScript","Frontend","I780092","Expert","8","In Progress"
+"ed07162a-f6dd-406a-8c9f-81c6a258e862","SAP SuccessFactors","HCM","I780093","Expert","7","None"
+"4e839043-af41-4171-a15a-deb87b0efe17","Git","DevOps","I780094","Proficient","1","In Progress"
+"01f75298-e8d7-4de4-841c-57ba4d360bcc","SAP Work Zone","Portal","I780094","Proficient","7","Certified"
+"211a0cd4-f4d7-466e-b0f0-a180c07c7e12","JIRA","Methodology","I780095","Expert","3","None"
+"59acf119-8824-4d87-949a-e86c2b7d2a90","SAP FI","Finance","I780095","Intermediate","3","Certified"
+"602d1c8f-0561-4572-aef4-ffb63a2d6f93","SQL","Database","I780095","Expert","2","None"
+"ace5f676-8cf6-4f3e-ae32-878863e4bce7","SAP Integration Suite","Integration","I780096","Advanced","8","In Progress"
+"ccce70e6-317b-402f-9490-8475ccabfb24","SAP Work Zone","Portal","I780097","Advanced","1","None"
+"bfcc7d27-7c56-4fbe-a909-d606ee34af22","SAP Fiori","Frontend","I780097","Expert","1","None"
+"d68e3427-8f48-489e-9a4d-d08fdf79952f","SAP S/4HANA","ERP","I780098","Advanced","4","None"
+"eec04e2f-6808-4979-84ce-26b0c0ae154a","SAP MM","ERP","I780098","Advanced","5","None"
+"630e85aa-6496-47ee-8b38-e2793692ee84","SAP SuccessFactors","HCM","I780098","Proficient","7","In Progress"
+"28836be3-9d5e-4e10-aa82-ff798bdf614c","JIRA","Methodology","I780099","Expert","7","Certified"
+"cbd86cae-fecd-407f-bcff-75e50285af31","SAP S/4HANA","ERP","I780100","Proficient","6","Certified"
+"9f8886d8-4511-4d26-afee-8e2bdb16a2a0","OData","Integration","I780101","Beginner","7","Certified"
+"dca9ec4f-f4cc-4ca1-95bd-28a9eb4aea47","REST API","Integration","I780102","Advanced","5","Certified"
+"65fbfd86-e910-4e71-a2a1-b87040a1f60d","Java","Backend","I780103","Intermediate","6","In Progress"
+"d839f63e-552d-4bac-918b-0898bcf39c5a","Data Analytics","Analytics","I780104","Beginner","3","Certified"
+"2cafa1b3-835e-4f7d-9bc3-62265cdb3421","SQL","Database","I780105","Advanced","7","In Progress"
+"8f392127-ee38-40d3-b056-d9885ee4780b","SAP CO","Finance","I780106","Intermediate","5","Certified"
+"60b56e81-093f-41f1-887a-af742a43587e","SAP SuccessFactors","HCM","I780106","Advanced","3","None"
+"63d1c629-d04f-4c7c-9483-4b8fbe68f56c","SAP Integration Suite","Integration","I780107","Proficient","3","In Progress"
+"c8bcf3c4-1284-42d6-b87b-a012cbfca930","Cloud Computing","Cloud","I780107","Expert","6","Certified"
+"a954b88f-8736-4ca0-a184-b9377c2265a2","REST API","Integration","I780108","Intermediate","2","In Progress"
+"2ecec54b-bf20-4705-8690-f9a0c9c8b910","SAP FI","Finance","I780108","Proficient","8","None"
+"5ff33903-805e-4b8d-9df2-31d8d9512f26","Python","Backend","I780108","Expert","6","In Progress"
+"d14f1cf8-3231-4eff-bf79-547f9811da5b","SAP Integration Suite","Integration","I780109","Beginner","2","None"
+"e58c0ef7-2013-426d-9e74-00a696ed8ad0","REST API","Integration","I780110","Expert","1","None"
+"9564903b-4bfc-4c55-83a8-5d528b3797bd","OData","Integration","I780111","Beginner","4","In Progress"
+"922e5ef5-e205-40f8-ba3a-13843c9c5ad1","SAP Basis","Infrastructure","I780112","Advanced","7","In Progress"
+"8395fd29-8a42-4b66-bf41-b54ee280c92c","SAP Security","Security","I780113","Expert","1","In Progress"
+"9b3ce1ec-ef64-489b-a722-69a859de63bf","JavaScript","Frontend","I780113","Beginner","6","None"
+"64e3c7fa-4d28-4f24-845e-5899a61c56ed","Java","Backend","I780114","Expert","2","None"
+"76e05296-c7d9-41c6-b4e3-4eef49c1a053","Python","Backend","I780114","Intermediate","2","None"
+"7f23da13-5a7e-4615-aa73-bf8144024ece","JIRA","Methodology","I780114","Advanced","2","Certified"
+"e0cc1f36-db53-4feb-ad94-9da70fb0d2d4","SAP UI5","Frontend","I780115","Beginner","6","None"
+"9a987fda-4358-45d4-94fa-26efe6d67680","Agile/Scrum","Methodology","I780115","Beginner","2","None"
+"2809531f-7aa5-4f2e-9cda-ffc926d8c420","SQL","Database","I780115","Beginner","1","Certified"
+"6d88c910-1d17-4aa7-9e71-45ae00d82cae","Machine Learning","AI","I780116","Beginner","2","Certified"
+"deea63b7-67cf-4249-b07f-b0b3b8c61f71","SAP Security","Security","I780117","Advanced","2","Certified"
+"46c4d907-7da0-4f9b-94d8-129448798b62","SAP Integration Suite","Integration","I780118","Intermediate","8","In Progress"
+"68209124-1bcc-421b-9ee0-07731033cc1b","SAP BTP","Cloud","I780118","Proficient","2","None"
+"0b8bd9f6-859b-43cb-9a39-773d8be9abe7","SAP SuccessFactors","HCM","I780118","Advanced","1","None"
+"60115fce-2060-497c-b3f0-0911f846a73b","JIRA","Methodology","I780119","Intermediate","5","None"
+"bc2724ea-7063-4220-b04f-6626b22d59ef","JavaScript","Frontend","I780119","Advanced","1","None"
+"c290ca29-4d23-4619-b150-0aeacdb4b684","SAP ABAP","ERP","I780120","Intermediate","2","Certified"
+"8c1f11b4-6f7a-4373-9938-707731f99127","Machine Learning","AI","I780120","Proficient","4","None"
+"0a565516-f464-4933-b3f3-6d1f1c6dd836","SAP MM","ERP","I780121","Beginner","7","None"
+"34075794-e8d7-4538-b3fb-504391304dcc","SQL","Database","I780122","Expert","2","None"
+"6f044f57-fb0b-4b5c-9851-fb40a75b8830","OData","Integration","I780123","Intermediate","6","Certified"
+"fcc57f14-7892-44a8-92cb-90b9d9706c96","SAP SD","ERP","I780123","Proficient","4","Certified"
+"5c860b55-9774-4433-b535-197a86370df7","SAP SuccessFactors","HCM","I780123","Intermediate","6","None"
+"c7752d6e-00fa-4796-af9a-e520e77becf7","Python","Backend","I780124","Intermediate","7","Certified"
+"463e20ec-b346-4e41-a9db-f66be4184f30","Data Analytics","Analytics","I780124","Advanced","8","In Progress"
+"3b2113f4-3136-4777-ba54-3b0072246be0","SAP BTP","Cloud","I780124","Beginner","6","None"
+"35a81968-d714-4d96-865d-35c5621cb4bc","Agile/Scrum","Methodology","I780125","Proficient","2","Certified"
+"29689f03-0e0f-4315-a1f0-e29832dcf5d0","SAP Work Zone","Portal","I780126","Proficient","7","Certified"
+"b633b216-c672-4387-b61d-97986c93e644","SAP Integration Suite","Integration","I780126","Advanced","6","None"
+"bfca1fb1-729c-427e-80c4-4e2c7a6498b0","SAP BTP","Cloud","I780126","Proficient","2","In Progress"
+"41fe0fdc-6ecc-4a2b-abb0-1c9268cece50","TypeScript","Frontend","I780127","Intermediate","2","None"
+"f43eb494-50d2-4dbe-a36b-4dfcb5d51003","SAP UI5","Frontend","I780128","Expert","4","In Progress"
+"d8694903-f7f0-4e27-8f6a-6f8b43110c2f","SAP SuccessFactors","HCM","I780128","Expert","2","In Progress"
+"5cec6777-b06c-409d-872c-529d5980e79e","SAP Security","Security","I780129","Intermediate","1","None"
+"a98dc762-9b19-4146-a3f1-a27eb38f1863","Agile/Scrum","Methodology","I780129","Expert","5","In Progress"
+"f0599530-ecba-4975-8d68-84c9f246e4bd","OData","Integration","I780130","Expert","1","None"
+"f09f526b-8940-459b-a21c-ce7144596057","SAP S/4HANA","ERP","I780131","Intermediate","7","None"
+"3e43c62b-5f17-4fe8-bf6f-1c1ebca17cf6","TypeScript","Frontend","I780131","Beginner","3","None"
+"6eca424b-12dd-4d9f-b222-9589848d684a","SAP S/4HANA","ERP","I780132","Advanced","7","In Progress"
+"7b3fa8df-dc1c-45e7-a083-8c7aa53b8c47","SAP UI5","Frontend","I780132","Proficient","1","None"
+"ff5b86a6-8ecd-4267-8529-1d7e1dab617d","SAP Fiori","Frontend","I780132","Beginner","3","Certified"
+"2bb431ec-6313-4971-bbdd-42881c2ad3b0","SAP Fiori","Frontend","I780133","Intermediate","8","In Progress"
+"5b54b123-e3d4-4fd3-ae5a-06b47f8fbe49","Cloud Computing","Cloud","I780134","Intermediate","4","None"
+"bdc95234-4208-4604-af34-6a57fefe176c","SAP UI5","Frontend","I780134","Expert","6","Certified"
+"75d341d8-d54e-4482-aa16-124e841ee28b","Java","Backend","I780135","Proficient","2","Certified"
+"f9745d8b-5680-4f9d-8f87-5e7484197bad","SAP Fiori","Frontend","I780135","Proficient","1","None"
+"161e416f-3fcf-4c30-a40d-099773a0b457","SAP UI5","Frontend","I780135","Beginner","3","Certified"
+"be57c3ea-72d2-40a8-bee6-5e45cc209803","Git","DevOps","I780136","Expert","7","Certified"
+"df4951c4-eb35-4e39-a5dc-410f78b8b3fe","SAP MM","ERP","I780137","Expert","7","In Progress"
+"7467df79-9174-4873-91fd-345c7eb89eab","SAP HANA","Database","I780137","Proficient","6","None"
+"7233111c-2864-4bb8-85d1-57a46a600133","SAP Ariba","Procurement","I780137","Advanced","7","Certified"
+"8783177d-ed1e-4e9e-9854-95fdbb0ac964","Machine Learning","AI","I780138","Expert","5","None"
+"900e24c2-826f-4ae5-86b1-d096a7d6202b","SAP Fiori","Frontend","I780139","Proficient","1","None"
+"214dd172-c059-41a7-9b6a-a261ed6fa739","Agile/Scrum","Methodology","I780139","Expert","3","In Progress"
+"785889a8-f5b8-4a57-84e0-3f2bed408a83","SAP BTP","Cloud","I780139","Proficient","5","None"
+"f436a9dd-8b53-48fb-89f8-26d3390e3d7f","JavaScript","Frontend","I780140","Beginner","6","In Progress"
+"acaae308-7b7b-4b13-8c8e-56f7c98a42b7","SAP Security","Security","I780140","Proficient","3","In Progress"
+"e810e48b-2fe3-401e-b2e1-7db1e180f5dc","SQL","Database","I780141","Intermediate","2","In Progress"
+"a18cc4ed-daf5-4428-b524-590612601cfd","SAP CO","Finance","I780141","Intermediate","7","In Progress"
+"82b16c40-a4bc-44cb-8063-81b710865422","Data Analytics","Analytics","I780141","Proficient","8","In Progress"
+"36c7b344-910b-4876-bf3d-74c931f534b0","SAP CO","Finance","I780142","Advanced","2","In Progress"
+"99cd9bb6-14ea-46b1-8805-d846d7c83da2","Cloud Computing","Cloud","I780142","Expert","2","Certified"

@@ -6,10 +6,6 @@
     displayBlock="true">
 
     <m:Page id="seniorManagerWorkOverviewPage" class="smWorkOverviewPage" title="Current Work Overview" showNavButton="true" navButtonPress="onNavBack" enableScrolling="true">
-        <m:headerContent>
-            <m:Button id="seniorManagerWorkOverviewLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
-        </m:headerContent>
-
         <m:content>
             <m:VBox class="sapUiResponsiveContentPadding sapUiMediumMarginBottom smWorkOverviewWrapper" fitContainer="true">
                 <m:Toolbar class="sapUiSmallMarginBottom smWorkOverviewToolbar">
@@ -64,8 +60,8 @@
         <m:Dialog
             id="aiAssistantDialogWorkOverview"
             title="SkillSphere AI Assistant - Senior Manager"
-            contentWidth="600px"
-            contentHeight="700px"
+            contentWidth="750px"
+            contentHeight="800px"
             class="aiAssistantDialog"
             resizable="true"
             draggable="true">
@@ -83,19 +79,20 @@
             </m:customHeader>
             
             <m:content>
-                <m:VBox height="100%" justifyContent="SpaceBetween">
+                <m:VBox height="100%" width="100%" class="aiAssistantContent">
                     
                     <!-- Chat Messages Area -->
                     <m:ScrollContainer
                         id="chatContainerWorkOverview"
-                        height="520px"
+                        height="100%"
                         vertical="true"
-                        class="sapUiSmallMargin aiChatScrollArea">
-                        <m:VBox id="messagesContainerWorkOverview" class="sapUiSmallMargin aiMessagesContainer"/>
+                        horizontal="false"
+                        class="aiChatScrollArea">
+                        <m:VBox id="messagesContainerWorkOverview" width="100%" class="aiMessagesContainer"/>
                     </m:ScrollContainer>
                     
                     <!-- Quick Action Buttons for Senior Manager -->
-                    <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
+                    <m:HBox justifyContent="Center" class="aiQuickActionsBar">
                         <m:Button 
                             text="Availability?" 
                             icon="sap-icon://org-chart"
@@ -115,30 +112,30 @@
                             type="Emphasized"/>
                     </m:HBox>
                     
-                    <!-- Input Area -->
-                    <m:Bar class="aiInputBar">
-                        <m:contentLeft>
-                            <m:Input
-                                id="messageInputWorkOverview"
-                                placeholder="Ask me about your organization..."
-                                width="100%"
-                                submit="onSendMessage"
-                                class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
-                        </m:contentLeft>
-                        <m:contentRight>
-                            <m:Button
-                                icon="sap-icon://paper-plane"
-                                type="Emphasized"
-                                press="onSendMessage"
-                                tooltip="Send Message"/>
-                        </m:contentRight>
-                    </m:Bar>
                 </m:VBox>
             </m:content>
-            
-            <m:beginButton>
-                <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
-            </m:beginButton>
+
+            <m:footer>
+                <m:Toolbar class="aiInputBar">
+                    <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
+                    <m:ToolbarSpacer/>
+                    <m:Input
+                        id="messageInputWorkOverview"
+                        placeholder="Ask me about your organization..."
+                        submit="onSendMessage"
+                        class="aiMessageInput aiMessageInputGrow">
+                        <m:layoutData>
+                            <m:ToolbarLayoutData shrinkable="true" minWidth="12rem" maxWidth="100%"/>
+                        </m:layoutData>
+                    </m:Input>
+                    <m:Button
+                        icon="sap-icon://paper-plane"
+                        type="Emphasized"
+                        press="onSendMessage"
+                        tooltip="Send Message"
+                        class="aiSendButton"/>
+                </m:Toolbar>
+            </m:footer>
             
         </m:Dialog>
     </m:Page>

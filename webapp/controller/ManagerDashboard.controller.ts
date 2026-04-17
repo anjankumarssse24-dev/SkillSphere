@@ -16,6 +16,7 @@ import VBox from "sap/m/VBox";
 import HBox from "sap/m/HBox";
 import ProgressIndicator from "sap/m/ProgressIndicator";
 import Dialog from "sap/m/Dialog";
+import FormattedText from "sap/m/FormattedText";
 
 /**
  * @namespace skillsphere.controller
@@ -2756,14 +2757,18 @@ private initializeAIChat(): void {
     private addBotMessage(message: string): void {
         const oContainer = this.byId("messagesContainerManager") as any;
         
+        // Parse markdown and convert to HTML-friendly format
+        const formattedHtml = this.parseMarkdown(message);
+        
         const oMessageBox = new HBox({
             justifyContent: "Start",
+            width: "100%",
             items: [
                 new VBox({
+                    width: "100%",
                     items: [
-                        new Text({
-                            text: message,
-                            renderWhitespace: true
+                        new FormattedText({
+                            htmlText: formattedHtml
                         }).addStyleClass("botMessage sapUiSmallMargin")
                     ]
                 }).addStyleClass("messageBox botMessageBox")
@@ -2772,6 +2777,45 @@ private initializeAIChat(): void {
         
         oContainer?.addItem(oMessageBox);
         this.scrollToBottom();
+    }
+
+    /**
+     * Parse markdown to HTML for better formatting
+     */
+    private parseMarkdown(text: string): string {
+        let html = text;
+        
+        // Escape HTML special characters first
+        html = html
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+        // Convert markdown bold **text** to <strong>text</strong>
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        
+        // Convert markdown italic *text* to <em>text</em>
+        html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        
+        // Convert markdown code `text` to <code>text</code>
+        html = html.replace(/`(.+?)`/g, "<code>$1</code>");
+        
+        // Convert line breaks to <br>
+        html = html.replace(/\n/g, "<br>");
+        
+        // Convert bullet points - lines starting with * or -
+        html = html.replace(/^[\s]*[\*\-]\s+(.+?)(?=<br>|$)/gm, 
+            (match, content) => "&nbsp;&nbsp;&nbsp;• " + content.trim());
+        
+        // Convert numbered lists - lines starting with number.
+        html = html.replace(/^[\s]*(\d+)\.\s+(.+?)(?=<br>|$)/gm, 
+            (match, num, content) => "&nbsp;&nbsp;&nbsp;" + num + ". " + content.trim());
+        
+        // Convert headers - lines starting with #
+        html = html.replace(/^#+\s+(.+?)(?=<br>|$)/gm, 
+            (match, content) => "<strong style=\"font-size: 1.1em; color: #0070f2;\">" + content.trim() + "</strong>");
+        
+        return html;
     }
 
     /**
@@ -3090,11 +3134,9 @@ private initializeAIChat(): void {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const projectId = `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
             const listBinding = oDataModel.bindList("/Projects");
             listBinding.create({
-                projectId: projectId,
                 employeeId: "",
                 projectName: data.projectName,
                 role: "",
@@ -3370,12 +3412,10 @@ private initializeAIChat(): void {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const projectId = `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             
             // Create project in Projects master data
             const listBinding = oDataModel.bindList("/Projects");
             listBinding.create({
-                projectId: projectId,
                 employeeId: employeeId,
                 projectName: data.projectName,
                 role: "",
@@ -3397,7 +3437,6 @@ private initializeAIChat(): void {
             // Also create assignment in CurrentProjects for Gantt Chart visibility
             const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
             currentProjectsBinding.create({
-                currentProjectId: `CP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 type: "Project",
                 projectName: data.projectName,
@@ -3457,7 +3496,6 @@ private initializeAIChat(): void {
             // Create assignment in CurrentProjects with Pending status
             const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
             currentProjectsBinding.create({
-                currentProjectId: `ASSIGN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 type: "Project",
                 projectName: project.projectName,

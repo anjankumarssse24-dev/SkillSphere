@@ -18,6 +18,7 @@ import VBox from "sap/m/VBox";
 import HBox from "sap/m/HBox";
 import HTML from "sap/ui/core/HTML";
 import ListBinding from "sap/ui/model/ListBinding";
+import FormattedText from "sap/m/FormattedText";
 import OverflowToolbar from "sap/m/OverflowToolbar";
 import ObjectStatus from "sap/m/ObjectStatus";
 
@@ -1543,14 +1544,18 @@ export default class SeniorManagerDashboard extends Controller {
     private addBotMessage(message: string): void {
         const oContainer = this.byId("messagesContainerSeniorManager") as any;
 
+        // Parse markdown and convert to HTML-friendly format
+        const formattedHtml = this.parseMarkdown(message);
+
         const oMessageBox = new HBox({
             justifyContent: "Start",
+            width: "100%",
             items: [
                 new VBox({
+                    width: "100%",
                     items: [
-                        new Text({
-                            text: message,
-                            renderWhitespace: true
+                        new FormattedText({
+                            htmlText: formattedHtml
                         }).addStyleClass("botMessage sapUiSmallMargin")
                     ]
                 }).addStyleClass("messageBox botMessageBox")
@@ -1559,6 +1564,45 @@ export default class SeniorManagerDashboard extends Controller {
 
         oContainer?.addItem(oMessageBox);
         this.scrollToBottom();
+    }
+
+    /**
+     * Parse markdown to HTML for better formatting
+     */
+    private parseMarkdown(text: string): string {
+        let html = text;
+        
+        // Escape HTML special characters first
+        html = html
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+        // Convert markdown bold **text** to <strong>text</strong>
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        
+        // Convert markdown italic *text* to <em>text</em>
+        html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        
+        // Convert markdown code `text` to <code>text</code>
+        html = html.replace(/`(.+?)`/g, "<code>$1</code>");
+        
+        // Convert line breaks to <br>
+        html = html.replace(/\n/g, "<br>");
+        
+        // Convert bullet points - lines starting with * or -
+        html = html.replace(/^[\s]*[\*\-]\s+(.+?)(?=<br>|$)/gm, 
+            (match, content) => "&nbsp;&nbsp;&nbsp;• " + content.trim());
+        
+        // Convert numbered lists - lines starting with number.
+        html = html.replace(/^[\s]*(\d+)\.\s+(.+?)(?=<br>|$)/gm, 
+            (match, num, content) => "&nbsp;&nbsp;&nbsp;" + num + ". " + content.trim());
+        
+        // Convert headers - lines starting with #
+        html = html.replace(/^#+\s+(.+?)(?=<br>|$)/gm, 
+            (match, content) => "<strong style=\"font-size: 1.1em; color: #0070f2;\">" + content.trim() + "</strong>");
+        
+        return html;
     }
 
     /**

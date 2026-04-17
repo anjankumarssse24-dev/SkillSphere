@@ -9,9 +9,6 @@
     <uxap:ObjectPageLayout id="employeeObjectPage">
         <uxap:headerTitle>
             <uxap:ObjectPageHeader id="employeeHeader" objectTitle="{currentUser>/name}" objectSubtitle="Employee Dashboard">
-                <uxap:actions>
-                    <m:Button id="logoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
-                </uxap:actions>
             </uxap:ObjectPageHeader>
         </uxap:headerTitle>
 
@@ -337,15 +334,15 @@
                             <f:Card id="profileManagementCard" class="sapUiMediumMargin" width="96%">
                                 <f:content>
                                     <m:VBox id="profileManagementVBox" class="sapUiMediumMargin" width="100%">
-                                        <m:Title text="Complete or Update Your Profile" level="H3" class="sapUiMediumMarginBottom"/>
-                                        <m:Text text="Use this section after your first SSO login to complete the information that used to be captured during registration." class="sapUiTinyMarginBottom"/>
+                                        <m:Title text="View or Update Your Profile" level="H3" class="sapUiMediumMarginBottom"/>
+    
 
                                         <m:VBox visible="{= !${profileUi>/isEditing} }" class="sapUiSmallMarginTop">
                                             <m:Panel headerText="Identity" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
                                                 <m:content>
                                                     <m:VBox class="sapUiSmallMargin">
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Full Name" design="Bold" width="14rem"/><m:Text text="{selfProfile>/name}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Email" design="Bold" width="14rem"/><m:Text text="{selfProfile>/email}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Full Name" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/name} ? ${selfProfile>/name} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Email" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/email} ? ${selfProfile>/email} : '* click edit to add *' }"/></m:HBox>
                                                     </m:VBox>
                                                 </m:content>
                                             </m:Panel>
@@ -353,10 +350,10 @@
                                             <m:Panel headerText="Organization" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
                                                 <m:content>
                                                     <m:VBox class="sapUiSmallMargin">
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Team" design="Bold" width="14rem"/><m:Text text="{selfProfile>/team}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Sub-Team" design="Bold" width="14rem"/><m:Text text="{selfProfile>/subTeam}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Experience" design="Bold" width="14rem"/><m:Text text="{selfProfile>/experience}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Reporting Manager" design="Bold" width="14rem"/><m:Text text="{selfProfile>/managerName}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Team" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/team} ? ${selfProfile>/team} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Sub-Team" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/subTeam} ? ${selfProfile>/subTeam} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Experience" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/experience} || ${selfProfile>/experience} === 0 ? ${selfProfile>/experience} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Reporting Manager" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/managerName} ? ${selfProfile>/managerName} : '* click edit to add *' }"/></m:HBox>
                                                     </m:VBox>
                                                 </m:content>
                                             </m:Panel>
@@ -364,11 +361,11 @@
                                             <m:Panel headerText="Professional Profile" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
                                                 <m:content>
                                                     <m:VBox class="sapUiSmallMargin">
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Role" design="Bold" width="14rem"/><m:Text text="{selfProfile>/professionalRole}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Location" design="Bold" width="14rem"/><m:Text text="{selfProfile>/location}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="T Level" design="Bold" width="14rem"/><m:Text text="{selfProfile>/tLevel}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Grade Level" design="Bold" width="14rem"/><m:Text text="{selfProfile>/gradeLevel}"/></m:HBox>
-                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Specialization" design="Bold" width="14rem"/><m:Text text="{selfProfile>/specialization}"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Role" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/professionalRole} ? ${selfProfile>/professionalRole} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Location" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/location} ? ${selfProfile>/location} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="T Level" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/tLevel} ? ${selfProfile>/tLevel} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Grade Level" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/gradeLevel} ? ${selfProfile>/gradeLevel} : '* click edit to add *' }"/></m:HBox>
+                                                        <m:HBox justifyContent="SpaceBetween"><m:Label text="Specialization" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/specialization} ? ${selfProfile>/specialization} : '* click edit to add *' }"/></m:HBox>
                                                     </m:VBox>
                                                 </m:content>
                                             </m:Panel>
@@ -425,7 +422,8 @@
                                                         <core:Item key="Data Scientist" text="Data Scientist"/>
                                                         <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
                                                         <core:Item key="QA Engineer" text="QA Engineer"/>
-                                                        <core:Item key="Solution Architect" text="Solution Architect"/>
+                                                        <core:Item key="Project Manager" text="Project Manager"/>
+                                                        <core:Item key="ABAP Developer" text="ABAP Developer"/>
                                                     </m:Select>
                                                 </m:VBox>
                                             </m:FlexBox>
@@ -492,8 +490,8 @@
     <m:Dialog
         id="aiAssistantDialogEmployee"
         title="SkillSphere AI Assistant"
-        contentWidth="600px"
-        contentHeight="700px"
+        contentWidth="750px"
+        contentHeight="800px"
         class="aiAssistantDialog"
         resizable="true"
         draggable="true">
@@ -511,19 +509,20 @@
         </m:customHeader>
         
         <m:content>
-            <m:VBox height="100%" justifyContent="SpaceBetween">
+            <m:VBox height="100%" width="100%" class="aiAssistantContent">
                 
                 <!-- Chat Messages Area -->
                 <m:ScrollContainer
                     id="chatContainerEmployee"
-                    height="520px"
+                    height="100%"
                     vertical="true"
-                    class="sapUiSmallMargin aiChatScrollArea">
-                    <m:VBox id="messagesContainerEmployee" class="sapUiSmallMargin aiMessagesContainer"/>
+                    horizontal="false"
+                    class="aiChatScrollArea">
+                    <m:VBox id="messagesContainerEmployee" width="100%" class="aiMessagesContainer"/>
                 </m:ScrollContainer>
                 
                 <!-- Quick Action Buttons for Employee -->
-                <m:HBox justifyContent="Center" class="sapUiSmallMarginBottom aiQuickActionsBar">
+                <m:HBox justifyContent="Center" class="aiQuickActionsBar">
                     <m:Button 
                         text="My Skills" 
                         icon="sap-icon://learning-assistant"
@@ -542,31 +541,30 @@
                         press="onQuickAction"
                         type="Emphasized"/>
                 </m:HBox>
-                
-                <!-- Input Area -->
-                <m:Bar class="aiInputBar">
-                    <m:contentLeft>
-                        <m:Input
-                            id="messageInputEmployee"
-                            placeholder="Ask me anything..."
-                            width="100%"
-                            submit="onSendMessage"
-                            class="sapUiSmallMarginBegin sapUiSmallMarginEnd aiMessageInput"/>
-                    </m:contentLeft>
-                    <m:contentRight>
-                        <m:Button
-                            icon="sap-icon://paper-plane"
-                            type="Emphasized"
-                            press="onSendMessage"
-                            tooltip="Send Message"/>
-                    </m:contentRight>
-                </m:Bar>
             </m:VBox>
         </m:content>
-        
-        <m:beginButton>
-            <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
-        </m:beginButton>
+
+        <m:footer>
+            <m:Toolbar class="aiInputBar">
+                <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
+                <m:ToolbarSpacer/>
+                <m:Input
+                    id="messageInputEmployee"
+                    placeholder="Ask me anything..."
+                    submit="onSendMessage"
+                    class="aiMessageInput aiMessageInputGrow">
+                    <m:layoutData>
+                        <m:ToolbarLayoutData shrinkable="true" minWidth="12rem" maxWidth="100%"/>
+                    </m:layoutData>
+                </m:Input>
+                <m:Button
+                    icon="sap-icon://paper-plane"
+                    type="Emphasized"
+                    press="onSendMessage"
+                    tooltip="Send Message"
+                    class="aiSendButton"/>
+            </m:Toolbar>
+                </m:footer>
         
     </m:Dialog>
 </mvc:View>

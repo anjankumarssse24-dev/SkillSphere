@@ -2416,7 +2416,6 @@ export default class ManagerTeamView extends Controller {
             // Create assignment in CurrentProjects with Pending status
             const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
             currentProjectsBinding.create({
-                currentProjectId: `ASSIGN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 type: "Project",
                 projectName: project.projectName,

@@ -16,7 +16,6 @@
             <uxap:ObjectPageHeader id="managerTeamHeader" objectTitle="{managerTeamInfo>/managerName}" objectSubtitle="Manager Team Dashboard (Viewed by {currentUser>/name})">
                 <uxap:actions>
                     <m:Button id="backToSeniorDashboardBtn" text="Back to Dashboard" icon="sap-icon://nav-back" press="onBackToDashboard"/>
-                    <m:Button id="managerTeamLogoutBtn" text="Logout" icon="sap-icon://log" press="onLogout"/>
                 </uxap:actions>
             </uxap:ObjectPageHeader>
         </uxap:headerTitle>

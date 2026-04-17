@@ -191,6 +191,8 @@ async function _resolveConfig(options = {}) {
 }
 
 class AICoreClient {
+  static _chatSessions = new Map();
+
   constructor(config = null) {
     if (config) {
       this.aiApiUrl = config.aiApiUrl;
@@ -370,6 +372,17 @@ class AICoreClient {
 
     console.log('✅ Answer extracted:', msg.substring(0, 100) + '...');
     return msg;
+  }
+
+  async clearUserChat(userId) {
+    if (!userId) {
+      throw new Error('userId is required to clear chat context');
+    }
+
+    // The orchestration client is request-scoped and stateless today; this
+    // keeps the clearChat action forward-compatible with any future memory use.
+    AICoreClient._chatSessions.delete(String(userId));
+    return { cleared: true, userId: String(userId) };
   }
 }
 

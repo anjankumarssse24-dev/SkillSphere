@@ -48,7 +48,7 @@ entity Employees {
  * Skills entity - Employee skills and competencies
  */
 entity Skills {
-  key skillId : String;
+  key skillId : UUID;
   skillName : String;
   category : String;
   employeeId : String;
@@ -62,7 +62,7 @@ entity Skills {
  * Projects entity - Employee project history
  */
 entity Projects {
-  key projectId : String;
+  key projectId : UUID;
   employeeId : String;
   projectName : String;
   role : String;
@@ -102,7 +102,7 @@ entity Profiles {
  * CurrentProjects entity - Unified work assignments (Projects, Evaluations, Initiatives)
  */
 entity CurrentProjects {
-  key currentProjectId : String;
+  key currentProjectId : UUID;
   employeeId : String;
   type : String default 'Project'; // Project, Evaluation, Initiative, CAIA, POC
   projectName : String;
@@ -126,7 +126,7 @@ entity CurrentProjects {
  * Initiatives entity - Strategic initiatives, CAIA, POC, and other employee-driven work
  */
 entity Initiatives {
-  key initiativeId : String;
+  key initiativeId : UUID;
   employeeId : String;
   initiativeName : String;
   description : String;
@@ -144,7 +144,7 @@ entity Initiatives {
  * CAIAUtilization entity - CAIA (Cross-account Internal Activities) time tracking
  */
 entity CAIAUtilization {
-  key caiaId : String;
+  key caiaId : UUID;
   employeeId : String;
   taskName : String;
   startDate : Date;
@@ -159,7 +159,7 @@ entity CAIAUtilization {
  * POCUtilization entity - Proof of Concept time tracking
  */
 entity POCUtilization {
-  key pocId : String;
+  key pocId : UUID;
   employeeId : String;
   pocTitle : String;
   startDate : Date;
@@ -174,7 +174,7 @@ entity POCUtilization {
  * Certifications entity - Employee certifications and credentials
  */
 entity Certifications {
-  key certificationId : String;
+  key certificationId : UUID;
   employeeId : String;
   name : String;
   code : String;

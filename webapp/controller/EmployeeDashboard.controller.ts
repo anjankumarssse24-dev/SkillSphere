@@ -12,6 +12,7 @@ import FilterOperator from "sap/ui/model/FilterOperator";
 import HBox from "sap/m/HBox";
 import VBox from "sap/m/VBox";
 import Text from "sap/m/Text";
+import FormattedText from "sap/m/FormattedText";
 
 /**
  * @namespace skillsphere.controller
@@ -534,7 +535,6 @@ export default class EmployeeDashboard extends Controller {
                 // Add new record
                 const listBinding = oDataModel.bindList("/Initiatives");
                 const newData = {
-                    initiativeId: `INIT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     initiativeName: data.initiativeName,
                     description: data.description,
@@ -796,7 +796,6 @@ export default class EmployeeDashboard extends Controller {
             }
 
             const skillData = {
-                skillId: `SKL_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId,
                 skillName: formData.skillName,
                 category: formData.category,
@@ -1405,7 +1404,6 @@ export default class EmployeeDashboard extends Controller {
             const calculatedDuration = calculateDuration(startDateISO, endDateISO);
             
             const newProject = {
-                projectId: `PROJ_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 projectName: projectData.projectName,
                 role: projectData.role,
@@ -2196,7 +2194,6 @@ export default class EmployeeDashboard extends Controller {
                 // Add new record
                 const listBinding = oDataModel.bindList("/CurrentProjects");
                 const newData = {
-                    currentProjectId: `CP_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     projectName: data.projectName,
                     role: data.role,
@@ -2450,7 +2447,6 @@ export default class EmployeeDashboard extends Controller {
                 // Save Initiative/Evaluation to Initiatives entity
                 const listBinding = oDataModel.bindList("/Initiatives");
                 listBinding.create({
-                    initiativeId: `${data.type === "Evaluation" ? "EVL" : "INIT"}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     initiativeName: data.projectName,
                     description: data.description || "",
@@ -2464,7 +2460,6 @@ export default class EmployeeDashboard extends Controller {
                 // Save Project/Evaluation to CurrentProjects entity
                 const listBinding = oDataModel.bindList("/CurrentProjects");
                 const newData: any = {
-                    currentProjectId: `WORK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     type: data.type,
                     projectName: data.projectName,
@@ -2671,7 +2666,6 @@ export default class EmployeeDashboard extends Controller {
             const listBinding = oDataModel.bindList("/CurrentProjects");
             
             const newData = {
-                currentProjectId: `WORK_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 projectName: data.projectName,
                 role: data.role,
@@ -2796,7 +2790,6 @@ export default class EmployeeDashboard extends Controller {
             const listBinding = oDataModel.bindList("/CurrentProjects");
             
             const newData: any = {
-                currentProjectId: `ASSIGN_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 employeeId: employeeId,
                 type: data.type,
                 projectName: data.projectName,
@@ -2919,7 +2912,6 @@ export default class EmployeeDashboard extends Controller {
                 // Add new record
                 const listBinding = oDataModel.bindList("/CAIAUtilization");
                 const newData = {
-                    caiaId: `CAIA_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     taskName: data.taskName,
                     startDate: startDateISO,
@@ -3091,7 +3083,6 @@ export default class EmployeeDashboard extends Controller {
                 // Add new record
                 const listBinding = oDataModel.bindList("/POCUtilization");
                 const newData = {
-                    pocId: `POC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     pocTitle: data.pocTitle,
                     startDate: startDateISO,
@@ -3277,7 +3268,6 @@ export default class EmployeeDashboard extends Controller {
                 // Add new certification
                 const listBinding = oDataModel.bindList("/Certifications");
                 const newData = {
-                    certificationId: `CERT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                     employeeId: employeeId,
                     name: data.name,
                     code: data.code,
@@ -3604,19 +3594,23 @@ private async queryAI(query: string): Promise<void> {
     }
 
     /**
-     * Add bot message to chat
+     * Add bot message to chat - with markdown formatting support
      */
     private addBotMessage(message: string): void {
         const oContainer = this.byId("messagesContainerEmployee") as any;
         
+        // Parse markdown and convert to HTML-friendly format
+        const formattedHtml = this.parseMarkdown(message);
+        
         const oMessageBox = new HBox({
             justifyContent: "Start",
+            width: "100%",
             items: [
                 new VBox({
+                    width: "100%",
                     items: [
-                        new Text({
-                            text: message,
-                            renderWhitespace: true
+                        new FormattedText({
+                            htmlText: formattedHtml
                         }).addStyleClass("botMessage sapUiSmallMargin")
                     ]
                 }).addStyleClass("messageBox botMessageBox")
@@ -3625,6 +3619,45 @@ private async queryAI(query: string): Promise<void> {
         
         oContainer?.addItem(oMessageBox);
         this.scrollToBottom();
+    }
+
+    /**
+     * Parse markdown to HTML for better formatting
+     */
+    private parseMarkdown(text: string): string {
+        let html = text;
+        
+        // Escape HTML special characters first
+        html = html
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+        
+        // Convert markdown bold **text** to <strong>text</strong>
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        
+        // Convert markdown italic *text* to <em>text</em>
+        html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        
+        // Convert markdown code `text` to <code>text</code>
+        html = html.replace(/`(.+?)`/g, "<code>$1</code>");
+        
+        // Convert line breaks to <br>
+        html = html.replace(/\n/g, "<br>");
+        
+        // Convert bullet points - lines starting with * or -
+        html = html.replace(/^[\s]*[\*\-]\s+(.+?)(?=<br>|$)/gm, 
+            (match, content) => "&nbsp;&nbsp;&nbsp;• " + content.trim());
+        
+        // Convert numbered lists - lines starting with number.
+        html = html.replace(/^[\s]*(\d+)\.\s+(.+?)(?=<br>|$)/gm, 
+            (match, num, content) => "&nbsp;&nbsp;&nbsp;" + num + ". " + content.trim());
+        
+        // Convert headers - lines starting with #
+        html = html.replace(/^#+\s+(.+?)(?=<br>|$)/gm, 
+            (match, content) => "<strong style=\"font-size: 1.1em; color: #0070f2;\">" + content.trim() + "</strong>");
+        
+        return html;
     }
 
     /**
