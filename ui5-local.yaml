@@ -50,11 +50,6 @@ server:
           - path: /odata
             url: http://localhost:4004
             destination: backend
-        ui5:
-          path:
-            - /resources
-            - /test-resources
-          url: https://ui5.sap.com
 builder:
   customTasks:
     - name: ui5-tooling-transpile-task

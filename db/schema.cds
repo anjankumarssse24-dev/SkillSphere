@@ -9,6 +9,7 @@ entity Users {
   role : String;
   isActive : Boolean default true;
 }
+//not used
 
 /**
  * Employees entity - Unified people master data
@@ -119,7 +120,7 @@ entity CurrentProjects {
   createdAt : DateTime;
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;
-}
+} // current projects why ? project will have status,we can filter by active projects, why need current projects ? to have unified view of all work assignments, including projects, evaluations, initiatives, and other work types. This simplifies tracking and reporting on employee workload and utilization across different types of assignments.
 
 /**
  * Initiatives entity - Strategic initiatives, CAIA, POC, and other employee-driven work
@@ -152,7 +153,7 @@ entity CAIAUtilization {
   createdAt : DateTime;
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;
-}
+} //inititave= inititave, caia, poc = initiative, but we want to track them separately for reporting and analysis purposes. This allows us to understand how much time employees are spending on different types of work and identify opportunities for better resource allocation and workload management.
 
 /**
  * POCUtilization entity - Proof of Concept time tracking
