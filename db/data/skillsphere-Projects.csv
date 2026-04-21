@@ -1,4 +1,4 @@
-"projectId","employeeId","projectName","role","startDate","endDate","evaluationStartDate","evaluationEndDate","status","description","duration","projectManager","accountExecutiveManager","lineManagerPOC","projectOrchestrator","addedByManager","technology"
+﻿projectId,employeeId,projectName,role,startDate,endDate,evaluationStartDate,evaluationEndDate,status,description,duration,projectManager,accountExecutiveManager,lineManagerPOC,projectOrchestrator,addedByManager,technology
 "996c704c-6924-4647-b49a-70a0b4bef5c9","","S/4HANA Finance Transformation","","2025-09-01","2026-06-30","","","Active","Enterprise-wide S/4HANA finance module rollout","10 months","Jain Pawan","","","Jain Pawan","MGR001","S/4HANA"
 "5da48418-befe-4058-90b1-50f70eb7c695","","BTP Integration Hub","","2026-01-15","2026-09-30","","","Active","Centralized BTP integration platform for CIS","9 months","Jain Pawan","","","Jain Pawan","MGR001","BTP"
 "a4a13e55-31d9-4413-a637-ec419de70d11","","S/4HANA Cloud ERP Rollout","","2025-06-01","2026-03-31","","","Active","Enterprise-wide SAP S/4HANA cloud rollout","10 months","V B Adhithya","","","V B Adhithya","MGR002","S/4HANA"

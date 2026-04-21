@@ -1,4 +1,4 @@
-"skillId","skillName","category","employeeId","proficiencyLevel","yearsExperience","certificationStatus"
+﻿skillId,skillName,category,employeeId,proficiencyLevel,yearsExperience,certificationStatus
 "5d962b3b-be00-4e70-9117-59bf71954245","SAPUI5","Frontend","I770144","Advanced","6","Certified"
 "eee46453-c674-4491-a1aa-dfad236e17c7","SAPUI5","Frontend","I770145","Intermediate","4","In Progress"
 "68bce6f2-4427-4915-a2db-903f5f8c866a","SAP HANA","Database","I770146","Advanced","8","Certified"

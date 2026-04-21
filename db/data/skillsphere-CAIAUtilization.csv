@@ -1,4 +1,4 @@
-"caiaId","employeeId","taskName","startDate","endDate","hoursPerDay"
+﻿caiaId,employeeId,taskName,startDate,endDate,hoursPerDay
 "3f07e0e5-bf3f-4958-8ade-85b4bfb06fa4","I770144","Technical Documentation","2025-10-16","2025-10-30","3"
 "0cffb59b-780c-4333-8e35-575ce595f3aa","I770144","Code Review & Quality Assurance","2025-10-21","2025-10-27","3"
 "edfacf62-20f2-43e4-b740-fe806a95749a","I770151","Team Training & Mentoring","2025-10-20","2025-11-20","2"

@@ -1,5 +1,5 @@
 {
-  "xsappname": "skillsphere-${org}-${space}",
+  "xsappname": "skillsphere",
   "tenant-mode": "dedicated",
   "scopes": [
     {
