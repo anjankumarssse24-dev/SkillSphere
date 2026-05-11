@@ -15,7 +15,25 @@ service SkillSphereService {
     name: String;
     role: String;
     targetDashboard: String;
+    isFirstTime: Boolean;
     message: String;
+  };
+
+  action completeFirstTimeSetup(
+    loginEmployeeId: String,
+    employeeId: String,
+    name: String,
+    team: String,
+    subTeam: String,
+    location: String,
+    gradeLevel: String,
+    tLevel: String,
+    experience: Decimal,
+    managerId: String
+  ) returns {
+    success: Boolean;
+    message: String;
+    employeeId: String;
   };
   
   // User Management

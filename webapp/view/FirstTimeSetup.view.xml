@@ -1,0 +1,185 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:f="sap.ui.layout.form"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  controllerName="skillsphere.controller.FirstTimeSetup"
+  displayBlock="true">
+
+  <Shell id="shell">
+    <App id="firstTimeSetupApp">
+      <pages>
+        <Page
+          id="firstTimeSetupPage"
+          title="Complete Your Profile"
+          showHeader="true"
+          enableScrolling="true">
+
+          <content>
+            <VBox class="sapUiResponsiveMargin" alignItems="Center">
+              <!-- Header Section with Better Styling -->
+              <VBox
+                class="sapUiLargeMarginBottom sapUiMediumMarginBegin sapUiMediumMarginEnd"
+                alignItems="Center"
+                justifyContent="Center"
+                width="100%">
+                <Title text="Welcome to SkillSphere!" level="H1" class="sapUiLargeMarginBottom sapMTitleMarginTop" />
+                <Text
+                  text="Please complete your profile to get started"
+                  class="sapUiMediumMarginTop sapMTextRenderWhitespaceWrap sapUiMediumText" />
+              </VBox>
+
+              <!-- Form Section -->
+              <VBox width="100%" class="sapUiMediumMarginBegin sapUiMediumMarginEnd sapUiLargeMarginBottom">
+                <f:SimpleForm editable="true" layout="ResponsiveGridLayout" class="sapUiMediumMargin">
+                  <f:content>
+                    <!-- Full Name -->
+                    <Label text="Full Name *" design="Bold" />
+                    <Input
+                      id="nameInput"
+                      value="{model>/name}"
+                      placeholder="Enter your full name"
+                      required="true"
+                      maxLength="100"
+                      width="100%" />
+
+                    <!-- Email (Read-only) -->
+                    <Label text="Email" design="Bold" />
+                    <Input
+                      id="emailInput"
+                      value="{model>/email}"
+                      editable="false"
+                      enabled="false"
+                      maxLength="100"
+                      width="100%" />
+
+                    <!-- Employee ID -->
+                    <Label text="Employee ID (I-Number) *" design="Bold" />
+                    <Input
+                      id="employeeIdInput"
+                      value="{model>/employeeId}"
+                      placeholder="Enter your I-number (e.g., I774156)"
+                      required="true"
+                      maxLength="20"
+                      width="100%" />
+
+                    <!-- Team -->
+                    <Label text="Team *" design="Bold" />
+                    <Input
+                      id="teamInput"
+                      value="{model>/team}"
+                      editable="false"
+                      enabled="false"
+                      required="true"
+                      width="100%" />
+
+                    <!-- Sub Team -->
+                    <Label text="Sub Team" design="Bold" />
+                    <ComboBox
+                      id="subTeamCombo"
+                      items="{model>/subTeamList}"
+                      selectedKey="{model>/subTeam}"
+                      placeholder="Select your sub-team"
+                      width="100%">
+                      <core:Item key="{model>key}" text="{model>text}" />
+                    </ComboBox>
+
+                    <!-- Location -->
+                    <Label text="Location *" design="Bold" />
+                    <ComboBox
+                      id="locationCombo"
+                      items="{model>/locationsList}"
+                      selectedKey="{model>/location}"
+                      placeholder="Select your location"
+                      required="true"
+                      width="100%">
+                      <core:Item key="{model>key}" text="{model>text}" />
+                    </ComboBox>
+
+                    <!-- Grade Level -->
+                    <Label text="Grade Level *" design="Bold" />
+                    <ComboBox
+                      id="gradeLevelCombo"
+                      items="{model>/gradeLevelList}"
+                      selectedKey="{model>/gradeLevel}"
+                      placeholder="Select your grade level"
+                      required="true"
+                      width="100%">
+                      <core:Item key="{model>key}" text="{model>text}" />
+                    </ComboBox>
+
+                    <!-- T-Level -->
+                    <Label text="T-Level *" design="Bold" />
+                    <ComboBox
+                      id="tLevelCombo"
+                      items="{model>/tLevelList}"
+                      selectedKey="{model>/tLevel}"
+                      placeholder="Select your T-level"
+                      required="true"
+                      width="100%">
+                      <core:Item key="{model>key}" text="{model>text}" />
+                    </ComboBox>
+
+                    <!-- Experience -->
+                    <Label text="Years of Experience" design="Bold" />
+                    <Input
+                      id="experienceInput"
+                      value="{model>/experience}"
+                      placeholder="e.g., 5"
+                      type="Number"
+                      maxLength="5"
+                      width="100%" />
+
+                    <!-- Manager -->
+                    <Label text="Manager" design="Bold" />
+                    <ComboBox
+                      id="managerCombo"
+                      items="{model>/managerList}"
+                      selectedKey="{model>/managerId}"
+                      placeholder="Select your manager"
+                      width="100%">
+                      <core:ListItem key="{model>key}" text="{model>text}" additionalText="{model>email}" />
+                    </ComboBox>
+
+                    <!-- Terms Consent -->
+                    <Label text="Consent *" design="Bold" />
+                    <CheckBox
+                      id="termsCheckbox"
+                      selected="{model>/termsAccepted}"
+                      text="I agree that SkillSphere can use my name, email, and project-related information for profile, staffing, and reporting purposes."
+                      wrapping="true"
+                      width="100%" />
+                  </f:content>
+                </f:SimpleForm>
+              </VBox>
+
+              <!-- Info Message with better styling -->
+              <MessageStrip
+                text="* Required fields must be completed to access the application"
+                type="Information"
+                class="sapUiMediumMarginTop sapUiMediumMarginBegin sapUiMediumMarginEnd"
+                showIcon="true" />
+            </VBox>
+          </content>
+
+          <footer>
+            <Bar>
+              <contentMiddle>
+                <Button
+                  id="completeBtn"
+                  text="Complete Setup"
+                  type="Emphasized"
+                  width="250px"
+                  press="onCompleteSetup" />
+              </contentMiddle>
+              <contentRight>
+                <Text text="Step 1 of 1" class="sapUiSmallMarginRight" />
+              </contentRight>
+            </Bar>
+          </footer>
+        </Page>
+      </pages>
+    </App>
+  </Shell>
+
+</mvc:View>

@@ -70,7 +70,6 @@
       "libs": {
         "sap.m": {},
         "sap.ui.core": {},
-        "sap.ui.fl": {},
         "sap.f": {},
         "sap.ui.table": {},
         "sap.viz": {},
@@ -129,6 +128,11 @@
           "target": ["TargetLanding"]
         },
         {
+          "name": "firstTimeSetup",
+          "pattern": "first-time-setup",
+          "target": ["TargetFirstTimeSetup"]
+        },
+        {
           "name": "EmployeeLogin",
           "pattern": "employee-login",
           "target": ["TargetEmployeeLogin"]
@@ -173,6 +177,10 @@
         "TargetLanding": {
           "id": "Landing",
           "name": "Landing"
+        },
+        "TargetFirstTimeSetup": {
+          "id": "FirstTimeSetup",
+          "name": "FirstTimeSetup"
         },
         "TargetEmployeeLogin": {
           "id": "EmployeeLogin",

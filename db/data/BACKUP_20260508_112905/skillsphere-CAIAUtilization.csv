@@ -1,0 +1,11 @@
+﻿caiaId,employeeId,taskName,startDate,endDate,hoursPerDay
+"3f07e0e5-bf3f-4958-8ade-85b4bfb06fa4","I770144","Technical Documentation","2025-10-16","2025-10-30","3"
+"0cffb59b-780c-4333-8e35-575ce595f3aa","I770144","Code Review & Quality Assurance","2025-10-21","2025-10-27","3"
+"edfacf62-20f2-43e4-b740-fe806a95749a","I770151","Team Training & Mentoring","2025-10-20","2025-11-20","2"
+"ffbd8ffb-7c11-404d-a442-a5840610ee1e","I770152","System Maintenance","2025-10-15","2025-11-15","2"
+"cdf20f00-a4e8-456b-a7c0-dba6442af710","I753890","Data Analysis & Reporting","2026-03-05","2026-01-07","4"
+"c0ca0bba-06b7-47a6-9f5f-50c4fe522dfe","I763266","Code Refactoring","2026-03-05","2026-03-04","8"
+"cd2a7b72-de47-4c09-b25c-8904953fa565","I755736","Research & Development","2026-03-05","2026-02-28","14"
+"db449909-1591-486b-9222-cbbeb465fde5","I769086","ML Model Training","2026-03-05","2026-02-28","8"
+"f5511e52-de61-46c0-a25f-03fc1c1eb9c8","I749085","UI/UX Enhancement","2026-03-05","2026-09-24","8"
+"83543377-e863-46cd-b12a-e165f1f0afdf","I750145","Knowledge Transfer","2026-03-05","2026-12-16","8"

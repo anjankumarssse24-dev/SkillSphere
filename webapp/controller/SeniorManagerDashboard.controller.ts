@@ -121,22 +121,35 @@ export default class SeniorManagerDashboard extends Controller {
     private async loadAllManagers(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const managersBinding = oDataModel.bindList("/Employees");
-            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
-            
-            const contexts = await managersBinding.requestContexts(0, 100);
-            const managers = contexts
-                .map((context: any) => {
-                    const mgr = context.getObject();
-                    return {
-                        ...mgr,
-                        managerId: mgr.employeeId
-                    };
-                });
-            
-            console.log(`✅ Loaded ${managers.length} manager records`);
-            
-            // Load team size for each manager
+            const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+            const currentUser = currentUserModel?.getData();
+            const seniorMgrId = this.currentSeniorManagerId || currentUser?.id;
+
+            if (!seniorMgrId) {
+                console.warn("⚠️ Senior manager ID missing, cannot load team overview");
+                this.getView()?.setModel(new JSONModel({ managers: [], individualEmployees: [] }), "allManagers");
+                return;
+            }
+
+            // Load all direct reports under this senior manager, then split by role.
+            const directReportsBinding = oDataModel.bindList("/Employees");
+            directReportsBinding.filter([
+                new Filter("managerId", FilterOperator.EQ, seniorMgrId)
+            ]);
+
+            const directReportContexts = await directReportsBinding.requestContexts(0, 500);
+            const directReports = directReportContexts.map((context: any) => context.getObject());
+
+            const managers = directReports
+                .filter((person: any) => String(person.role || "").toLowerCase().includes("manager"))
+                .map((mgr: any) => ({
+                    ...mgr,
+                    managerId: mgr.employeeId
+                }));
+
+            console.log(`✅ Loaded ${directReports.length} direct reports for ${seniorMgrId} (${managers.length} managers)`);
+
+            // Load team size for each direct-report manager
             const managersWithTeamSize = await Promise.all(managers.map(async (mgr: any) => {
                 const teamSize = await this.getManagerTeamSize(mgr.managerId);
                 return {
@@ -146,15 +159,17 @@ export default class SeniorManagerDashboard extends Controller {
                 };
             }));
             
-            // Split into true managers (have reports) and individual employees (no reports)
-            const managersOnly = managersWithTeamSize.filter((person: any) => (person.teamSize || 0) > 0);
-            const individualEmployees = managersWithTeamSize
-                .filter((person: any) => (person.teamSize || 0) === 0)
+            // Keep all direct-report managers, even if they currently have zero direct reports.
+            const managersOnly = managersWithTeamSize;
+
+            // Employee Overview should show direct reports that are not managers.
+            const individualEmployees = directReports
+                .filter((person: any) => !String(person.role || "").toLowerCase().includes("manager"))
                 .map((person: any) => ({
                     ...person,
                     displayExperience: (person.experience && Number(person.experience) > 0)
                         ? person.experience
-                        : (String(person.managerId || "").startsWith("MGR") ? 10 : 5)
+                        : 0
                 }));
 
             // Create model for manager overview section
@@ -167,6 +182,9 @@ export default class SeniorManagerDashboard extends Controller {
             // Populate manager dropdown for search
             const managerSelect = this.byId("orgManagerFilter") as Select;
             if (managerSelect) {
+                managerSelect.removeAllItems();
+                managerSelect.addItem(new Item({ key: "", text: "All Managers" }));
+
                 managersOnly.forEach((mgr: any) => {
                     managerSelect.addItem(
                         new Item({
@@ -177,7 +195,7 @@ export default class SeniorManagerDashboard extends Controller {
                 });
             }
 
-            console.log(`✅ Manager overview split: ${managersOnly.length} managers, ${individualEmployees.length} employees (no reports)`);
+            console.log(`✅ Team overview split for ${seniorMgrId}: ${managersOnly.length} managers, ${individualEmployees.length} direct employees`);
             
         } catch (error) {
             console.error("❌ Error loading managers:", error);
@@ -217,8 +235,13 @@ export default class SeniorManagerDashboard extends Controller {
             const totalEmployees = allEmployees.length;
 
             // Average experience
-            const totalExperience = allEmployees.reduce((sum: number, emp: any) => sum + (emp.experience || 0), 0);
-            const avgExperience = totalEmployees > 0 ? (totalExperience / totalEmployees).toFixed(1) : 0;
+            const experienceValues = allEmployees
+                .map((emp: any) => Number(emp.experience))
+                .filter((value: number) => Number.isFinite(value));
+            const totalExperience = experienceValues.reduce((sum: number, value: number) => sum + value, 0);
+            const avgExperience = experienceValues.length > 0
+                ? Number((totalExperience / experienceValues.length).toFixed(1))
+                : 0;
 
             // Load all skills — unique count + top skills by frequency
             const skillsBinding = oDataModel.bindList("/Skills");
@@ -812,9 +835,20 @@ export default class SeniorManagerDashboard extends Controller {
                 filters.push(new Filter("managerId", FilterOperator.EQ, selectedManager));
             }
             
-            // Apply team filter if selected
+            // Apply sub-team filter if selected (support Team1 and Team 1 variants)
             if (selectedTeam) {
-                filters.push(new Filter("team", FilterOperator.EQ, selectedTeam));
+                const compactSubTeam = selectedTeam.replace(/\s+/g, "");
+                const spacedSubTeam = compactSubTeam.replace(/(\D+)(\d+)/, "$1 $2");
+                filters.push(new Filter({
+                    filters: [
+                        new Filter("subTeam", FilterOperator.EQ, selectedTeam),
+                        new Filter("subTeam", FilterOperator.EQ, compactSubTeam),
+                        new Filter("subTeam", FilterOperator.EQ, spacedSubTeam),
+                        new Filter("subTeam", FilterOperator.EQ, compactSubTeam.toLowerCase()),
+                        new Filter("subTeam", FilterOperator.EQ, spacedSubTeam.toLowerCase())
+                    ],
+                    and: false
+                }));
             }
             
             if (filters.length > 0) {

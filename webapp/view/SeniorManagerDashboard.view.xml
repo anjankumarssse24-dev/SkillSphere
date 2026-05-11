@@ -115,7 +115,7 @@
                                                     mode="None"
                                                     showSeparators="Inner"
                                                     alternateRowColors="true"
-                                                    noDataText="Loading skills...">
+                                                    noDataText="No skills added right now">
                                                     <m:columns>
                                                         <m:Column width="4rem" hAlign="Center"><m:Text text="#"/></m:Column>
                                                         <m:Column><m:Text text="Skill Name"/></m:Column>
@@ -209,7 +209,7 @@
                                                 <m:ColumnListItem type="Active" press="onViewIndividualEmployeeDetails">
                                                     <m:cells>
                                                         <m:ObjectIdentifier title="{allManagers>name}"/>
-                                                        <m:Text text="{allManagers>managerId}"/>
+                                                        <m:Text text="{allManagers>employeeId}"/>
                                                         <m:Text text="{allManagers>team}"/>
                                                         <m:Text text="{allManagers>displayExperience}" textAlign="Center"/>
                                                         <m:Text text="{allManagers>specialization}"/>
@@ -298,15 +298,17 @@
                                                 </m:Select>
                                             </m:VBox>
                                             <m:VBox class="sapUiResponsiveMargin" width="auto">
-                                                <m:Label text="Team:" class="sapUiSmallMarginBottom"/>
+                                                <m:Label text="Sub Team:" class="sapUiSmallMarginBottom"/>
                                                 <m:Select id="orgTeamFilter" width="15rem">
-                                                    <core:Item key="" text="All Teams"/>
-                                                    <core:Item key="S4HANA" text="SAP S/4HANA"/>
-                                                    <core:Item key="SuccessFactors" text="SAP SuccessFactors"/>
-                                                    <core:Item key="CIS" text="CIS"/>
-                                                    <core:Item key="Ariba" text="SAP Ariba"/>
-                                                    <core:Item key="BTP" text="SAP BTP"/>
-                                                    <core:Item key="Analytics" text="Analytics"/>
+                                                    <core:Item key="" text="All Sub Teams"/>
+                                                    <core:Item key="Team1" text="Team1"/>
+                                                    <core:Item key="Team2" text="Team2"/>
+                                                    <core:Item key="Team3" text="Team3"/>
+                                                    <core:Item key="Team4" text="Team4"/>
+                                                    <core:Item key="Team5" text="Team5"/>
+                                                    <core:Item key="Team6" text="Team6"/>
+                                                    <core:Item key="Team7" text="Team7"/>
+                                                    <core:Item key="Team8" text="Team8"/>
                                                 </m:Select>
                                             </m:VBox>
                                             <m:VBox class="sapUiResponsiveMargin" width="auto">

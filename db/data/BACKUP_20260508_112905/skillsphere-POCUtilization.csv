@@ -1,0 +1,9 @@
+﻿pocId,employeeId,pocTitle,startDate,endDate,hoursPerDay
+"c3337962-89fb-44b1-9a49-5da3ceda9968","I770144","BTP Integration POC","2025-10-10","2025-10-17","4"
+"57a16ab6-b251-425a-93d1-c1be6f83c78f","I770144","CAP Service Prototype","2025-11-12","2025-11-21","3"
+"c0da5bea-7115-4b18-816d-6e6b3d1f35d1","I770151","Email Integration POC","2025-10-20","2025-11-10","3"
+"e01ce91b-2637-4394-a417-9bcb4fb6a35e","I770152","Backend API POC","2025-10-25","2025-11-15","2"
+"b4afbe02-07e2-448a-bba9-75910ad3627d","I750145","AI Model Testing","2026-01-13","2026-12-16","8"
+"6303d745-6413-4f24-8a72-628d33878250","I750145","Roche-Email","2025-10-01","2025-10-31","3"
+"b86ace21-8d70-42c9-a6f2-ec3f0a0197ab","I346659","SET","2025-10-01","2025-10-31","2"
+"981fb19a-bcfa-4076-a49e-c4e1085deda4","I763161","Roche-Email","2025-10-01","2025-10-31","3"

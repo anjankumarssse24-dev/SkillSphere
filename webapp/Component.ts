@@ -68,6 +68,12 @@ super.init();
                 isLoggedIn: true
             });
 
+            // Check if first-time setup is needed
+            if (userContext.isFirstTime || userContext.targetDashboard === "firstTimeSetup") {
+                this.getRouter().navTo("firstTimeSetup", {}, undefined, true);
+                return;
+            }
+
             if (userContext.targetDashboard === "SeniorManagerDashboard") {
                 this.getRouter().navTo("SeniorManagerDashboard", {
                     seniorManagerId: userContext.employeeId

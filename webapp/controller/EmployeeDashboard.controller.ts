@@ -243,12 +243,23 @@ export default class EmployeeDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const managersBinding = oDataModel.bindList("/Employees");
-            managersBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
+            managersBinding.filter([
+                new Filter({
+                    filters: [
+                        new Filter("role", FilterOperator.EQ, "Manager"),
+                        new Filter("role", FilterOperator.EQ, "manager"),
+                        new Filter("role", FilterOperator.EQ, "SeniorManager"),
+                        new Filter("role", FilterOperator.EQ, "seniormanager")
+                    ],
+                    and: false
+                })
+            ]);
 
             const managerContexts = await managersBinding.requestContexts(0, 200);
             const managers = managerContexts
                 .map((context: any) => context.getObject())
                 .filter((manager: any) => manager.employeeId !== currentEmployeeId)
+                .filter((manager: any) => !!manager.employeeId)
                 .sort((left: any, right: any) => (left.name || "").localeCompare(right.name || ""));
 
             this.getView()?.setModel(new JSONModel({ managers }), "managersList");
@@ -1734,6 +1745,12 @@ export default class EmployeeDashboard extends Controller {
     public onEditProfile(): void {
         const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
         this.selfProfileSnapshot = JSON.parse(JSON.stringify(selfProfileModel?.getData() || {}));
+        
+        const employeeId = String(this.currentEmployeeId || selfProfileModel?.getProperty("/employeeId") || "");
+        if (employeeId) {
+            // Refresh manager list each time edit mode opens so the latest options are visible.
+            this.loadManagerOptions(employeeId);
+        }
 
         const profileUiModel = this.getView()?.getModel("profileUi") as JSONModel;
         profileUiModel?.setProperty("/isEditing", true);
