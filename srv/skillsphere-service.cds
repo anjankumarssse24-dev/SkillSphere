@@ -84,7 +84,7 @@ service SkillSphereService {
   };
   
   // AI Assistant Actions
-  @requires: ['Employee', 'Manager', 'SeniorManager']
+  @requires: 'authenticated-user'
   action askAIAssistant(
     query: String,
     employeeId: String  // ← Make sure this parameter exists!
@@ -94,7 +94,7 @@ service SkillSphereService {
     error: String;
   };
 
-  @requires: ['Manager', 'SeniorManager']
+  @requires: 'authenticated-user'
   action managerQuery(
     managerId: String,
     queryType: String,
@@ -105,7 +105,7 @@ service SkillSphereService {
     success: Boolean;
   };
 
-  @requires: 'SeniorManager'
+  @requires: 'authenticated-user'
   action seniorManagerQuery(
     seniorManagerId: String,
     queryType: String,

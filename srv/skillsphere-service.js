@@ -25,6 +25,86 @@ module.exports = cds.service.impl(async function() {
     }
     return authHeader.slice('Bearer '.length);
   }
+
+  function _toScopeList(value) {
+    if (!value) return [];
+    if (Array.isArray(value)) return value.filter(Boolean);
+    if (value instanceof Set) return Array.from(value).filter(Boolean);
+    if (typeof value === 'string' && value.includes(' ')) {
+      return value.split(' ').map(v => v.trim()).filter(Boolean);
+    }
+    if (typeof value === 'string') return [value];
+    if (typeof value === 'object') return Object.keys(value).filter(Boolean);
+    return [];
+  }
+
+  function _getRolesFromRequest(req) {
+    const tokenInfo = req.user?.authInfo?.getTokenInfo?.() || req.user?.tokenInfo;
+    const jwtPayload = tokenInfo?.getPayload?.() || req.user?.authInfo?.token || {};
+
+    const roleCollections = _toScopeList(jwtPayload?.['xs.system.attributes']?.['xs.rolecollections']);
+    const grantedScopes = [
+      ..._toScopeList(req.user?._roles),
+      ..._toScopeList(req.user?.scopes),
+      ..._toScopeList(req.user?.roles),
+      ..._toScopeList(req.user?.attr?.scope),
+      ..._toScopeList(req.user?.attr?.scopes),
+      ..._toScopeList(req.user?.attr?.authorities),
+      ..._toScopeList(jwtPayload?.scope),
+      ..._toScopeList(jwtPayload?.scp),
+      ..._toScopeList(jwtPayload?.authorities)
+    ].filter(Boolean);
+
+    return {
+      scopes: Array.from(new Set(grantedScopes)),
+      roleCollections: Array.from(new Set(roleCollections))
+    };
+  }
+
+  function _hasRole(req, roleName) {
+    if (req.user?.is?.(roleName)) return true;
+
+    const { scopes, roleCollections } = _getRolesFromRequest(req);
+    const normalize = value => String(value || '').trim().toLowerCase();
+    const tokenize = value => normalize(value).split(/[^a-z0-9]+/).filter(Boolean);
+    const normalizedRole = normalize(roleName);
+
+    const fromScopes = scopes.some(scope => {
+      const normalizedScope = normalize(scope);
+      return (
+        normalizedScope === normalizedRole ||
+        normalizedScope.endsWith(`.${normalizedRole}`)
+      );
+    });
+
+    if (fromScopes) return true;
+
+    return roleCollections.some(collection => {
+      const normalizedCollection = normalize(collection);
+      if (
+        normalizedCollection === normalizedRole ||
+        normalizedCollection.endsWith(`.${normalizedRole}`)
+      ) {
+        return true;
+      }
+
+      // Handle naming styles like Skillsphere_Senior_Manager by stripping separators.
+      const compactCollection = normalizedCollection.replace(/[^a-z0-9]/g, '');
+      if (
+        compactCollection === normalizedRole ||
+        compactCollection.endsWith(normalizedRole)
+      ) {
+        return true;
+      }
+
+      const tokens = tokenize(collection);
+      return tokens.includes(normalizedRole);
+    });
+  }
+
+  function _requireAnyRole(req, allowedRoles) {
+    return allowedRoles.some(role => _hasRole(req, role));
+  }
   
   async function getAIClient(req) {
     const jwt = _extractBearerToken(req);
@@ -77,52 +157,11 @@ module.exports = cds.service.impl(async function() {
       principalEmail?.split('@')[0] ||
       principalId;
 
-    const roleCollections = toScopeList(jwtPayload?.['xs.system.attributes']?.['xs.rolecollections']);
+    const { scopes: uniqueScopes, roleCollections: uniqueRoleCollections } = _getRolesFromRequest(req);
 
-    const grantedScopes = [
-      ...toScopeList(req.user?._roles),
-      ...toScopeList(req.user?.scopes),
-      ...toScopeList(req.user?.roles),
-      ...toScopeList(req.user?.attr?.scope),
-      ...toScopeList(req.user?.attr?.scopes),
-      ...toScopeList(req.user?.attr?.authorities),
-      ...toScopeList(jwtPayload?.scope),
-      ...toScopeList(jwtPayload?.scp),
-      ...toScopeList(jwtPayload?.authorities)
-    ].filter(Boolean);
-
-    const uniqueScopes = Array.from(new Set(grantedScopes));
-    const uniqueRoleCollections = Array.from(new Set(roleCollections));
-
-    const normalize = value => String(value || '').trim().toLowerCase();
-
-    const hasRole = roleName => {
-      if (req.user?.is?.(roleName)) return true;
-
-      const normalizedRole = normalize(roleName);
-
-      const fromScopes = uniqueScopes.some(scope => {
-        const normalizedScope = normalize(scope);
-        return (
-          normalizedScope === normalizedRole ||
-          normalizedScope.endsWith(`.${normalizedRole}`)
-        );
-      });
-
-      if (fromScopes) return true;
-
-      return uniqueRoleCollections.some(collection => {
-        const normalizedCollection = normalize(collection);
-        return (
-          normalizedCollection === normalizedRole ||
-          normalizedCollection.endsWith(`.${normalizedRole}`)
-        );
-      });
-    };
-
-    const hasSeniorManagerRole = hasRole('SeniorManager');
-    const hasManagerRole = hasRole('Manager');
-    const hasEmployeeRole = hasRole('Employee');
+    const hasSeniorManagerRole = _hasRole(req, 'SeniorManager');
+    const hasManagerRole = _hasRole(req, 'Manager');
+    const hasEmployeeRole = _hasRole(req, 'Employee');
 
     console.log('🪪 currentUserContext role summary:', {
       principalId,
@@ -396,6 +435,10 @@ module.exports = cds.service.impl(async function() {
     try {
       const { query, employeeId } = req.data;
 
+      if (!_requireAnyRole(req, ['Employee', 'Manager', 'SeniorManager'])) {
+        return req.reject(403, 'Forbidden');
+      }
+
       console.log('🧪 askAIAssistant runtime:', { employeeId });
 
       if (!employeeId || !query) {
@@ -467,6 +510,10 @@ ${projects.length ? projects.map(p =>
   this.on('managerQuery', async req => {
     try {
       const { managerId, queryType, context } = req.data;
+
+      if (!_requireAnyRole(req, ['Manager', 'SeniorManager'])) {
+        return req.reject(403, 'Forbidden');
+      }
 
       console.log('🧪 managerQuery runtime:', { managerId });
 
@@ -547,6 +594,10 @@ ${projects.map(p =>
   this.on('seniorManagerQuery', async req => {
     try {
       const { seniorManagerId, queryType, context } = req.data;
+
+      if (!_requireAnyRole(req, ['SeniorManager'])) {
+        return req.reject(403, 'Forbidden');
+      }
 
       console.log('🧪 seniorManagerQuery runtime:', { seniorManagerId });
 

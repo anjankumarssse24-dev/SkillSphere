@@ -21,6 +21,8 @@ modules:
       buildpack: nodejs_buildpack
       memory: 256M
       disk-quota: 1024M
+      env:
+        AI_DEPLOYMENT_ID: d4e219b7a51f262e
     build-parameters:
       builder: npm
       ignore:
@@ -130,8 +132,8 @@ resources:
         tenant-mode: dedicated
         oauth2-configuration:
           redirect-uris:
-            - https://skillsphere-jfgc5ap3.launchpad.cfapps.us10.hana.ondemand.com/**
-            - https://*.cfapps.us10.hana.ondemand.com/**
+            - https://*.launchpad.cfapps.eu12.hana.ondemand.com/**
+            - https://*.cfapps.eu12.hana.ondemand.com/**
             - https://*.applicationstudio.cloud.sap/**
           credential-types:
             - "binding-secret"

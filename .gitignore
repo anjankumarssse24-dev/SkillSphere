@@ -18,3 +18,6 @@ db.sqlite
 db.sqlite-shm
 db.sqlite-wal
 webapp/skillsphere.zip
+
+# added by cds
+.cdsrc-private.json

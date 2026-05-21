@@ -1,4 +1,5 @@
 employeeId,name,team,subTeam,managerId,email,experience,totalSkills,totalProjects,role,location,tLevel,gradeLevel
 "I749085","Shajith Mujipurrahuman","CIS","Team8","I774156","shajith.mujipurrahuman@sap.com","10","2","1","Manager","Whitefield, Bangalore","T3","L1"
 "I750145","Sreeja Reddy","CIS","Team8","I774156","sreeja.reddy.kattekommula@sap.com","0.33","2","1","Employee","Whitefield, Bangalore","T1","L1"
-"I774156","Arushi Mittal","CIS","Team8","","arushi.mittal@sap.com","0","0","0","SeniorManager","Whitefield, Bangalore","T1","L1"
+"I774156","Arushi Mittal","CIS","Team8","","arushi.mittal@sap.com","0","0","0","Employee","Whitefield, Bangalore","T1","L1"
+"I305034","Nirmala Shettar","CIS","","","nirmala.shettar@sap.com","0","0","0","SeniorManager","Whitefield, Bangalore","",""
