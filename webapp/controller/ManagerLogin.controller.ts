@@ -1,4 +1,4 @@
-﻿import Controller from "sap/ui/core/mvc/Controller";
+import Controller from "sap/ui/core/mvc/Controller";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
 import JSONModel from "sap/ui/model/json/JSONModel";

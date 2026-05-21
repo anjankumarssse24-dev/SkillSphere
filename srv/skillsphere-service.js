@@ -347,14 +347,27 @@ module.exports = cds.service.impl(async function() {
 
         const principalEmail = req.user?.attr?.email || req.user?.attr?.mail || '';
         const displayName = principalEmail?.split('@')[0] || normalizedEmployeeId;
-        const isSeniorManager = req.user?.is?.('SeniorManager') || false;
-        const isManager = req.user?.is?.('Manager') || false;
-        const inferredRole = isSeniorManager ? 'SeniorManager' : isManager ? 'Manager' : 'Employee';
+
+        // Use the same role resolution logic as currentUserContext
+        const { scopes: uniqueScopes, roleCollections: uniqueRoleCollections } = _getRolesFromRequest(req);
+        const hasSeniorManagerRole = _hasRole(req, 'SeniorManager');
+        const hasManagerRole = _hasRole(req, 'Manager');
+        const hasEmployeeRole = _hasRole(req, 'Employee');
+        let resolvedRole = '';
+        if (hasSeniorManagerRole) {
+          resolvedRole = 'SeniorManager';
+        } else if (hasManagerRole) {
+          resolvedRole = 'Manager';
+        } else if (hasEmployeeRole) {
+          resolvedRole = 'Employee';
+        } else {
+          resolvedRole = 'Employee'; // fallback
+        }
 
         await tx.run(INSERT.into(Employees).entries([{
           employeeId: normalizedEmployeeId,
           name: name || displayName,
-          role: inferredRole,
+          role: resolvedRole,
           team: team,
           subTeam: subTeam || '',
           managerId: normalizedManagerId || '',

@@ -1,4 +1,4 @@
-﻿<mvc:View
+<mvc:View
     controllerName="skillsphere.controller.ManagerDashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:m="sap.m"
