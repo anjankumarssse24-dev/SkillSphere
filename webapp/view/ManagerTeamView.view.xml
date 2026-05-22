@@ -622,6 +622,7 @@
                                             <m:Column><m:Text text="Start Date"/></m:Column>
                                             <m:Column><m:Text text="End Date"/></m:Column>
                                             <m:Column><m:Text text="Utilization"/></m:Column>
+                                            <m:Column hAlign="Center" width="140px"><m:Text text="Actions"/></m:Column>
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem>
@@ -629,7 +630,18 @@
                                                 <m:Text text="{employeeDetails>projectManager}"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:VBox width="8rem">
+                                                    <m:Text text="{= ${employeeDetails>utilizationPercent} + '%' }"
+                                                            visible="{= !${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Input value="{employeeDetails>utilizationPercent}"
+                                                             type="Number"
+                                                             width="100%"
+                                                             visible="{= ${employeeDetails>isUtilizationEditing} }"/>
+                                                </m:VBox>
+                                                <m:HBox justifyContent="Center" alignItems="Center">
+                                                    <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit utilization" press="onMTVEditUtilization" class="sapUiTinyMarginEnd" visible="{= !${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Button icon="sap-icon://save" type="Transparent" tooltip="Save utilization" press="onMTVSaveUtilization" visible="{= ${employeeDetails>isUtilizationEditing} }"/>
+                                                </m:HBox>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>

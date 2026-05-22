@@ -1979,7 +1979,10 @@ export default class ManagerTeamView extends Controller {
                 ...profileData,
                 skills: skills,
                 projects: projects,
-                currentProjects: currentProjects,
+                currentProjects: currentProjects.map((cp: any) => ({
+                    ...cp,
+                    isUtilizationEditing: false
+                })),
                 caiaUtilization: caiaUtilization,
                 pocUtilization: pocUtilization,
                 certifications: certifications,
@@ -2394,6 +2397,57 @@ export default class ManagerTeamView extends Controller {
         
         // Refresh the assignments table
         await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
+    }
+
+    public onMTVEditUtilization(event: Event): void {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        if (!bindingContext) {
+            return;
+        }
+
+        bindingContext.setProperty("isUtilizationEditing", true);
+    }
+
+    public async onMTVSaveUtilization(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        const row = bindingContext?.getObject();
+
+        if (!row || !this.currentDialogEmployeeId) {
+            MessageToast.show("Unable to update utilization");
+            return;
+        }
+
+        const utilizationPercent = Math.max(1, Math.min(100, Math.round(Number(row.utilizationPercent) || 0)));
+        const currentProjectId = row.currentProjectId;
+        if (!currentProjectId) {
+            MessageToast.show("Assignment identifier not found");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProjectId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length === 0) {
+                MessageToast.show("Assignment not found");
+                return;
+            }
+
+            contexts[0].setProperty("utilizationPercent", utilizationPercent);
+            contexts[0].setProperty("lastUpdated", new Date().toISOString());
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+
+            bindingContext.setProperty("isUtilizationEditing", false);
+            bindingContext.setProperty("utilizationPercent", utilizationPercent);
+            MessageToast.show("Utilization updated successfully");
+        } catch (error) {
+            console.error("❌ Error updating MTV utilization:", error);
+            MessageToast.show("Error updating utilization");
+        }
     }
 
     // Assign project to employee with Pending status

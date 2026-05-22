@@ -281,6 +281,9 @@
                                             <m:Column minScreenWidth="Phone" demandPopin="false">
                                                 <m:Text text="Current Status"/>
                                             </m:Column>
+                                            <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline" hAlign="Center">
+                                                <m:Text text="Total Utilization"/>
+                                            </m:Column>
                                             <m:Column minScreenWidth="Phone" demandPopin="false" hAlign="End" width="3rem">
                                                 <m:Text text=""/>
                                             </m:Column>
@@ -295,6 +298,9 @@
                                                 <m:ObjectStatus 
                                                     text="{path: 'managerEmployees>working_on_project', formatter: '.formatWorkingStatus'}"
                                                     state="{path: 'managerEmployees>working_on_project', formatter: '.formatWorkingStatusState'}"/>
+                                                <m:ObjectStatus
+                                                    text="{path: 'managerEmployees>totalUtilization', formatter: '.formatUtilizationPercent'}"
+                                                    state="{= ${managerEmployees>totalUtilization} > 100 ? 'Error' : ${managerEmployees>totalUtilization} > 80 ? 'Warning' : 'Success' }"/>
                                                 <m:Text text=""/>
                                             </m:ColumnListItem>
                                         </m:items>
@@ -444,6 +450,10 @@
                                                         <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
                                                             <core:Icon src="sap-icon://circle-task" color="#F39C12" class="sapUiTinyMarginEnd"/>
                                                             <m:Text text="Initiative / CAIA / POC (Orange)"/>
+                                                        </m:HBox>
+                                                        <m:HBox class="sapUiTinyMarginEnd" alignItems="Center">
+                                                            <core:Icon src="sap-icon://circle-task" color="#8e44ad" class="sapUiTinyMarginEnd"/>
+                                                            <m:Text text="Evaluation (Purple)"/>
                                                         </m:HBox>
                                                     </m:HBox>
                                                     
@@ -880,24 +890,66 @@
                                             <m:ObjectNumber id="dialogTotalProjects" number="0" unit="projects" emphasized="true"/>
                                         </m:FlexBox>
                                     </m:FlexBox>
-                                    <m:Table id="dialogProjectsTable" items="{employeeDetails>/projects}" class="sapUiSmallMarginTop">
-                                        <m:columns>
-                                            <m:Column><m:Text text="Project Name"/></m:Column>
-                                            <m:Column><m:Text text="Role"/></m:Column>
-                                            <m:Column><m:Text text="Start Date"/></m:Column>
-                                            <m:Column><m:Text text="End Date"/></m:Column>
-                                            <m:Column><m:Text text="Duration"/></m:Column>
-                                        </m:columns>
+                                    <m:IconTabBar id="dialogProjectHistoryTabs" expandable="false">
                                         <m:items>
-                                            <m:ColumnListItem>
-                                                <m:Text text="{employeeDetails>projectName}"/>
-                                                <m:Text text="{employeeDetails>role}"/>
-                                                <m:Text text="{employeeDetails>startDate}"/>
-                                                <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{employeeDetails>duration}"/>
-                                            </m:ColumnListItem>
+                                            <m:IconTabFilter text="Projects" key="projectsOnly">
+                                                <m:Table id="dialogProjectsTable" items="{employeeDetails>/projects}" class="sapUiSmallMarginTop">
+                                                    <m:columns>
+                                                        <m:Column><m:Text text="Project Name"/></m:Column>
+                                                        <m:Column><m:Text text="Role"/></m:Column>
+                                                        <m:Column><m:Text text="Start Date"/></m:Column>
+                                                        <m:Column><m:Text text="End Date"/></m:Column>
+                                                        <m:Column><m:Text text="Duration"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:Text text="{employeeDetails>projectName}"/>
+                                                            <m:Text text="{employeeDetails>role}"/>
+                                                            <m:Text text="{employeeDetails>startDate}"/>
+                                                            <m:Text text="{employeeDetails>endDate}"/>
+                                                            <m:Text text="{employeeDetails>duration}"/>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:IconTabFilter>
+                                            <m:IconTabFilter text="Initiatives" key="initiativesHistoryTab">
+                                                <m:Table id="dialogInitiativesHistoryTable" items="{employeeDetails>/initiativesHistory}" class="sapUiSmallMarginTop">
+                                                    <m:columns>
+                                                        <m:Column><m:Text text="Initiative Name"/></m:Column>
+                                                        <m:Column><m:Text text="Start Date"/></m:Column>
+                                                        <m:Column><m:Text text="End Date"/></m:Column>
+                                                        <m:Column><m:Text text="Status"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:Text text="{employeeDetails>projectName}"/>
+                                                            <m:Text text="{employeeDetails>startDate}"/>
+                                                            <m:Text text="{employeeDetails>endDate}"/>
+                                                            <m:ObjectStatus text="{employeeDetails>status}" state="Success"/>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:IconTabFilter>
+                                            <m:IconTabFilter text="Evaluations" key="evaluationsHistoryTab">
+                                                <m:Table id="dialogEvaluationsHistoryTable" items="{employeeDetails>/evaluationsHistory}" class="sapUiSmallMarginTop">
+                                                    <m:columns>
+                                                        <m:Column><m:Text text="Evaluation Name"/></m:Column>
+                                                        <m:Column><m:Text text="Start Date"/></m:Column>
+                                                        <m:Column><m:Text text="End Date"/></m:Column>
+                                                        <m:Column><m:Text text="Status"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:Text text="{employeeDetails>projectName}"/>
+                                                            <m:Text text="{employeeDetails>startDate}"/>
+                                                            <m:Text text="{employeeDetails>endDate}"/>
+                                                            <m:ObjectStatus text="{employeeDetails>status}" state="Success"/>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:IconTabFilter>
                                         </m:items>
-                                    </m:Table>
+                                    </m:IconTabBar>
                                 </m:VBox>
                             </m:content>
                         </m:Panel>
@@ -925,11 +977,19 @@
                                                 <m:Text text="{employeeDetails>projectName}"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:StepInput value="{employeeDetails>utilizationPercent}" min="1" max="100" step="5" width="6rem"/>
+                                                <m:VBox width="8rem">
+                                                    <m:Text text="{= ${employeeDetails>utilizationPercent} + '%' }"
+                                                            visible="{= !${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Input value="{employeeDetails>utilizationPercent}"
+                                                             type="Number"
+                                                             width="100%"
+                                                             visible="{= ${employeeDetails>isUtilizationEditing} }"/>
+                                                </m:VBox>
                                                 <m:ObjectStatus text="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusLabel'}"
                                                                state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
                                                 <m:HBox justifyContent="Center" alignItems="Center">
-                                                    <m:Button icon="sap-icon://save" type="Transparent" tooltip="Save utilization" press="onManagerSaveUtilization" class="sapUiTinyMarginEnd"/>
+                                                    <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit utilization" press="onManagerEditUtilization" class="sapUiTinyMarginEnd" visible="{= !${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Button icon="sap-icon://save" type="Transparent" tooltip="Save utilization" press="onManagerSaveUtilization" class="sapUiTinyMarginEnd" visible="{= ${employeeDetails>isUtilizationEditing} }"/>
                                                     <m:Button icon="sap-icon://complete" type="Accept" tooltip="Mark as Completed" press="onManagerCompleteCurrentProject"/>
                                                 </m:HBox>
                                             </m:ColumnListItem>
@@ -1029,17 +1089,51 @@
 
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Initiative to Employee" expandable="false">
                                 <m:content>
-                                    <m:HBox justifyContent="End">
-                                        <m:Button text="Assign Initiative" icon="sap-icon://shortcut" type="Emphasized" press="onManagerAssignInitiative"/>
-                                    </m:HBox>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Initiative:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="assignInitiativeComboBox"
+                                                    items="{masterInitiatives>/items}"
+                                                    placeholder="Select an initiative to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{masterInitiatives>initiativeId}" text="{masterInitiatives>initiativeName}"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
+                                        <m:Input id="assignInitiativeAllocationInput"
+                                                 type="Number"
+                                                 value="100"
+                                                 width="100%"
+                                                 class="sapUiMediumMarginBottom"/>
+                                        <m:Button text="Assign Initiative"
+                                                  type="Emphasized"
+                                                  icon="sap-icon://add"
+                                                  press="onAssignInitiativeFromPanel"/>
+                                    </m:VBox>
                                 </m:content>
                             </m:Panel>
 
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Evaluation to Employee" expandable="false">
                                 <m:content>
-                                    <m:HBox justifyContent="End">
-                                        <m:Button text="Assign Evaluation" icon="sap-icon://shortcut" type="Emphasized" press="onManagerAssignEvaluation"/>
-                                    </m:HBox>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Evaluation:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="assignEvaluationComboBox"
+                                                    items="{masterEvaluations>/items}"
+                                                    placeholder="Select an evaluation to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{masterEvaluations>evaluationId}" text="{masterEvaluations>evaluationName}"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
+                                        <m:Input id="assignEvaluationAllocationInput"
+                                                 type="Number"
+                                                 value="100"
+                                                 width="100%"
+                                                 class="sapUiMediumMarginBottom"/>
+                                        <m:Button text="Assign Evaluation"
+                                                  type="Emphasized"
+                                                  icon="sap-icon://add"
+                                                  press="onAssignEvaluationFromPanel"/>
+                                    </m:VBox>
                                 </m:content>
                             </m:Panel>
                             
