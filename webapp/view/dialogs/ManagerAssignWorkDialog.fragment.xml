@@ -17,7 +17,7 @@
                     placeholder="Select initiative/evaluation"
                     width="100%"
                     class="sapUiMediumMarginBottom">
-                    <core:Item key="{managerWorkCatalog>initiativeId}" text="{managerWorkCatalog>initiativeName}"/>
+                    <core:Item key="{managerWorkCatalog>id}" text="{managerWorkCatalog>name}"/>
                 </ComboBox>
 
                 <Label text="Name" required="true" class="sapUiTinyMarginBottom"/>

@@ -122,7 +122,7 @@
                         </VBox>
                     </IconTabFilter>
 
-                    <IconTabFilter key="skills" icon="sap-icon://learning-assistant" text="Skills">
+                    <IconTabFilter key="skills" icon="sap-icon://learning-assistant" text="Skills" visible="{= ${employeeEditor>/mode} === 'edit' }">
                         <VBox class="sapUiMediumMargin">
                             <MessageStrip visible="{= ${employeeEditor>/mode} === 'create' }" text="Save the employee first, then add skills." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
                             <FlexBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
@@ -153,7 +153,7 @@
                         </VBox>
                     </IconTabFilter>
 
-                    <IconTabFilter key="certifications" icon="sap-icon://employee-approvals" text="Certifications">
+                    <IconTabFilter key="certifications" icon="sap-icon://employee-approvals" text="Certifications" visible="{= ${employeeEditor>/mode} === 'edit' }">
                         <VBox class="sapUiMediumMargin">
                             <MessageStrip visible="{= ${employeeEditor>/mode} === 'create' }" text="Save the employee first, then add certifications." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
                             <FlexBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">

@@ -336,32 +336,58 @@ export default class EmployeeDashboard extends Controller {
                 };
             });
 
-            // Load evaluations & initiatives from Initiatives entity
-            const initBinding = oDataModel.bindList("/Initiatives");
-            initBinding.filter([
-                new Filter("employeeId", FilterOperator.EQ, employeeId)
+            const currentInitiativesBinding = oDataModel.bindList("/CurrentInitiatives");
+            currentInitiativesBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+
+            const currentEvaluationsBinding = oDataModel.bindList("/CurrentEvaluations");
+            currentEvaluationsBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+
+            const [initiativeContexts, evaluationContexts] = await Promise.all([
+                currentInitiativesBinding.requestContexts(0, 100),
+                currentEvaluationsBinding.requestContexts(0, 100)
             ]);
-            const initContexts = await initBinding.requestContexts(0, 100);
-            const initData = initContexts.map((ctx: any) => {
+
+            const initiativeData = initiativeContexts.map((ctx: any) => {
                 const obj = ctx.getObject();
-                // Only include active Evaluation and Initiative types
-                if (obj.status === "Completed" || (obj.type !== "Evaluation" && obj.type !== "Initiative")) return null;
+                if (obj.status === "Completed") return null;
                 return {
-                    currentProjectId: obj.initiativeId,
+                    currentProjectId: obj.currentInitiativeId,
                     employeeId: obj.employeeId,
-                    type: obj.type,
+                    type: "Initiative",
                     projectName: obj.initiativeName,
-                    role: obj.type === "Evaluation" ? "Evaluator" : "Contributor",
+                    role: "Contributor",
                     projectManager: "Self-Managed",
                     startDate: this.formatDate(obj.startDate),
                     endDate: this.formatDate(obj.endDate),
                     utilizationPercent: obj.utilizationPercent,
                     assignmentStatus: "Assigned",
                     description: obj.description,
-                    _source: "Initiatives",
-                    _initiativeId: obj.initiativeId
+                    _source: "CurrentInitiatives",
+                    _initiativeId: obj.currentInitiativeId
                 };
             }).filter((item: any) => item !== null);
+
+            const evaluationData = evaluationContexts.map((ctx: any) => {
+                const obj = ctx.getObject();
+                if (obj.status === "Completed") return null;
+                return {
+                    currentProjectId: obj.currentEvaluationId,
+                    employeeId: obj.employeeId,
+                    type: "Evaluation",
+                    projectName: obj.evaluationName,
+                    role: "Evaluator",
+                    projectManager: "Self-Managed",
+                    startDate: this.formatDate(obj.startDate),
+                    endDate: this.formatDate(obj.endDate),
+                    utilizationPercent: obj.utilizationPercent,
+                    assignmentStatus: "Assigned",
+                    description: obj.description,
+                    _source: "CurrentEvaluations",
+                    _initiativeId: obj.currentEvaluationId
+                };
+            }).filter((item: any) => item !== null);
+
+            const initData = [...initiativeData, ...evaluationData];
 
             const allData = [...cpData, ...initData];
             console.log(`✅ Loaded ${cpData.length} projects + ${initData.length} evals/inits = ${allData.length} total work items`);
@@ -431,19 +457,42 @@ export default class EmployeeDashboard extends Controller {
     private async loadInitiatives(employeeId: string): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const binding = oDataModel.bindList("/Initiatives");
-            binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            
-            const contexts = await binding.requestContexts(0, 100);
-            const data = contexts.map((ctx: any) => {
+            const initiativesBinding = oDataModel.bindList("/CurrentInitiatives");
+            initiativesBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+
+            const evaluationsBinding = oDataModel.bindList("/CurrentEvaluations");
+            evaluationsBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+
+            const [initiativeContexts, evaluationContexts] = await Promise.all([
+                initiativesBinding.requestContexts(0, 100),
+                evaluationsBinding.requestContexts(0, 100)
+            ]);
+
+            const initiatives = initiativeContexts.map((ctx: any) => {
                 const obj = ctx.getObject();
-                const formatted = {
+                return {
                     ...obj,
+                    type: "Initiative",
+                    initiativeId: obj.currentInitiativeId,
+                    initiativeName: obj.initiativeName,
                     startDate: this.formatDate(obj.startDate),
                     endDate: this.formatDate(obj.endDate)
                 };
-                return formatted;
             });
+
+            const evaluations = evaluationContexts.map((ctx: any) => {
+                const obj = ctx.getObject();
+                return {
+                    ...obj,
+                    type: "Evaluation",
+                    initiativeId: obj.currentEvaluationId,
+                    initiativeName: obj.evaluationName,
+                    startDate: this.formatDate(obj.startDate),
+                    endDate: this.formatDate(obj.endDate)
+                };
+            });
+
+            const data = [...initiatives, ...evaluations];
             
             console.log(`✅ Loaded ${data.length} initiatives from OData`);
             
@@ -459,7 +508,18 @@ export default class EmployeeDashboard extends Controller {
     
     private initiativeDialog?: Dialog;
 
+    private isManagerUser(): boolean {
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const role = String(currentUserModel?.getProperty("/role") || "").toLowerCase();
+        return role === "manager" || role === "seniormanager";
+    }
+
     public async onAddInitiative(): Promise<void> {
+        if (!this.isManagerUser()) {
+            MessageToast.show("Only managers can create initiatives/evaluations");
+            return;
+        }
+
         if (!this.initiativeDialog) {
             this.initiativeDialog = await Fragment.load({
                 id: this.getView()?.getId(),
@@ -485,6 +545,11 @@ export default class EmployeeDashboard extends Controller {
     }
 
     public async onSaveInitiative(): Promise<void> {
+        if (!this.isManagerUser()) {
+            MessageToast.show("Only managers can create or update initiatives/evaluations");
+            return;
+        }
+
         const dialogModel = this.getView()?.getModel("initiativeDialog") as JSONModel;
         const data = dialogModel.getData();
         const employeeId = this.currentEmployeeId;
@@ -518,51 +583,52 @@ export default class EmployeeDashboard extends Controller {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            
+            const isEvaluation = (data.type || "Initiative") === "Evaluation";
+
             if (data.initiativeId) {
-                // Update existing record
-                const listBinding = oDataModel.bindList("/Initiatives");
-                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, data.initiativeId)]);
-                
+                const listBinding = oDataModel.bindList(isEvaluation ? "/CurrentEvaluations" : "/CurrentInitiatives");
+                listBinding.filter([
+                    new Filter(isEvaluation ? "currentEvaluationId" : "currentInitiativeId", FilterOperator.EQ, data.initiativeId)
+                ]);
+
                 const contexts = await listBinding.requestContexts(0, 1);
                 if (contexts.length > 0) {
                     const context = contexts[0];
-                    context.setProperty("initiativeName", data.initiativeName);
+                    const currentObj = context.getObject() as any;
+                    context.setProperty(isEvaluation ? "evaluationName" : "initiativeName", data.initiativeName);
                     context.setProperty("description", data.description);
                     context.setProperty("startDate", startDateISO);
                     context.setProperty("endDate", endDateISO);
                     context.setProperty("utilizationPercent", utilizationPercent);
-                    context.setProperty("type", data.type || "Initiative");
                     context.setProperty("status", data.status || "Active");
                     context.setProperty("lastUpdated", new Date().toISOString());
-                    
+
+                    const masterId = isEvaluation ? currentObj?.evaluationId : currentObj?.initiativeId;
+                    if (masterId) {
+                        const masterBinding = oDataModel.bindList(isEvaluation ? "/EvaluationsMaster" : "/InitiativesMaster");
+                        masterBinding.filter([
+                            new Filter(isEvaluation ? "evaluationId" : "initiativeId", FilterOperator.EQ, masterId)
+                        ]);
+                        const masterContexts = await masterBinding.requestContexts(0, 1);
+                        if (masterContexts.length > 0) {
+                            const masterContext = masterContexts[0];
+                            masterContext.setProperty(isEvaluation ? "evaluationName" : "initiativeName", data.initiativeName);
+                            masterContext.setProperty("description", data.description);
+                            masterContext.setProperty("startDate", startDateISO);
+                            masterContext.setProperty("endDate", endDateISO);
+                            masterContext.setProperty("status", data.status || "Active");
+                            masterContext.setProperty("lastUpdated", new Date().toISOString());
+                        }
+                    }
+
                     await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
                     await new Promise(resolve => setTimeout(resolve, 300));
-                    listBinding.refresh();
-                    
+
                     MessageToast.show("Initiative updated successfully");
                 }
             } else {
-                // Add new record
-                const listBinding = oDataModel.bindList("/Initiatives");
-                const newData = {
-                    employeeId: employeeId,
-                    initiativeName: data.initiativeName,
-                    description: data.description,
-                    startDate: startDateISO,
-                    endDate: endDateISO,
-                    utilizationPercent: utilizationPercent,
-                    type: data.type || "Initiative",
-                    status: data.status || "Active",
-                    createdAt: new Date().toISOString(),
-                    lastUpdated: new Date().toISOString()
-                };
-                
-                listBinding.create(newData);
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 800));
-                
-                MessageToast.show("Initiative added successfully");
+                MessageToast.show("Please use manager assignment flow to add new initiative/evaluation");
+                return;
             }
             
             this.initiativeDialog?.close();
@@ -580,6 +646,11 @@ export default class EmployeeDashboard extends Controller {
     }
 
     public async onEditInitiative(event: Event): Promise<void> {
+        if (!this.isManagerUser()) {
+            MessageToast.show("Only managers can edit initiatives/evaluations");
+            return;
+        }
+
         const source = event.getSource() as any;
         const bindingContext = source.getBindingContext("initiatives");
         const initiative = bindingContext?.getObject();
@@ -600,14 +671,22 @@ export default class EmployeeDashboard extends Controller {
     }
 
     public async onDeleteInitiative(event: Event): Promise<void> {
+        if (!this.isManagerUser()) {
+            MessageToast.show("Only managers can delete initiatives/evaluations");
+            return;
+        }
+
         const source = event.getSource() as any;
         const bindingContext = source.getBindingContext("initiatives");
         const initiative = bindingContext?.getObject();
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Initiatives");
-            listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, initiative.initiativeId)]);
+            const isEvaluation = initiative?.type === "Evaluation";
+            const listBinding = oDataModel.bindList(isEvaluation ? "/CurrentEvaluations" : "/CurrentInitiatives");
+            listBinding.filter([
+                new Filter(isEvaluation ? "currentEvaluationId" : "currentInitiativeId", FilterOperator.EQ, initiative.initiativeId)
+            ]);
             
             const contexts = await listBinding.requestContexts(0, 1);
             if (contexts.length > 0) {
@@ -2086,7 +2165,7 @@ export default class EmployeeDashboard extends Controller {
                 name: "skillsphere.view.dialogs.CurrentProjectDialog",
                 controller: this
             }) as Dialog;
-            this.getView()?.addDependent(this.currentProjectDialog);
+            this.getView()?.addDependent(this.currentProjectDialog!);
         }
 
         // Load projects list from existing Projects entity
@@ -2106,7 +2185,7 @@ export default class EmployeeDashboard extends Controller {
         });
         this.getView()?.setModel(dialogModel, "currentProjectDialog");
         
-        this.currentProjectDialog.open();
+        this.currentProjectDialog!.open();
     }
 
     private async loadProjectsListForDropdown(): Promise<void> {
@@ -2303,10 +2382,19 @@ export default class EmployeeDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-            if (currentProject._source === "Initiatives") {
-                // Delete from Initiatives entity
-                const listBinding = oDataModel.bindList("/Initiatives");
-                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, currentProject._initiativeId)]);
+            if (currentProject._source === "CurrentInitiatives") {
+                const listBinding = oDataModel.bindList("/CurrentInitiatives");
+                listBinding.filter([new Filter("currentInitiativeId", FilterOperator.EQ, currentProject._initiativeId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    contexts[0].delete();
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
+                }
+            } else if (currentProject._source === "CurrentEvaluations") {
+                const listBinding = oDataModel.bindList("/CurrentEvaluations");
+                listBinding.filter([new Filter("currentEvaluationId", FilterOperator.EQ, currentProject._initiativeId)]);
                 const contexts = await listBinding.requestContexts(0, 1);
                 if (contexts.length > 0) {
                     contexts[0].delete();
@@ -2349,10 +2437,20 @@ export default class EmployeeDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-            if (currentProject._source === "Initiatives") {
-                // Complete in Initiatives entity
-                const listBinding = oDataModel.bindList("/Initiatives");
-                listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, currentProject._initiativeId)]);
+            if (currentProject._source === "CurrentInitiatives") {
+                const listBinding = oDataModel.bindList("/CurrentInitiatives");
+                listBinding.filter([new Filter("currentInitiativeId", FilterOperator.EQ, currentProject._initiativeId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length > 0) {
+                    contexts[0].setProperty("status", "Completed");
+                    contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                    await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    listBinding.refresh();
+                }
+            } else if (currentProject._source === "CurrentEvaluations") {
+                const listBinding = oDataModel.bindList("/CurrentEvaluations");
+                listBinding.filter([new Filter("currentEvaluationId", FilterOperator.EQ, currentProject._initiativeId)]);
                 const contexts = await listBinding.requestContexts(0, 1);
                 if (contexts.length > 0) {
                     contexts[0].setProperty("status", "Completed");
@@ -2401,7 +2499,7 @@ export default class EmployeeDashboard extends Controller {
                 name: "skillsphere.view.dialogs.UnifiedWorkDialog",
                 controller: this
             }) as Dialog;
-            this.getView()?.addDependent(this.unifiedWorkDialog);
+            this.getView()?.addDependent(this.unifiedWorkDialog!);
         }
 
         await this.loadProjectsListForDropdown();
@@ -2419,7 +2517,7 @@ export default class EmployeeDashboard extends Controller {
         });
         this.getView()?.setModel(dialogModel, "unifiedWork");
         
-        this.unifiedWorkDialog.open();
+        this.unifiedWorkDialog!.open();
     }
 
     public onUnifiedWorkTypeChange(event: Event): void {
@@ -2496,18 +2594,37 @@ export default class EmployeeDashboard extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
             if (data.type === "Initiative" || data.type === "Evaluation") {
-                // Save Initiative/Evaluation to Initiatives entity
-                const listBinding = oDataModel.bindList("/Initiatives");
-                listBinding.create({
-                    employeeId: employeeId,
-                    initiativeName: data.projectName,
-                    description: data.description || "",
-                    startDate: startDateISO,
-                    endDate: endDateISO,
-                    utilizationPercent: parseInt(data.utilizationPercent),
-                    status: "Active",
-                    type: data.type
-                });
+                const isEvaluation = data.type === "Evaluation";
+                const listBinding = oDataModel.bindList(isEvaluation ? "/CurrentEvaluations" : "/CurrentInitiatives");
+                if (isEvaluation) {
+                    listBinding.create({
+                        employeeId: employeeId,
+                        evaluationId: null,
+                        evaluationName: data.projectName,
+                        description: data.description || "",
+                        startDate: startDateISO,
+                        endDate: endDateISO,
+                        utilizationPercent: parseInt(data.utilizationPercent),
+                        status: "Active",
+                        assignedBy: null,
+                        createdAt: new Date().toISOString(),
+                        lastUpdated: new Date().toISOString()
+                    });
+                } else {
+                    listBinding.create({
+                        employeeId: employeeId,
+                        initiativeId: null,
+                        initiativeName: data.projectName,
+                        description: data.description || "",
+                        startDate: startDateISO,
+                        endDate: endDateISO,
+                        utilizationPercent: parseInt(data.utilizationPercent),
+                        status: "Active",
+                        assignedBy: null,
+                        createdAt: new Date().toISOString(),
+                        lastUpdated: new Date().toISOString()
+                    });
+                }
             } else {
                 // Save Project/Evaluation to CurrentProjects entity
                 const listBinding = oDataModel.bindList("/CurrentProjects");
@@ -2536,7 +2653,7 @@ export default class EmployeeDashboard extends Controller {
             this.unifiedWorkDialog?.close();
             
             if (employeeId) {
-                await this.loadCurrentProjects(employeeId);
+                await this.loadCurrentProjects(employeeId!);
             }
         } catch (error) {
             console.error("❌ Error saving work:", error);
@@ -2578,7 +2695,7 @@ export default class EmployeeDashboard extends Controller {
                 name: "skillsphere.view.dialogs.WorkAssignmentDialog",
                 controller: this
             }) as Dialog;
-            this.getView()?.addDependent(this.workAssignmentDialog);
+            this.getView()?.addDependent(this.workAssignmentDialog!);
         }
 
         // Load projects list from master data
@@ -2597,7 +2714,7 @@ export default class EmployeeDashboard extends Controller {
         });
         this.getView()?.setModel(dialogModel, "workAssignment");
         
-        this.workAssignmentDialog.open();
+        this.workAssignmentDialog!.open();
     }
 
     public onWorkTypeChange(event: Event): void {
@@ -2700,7 +2817,7 @@ export default class EmployeeDashboard extends Controller {
             this.workAssignmentDialog?.close();
             
             if (employeeId) {
-                await this.loadCurrentProjects(employeeId);
+                await this.loadCurrentProjects(employeeId!);
             }
         } catch (error) {
             console.error("❌ Error saving work assignment:", error);
@@ -2856,7 +2973,7 @@ export default class EmployeeDashboard extends Controller {
                 name: "skillsphere.view.dialogs.CAIADialog",
                 controller: this
             }) as Dialog;
-            this.getView()?.addDependent(this.caiaDialog);
+            this.getView()?.addDependent(this.caiaDialog!);
         }
 
         // Initialize dialog model with empty data
@@ -2868,7 +2985,7 @@ export default class EmployeeDashboard extends Controller {
         });
         this.getView()?.setModel(dialogModel, "caiaDialog");
         
-        this.caiaDialog.open();
+        this.caiaDialog!.open();
     }
 
     public async onSaveCAIA(): Promise<void> {
@@ -3036,7 +3153,7 @@ export default class EmployeeDashboard extends Controller {
                 name: "skillsphere.view.dialogs.POCDialog",
                 controller: this
             }) as Dialog;
-            this.getView()?.addDependent(this.pocDialog);
+            this.getView()?.addDependent(this.pocDialog!);
         }
 
         // Initialize dialog model with empty data
@@ -3048,7 +3165,7 @@ export default class EmployeeDashboard extends Controller {
         });
         this.getView()?.setModel(dialogModel, "pocDialog");
         
-        this.pocDialog.open();
+        this.pocDialog!.open();
     }
 
     public async onSavePOC(): Promise<void> {

@@ -8,7 +8,8 @@ const AICoreClient = require('./utils/aicore-client-orchestration');
 module.exports = cds.service.impl(async function() {
   const { 
     Users, Employees, Skills, Projects, Profiles,
-    CurrentProjects, Initiatives, CAIAUtilization, POCUtilization, Certifications
+    CurrentProjects, InitiativesMaster, EvaluationsMaster, CurrentInitiatives, CurrentEvaluations,
+    Initiatives, CAIAUtilization, POCUtilization, Certifications
   } = this.entities;
 
   console.log('🚀 Initializing SkillSphere...');
@@ -767,16 +768,29 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    */
   this.on('getUtilizationSummary', async (req) => {
     const { employeeId } = req.data;
-    const currentProj = await SELECT.one.from(CurrentProjects).where({ employeeId });
-    const caia = await SELECT.one.from(CAIAUtilization).where({ employeeId });
-    const poc = await SELECT.one.from(POCUtilization).where({ employeeId });
+    const currentProjects = await SELECT.from(CurrentProjects).where({ employeeId });
+    const caiaRows = await SELECT.from(CAIAUtilization).where({ employeeId });
+    const pocRows = await SELECT.from(POCUtilization).where({ employeeId });
+
+    const activeCurrentProjects = currentProjects.filter(p => p.assignmentStatus !== 'Completed');
+    const currentProjectUtilizationPercent = activeCurrentProjects.reduce(
+      (sum, p) => sum + (Number(p.utilizationPercent) || 0),
+      0
+    );
+
+    // Convert utilization percentage to hour-equivalent assuming 8 hours/day capacity.
+    const currentProjectHours = Number(((currentProjectUtilizationPercent / 100) * 8).toFixed(2));
+    const caiaHours = Number(caiaRows.reduce((sum, row) => sum + (Number(row.hoursPerDay) || 0), 0).toFixed(2));
+    const pocHours = Number(pocRows.reduce((sum, row) => sum + (Number(row.hoursPerDay) || 0), 0).toFixed(2));
+    const totalHours = Number((currentProjectHours + caiaHours + pocHours).toFixed(2));
 
     return {
       employeeId,
-      currentProjectHours: currentProj?.hoursPerDay || 0,
-      caiaHours: caia?.hoursPerDay || 0,
-      pocHours: poc?.hoursPerDay || 0,
-      totalHours: (currentProj?.hoursPerDay || 0) + (caia?.hoursPerDay || 0) + (poc?.hoursPerDay || 0)
+      currentProjectHours,
+      currentProjectUtilizationPercent,
+      caiaHours,
+      pocHours,
+      totalHours
     };
   });
 

@@ -37,6 +37,8 @@ entity Employees {
   skills : Composition of many Skills on skills.employeeId = $self.employeeId;
   projects : Composition of many Projects on projects.employeeId = $self.employeeId;
   currentProjects : Composition of many CurrentProjects on currentProjects.employeeId = $self.employeeId;
+  currentInitiatives : Composition of many CurrentInitiatives on currentInitiatives.employeeId = $self.employeeId;
+  currentEvaluations : Composition of many CurrentEvaluations on currentEvaluations.employeeId = $self.employeeId;
   initiatives : Composition of many Initiatives on initiatives.employeeId = $self.employeeId;
   caiaUtilization : Composition of many CAIAUtilization on caiaUtilization.employeeId = $self.employeeId;
   pocUtilization : Composition of many POCUtilization on pocUtilization.employeeId = $self.employeeId;
@@ -121,6 +123,74 @@ entity CurrentProjects {
   lastUpdated : DateTime;
   employee : Association to Employees on employee.employeeId = employeeId;
 } // current projects why ? project will have status,we can filter by active projects, why need current projects ? to have unified view of all work assignments, including projects, evaluations, initiatives, and other work types. This simplifies tracking and reporting on employee workload and utilization across different types of assignments.
+
+/**
+ * InitiativesMaster entity - Manager-owned initiative registry
+ */
+entity InitiativesMaster {
+  key initiativeId : UUID;
+  initiativeName : String;
+  description : String;
+  startDate : Date;
+  endDate : Date;
+  status : String default 'Active';
+  addedByManager : String;
+  createdAt : DateTime;
+  lastUpdated : DateTime;
+}
+
+/**
+ * EvaluationsMaster entity - Manager-owned evaluation registry
+ */
+entity EvaluationsMaster {
+  key evaluationId : UUID;
+  evaluationName : String;
+  description : String;
+  startDate : Date;
+  endDate : Date;
+  status : String default 'Active';
+  addedByManager : String;
+  createdAt : DateTime;
+  lastUpdated : DateTime;
+}
+
+/**
+ * CurrentInitiatives entity - Active initiative assignments per employee
+ */
+entity CurrentInitiatives {
+  key currentInitiativeId : UUID;
+  employeeId : String;
+  initiativeId : UUID;
+  initiativeName : String;
+  description : String;
+  startDate : Date;
+  endDate : Date;
+  utilizationPercent : Integer;
+  status : String default 'Active'; // Active, Completed
+  assignedBy : String;
+  createdAt : DateTime;
+  lastUpdated : DateTime;
+  employee : Association to Employees on employee.employeeId = employeeId;
+}
+
+/**
+ * CurrentEvaluations entity - Active evaluation assignments per employee
+ */
+entity CurrentEvaluations {
+  key currentEvaluationId : UUID;
+  employeeId : String;
+  evaluationId : UUID;
+  evaluationName : String;
+  description : String;
+  startDate : Date;
+  endDate : Date;
+  utilizationPercent : Integer;
+  status : String default 'Active'; // Active, Completed
+  assignedBy : String;
+  createdAt : DateTime;
+  lastUpdated : DateTime;
+  employee : Association to Employees on employee.employeeId = employeeId;
+}
 
 /**
  * Initiatives entity - Strategic initiatives, CAIA, POC, and other employee-driven work
