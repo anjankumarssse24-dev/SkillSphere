@@ -182,7 +182,14 @@
                                     </m:content>
                                 </m:Panel>
 
-                                <m:Panel id="individualEmployeesPanel" headerText="Employees" class="sapUiMediumMarginTopBottom smCenteredPanel" width="95%">
+                                <m:Panel id="individualEmployeesPanel" class="sapUiMediumMarginTopBottom smCenteredPanel" width="95%">
+                                    <m:headerToolbar>
+                                        <m:Toolbar>
+                                            <m:Title text="My Team" level="H3"/>
+                                            <m:ToolbarSpacer/>
+                                            <m:Button text="Add Employee" icon="sap-icon://add-employee" type="Emphasized" press="onOpenAddEmployeeDialog"/>
+                                        </m:Toolbar>
+                                    </m:headerToolbar>
                                     <m:content>
                                         <m:Table id="individualEmployeesTable" items="{allManagers>/individualEmployees}" class="sapUiNoMargin" mode="None" fixedLayout="true" autoPopinMode="true" width="100%" noDataText="No individual employees found">
                                             <m:columns>
@@ -580,6 +587,8 @@
                                             <m:VBox width="45%">
                                                 <m:Label text="T-Level:" class="sapUiTinyMarginBottom"/>
                                                 <m:Text id="smgrDialogEmployeeTLevel" text="" class="sapUiMediumMarginBottom"/>
+                                                <m:Label text="Grade Level:" class="sapUiTinyMarginBottom"/>
+                                                <m:Text id="smgrDialogEmployeeGradeLevel" text="" class="sapUiMediumMarginBottom"/>
                                                 <m:Label text="Last Updated:" class="sapUiTinyMarginBottom"/>
                                                 <m:Text id="smgrDialogEmployeeLastUpdated" text="" class="sapUiMediumMarginBottom"/>
                                             </m:VBox>
@@ -668,31 +677,73 @@
 
                     <!-- Projects Tab -->
                     <m:IconTabFilter icon="sap-icon://project-definition-triangle" text="Projects" key="projects">
-                        <m:Panel class="sapUiSmallMargin" headerText="Project History" expandable="false">
+                        <m:Panel class="sapUiSmallMargin" headerText="Project Master History" expandable="false">
                             <m:content>
                                 <m:VBox class="sapUiSmallMargin">
                                     <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
                                         <m:Label text="Total Projects: " class="sapUiMediumMarginEnd"/>
                                         <m:ObjectNumber id="smgrDialogTotalProjects" number="0" unit="projects" emphasized="true"/>
                                     </m:FlexBox>
-                                    <m:Table id="smgrDialogProjectsTable" items="{employeeDetails>/projects}" class="sapUiSmallMarginTop">
-                                        <m:columns>
-                                            <m:Column><m:Text text="Project Name"/></m:Column>
-                                            <m:Column><m:Text text="Role"/></m:Column>
-                                            <m:Column><m:Text text="Start Date"/></m:Column>
-                                            <m:Column><m:Text text="End Date"/></m:Column>
-                                            <m:Column><m:Text text="Duration"/></m:Column>
-                                        </m:columns>
+                                    <m:IconTabBar id="smgrDialogProjectHistoryTabs" expandable="false">
                                         <m:items>
-                                            <m:ColumnListItem>
-                                                <m:Text text="{employeeDetails>projectName}"/>
-                                                <m:Text text="{employeeDetails>role}"/>
-                                                <m:Text text="{employeeDetails>startDate}"/>
-                                                <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{employeeDetails>duration}"/>
-                                            </m:ColumnListItem>
+                                            <m:IconTabFilter text="Projects" key="projectsOnly">
+                                                <m:Table id="smgrDialogProjectsTable" items="{employeeDetails>/projects}" class="sapUiSmallMarginTop">
+                                                    <m:columns>
+                                                        <m:Column><m:Text text="Project Name"/></m:Column>
+                                                        <m:Column><m:Text text="Role"/></m:Column>
+                                                        <m:Column><m:Text text="Start Date"/></m:Column>
+                                                        <m:Column><m:Text text="End Date"/></m:Column>
+                                                        <m:Column><m:Text text="Duration"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:Text text="{employeeDetails>projectName}"/>
+                                                            <m:Text text="{employeeDetails>role}"/>
+                                                            <m:Text text="{employeeDetails>startDate}"/>
+                                                            <m:Text text="{employeeDetails>endDate}"/>
+                                                            <m:Text text="{employeeDetails>duration}"/>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:IconTabFilter>
+                                            <m:IconTabFilter text="Initiatives" key="initiativesHistoryTab">
+                                                <m:Table id="smgrDialogInitiativesHistoryTable" items="{employeeDetails>/initiativesHistory}" class="sapUiSmallMarginTop">
+                                                    <m:columns>
+                                                        <m:Column><m:Text text="Initiative Name"/></m:Column>
+                                                        <m:Column><m:Text text="Start Date"/></m:Column>
+                                                        <m:Column><m:Text text="End Date"/></m:Column>
+                                                        <m:Column><m:Text text="Status"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:Text text="{employeeDetails>projectName}"/>
+                                                            <m:Text text="{employeeDetails>startDate}"/>
+                                                            <m:Text text="{employeeDetails>endDate}"/>
+                                                            <m:ObjectStatus text="{employeeDetails>status}" state="Success"/>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:IconTabFilter>
+                                            <m:IconTabFilter text="Evaluations" key="evaluationsHistoryTab">
+                                                <m:Table id="smgrDialogEvaluationsHistoryTable" items="{employeeDetails>/evaluationsHistory}" class="sapUiSmallMarginTop">
+                                                    <m:columns>
+                                                        <m:Column><m:Text text="Evaluation Name"/></m:Column>
+                                                        <m:Column><m:Text text="Start Date"/></m:Column>
+                                                        <m:Column><m:Text text="End Date"/></m:Column>
+                                                        <m:Column><m:Text text="Status"/></m:Column>
+                                                    </m:columns>
+                                                    <m:items>
+                                                        <m:ColumnListItem>
+                                                            <m:Text text="{employeeDetails>projectName}"/>
+                                                            <m:Text text="{employeeDetails>startDate}"/>
+                                                            <m:Text text="{employeeDetails>endDate}"/>
+                                                            <m:ObjectStatus text="{employeeDetails>status}" state="Success"/>
+                                                        </m:ColumnListItem>
+                                                    </m:items>
+                                                </m:Table>
+                                            </m:IconTabFilter>
                                         </m:items>
-                                    </m:Table>
+                                    </m:IconTabBar>
                                 </m:VBox>
                             </m:content>
                         </m:Panel>
@@ -705,19 +756,26 @@
                                 <m:content>
                                     <m:Table id="smgrDialogCurrentProjectsTable" items="{employeeDetails>/currentProjects}">
                                         <m:columns>
-                                            <m:Column><m:Text text="Project Name"/></m:Column>
-                                            <m:Column><m:Text text="Project Manager"/></m:Column>
+                                            <m:Column><m:Text text="Type"/></m:Column>
+                                            <m:Column><m:Text text="Work Name"/></m:Column>
                                             <m:Column><m:Text text="Start Date"/></m:Column>
                                             <m:Column><m:Text text="End Date"/></m:Column>
                                             <m:Column><m:Text text="Utilization"/></m:Column>
+                                            <m:Column><m:Text text="Status"/></m:Column>
+                                            <m:Column hAlign="Center" width="180px"><m:Text text="Actions"/></m:Column>
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem>
+                                                <m:ObjectStatus text="{employeeDetails>type}" state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
                                                 <m:Text text="{employeeDetails>projectName}"/>
-                                                <m:Text text="{employeeDetails>projectManager}"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:Text text="{= ${employeeDetails>utilizationPercent} + '%' }"/>
+                                                <m:ObjectStatus text="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusLabel'}"
+                                                               state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
+                                                <m:HBox justifyContent="Center" alignItems="Center">
+                                                    <m:Text text="--"/>
+                                                </m:HBox>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>
@@ -758,6 +816,107 @@
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
                                                 <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+                        </m:VBox>
+                    </m:IconTabFilter>
+
+                    <!-- Assign Work Tab -->
+                    <m:IconTabFilter icon="sap-icon://add-coursebook" text="Assign Work" key="assign">
+                        <m:VBox class="sapUiSmallMargin">
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Project to Employee" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Project:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="smgrAssignProjectComboBox"
+                                                    items="{/Projects}"
+                                                    placeholder="Select a project to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{projectId}" text="{projectName} - {technology}"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Role in Project:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="smgrAssignProjectRoleCombo"
+                                                    selectedKey="Team Member"
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="Developer" text="Developer"/>
+                                            <core:Item key="Tech Lead" text="Tech Lead"/>
+                                            <core:Item key="Solution Architect" text="Solution Architect"/>
+                                            <core:Item key="Team Member" text="Team Member"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
+                                        <m:StepInput id="smgrAssignProjectAllocationInput"
+                                                     min="1"
+                                                     max="100"
+                                                     step="5"
+                                                     value="100"
+                                                     width="100%"
+                                                     class="sapUiMediumMarginBottom"/>
+                                        <m:Button text="Assign Project" type="Emphasized" icon="sap-icon://add"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Initiative to Employee" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Initiative:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="smgrAssignInitiativeComboBox"
+                                                    items="{masterInitiatives>/items}"
+                                                    placeholder="Select an initiative to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{masterInitiatives>initiativeId}" text="{masterInitiatives>initiativeName}"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
+                                        <m:Input id="smgrAssignInitiativeAllocationInput" type="Number" value="100" width="100%" class="sapUiMediumMarginBottom"/>
+                                        <m:Button text="Assign Initiative" type="Emphasized" icon="sap-icon://add"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Evaluation to Employee" expandable="false">
+                                <m:content>
+                                    <m:VBox class="sapUiSmallMargin">
+                                        <m:Label text="Select Evaluation:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="smgrAssignEvaluationComboBox"
+                                                    items="{masterEvaluations>/items}"
+                                                    placeholder="Select an evaluation to assign..."
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="{masterEvaluations>evaluationId}" text="{masterEvaluations>evaluationName}"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
+                                        <m:Input id="smgrAssignEvaluationAllocationInput" type="Number" value="100" width="100%" class="sapUiMediumMarginBottom"/>
+                                        <m:Button text="Assign Evaluation" type="Emphasized" icon="sap-icon://add"/>
+                                    </m:VBox>
+                                </m:content>
+                            </m:Panel>
+
+                            <m:Panel class="sapUiSmallMarginTop" headerText="Assignment History" expandable="true" expanded="true">
+                                <m:content>
+                                    <m:Table id="smgrDialogAssignmentsTable" items="{employeeDetails>/assignments}" class="sapUiSmallMargin">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Type"/></m:Column>
+                                            <m:Column><m:Text text="Project/Work Name"/></m:Column>
+                                            <m:Column><m:Text text="Status"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization %"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:ObjectStatus text="{employeeDetails>type}" state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
+                                                <m:Text text="{employeeDetails>projectName}"/>
+                                                <m:ObjectStatus text="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusLabel'}"
+                                                               state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{employeeDetails>utilizationPercent}%"/>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>

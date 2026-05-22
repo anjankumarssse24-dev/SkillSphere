@@ -24,6 +24,7 @@ export default class ManagerTeamView extends Controller {
     private currentManagerId: string | null = null;
     private seniorManagerId: string | null = null;
     private currentDialogEmployeeId: string = "";
+    private pendingEmployeeIdToOpen: string | null = null;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -61,6 +62,7 @@ export default class ManagerTeamView extends Controller {
         const args: any = event.getParameter("arguments");
         const managerId = args?.managerId;
         const seniorManagerId = args?.seniorManagerId;
+        const targetEmployeeId = String(args?.["?query"]?.employeeId || "").trim();
         
         console.log("Route matched for viewing manager team:", managerId, "by senior manager:", seniorManagerId);
         
@@ -90,12 +92,25 @@ export default class ManagerTeamView extends Controller {
         
         // Set current manager ID (the manager whose team we're viewing)
         this.currentManagerId = managerId;
+        this.pendingEmployeeIdToOpen = targetEmployeeId || null;
         
         // Load manager information and set it in a model
         await this.loadManagerInfo(managerId);
         
         // Load manager-specific team data
         await this.loadManagerData();
+
+        if (this.pendingEmployeeIdToOpen) {
+            const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
+            const employees = managerEmployeesModel?.getProperty("/employees") || [];
+            const target = employees.find((emp: any) => emp.employeeId === this.pendingEmployeeIdToOpen);
+
+            if (target) {
+                await this.openEmployeeDetailsDialog(target, false);
+            }
+
+            this.pendingEmployeeIdToOpen = null;
+        }
     }
 
     /**

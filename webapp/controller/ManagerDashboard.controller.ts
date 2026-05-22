@@ -37,6 +37,7 @@ export default class ManagerDashboard extends Controller {
     private managerWorkAssignmentDialog?: Dialog;
     private managerAssignWorkDialog?: Dialog;
     private managerProfileSnapshot: any = null;
+    private pendingEmployeeIdToOpen: string | null = null;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -75,6 +76,7 @@ export default class ManagerDashboard extends Controller {
     private async onRouteMatched(event: any): Promise<void> {
         const args: any = event.getParameter("arguments");
         const managerId = args?.managerId;
+        const targetEmployeeId = String(args?.["?query"]?.employeeId || "").trim();
 
         // Keep dashboard at top when route changes.
         window.scrollTo({ top: 0, behavior: "auto" });
@@ -89,6 +91,7 @@ export default class ManagerDashboard extends Controller {
 
         const resolvedManagerId = String(managerId || currentUser?.id || "").trim().toUpperCase();
         this.currentManagerId = resolvedManagerId || null;
+        this.pendingEmployeeIdToOpen = targetEmployeeId || null;
         if (!this.currentManagerId) {
             MessageToast.show("Manager information not found");
             this.getRouter().navTo("Landing");
@@ -96,6 +99,19 @@ export default class ManagerDashboard extends Controller {
         }
 
         await this.loadManagerData(this.currentManagerId);
+
+        if (this.pendingEmployeeIdToOpen) {
+            const employeeId = this.pendingEmployeeIdToOpen;
+            const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
+            const employees = managerEmployeesModel?.getProperty("/employees") || [];
+            const targetEmployee = employees.find((emp: any) => emp.employeeId === employeeId);
+
+            if (targetEmployee) {
+                await this.openEmployeeDetailsDialog(targetEmployee, false);
+            }
+
+            this.pendingEmployeeIdToOpen = null;
+        }
     }
 
     private async loadManagerData(currentManagerId?: string): Promise<void> {

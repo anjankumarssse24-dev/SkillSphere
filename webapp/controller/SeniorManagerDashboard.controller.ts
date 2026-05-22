@@ -1,10 +1,12 @@
 import Controller from "sap/ui/core/mvc/Controller";
+import XMLView from "sap/ui/core/mvc/XMLView";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import Dialog from "sap/m/Dialog";
+import Fragment from "sap/ui/core/Fragment";
 import Table from "sap/m/Table";
 import Column from "sap/m/Column";
 import ColumnListItem from "sap/m/ColumnListItem";
@@ -32,6 +34,9 @@ export default class SeniorManagerDashboard extends Controller {
     private currentChatSeniorManagerId: string = "";
     private aiInitialized: boolean = false;
     private typingIndicator: HTML | null = null;
+    private employeeProfileDialog?: Dialog;
+    private sharedManagerView?: XMLView;
+    private sharedManagerController?: any;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -72,6 +77,123 @@ export default class SeniorManagerDashboard extends Controller {
         });
     }
 
+    public async onOpenAddEmployeeDialog(): Promise<void> {
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData() || {};
+        const seniorManagerId = String(this.currentSeniorManagerId || currentUser?.id || "").trim().toUpperCase();
+
+        if (!seniorManagerId) {
+            MessageToast.show("Senior manager information not found");
+            return;
+        }
+
+        const allManagersModel = this.getView()?.getModel("allManagers") as JSONModel;
+        const directEmployees = allManagersModel?.getProperty("/individualEmployees") || [];
+        const defaultTeam = String(directEmployees[0]?.team || "CIS").trim();
+        const defaultSubTeam = String(directEmployees[0]?.subTeam || "Team 1").trim() || "Team 1";
+        const managerName = String(currentUser?.name || "Senior Manager").trim();
+
+        const editorModel = new JSONModel({
+            mode: "create",
+            employeeId: "",
+            name: "",
+            email: "",
+            businessRole: "Employee",
+            professionalRole: "Developer",
+            team: defaultTeam,
+            subTeam: defaultSubTeam,
+            managerId: seniorManagerId,
+            managerLabel: `${managerName} (${seniorManagerId})`,
+            experience: 0,
+            location: "",
+            tLevel: "",
+            gradeLevel: "",
+            specialization: ""
+        });
+
+        this.getView()?.setModel(editorModel, "employeeEditor");
+        this.getView()?.setModel(new JSONModel({ skills: [] }), "employeeEditorSkills");
+        this.getView()?.setModel(new JSONModel({ certifications: [] }), "employeeEditorCertifications");
+
+        if (!this.employeeProfileDialog) {
+            this.employeeProfileDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.ManagerEmployeeProfileDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.employeeProfileDialog);
+        }
+
+        this.employeeProfileDialog.open();
+    }
+
+    public onCloseEmployeeProfileDialog(): void {
+        this.employeeProfileDialog?.close();
+    }
+
+    public async onSaveEmployeeProfileFromManager(): Promise<void> {
+        try {
+            const editorModel = this.getView()?.getModel("employeeEditor") as JSONModel;
+            const data = editorModel?.getData() || {};
+            const employeeId = String(data.employeeId || "").trim().toUpperCase();
+            const managerId = String(data.managerId || this.currentSeniorManagerId || "").trim().toUpperCase();
+            const subTeamRaw = String(data.subTeam || "").trim();
+            const normalizedSubTeam = /^Team\s*[1-9]$/i.test(subTeamRaw)
+                ? subTeamRaw.replace(/\s+/g, " ")
+                : "Team 1";
+
+            if (!employeeId || !data.name || !data.email || !data.team || !normalizedSubTeam || !data.location || !data.tLevel || !data.gradeLevel || !managerId) {
+                MessageToast.show("Please fill all required fields");
+                return;
+            }
+
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const employeesBinding = oDataModel.bindList("/Employees");
+            employeesBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const existingEmployee = await employeesBinding.requestContexts(0, 1);
+
+            if (existingEmployee.length > 0) {
+                MessageToast.show(`Employee ${employeeId} already exists`);
+                return;
+            }
+
+            employeesBinding.create({
+                employeeId,
+                name: String(data.name).trim(),
+                role: "Employee",
+                team: String(data.team).trim(),
+                subTeam: normalizedSubTeam,
+                managerId,
+                email: String(data.email).trim(),
+                experience: Number(data.experience || 0),
+                totalSkills: 0,
+                totalProjects: 0,
+                location: String(data.location).trim(),
+                tLevel: data.tLevel,
+                gradeLevel: data.gradeLevel
+            });
+
+            const profileBinding = oDataModel.bindList("/Profiles");
+            profileBinding.create({
+                employeeId,
+                specialization: String(data.specialization || "General").trim(),
+                role: data.professionalRole || "Developer",
+                location: String(data.location).trim(),
+                tLevel: data.tLevel,
+                gradeLevel: data.gradeLevel,
+                lastUpdated: new Date().toISOString()
+            });
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            this.employeeProfileDialog?.close();
+            await this.loadDashboardData();
+            MessageToast.show("Employee added successfully");
+        } catch (error) {
+            console.error("❌ Error saving employee from senior manager dialog:", error);
+            MessageToast.show("Error saving employee");
+        }
+    }
+
     private async onRouteMatched(event: any): Promise<void> {
         const args: any = event.getParameter("arguments");
         const seniorManagerId = args?.seniorManagerId;
@@ -110,11 +232,53 @@ export default class SeniorManagerDashboard extends Controller {
             
             // Load organization metrics
             await this.loadOrganizationMetrics();
+
+            // Load master work catalogs used in employee modal assign tab
+            await this.loadMasterWorkItems();
             
             MessageToast.show("Dashboard data loaded successfully");
         } catch (error) {
             console.error("❌ Error loading dashboard data:", error);
             MessageToast.show("Error loading dashboard data");
+        }
+    }
+
+    private async loadMasterWorkItems(): Promise<void> {
+        try {
+            const [initiativesResponse, evaluationsResponse] = await Promise.all([
+                fetch("/odata/v4/skillsphere/InitiativesMaster", {
+                    credentials: "same-origin",
+                    headers: { Accept: "application/json" }
+                }),
+                fetch("/odata/v4/skillsphere/EvaluationsMaster", {
+                    credentials: "same-origin",
+                    headers: { Accept: "application/json" }
+                })
+            ]);
+
+            const [initiativesData, evaluationsData] = await Promise.all([
+                initiativesResponse.ok ? initiativesResponse.json() : { value: [] },
+                evaluationsResponse.ok ? evaluationsResponse.json() : { value: [] }
+            ]);
+
+            const initiativesItems = (initiativesData.value || []).map((row: any) => ({
+                initiativeId: row.initiativeId,
+                initiativeName: row.initiativeName,
+                status: row.status
+            }));
+
+            const evaluationsItems = (evaluationsData.value || []).map((row: any) => ({
+                evaluationId: row.evaluationId,
+                evaluationName: row.evaluationName,
+                status: row.status
+            }));
+
+            this.getView()?.setModel(new JSONModel({ items: initiativesItems }), "masterInitiatives");
+            this.getView()?.setModel(new JSONModel({ items: evaluationsItems }), "masterEvaluations");
+        } catch (error) {
+            console.error("❌ Error loading master work items:", error);
+            this.getView()?.setModel(new JSONModel({ items: [] }), "masterInitiatives");
+            this.getView()?.setModel(new JSONModel({ items: [] }), "masterEvaluations");
         }
     }
 
@@ -1050,7 +1214,7 @@ export default class SeniorManagerDashboard extends Controller {
         }
 
         const employee = bindingContext.getObject();
-        this.openEmployeeDetailsDialog(employee);
+        this.openManagerSharedEmployeeDialog(employee);
     }
 
     // Helper methods
@@ -1118,7 +1282,42 @@ export default class SeniorManagerDashboard extends Controller {
             return;
         }
         const result = bindingContext.getObject();
-        this.openEmployeeDetailsDialog(result);
+        this.openManagerSharedEmployeeDialog(result);
+    }
+
+    private async openManagerSharedEmployeeDialog(employee: any): Promise<void> {
+        try {
+            const managerId = String(employee?.managerId || "").trim().toUpperCase();
+            const employeeId = String(employee?.employeeId || employee?.id || "").trim();
+
+            if (!managerId || !employeeId) {
+                MessageToast.show("Unable to open employee details");
+                return;
+            }
+
+            if (!this.sharedManagerView) {
+                const owner = this.getOwnerComponent() as any;
+                if (owner?.runAsOwner) {
+                    let createdViewPromise: Promise<XMLView> | undefined;
+                    owner.runAsOwner(() => {
+                        createdViewPromise = XMLView.create({ viewName: "skillsphere.view.ManagerDashboard" });
+                    });
+                    this.sharedManagerView = await (createdViewPromise as Promise<XMLView>);
+                } else {
+                    this.sharedManagerView = await XMLView.create({ viewName: "skillsphere.view.ManagerDashboard" });
+                }
+                this.getView()?.addDependent(this.sharedManagerView);
+                this.sharedManagerController = (this.sharedManagerView as any).getController();
+            }
+
+            // Reuse the exact manager-side employee dialog flow without modifying manager code.
+            this.sharedManagerController.currentManagerId = managerId;
+            await this.sharedManagerController.loadManagerData(managerId);
+            await this.sharedManagerController.openEmployeeDetailsDialog({ employeeId }, false);
+        } catch (error) {
+            console.error("❌ Error opening shared manager employee dialog:", error);
+            MessageToast.show("Unable to open employee details");
+        }
     }
 
     private async openEmployeeDetailsDialog(employee: any): Promise<void> {
@@ -1131,7 +1330,7 @@ export default class SeniorManagerDashboard extends Controller {
         const empId = employee.employeeId || employee.id;
 
         try {
-            const [employeeData, profileData, skills, projects, currentProjects, caiaUtilization, pocUtilization, certifications] = await Promise.all([
+            const [employeeData, profileData, skills, projects, currentProjects, caiaUtilization, pocUtilization, certifications, completedMasterWork] = await Promise.all([
                 this.loadEmployeeData(empId),
                 this.loadProfileData(empId),
                 this.getEmployeeSkills(empId),
@@ -1139,18 +1338,29 @@ export default class SeniorManagerDashboard extends Controller {
                 this.getCurrentProjects(empId),
                 this.getCAIAUtilization(empId),
                 this.getPOCUtilization(empId),
-                this.getCertifications(empId)
+                this.getCertifications(empId),
+                this.getCompletedInitiativeEvaluationForTabs(empId)
             ]);
+
+            const activeCurrentProjects = currentProjects
+                .filter((cp: any) => cp.assignmentStatus !== "Completed")
+                .map((cp: any) => ({
+                    ...cp,
+                    isUtilizationEditing: false
+                }));
 
             const completeData = {
                 ...employeeData,
                 ...profileData,
                 skills,
                 projects,
-                currentProjects,
+                initiativesHistory: completedMasterWork.initiatives,
+                evaluationsHistory: completedMasterWork.evaluations,
+                currentProjects: activeCurrentProjects,
                 caiaUtilization,
                 pocUtilization,
-                certifications
+                certifications,
+                assignments: currentProjects
             };
 
             this.getView()?.setModel(new JSONModel(completeData), "employeeDetails");
@@ -1164,6 +1374,7 @@ export default class SeniorManagerDashboard extends Controller {
             (this.byId("smgrDialogEmployeeRole") as any)?.setText(profileData.role || 'N/A');
             (this.byId("smgrDialogEmployeeLocation") as any)?.setText(profileData.location || 'N/A');
             (this.byId("smgrDialogEmployeeTLevel") as any)?.setText(profileData.tLevel || 'N/A');
+            (this.byId("smgrDialogEmployeeGradeLevel") as any)?.setText(profileData.gradeLevel || 'N/A');
             (this.byId("smgrDialogEmployeeLastUpdated") as any)?.setText(
                 profileData.lastUpdated ? new Date(profileData.lastUpdated).toLocaleDateString() : 'N/A'
             );
@@ -1174,12 +1385,7 @@ export default class SeniorManagerDashboard extends Controller {
             statusControl?.setState(this.formatWorkingStatusState(employee.working_on_project));
 
             const today = new Date(); today.setHours(0, 0, 0, 0);
-            const activeCount = currentProjects.filter((cp: any) => {
-                if (!cp.startDate || !cp.endDate) return false;
-                const s = new Date(cp.startDate); const e = new Date(cp.endDate);
-                s.setHours(0,0,0,0); e.setHours(0,0,0,0);
-                return today >= s && today <= e;
-            }).length;
+            const activeCount = currentProjects.filter((cp: any) => cp.assignmentStatus !== "Completed").length;
             (this.byId("smgrDialogActiveProjects") as any)?.setNumber(activeCount);
             (this.byId("smgrDialogActiveProjects") as any)?.setUnit(activeCount === 1 ? "project" : "projects");
             (this.byId("smgrDialogTotalSkills") as any)?.setNumber(skills.length);
@@ -1253,12 +1459,122 @@ export default class SeniorManagerDashboard extends Controller {
 
     private async getCurrentProjects(employeeId: string): Promise<any[]> {
         try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const binding = oDataModel.bindList("/CurrentProjects");
-            binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            const contexts = await binding.requestContexts();
-            return contexts.map((c: any) => c.getObject());
+            const escapedEmployeeId = employeeId.replace(/'/g, "''");
+            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}'`);
+
+            const [projectRes, initiativeRes, evaluationRes] = await Promise.all([
+                fetch(`/odata/v4/skillsphere/CurrentProjects?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } }),
+                fetch(`/odata/v4/skillsphere/CurrentInitiatives?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } }),
+                fetch(`/odata/v4/skillsphere/CurrentEvaluations?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } })
+            ]);
+
+            const [projectData, initiativeData, evaluationData] = await Promise.all([
+                projectRes.ok ? projectRes.json() : { value: [] },
+                initiativeRes.ok ? initiativeRes.json() : { value: [] },
+                evaluationRes.ok ? evaluationRes.json() : { value: [] }
+            ]);
+
+            const projects = (projectData.value || []).map((obj: any) => ({
+                ...obj,
+                assignmentStatus: obj.assignmentStatus || obj.status || "Assigned",
+                _source: "CurrentProjects"
+            }));
+
+            const initiatives = (initiativeData.value || []).map((obj: any) => ({
+                currentProjectId: obj.currentInitiativeId,
+                currentInitiativeId: obj.currentInitiativeId,
+                employeeId: obj.employeeId,
+                type: "Initiative",
+                projectName: obj.initiativeName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                utilizationPercent: obj.utilizationPercent,
+                assignmentStatus: obj.status === "Completed" ? "Completed" : "Assigned",
+                _source: "CurrentInitiatives"
+            }));
+
+            const evaluations = (evaluationData.value || []).map((obj: any) => ({
+                currentProjectId: obj.currentEvaluationId,
+                currentEvaluationId: obj.currentEvaluationId,
+                employeeId: obj.employeeId,
+                type: "Evaluation",
+                projectName: obj.evaluationName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                utilizationPercent: obj.utilizationPercent,
+                assignmentStatus: obj.status === "Completed" ? "Completed" : "Assigned",
+                _source: "CurrentEvaluations"
+            }));
+
+            const completedHistory = await this.getCompletedMasterWorkHistory(employeeId);
+            return [...projects, ...initiatives, ...evaluations, ...completedHistory];
         } catch { return []; }
+    }
+
+    private async getCompletedMasterWorkHistory(employeeId: string): Promise<any[]> {
+        try {
+            const escapedEmployeeId = employeeId.replace(/'/g, "''");
+            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
+            const response = await fetch(`/odata/v4/skillsphere/Initiatives?$filter=${filter}`, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" }
+            });
+
+            if (!response.ok) return [];
+            const data = await response.json();
+
+            return (data.value || []).map((obj: any) => {
+                const isEvaluation = String(obj.type || "").toLowerCase() === "evaluation";
+                return {
+                    employeeId: obj.employeeId,
+                    type: isEvaluation ? "Evaluation" : "Initiative",
+                    projectName: obj.initiativeName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    utilizationPercent: obj.utilizationPercent,
+                    assignmentStatus: "Completed",
+                    _source: "InitiativesHistory"
+                };
+            });
+        } catch {
+            return [];
+        }
+    }
+
+    private async getCompletedInitiativeEvaluationForTabs(employeeId: string): Promise<{ initiatives: any[]; evaluations: any[] }> {
+        try {
+            const escapedEmployeeId = employeeId.replace(/'/g, "''");
+            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
+            const response = await fetch(`/odata/v4/skillsphere/Initiatives?$filter=${filter}`, {
+                credentials: "same-origin",
+                headers: { Accept: "application/json" }
+            });
+
+            if (!response.ok) return { initiatives: [], evaluations: [] };
+            const data = await response.json();
+
+            const initiatives = (data.value || [])
+                .filter((obj: any) => String(obj.type || "").toLowerCase() !== "evaluation")
+                .map((obj: any) => ({
+                    projectName: obj.initiativeName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    status: "Completed"
+                }));
+
+            const evaluations = (data.value || [])
+                .filter((obj: any) => String(obj.type || "").toLowerCase() === "evaluation")
+                .map((obj: any) => ({
+                    projectName: obj.initiativeName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    status: "Completed"
+                }));
+
+            return { initiatives, evaluations };
+        } catch {
+            return { initiatives: [], evaluations: [] };
+        }
     }
 
     private async getCAIAUtilization(employeeId: string): Promise<any[]> {
@@ -1322,6 +1638,28 @@ export default class SeniorManagerDashboard extends Controller {
             "Not Certified": "None", "None": "None"
         };
         return map[certificationStatus] || "None";
+    }
+
+    public formatTypeState(type: string): string {
+        const normalizedType = String(type || "").toLowerCase();
+        if (normalizedType === "project") return "Success";
+        if (normalizedType === "evaluation") return "Warning";
+        if (normalizedType === "initiative") return "Information";
+        if (normalizedType === "caia" || normalizedType === "poc") return "None";
+        return "None";
+    }
+
+    public formatAssignmentStatusLabel(status: string): string {
+        const normalizedStatus = String(status || "").trim();
+        return normalizedStatus || "Assigned";
+    }
+
+    public formatAssignmentStatusState(status: string): string {
+        const normalizedStatus = String(status || "").trim().toLowerCase();
+        if (normalizedStatus === "completed") return "Success";
+        if (normalizedStatus === "rejected") return "Error";
+        if (normalizedStatus === "pending") return "Warning";
+        return "Information";
     }
 
     public formatUtilizationPercent(hoursPerDay: number): string {

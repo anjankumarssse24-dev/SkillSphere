@@ -154,7 +154,7 @@
         },
         {
           "name": "ManagerDashboard",
-          "pattern": "manager-dashboard/{managerId}",
+          "pattern": "manager-dashboard/{managerId}:?query:",
           "target": ["TargetManagerDashboard"]
         },
         {
@@ -169,7 +169,7 @@
         },
         {
           "name": "ManagerTeamView",
-          "pattern": "manager-team-view/{managerId}/{seniorManagerId}",
+          "pattern": "manager-team-view/{managerId}/{seniorManagerId}:?query:",
           "target": ["TargetManagerTeamView"]
         }
       ],
