@@ -1,0 +1,46 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Assign Existing Initiative / Evaluation"
+        contentWidth="520px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Type" class="sapUiTinyMarginBottom"/>
+                <Input value="{managerAssignWork>/type}" editable="false" class="sapUiMediumMarginBottom"/>
+
+                <Label text="Select Existing Item" required="true" class="sapUiTinyMarginBottom"/>
+                <ComboBox
+                    selectedKey="{managerAssignWork>/selectedId}"
+                    items="{managerWorkCatalog>/items}"
+                    selectionChange="onManagerAssignWorkSelectionChange"
+                    placeholder="Select initiative/evaluation"
+                    width="100%"
+                    class="sapUiMediumMarginBottom">
+                    <core:Item key="{managerWorkCatalog>initiativeId}" text="{managerWorkCatalog>initiativeName}"/>
+                </ComboBox>
+
+                <Label text="Name" required="true" class="sapUiTinyMarginBottom"/>
+                <Input value="{managerAssignWork>/name}" class="sapUiMediumMarginBottom"/>
+
+                <Label text="Description" class="sapUiTinyMarginBottom"/>
+                <TextArea value="{managerAssignWork>/description}" rows="3" class="sapUiMediumMarginBottom"/>
+
+                <Label text="Start Date" required="true" class="sapUiTinyMarginBottom"/>
+                <DatePicker value="{managerAssignWork>/startDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%" class="sapUiMediumMarginBottom"/>
+
+                <Label text="End Date" required="true" class="sapUiTinyMarginBottom"/>
+                <DatePicker value="{managerAssignWork>/endDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%" class="sapUiMediumMarginBottom"/>
+
+                <Label text="Allocation (%)" required="true" class="sapUiTinyMarginBottom"/>
+                <StepInput value="{managerAssignWork>/utilizationPercent}" min="1" max="100" step="5" width="100%"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button text="Assign" type="Emphasized" press="onSaveManagerAssignWork"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press="onCloseManagerAssignWork"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

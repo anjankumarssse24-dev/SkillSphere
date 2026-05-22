@@ -1,0 +1,38 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="Add Initiative / Evaluation"
+        contentWidth="500px">
+        <content>
+            <VBox class="sapUiMediumMargin">
+                <Label text="Work Type" required="true" class="sapUiTinyMarginBottom"/>
+                <Select selectedKey="{managerWork>/type}" class="sapUiMediumMarginBottom" width="100%">
+                    <core:Item key="Initiative" text="Initiative"/>
+                    <core:Item key="Evaluation" text="Evaluation"/>
+                </Select>
+
+                <Label text="Name" required="true" class="sapUiTinyMarginBottom"/>
+                <Input value="{managerWork>/name}" placeholder="Enter initiative or evaluation name" class="sapUiMediumMarginBottom"/>
+
+                <Label text="Description" class="sapUiTinyMarginBottom"/>
+                <TextArea value="{managerWork>/description}" rows="3" class="sapUiMediumMarginBottom"/>
+
+                <Label text="Start Date" required="true" class="sapUiTinyMarginBottom"/>
+                <DatePicker value="{managerWork>/startDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" class="sapUiMediumMarginBottom" width="100%"/>
+
+                <Label text="End Date" required="true" class="sapUiTinyMarginBottom"/>
+                <DatePicker value="{managerWork>/endDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" class="sapUiMediumMarginBottom" width="100%"/>
+
+                <Label text="Allocation (%)" required="true" class="sapUiTinyMarginBottom"/>
+                <StepInput value="{managerWork>/utilizationPercent}" min="1" max="100" step="5" width="100%"/>
+            </VBox>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press="onSaveManagerWorkAssignment"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press="onCloseManagerWorkAssignment"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

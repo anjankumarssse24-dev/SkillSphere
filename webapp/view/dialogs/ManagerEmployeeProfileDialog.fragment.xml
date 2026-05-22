@@ -1,0 +1,196 @@
+<core:FragmentDefinition
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    <Dialog
+        title="{= ${employeeEditor>/mode} === 'create' ? 'Add Employee' : 'Edit Employee' }"
+        contentWidth="920px"
+        contentHeight="740px"
+        draggable="true"
+        resizable="true">
+        <content>
+            <IconTabBar class="sapUiResponsiveContentPadding">
+                <items>
+                    <IconTabFilter key="profile" icon="sap-icon://employee" text="Profile">
+                        <VBox class="sapUiMediumMargin">
+                            <Panel headerText="Basic Information" class="sapUiSmallMarginBottom">
+                                <content>
+                                    <VBox class="sapUiSmallMargin">
+                                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                                            <VBox width="48%">
+                                                <Label text="Employee ID" required="true"/>
+                                                <Input value="{employeeEditor>/employeeId}" editable="{= ${employeeEditor>/mode} === 'create' }"/>
+                                            </VBox>
+                                            <VBox width="48%">
+                                                <Label text="Full Name" required="true"/>
+                                                <Input value="{employeeEditor>/name}"/>
+                                            </VBox>
+                                        </FlexBox>
+
+                                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                                            <VBox width="48%">
+                                                <Label text="Email" required="true"/>
+                                                <Input value="{employeeEditor>/email}"/>
+                                            </VBox>
+                                            <VBox width="48%">
+                                                <Label text="Reporting Manager" required="true"/>
+                                                <Input value="{employeeEditor>/managerLabel}" editable="false" enabled="false"/>
+                                            </VBox>
+                                        </FlexBox>
+
+                                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween">
+                                            <VBox width="32%">
+                                                <Label text="Team" required="true"/>
+                                                <Input value="{employeeEditor>/team}" editable="false" enabled="false"/>
+                                            </VBox>
+                                            <VBox width="32%">
+                                                <Label text="Sub Team" required="true"/>
+                                                <Input value="{employeeEditor>/subTeam}" editable="false" enabled="false"/>
+                                            </VBox>
+                                            <VBox width="32%">
+                                                <Label text="Experience (Years)"/>
+                                                <StepInput value="{employeeEditor>/experience}" min="0" max="50" step="0.5"/>
+                                            </VBox>
+                                        </FlexBox>
+                                    </VBox>
+                                </content>
+                            </Panel>
+
+                            <Panel headerText="Professional Profile">
+                                <content>
+                                    <VBox class="sapUiSmallMargin">
+                                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                                            <VBox width="48%">
+                                                <Label text="Role"/>
+                                                <Select selectedKey="{employeeEditor>/professionalRole}">
+                                                    <core:Item key="" text="-- Select Role --"/>
+                                                    <core:Item key="Developer" text="Developer"/>
+                                                    <core:Item key="Architect" text="Architect"/>
+                                                    <core:Item key="Backend Developer" text="Backend Developer"/>
+                                                    <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                                                    <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="AI/ML Engineer" text="AI/ML Engineer"/>
+                                                    <core:Item key="Data Scientist" text="Data Scientist"/>
+                                                    <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                                    <core:Item key="QA Engineer" text="QA Engineer"/>
+                                                    <core:Item key="Project Manager" text="Project Manager"/>
+                                                    <core:Item key="ABAP Developer" text="ABAP Developer"/>
+                                                </Select>
+                                            </VBox>
+                                            <VBox width="48%">
+                                                <Label text="Location" required="true"/>
+                                                <Select selectedKey="{employeeEditor>/location}">
+                                                    <core:Item key="" text="-- Select Location --"/>
+                                                    <core:Item key="Whitefield, Bangalore" text="Whitefield, Bangalore"/>
+                                                    <core:Item key="Devanahalli, Bangalore" text="Devanahalli, Bangalore"/>
+                                                    <core:Item key="Gurgaon" text="Gurgaon"/>
+                                                </Select>
+                                            </VBox>
+                                        </FlexBox>
+
+                                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+                                            <VBox width="32%">
+                                                <Label text="T Level" required="true"/>
+                                                <Select selectedKey="{employeeEditor>/tLevel}">
+                                                    <core:Item key="" text="-- Select T Level --"/>
+                                                    <core:Item key="T1" text="T1"/>
+                                                    <core:Item key="T2" text="T2"/>
+                                                    <core:Item key="T3" text="T3"/>
+                                                    <core:Item key="T4" text="T4"/>
+                                                    <core:Item key="T5" text="T5"/>
+                                                </Select>
+                                            </VBox>
+                                            <VBox width="32%">
+                                                <Label text="Grade Level" required="true"/>
+                                                <Select selectedKey="{employeeEditor>/gradeLevel}">
+                                                    <core:Item key="" text="-- Select Grade Level --"/>
+                                                    <core:Item key="L1" text="L1"/>
+                                                    <core:Item key="L2" text="L2"/>
+                                                    <core:Item key="L3" text="L3"/>
+                                                    <core:Item key="L4" text="L4"/>
+                                                    <core:Item key="L5" text="L5"/>
+                                                </Select>
+                                            </VBox>
+                                            <VBox width="32%">
+                                                <Label text="Specialization"/>
+                                                <Input value="{employeeEditor>/specialization}" placeholder="e.g. SAP CAP"/>
+                                            </VBox>
+                                        </FlexBox>
+
+                                    </VBox>
+                                </content>
+                            </Panel>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <IconTabFilter key="skills" icon="sap-icon://learning-assistant" text="Skills">
+                        <VBox class="sapUiMediumMargin">
+                            <MessageStrip visible="{= ${employeeEditor>/mode} === 'create' }" text="Save the employee first, then add skills." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+                            <FlexBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+                                <Title text="Employee Skills" level="H4"/>
+                                <Button text="Add Skill" icon="sap-icon://add" type="Emphasized" press="onManagerAddSkill" enabled="{= ${employeeEditor>/mode} === 'edit' }"/>
+                            </FlexBox>
+                            <Table items="{employeeEditorSkills>/skills}" noDataText="No skills found">
+                                <columns>
+                                    <Column><Text text="Skill Name"/></Column>
+                                    <Column><Text text="Category"/></Column>
+                                    <Column><Text text="Proficiency"/></Column>
+                                    <Column><Text text="Years"/></Column>
+                                    <Column hAlign="Center" width="120px"><Text text="Actions"/></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <Text text="{employeeEditorSkills>skillName}"/>
+                                        <Text text="{employeeEditorSkills>category}"/>
+                                        <ObjectStatus text="{employeeEditorSkills>proficiencyLevel}" state="{path: 'employeeEditorSkills>proficiencyLevel', formatter: '.formatProficiencyState'}"/>
+                                        <Text text="{employeeEditorSkills>yearsExperience}"/>
+                                        <HBox justifyContent="Center" alignItems="Center">
+                                            <Button icon="sap-icon://edit" type="Transparent" press="onManagerEditSkill" enabled="{= ${employeeEditor>/mode} === 'edit' }" class="sapUiTinyMarginEnd"/>
+                                            <Button icon="sap-icon://delete" type="Transparent" press="onManagerDeleteSkill" enabled="{= ${employeeEditor>/mode} === 'edit' }"/>
+                                        </HBox>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+                    </IconTabFilter>
+
+                    <IconTabFilter key="certifications" icon="sap-icon://employee-approvals" text="Certifications">
+                        <VBox class="sapUiMediumMargin">
+                            <MessageStrip visible="{= ${employeeEditor>/mode} === 'create' }" text="Save the employee first, then add certifications." type="Information" showIcon="true" class="sapUiSmallMarginBottom"/>
+                            <FlexBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+                                <Title text="Employee Certifications" level="H4"/>
+                                <Button text="Add Certification" icon="sap-icon://add" type="Emphasized" press="onManagerAddCertification" enabled="{= ${employeeEditor>/mode} === 'edit' }"/>
+                            </FlexBox>
+                            <Table items="{employeeEditorCertifications>/certifications}" noDataText="No certifications found">
+                                <columns>
+                                    <Column><Text text="Name"/></Column>
+                                    <Column><Text text="Code"/></Column>
+                                    <Column><Text text="Date"/></Column>
+                                    <Column><Text text="Level"/></Column>
+                                    <Column hAlign="Center" width="120px"><Text text="Actions"/></Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <Text text="{employeeEditorCertifications>name}"/>
+                                        <Text text="{employeeEditorCertifications>code}"/>
+                                        <Text text="{employeeEditorCertifications>dateOfCompletion}"/>
+                                        <ObjectStatus text="{employeeEditorCertifications>level}" state="Success"/>
+                                        <HBox justifyContent="Center" alignItems="Center">
+                                            <Button icon="sap-icon://edit" type="Transparent" press="onManagerEditCertification" enabled="{= ${employeeEditor>/mode} === 'edit' }" class="sapUiTinyMarginEnd"/>
+                                            <Button icon="sap-icon://delete" type="Transparent" press="onManagerDeleteCertification" enabled="{= ${employeeEditor>/mode} === 'edit' }"/>
+                                        </HBox>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </VBox>
+                    </IconTabFilter>
+                </items>
+            </IconTabBar>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press="onSaveEmployeeProfileFromManager"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press="onCloseEmployeeProfileDialog"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

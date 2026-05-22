@@ -148,6 +148,13 @@
                     <uxap:ObjectPageSubSection id="teamSubSection">
                         <uxap:blocks>
                             <m:Panel id="teamPanel" headerText="Team Members" class="sapUiMediumMargin" width="95%">
+                                <m:headerToolbar>
+                                    <m:Toolbar>
+                                        <m:Title text="Team Members" level="H3"/>
+                                        <m:ToolbarSpacer/>
+                                        <m:Button text="Add Employee" icon="sap-icon://add-employee" type="Emphasized" press="onOpenAddEmployeeDialog"/>
+                                    </m:Toolbar>
+                                </m:headerToolbar>
                                 <m:content>
                                     <m:Table id="teamTable" items="{managerEmployees>/employees}" class="sapUiResponsiveMargin" mode="None" fixedLayout="false">
                                         <m:columns>
@@ -507,6 +514,7 @@
                                             <m:Panel headerText="Organization" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
                                                 <m:content>
                                                     <m:VBox class="sapUiSmallMargin">
+                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Reporting Manager" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/managerLabel} ? ${selfProfile>/managerLabel} : '* click edit to add *' }"/></m:HBox>
                                                         <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Team" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/team} ? ${selfProfile>/team} : '* click edit to add *' }"/></m:HBox>
                                                         <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Sub-Team" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/subTeam} ? ${selfProfile>/subTeam} : '* click edit to add *' }"/></m:HBox>
                                                         <m:HBox justifyContent="SpaceBetween"><m:Label text="Experience" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/experience} || ${selfProfile>/experience} === 0 ? ${selfProfile>/experience} : '* click edit to add *' }"/></m:HBox>
@@ -517,7 +525,6 @@
                                             <m:Panel headerText="Professional Profile" class="sapUiTinyMarginBottom" backgroundDesign="Translucent">
                                                 <m:content>
                                                     <m:VBox class="sapUiSmallMargin">
-                                                        <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Role" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/professionalRole} ? ${selfProfile>/professionalRole} : '* click edit to add *' }"/></m:HBox>
                                                         <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Location" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/location} ? ${selfProfile>/location} : '* click edit to add *' }"/></m:HBox>
                                                         <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="T Level" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/tLevel} ? ${selfProfile>/tLevel} : '* click edit to add *' }"/></m:HBox>
                                                         <m:HBox justifyContent="SpaceBetween" class="sapUiTinyMarginBottom"><m:Label text="Grade Level" design="Bold" width="14rem"/><m:Text text="{= ${selfProfile>/gradeLevel} ? ${selfProfile>/gradeLevel} : '* click edit to add *' }"/></m:HBox>
@@ -544,13 +551,33 @@
                                             </m:FlexBox>
 
                                             <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
+                                                <m:VBox width="48%">
+                                                    <m:Label text="Reporting Manager" class="sapUiTinyMarginBottom" required="true"/>
+                                                    <m:Select selectedKey="{selfProfile>/managerId}" width="100%" class="sapUiMediumMarginBottom" items="{reportingManagers>/managers}">
+                                                        <core:Item key="{reportingManagers>employeeId}" text="{reportingManagers>name} ({reportingManagers>employeeId})"/>
+                                                    </m:Select>
+                                                </m:VBox>
+                                                <m:VBox width="48%"/>
+                                            </m:FlexBox>
+
+                                            <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
                                                 <m:VBox width="30%">
                                                     <m:Label text="Team" class="sapUiTinyMarginBottom" required="true"/>
-                                                    <m:Input value="{selfProfile>/team}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                    <m:Input value="CIS" editable="false" enabled="false" width="100%" class="sapUiMediumMarginBottom"/>
                                                 </m:VBox>
                                                 <m:VBox width="36%">
                                                     <m:Label text="Sub-Team" class="sapUiTinyMarginBottom" required="true"/>
-                                                    <m:Input value="{selfProfile>/subTeam}" width="100%" class="sapUiMediumMarginBottom"/>
+                                                    <m:Select selectedKey="{selfProfile>/subTeam}" width="100%" class="sapUiMediumMarginBottom">
+                                                        <core:Item key="Team 1" text="Team 1"/>
+                                                        <core:Item key="Team 2" text="Team 2"/>
+                                                        <core:Item key="Team 3" text="Team 3"/>
+                                                        <core:Item key="Team 4" text="Team 4"/>
+                                                        <core:Item key="Team 5" text="Team 5"/>
+                                                        <core:Item key="Team 6" text="Team 6"/>
+                                                        <core:Item key="Team 7" text="Team 7"/>
+                                                        <core:Item key="Team 8" text="Team 8"/>
+                                                        <core:Item key="Team 9" text="Team 9"/>
+                                                    </m:Select>
                                                 </m:VBox>
                                                 <m:VBox width="30%">
                                                     <m:Label text="Experience (Years)" class="sapUiTinyMarginBottom"/>
@@ -560,18 +587,6 @@
 
                                             <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
                                                 <m:VBox width="48%">
-                                                    <m:Label text="Role" class="sapUiTinyMarginBottom" required="true"/>
-                                                    <m:Select selectedKey="{selfProfile>/professionalRole}" width="100%" class="sapUiMediumMarginBottom">
-                                                        <core:Item key="" text="-- Select Role --"/>
-                                                        <core:Item key="Manager" text="Manager"/>
-                                                        <core:Item key="Senior Manager" text="Senior Manager"/>
-                                                        <core:Item key="Delivery Manager" text="Delivery Manager"/>
-                                                        <core:Item key="Program Manager" text="Program Manager"/>
-                                                        <core:Item key="Project Manager" text="Project Manager"/>
-                                                        <core:Item key="People Manager" text="People Manager"/>
-                                                    </m:Select>
-                                                </m:VBox>
-                                                <m:VBox width="48%">
                                                     <m:Label text="Location" class="sapUiTinyMarginBottom" required="true"/>
                                                     <m:Select selectedKey="{selfProfile>/location}" width="100%" class="sapUiMediumMarginBottom">
                                                         <core:Item key="" text="-- Select Location --"/>
@@ -580,6 +595,7 @@
                                                         <core:Item key="Gurgaon" text="Gurgaon"/>
                                                     </m:Select>
                                                 </m:VBox>
+                                                <m:VBox width="48%"/>
                                             </m:FlexBox>
 
                                             <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
@@ -591,6 +607,7 @@
                                                         <core:Item key="T2" text="T2"/>
                                                         <core:Item key="T3" text="T3"/>
                                                         <core:Item key="T4" text="T4"/>
+                                                        <core:Item key="T5" text="T5"/>
                                                     </m:Select>
                                                 </m:VBox>
                                                 <m:VBox width="30%">
@@ -600,6 +617,8 @@
                                                         <core:Item key="L1" text="L1"/>
                                                         <core:Item key="L2" text="L2"/>
                                                         <core:Item key="L3" text="L3"/>
+                                                        <core:Item key="L4" text="L4"/>
+                                                        <core:Item key="L5" text="L5"/>
                                                     </m:Select>
                                                 </m:VBox>
                                                 <m:VBox width="36%">
@@ -680,6 +699,9 @@
                                     </m:VBox>
                                 </m:content>
                             </m:Panel>
+                            <m:FlexBox justifyContent="End" class="sapUiSmallMarginBottom">
+                                <m:Button text="Edit Employee Profile" icon="sap-icon://edit" type="Emphasized" press="onEditEmployeeFromDialog"/>
+                            </m:FlexBox>
                             
                             <!-- Current Status -->
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Current Work Status" expandable="false">
@@ -706,9 +728,12 @@
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Technical Skills Portfolio" expandable="false">
                                 <m:content>
                                     <m:VBox class="sapUiSmallMargin">
-                                        <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                        <m:FlexBox class="sapUiMediumMarginBottom" justifyContent="SpaceBetween" alignItems="Center">
                                             <m:Label text="Total Skills: " class="sapUiMediumMarginEnd"/>
-                                            <m:ObjectNumber id="dialogTotalSkills" number="0" unit="skills" emphasized="true"/>
+                                            <m:HBox alignItems="Center">
+                                                <m:ObjectNumber id="dialogTotalSkills" number="0" unit="skills" emphasized="true" class="sapUiSmallMarginEnd"/>
+                                                <m:Button text="Add Skill" icon="sap-icon://add" type="Emphasized" press="onManagerAddSkill"/>
+                                            </m:HBox>
                                         </m:FlexBox>
                                         <m:Table id="dialogSkillsTable" items="{employeeDetails>/skills}" class="sapUiSmallMarginTop">
                                             <m:columns>
@@ -716,7 +741,7 @@
                                                 <m:Column><m:Text text="Proficiency Level"/></m:Column>
                                                 <m:Column><m:Text text="Category"/></m:Column>
                                                 <m:Column><m:Text text="Years of Experience"/></m:Column>
-                                                <m:Column><m:Text text="Certification Status"/></m:Column>
+                                                <m:Column width="120px" hAlign="Center"><m:Text text="Actions"/></m:Column>
                                             </m:columns>
                                             <m:items>
                                                 <m:ColumnListItem>
@@ -726,39 +751,10 @@
                                                         state="{path: 'employeeDetails>proficiencyLevel', formatter: '.formatProficiencyState'}"/>
                                                     <m:Text text="{employeeDetails>category}"/>
                                                     <m:Text text="{employeeDetails>yearsExperience}"/>
-                                                    <m:ObjectStatus 
-                                                        text="{employeeDetails>certificationStatus}"
-                                                        state="{path: 'employeeDetails>certificationStatus', formatter: '.formatCertificationState'}"/>
-                                                </m:ColumnListItem>
-                                            </m:items>
-                                        </m:Table>
-                                    </m:VBox>
-                                </m:content>
-                            </m:Panel>
-
-                            <!-- Certifications Panel -->
-                            <m:Panel class="sapUiSmallMarginTop" headerText="Professional Certifications" expandable="true" expanded="true">
-                                <m:content>
-                                    <m:VBox class="sapUiSmallMargin">
-                                        <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
-                                            <m:Label text="Total Certifications: " class="sapUiMediumMarginEnd"/>
-                                            <m:ObjectNumber id="dialogTotalCertifications" number="0" unit="certifications" emphasized="true"/>
-                                        </m:FlexBox>
-                                        <m:Table id="dialogCertificationsTable" items="{employeeDetails>/certifications}" class="sapUiSmallMarginTop">
-                                            <m:columns>
-                                                <m:Column><m:Text text="Certification Name"/></m:Column>
-                                                <m:Column><m:Text text="Code"/></m:Column>
-                                                <m:Column><m:Text text="Date of Completion"/></m:Column>
-                                                <m:Column><m:Text text="Level"/></m:Column>
-                                                <m:Column minScreenWidth="Desktop" demandPopin="true"><m:Text text="Description"/></m:Column>
-                                            </m:columns>
-                                            <m:items>
-                                                <m:ColumnListItem>
-                                                    <m:Text text="{employeeDetails>name}"/>
-                                                    <m:Text text="{employeeDetails>code}"/>
-                                                    <m:Text text="{employeeDetails>dateOfCompletion}"/>
-                                                    <m:ObjectStatus text="{employeeDetails>level}" state="Success"/>
-                                                    <m:Text text="{employeeDetails>description}"/>
+                                                    <m:HBox justifyContent="Center" alignItems="Center">
+                                                        <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit Skill" press="onManagerEditSkill" class="sapUiTinyMarginEnd"/>
+                                                        <m:Button icon="sap-icon://delete" type="Transparent" tooltip="Delete Skill" press="onManagerDeleteSkill"/>
+                                                    </m:HBox>
                                                 </m:ColumnListItem>
                                             </m:items>
                                         </m:Table>
@@ -770,7 +766,7 @@
                     
                     <!-- Projects Tab -->
                     <m:IconTabFilter icon="sap-icon://project-definition-triangle" text="Projects" key="projects">
-                        <m:Panel class="sapUiSmallMargin" headerText="Project History" expandable="false">
+                        <m:Panel class="sapUiSmallMargin" headerText="Project Master History" expandable="false">
                             <m:content>
                                 <m:VBox class="sapUiSmallMargin">
                                     <m:FlexBox class="sapUiMediumMarginBottom" justifyContent="SpaceBetween" alignItems="Center">
@@ -811,19 +807,26 @@
                                 <m:content>
                                     <m:Table id="dialogCurrentProjectsTable" items="{employeeDetails>/currentProjects}">
                                         <m:columns>
+                                            <m:Column><m:Text text="Type"/></m:Column>
                                             <m:Column><m:Text text="Project Name"/></m:Column>
                                             <m:Column><m:Text text="Project Manager"/></m:Column>
                                             <m:Column><m:Text text="Start Date"/></m:Column>
                                             <m:Column><m:Text text="End Date"/></m:Column>
                                             <m:Column><m:Text text="Utilization"/></m:Column>
+                                            <m:Column><m:Text text="Status"/></m:Column>
+                                            <m:Column hAlign="Center" width="120px"><m:Text text="Actions"/></m:Column>
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem>
+                                                <m:ObjectStatus text="{employeeDetails>type}" state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
                                                 <m:Text text="{employeeDetails>projectName}"/>
                                                 <m:Text text="{employeeDetails>projectManager}"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:Text text="{path: 'employeeDetails>utilizationPercent', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:ObjectStatus text="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusLabel'}"
+                                                               state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
+                                                <m:Button icon="sap-icon://complete" type="Accept" tooltip="Mark as Completed" press="onManagerCompleteCurrentProject"/>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>
@@ -833,6 +836,10 @@
                             <!-- Initiatives -->
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Strategic Initiatives" expandable="true" expanded="false">
                                 <m:content>
+                                    <m:HBox justifyContent="End" class="sapUiSmallMarginBottom">
+                                        <m:Button text="Assign Existing" icon="sap-icon://shortcut" type="Transparent" press="onManagerAssignInitiative" class="sapUiTinyMarginEnd"/>
+                                        <m:Button text="Add Initiative" icon="sap-icon://add" type="Emphasized" press="onManagerAddInitiative"/>
+                                    </m:HBox>
                                     <m:Table id="dialogInitiativesTable" items="{employeeDetails>/initiatives}">
                                         <m:columns>
                                             <m:Column><m:Text text="Initiative Name"/></m:Column>
@@ -840,6 +847,8 @@
                                             <m:Column><m:Text text="Start Date"/></m:Column>
                                             <m:Column><m:Text text="End Date"/></m:Column>
                                             <m:Column><m:Text text="Utilization"/></m:Column>
+                                            <m:Column><m:Text text="Status"/></m:Column>
+                                            <m:Column hAlign="Center" width="120px"><m:Text text="Actions"/></m:Column>
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem>
@@ -847,7 +856,43 @@
                                                 <m:Text text="{employeeDetails>description}" maxLines="1"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:Text text="{path: 'employeeDetails>utilizationPercent', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:ObjectStatus text="{employeeDetails>status}"
+                                                               state="{= ${employeeDetails>status} === 'Completed' ? 'Information' : 'Success' }"/>
+                                                <m:Button icon="sap-icon://complete" type="Accept" tooltip="Mark as Completed" press="onManagerCompleteInitiative"/>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:content>
+                            </m:Panel>
+
+                            <!-- Evaluations -->
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Evaluations" expandable="true" expanded="false">
+                                <m:content>
+                                    <m:HBox justifyContent="End" class="sapUiSmallMarginBottom">
+                                        <m:Button text="Assign Existing" icon="sap-icon://shortcut" type="Transparent" press="onManagerAssignEvaluation" class="sapUiTinyMarginEnd"/>
+                                        <m:Button text="Add Evaluation" icon="sap-icon://add" type="Emphasized" press="onManagerAddEvaluation"/>
+                                    </m:HBox>
+                                    <m:Table id="dialogEvaluationsTable" items="{employeeDetails>/evaluations}">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Evaluation Name"/></m:Column>
+                                            <m:Column><m:Text text="Description"/></m:Column>
+                                            <m:Column><m:Text text="Start Date"/></m:Column>
+                                            <m:Column><m:Text text="End Date"/></m:Column>
+                                            <m:Column><m:Text text="Utilization"/></m:Column>
+                                            <m:Column><m:Text text="Status"/></m:Column>
+                                            <m:Column hAlign="Center" width="120px"><m:Text text="Actions"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{employeeDetails>initiativeName}"/>
+                                                <m:Text text="{employeeDetails>description}" maxLines="1"/>
+                                                <m:Text text="{employeeDetails>startDate}"/>
+                                                <m:Text text="{employeeDetails>endDate}"/>
+                                                <m:Text text="{path: 'employeeDetails>utilizationPercent', formatter: '.formatUtilizationPercent'}"/>
+                                                <m:ObjectStatus text="{employeeDetails>status}"
+                                                               state="{= ${employeeDetails>status} === 'Completed' ? 'Information' : 'Success' }"/>
+                                                <m:Button icon="sap-icon://complete" type="Accept" tooltip="Mark as Completed" press="onManagerCompleteInitiative"/>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>
@@ -861,9 +906,12 @@
                         <m:Panel class="sapUiSmallMargin" headerText="Professional Certifications" expandable="false">
                             <m:content>
                                 <m:VBox class="sapUiSmallMargin">
-                                    <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                    <m:FlexBox class="sapUiMediumMarginBottom" justifyContent="SpaceBetween" alignItems="Center">
                                         <m:Label text="Total Certifications: " class="sapUiMediumMarginEnd"/>
-                                        <m:ObjectNumber id="dialogTotalCertificationsTab" number="0" unit="certifications" emphasized="true"/>
+                                        <m:HBox alignItems="Center">
+                                            <m:ObjectNumber id="dialogTotalCertificationsTab" number="0" unit="certifications" emphasized="true" class="sapUiSmallMarginEnd"/>
+                                            <m:Button text="Add Certification" icon="sap-icon://add" type="Emphasized" press="onManagerAddCertification"/>
+                                        </m:HBox>
                                     </m:FlexBox>
                                     <m:Table id="dialogCertificationsTabTable" items="{employeeDetails>/certifications}" class="sapUiSmallMarginTop">
                                         <m:columns>
@@ -872,6 +920,7 @@
                                             <m:Column><m:Text text="Date of Completion"/></m:Column>
                                             <m:Column><m:Text text="Level"/></m:Column>
                                             <m:Column minScreenWidth="Desktop" demandPopin="true"><m:Text text="Description"/></m:Column>
+                                            <m:Column width="120px" hAlign="Center"><m:Text text="Actions"/></m:Column>
                                         </m:columns>
                                         <m:items>
                                             <m:ColumnListItem>
@@ -880,6 +929,10 @@
                                                 <m:Text text="{employeeDetails>dateOfCompletion}"/>
                                                 <m:ObjectStatus text="{employeeDetails>level}" state="Success"/>
                                                 <m:Text text="{employeeDetails>description}"/>
+                                                <m:HBox justifyContent="Center" alignItems="Center">
+                                                    <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit Certification" press="onManagerEditCertification" class="sapUiTinyMarginEnd"/>
+                                                    <m:Button icon="sap-icon://delete" type="Transparent" tooltip="Delete Certification" press="onManagerDeleteCertification"/>
+                                                </m:HBox>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>
@@ -903,15 +956,34 @@
                                                     class="sapUiMediumMarginBottom">
                                             <core:Item key="{projectId}" text="{projectName} - {technology}"/>
                                         </m:ComboBox>
+                                        <m:Label text="Role in Project:" class="sapUiTinyMarginBottom"/>
+                                        <m:ComboBox id="assignProjectRoleCombo"
+                                                    selectedKey="Team Member"
+                                                    width="100%"
+                                                    class="sapUiMediumMarginBottom">
+                                            <core:Item key="Developer" text="Developer"/>
+                                            <core:Item key="Tech Lead" text="Tech Lead"/>
+                                            <core:Item key="Solution Architect" text="Solution Architect"/>
+                                            <core:Item key="Team Member" text="Team Member"/>
+                                            <core:Item key="QA Engineer" text="QA Engineer"/>
+                                            <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                            <core:Item key="Data Scientist" text="Data Scientist"/>
+                                            <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                                            <core:Item key="Backend Developer" text="Backend Developer"/>
+                                            <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                        </m:ComboBox>
+                                        <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
+                                        <m:StepInput id="assignProjectAllocationInput"
+                                                     min="1"
+                                                     max="100"
+                                                     step="5"
+                                                     value="100"
+                                                     width="100%"
+                                                     class="sapUiMediumMarginBottom"/>
                                         <m:Button text="Assign Project" 
                                                   type="Emphasized" 
                                                   icon="sap-icon://add" 
-                                                  press="onAssignProject"
-                                                  enabled="{= ${assignProjectComboBox>/selectedKey} !== '' }"/>
-                                        <m:MessageStrip text="The employee will receive this assignment with 'Pending' status and can accept or reject it." 
-                                                        type="Information" 
-                                                        showIcon="true" 
-                                                        class="sapUiSmallMarginTop"/>
+                                                  press="onAssignProject"/>
                                     </m:VBox>
                                 </m:content>
                             </m:Panel>
@@ -923,7 +995,7 @@
                                         <m:columns>
                                             <m:Column><m:Text text="Type"/></m:Column>
                                             <m:Column><m:Text text="Project/Work Name"/></m:Column>
-                                            <m:Column><m:Text text="Assignment Status"/></m:Column>
+                                            <m:Column><m:Text text="Status"/></m:Column>
                                             <m:Column><m:Text text="Start Date"/></m:Column>
                                             <m:Column><m:Text text="End Date"/></m:Column>
                                             <m:Column><m:Text text="Utilization %"/></m:Column>
@@ -933,7 +1005,7 @@
                                                 <m:ObjectStatus text="{employeeDetails>type}"
                                                                state="{path: 'employeeDetails>type', formatter: '.formatTypeState'}"/>
                                                 <m:Text text="{employeeDetails>projectName}"/>
-                                                <m:ObjectStatus text="{employeeDetails>assignmentStatus}"
+                                                <m:ObjectStatus text="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusLabel'}"
                                                                state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
@@ -966,11 +1038,11 @@
                     </m:IconTabFilter>
                 </m:items>
             </m:IconTabBar>
+            <m:HBox justifyContent="End" class="sapUiSmallMarginTop">
+                <m:Button text="Contact Employee" type="Emphasized" icon="sap-icon://email" press="onContactEmployee" class="sapUiTinyMarginEnd"/>
+                <m:Button text="Close" press="onCloseEmployeeDialog"/>
+            </m:HBox>
         </m:content>
-        <m:buttons>
-            <m:Button text="Contact Employee" type="Emphasized" icon="sap-icon://email" press="onContactEmployee"/>
-            <m:Button text="Close" press="onCloseEmployeeDialog"/>
-        </m:buttons>
     </m:Dialog>
 
     <!-- Analytics Employee List Dialog -->
@@ -1010,10 +1082,10 @@
                     </m:ColumnListItem>
                 </m:items>
             </m:Table>
+            <m:HBox justifyContent="End" class="sapUiSmallMarginTop">
+                <m:Button text="Close" press="onCloseAnalyticsDialog"/>
+            </m:HBox>
         </m:content>
-        <m:buttons>
-            <m:Button text="Close" press="onCloseAnalyticsDialog"/>
-        </m:buttons>
     </m:Dialog>
 
     <m:Button

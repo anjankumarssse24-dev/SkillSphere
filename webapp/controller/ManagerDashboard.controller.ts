@@ -2,6 +2,7 @@ import Fragment from "sap/ui/core/Fragment";
 import Controller from "sap/ui/core/mvc/Controller";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
+import MessageBox from "sap/m/MessageBox";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Event from "sap/ui/base/Event";
 import Table from "sap/m/Table";
@@ -28,6 +29,12 @@ export default class ManagerDashboard extends Controller {
     private managerAddProjectDialog?: Dialog;
     private createMasterProjectDialog?: Dialog;
     private editMasterProjectDialog?: Dialog;
+    private employeeProfileDialog?: Dialog;
+    private addSkillDialog?: Dialog;
+    private editSkillDialog?: Dialog;
+    private certificationDialog?: Dialog;
+    private managerWorkAssignmentDialog?: Dialog;
+    private managerAssignWorkDialog?: Dialog;
     private managerProfileSnapshot: any = null;
 
     public onInit(): void {
@@ -226,6 +233,7 @@ export default class ManagerDashboard extends Controller {
             
             // Load all managers for the search dropdown
             await this.loadAllManagers();
+            await this.loadReportingManagers(currentManagerId);
 
             // Load manager's own editable profile for SSO-first onboarding.
             await this.loadSelfProfile(currentManagerId);
@@ -284,17 +292,22 @@ export default class ManagerDashboard extends Controller {
 
             const employee = employeeContexts[0].getObject();
             const profile = await this.getEmployeeProfile(managerId);
+            const reportingManagersModel = this.getView()?.getModel("reportingManagers") as JSONModel;
+            const reportingManagers = reportingManagersModel?.getProperty("/managers") || [];
+            const managerRecord = reportingManagers.find((item: any) => item.employeeId === employee.managerId);
             const selfProfile = {
                 employeeId: employee.employeeId || managerId,
                 name: employee.name || "",
                 email: employee.email || "",
-                team: employee.team || "",
-                subTeam: employee.subTeam || "",
+                managerId: employee.managerId || "",
+                managerLabel: managerRecord ? `${managerRecord.name} (${managerRecord.employeeId})` : (employee.managerId || ""),
+                team: "CIS",
+                subTeam: employee.subTeam || "Team 1",
                 experience: Number(employee.experience || 0),
                 location: profile?.location || employee.location || "",
                 tLevel: profile?.tLevel || employee.tLevel || "",
                 gradeLevel: profile?.gradeLevel || employee.gradeLevel || "",
-                professionalRole: profile?.role || "",
+                professionalRole: "Manager",
                 specialization: profile?.specialization || ""
             };
 
@@ -307,7 +320,7 @@ export default class ManagerDashboard extends Controller {
                 managerId: employee.employeeId,
                 name: employee.name,
                 role: employee.role || "Manager",
-                team: employee.team,
+                team: "CIS",
                 subTeam: employee.subTeam,
                 email: employee.email,
                 location: selfProfile.location,
@@ -329,6 +342,7 @@ export default class ManagerDashboard extends Controller {
     public onEditMyProfile(): void {
         const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
         this.managerProfileSnapshot = JSON.parse(JSON.stringify(selfProfileModel?.getData() || {}));
+        selfProfileModel?.setProperty("/team", "CIS");
 
         const managerProfileUiModel = this.getView()?.getModel("managerProfileUi") as JSONModel;
         managerProfileUiModel?.setProperty("/isEditing", true);
@@ -365,18 +379,17 @@ export default class ManagerDashboard extends Controller {
                 return;
             }
 
-            if (!profileData?.team?.trim()) {
-                MessageToast.show("Please enter your team");
+            const normalizedSubTeam = /^Team\s*[1-9]$/i.test(String(profileData?.subTeam || "").trim())
+                ? String(profileData.subTeam).trim().replace(/\s+/g, " ")
+                : "";
+
+            if (!normalizedSubTeam) {
+                MessageToast.show("Please select sub-team from Team 1 to Team 9");
                 return;
             }
 
-            if (!profileData?.subTeam?.trim()) {
-                MessageToast.show("Please enter your sub-team");
-                return;
-            }
-
-            if (!profileData?.professionalRole?.trim()) {
-                MessageToast.show("Please enter your professional role");
+            if (!profileData?.managerId?.trim()) {
+                MessageToast.show("Please select your reporting manager");
                 return;
             }
 
@@ -415,8 +428,9 @@ export default class ManagerDashboard extends Controller {
             const employeeContext = employeeContexts[0];
             employeeContext.setProperty("name", profileData.name.trim());
             employeeContext.setProperty("email", profileData.email.trim());
-            employeeContext.setProperty("team", profileData.team.trim());
-            employeeContext.setProperty("subTeam", profileData.subTeam.trim());
+            employeeContext.setProperty("team", "CIS");
+            employeeContext.setProperty("subTeam", normalizedSubTeam);
+            employeeContext.setProperty("managerId", String(profileData.managerId).trim());
             employeeContext.setProperty("experience", Number(profileData.experience || 0));
             employeeContext.setProperty("location", profileData.location.trim());
             employeeContext.setProperty("tLevel", profileData.tLevel);
@@ -428,7 +442,7 @@ export default class ManagerDashboard extends Controller {
 
             if (profileContexts.length > 0) {
                 const profileContext = profileContexts[0];
-                profileContext.setProperty("role", profileData.professionalRole.trim());
+                profileContext.setProperty("role", "Manager");
                 profileContext.setProperty("location", profileData.location.trim());
                 profileContext.setProperty("tLevel", profileData.tLevel);
                 profileContext.setProperty("gradeLevel", profileData.gradeLevel);
@@ -437,7 +451,7 @@ export default class ManagerDashboard extends Controller {
             } else {
                 profileBinding.create({
                     employeeId: managerId,
-                    role: profileData.professionalRole.trim(),
+                    role: "Manager",
                     location: profileData.location.trim(),
                     tLevel: profileData.tLevel,
                     gradeLevel: profileData.gradeLevel,
@@ -458,8 +472,8 @@ export default class ManagerDashboard extends Controller {
                 name: profileData.name.trim(),
                 role: "Manager",
                 email: profileData.email.trim(),
-                team: profileData.team.trim(),
-                subTeam: profileData.subTeam.trim(),
+                team: "CIS",
+                subTeam: normalizedSubTeam,
                 location: profileData.location.trim(),
                 tLevel: profileData.tLevel,
                 gradeLevel: profileData.gradeLevel,
@@ -477,6 +491,32 @@ export default class ManagerDashboard extends Controller {
         } catch (error) {
             console.error("❌ Error saving manager profile:", error);
             MessageToast.show("Error saving profile");
+        }
+    }
+
+    private async loadReportingManagers(currentManagerId: string): Promise<void> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Employees");
+            const roleFilter = new Filter({
+                filters: [
+                    new Filter("role", FilterOperator.EQ, "Manager"),
+                    new Filter("role", FilterOperator.EQ, "SeniorManager")
+                ],
+                and: false
+            });
+            listBinding.filter([roleFilter]);
+
+            const contexts = await listBinding.requestContexts(0, 200);
+            const managers = contexts
+                .map((context: any) => context.getObject())
+                .filter((manager: any) => manager?.employeeId && manager.employeeId !== currentManagerId)
+                .sort((a: any, b: any) => String(a.name || "").localeCompare(String(b.name || "")));
+
+            this.getView()?.setModel(new JSONModel({ managers }), "reportingManagers");
+        } catch (error) {
+            console.error("❌ Error loading reporting managers:", error);
+            this.getView()?.setModel(new JSONModel({ managers: [] }), "reportingManagers");
         }
     }
 
@@ -2167,16 +2207,21 @@ export default class ManagerDashboard extends Controller {
 
             console.log("✅ All employee data loaded:", { employeeData, profileData, skills, projects, currentProjects, initiatives, certifications });
 
+            const activeCurrentProjects = currentProjects.filter((cp: any) => cp.assignmentStatus !== "Completed");
+            const activeInitiatives = initiatives.filter((initiative: any) => initiative.status !== "Completed" && initiative.type !== "Evaluation");
+            const activeEvaluations = initiatives.filter((initiative: any) => initiative.status !== "Completed" && initiative.type === "Evaluation");
+
             // Merge all data
             const completeData = {
                 ...employeeData,
                 ...profileData,
                 skills: skills,
                 projects: projects,
-                currentProjects: currentProjects,
-                initiatives: initiatives,
+                currentProjects: activeCurrentProjects,
+                initiatives: activeInitiatives,
+                evaluations: activeEvaluations,
                 certifications: certifications,
-                assignments: currentProjects // Assignments are the current projects (includes all statuses)
+                assignments: currentProjects // Keep full assignment history including completed.
             };
 
             // Create model for employee details
@@ -2229,10 +2274,6 @@ export default class ManagerDashboard extends Controller {
             // Update projects count
             (this.byId("dialogTotalProjects") as any)?.setNumber(projects.length);
             (this.byId("dialogTotalProjects") as any)?.setUnit(projects.length === 1 ? "project" : "projects");
-
-            // Update certifications count (in Skills tab)
-            (this.byId("dialogTotalCertifications") as any)?.setNumber(certifications.length);
-            (this.byId("dialogTotalCertifications") as any)?.setUnit(certifications.length === 1 ? "certification" : "certifications");
 
             // Update certifications count (in Certifications tab)
             (this.byId("dialogTotalCertificationsTab") as any)?.setNumber(certifications.length);
@@ -2362,6 +2403,978 @@ export default class ManagerDashboard extends Controller {
         if (dialog) {
             dialog.close();
         }
+    }
+
+    private async openManagerWorkAssignmentDialog(defaultType: "Initiative" | "Evaluation"): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Select an employee first");
+            return;
+        }
+
+        if (!this.managerWorkAssignmentDialog) {
+            this.managerWorkAssignmentDialog = await Fragment.load({
+                name: "skillsphere.view.dialogs.ManagerWorkAssignmentDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.managerWorkAssignmentDialog);
+        }
+
+        const dialogModel = new JSONModel({
+            type: defaultType,
+            name: "",
+            description: "",
+            startDate: null,
+            endDate: null,
+            utilizationPercent: 100
+        });
+        this.getView()?.setModel(dialogModel, "managerWork");
+        this.managerWorkAssignmentDialog.open();
+    }
+
+    public async onManagerAddWorkAssignment(): Promise<void> {
+        await this.openManagerWorkAssignmentDialog("Initiative");
+    }
+
+    public async onManagerAddInitiative(): Promise<void> {
+        await this.openManagerWorkAssignmentDialog("Initiative");
+    }
+
+    public async onManagerAddEvaluation(): Promise<void> {
+        await this.openManagerWorkAssignmentDialog("Evaluation");
+    }
+
+    private async loadManagerWorkCatalog(type: "Initiative" | "Evaluation"): Promise<any[]> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Initiatives");
+            listBinding.filter([new Filter("type", FilterOperator.EQ, type)]);
+
+            const contexts = await listBinding.requestContexts(0, 1000);
+            const items = contexts.map((ctx: any) => ctx.getObject());
+
+            const deduped = new Map<string, any>();
+            for (const item of items) {
+                const key = `${item.type || type}::${String(item.initiativeName || "").trim().toLowerCase()}`;
+                if (!deduped.has(key)) {
+                    deduped.set(key, item);
+                }
+            }
+
+            return Array.from(deduped.values());
+        } catch (error) {
+            console.error("Error loading work catalog:", error);
+            return [];
+        }
+    }
+
+    private async openManagerAssignWorkDialog(type: "Initiative" | "Evaluation"): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Select an employee first");
+            return;
+        }
+
+        if (!this.managerAssignWorkDialog) {
+            this.managerAssignWorkDialog = await Fragment.load({
+                name: "skillsphere.view.dialogs.ManagerAssignWorkDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.managerAssignWorkDialog);
+        }
+
+        const catalogItems = await this.loadManagerWorkCatalog(type);
+        this.getView()?.setModel(new JSONModel({ items: catalogItems }), "managerWorkCatalog");
+
+        const assignModel = new JSONModel({
+            type,
+            selectedId: "",
+            name: "",
+            description: "",
+            startDate: null,
+            endDate: null,
+            utilizationPercent: 100
+        });
+        this.getView()?.setModel(assignModel, "managerAssignWork");
+        this.managerAssignWorkDialog.open();
+    }
+
+    public async onManagerAssignInitiative(): Promise<void> {
+        await this.openManagerAssignWorkDialog("Initiative");
+    }
+
+    public async onManagerAssignEvaluation(): Promise<void> {
+        await this.openManagerAssignWorkDialog("Evaluation");
+    }
+
+    public onManagerAssignWorkSelectionChange(event: Event): void {
+        const source = event.getSource() as any;
+        const selectedKey = source.getSelectedKey();
+        if (!selectedKey) return;
+
+        const catalogModel = this.getView()?.getModel("managerWorkCatalog") as JSONModel;
+        const items = catalogModel?.getProperty("/items") || [];
+        const selected = items.find((item: any) => item.initiativeId === selectedKey);
+        if (!selected) return;
+
+        const model = this.getView()?.getModel("managerAssignWork") as JSONModel;
+        model?.setProperty("/name", selected.initiativeName || "");
+        model?.setProperty("/description", selected.description || "");
+        model?.setProperty("/startDate", selected.startDate || null);
+        model?.setProperty("/endDate", selected.endDate || null);
+        model?.setProperty("/utilizationPercent", Number(selected.utilizationPercent) || 100);
+    }
+
+    public onCloseManagerAssignWork(): void {
+        this.managerAssignWorkDialog?.close();
+    }
+
+    public async onSaveManagerAssignWork(): Promise<void> {
+        const employeeId = this.currentDialogEmployeeId;
+        if (!employeeId) {
+            MessageToast.show("Employee not selected");
+            return;
+        }
+
+        const model = this.getView()?.getModel("managerAssignWork") as JSONModel;
+        const data = model?.getData() || {};
+
+        if (!data.name || !data.startDate || !data.endDate || !data.utilizationPercent) {
+            MessageToast.show("Please select and complete required fields");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Initiatives");
+
+            listBinding.create({
+                employeeId,
+                initiativeName: String(data.name).trim(),
+                description: String(data.description || "").trim(),
+                startDate: data.startDate,
+                endDate: data.endDate,
+                utilizationPercent: Number(data.utilizationPercent) || 0,
+                status: "Active",
+                type: data.type || "Initiative",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            });
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            this.managerAssignWorkDialog?.close();
+            await this.refreshCurrentDialogData();
+            MessageToast.show(`${data.type || "Work"} assigned from catalog`);
+        } catch (error) {
+            console.error("❌ Error assigning work from catalog:", error);
+            MessageToast.show("Error assigning selected work item");
+        }
+    }
+
+    public onCloseManagerWorkAssignment(): void {
+        this.managerWorkAssignmentDialog?.close();
+    }
+
+    public async onSaveManagerWorkAssignment(): Promise<void> {
+        const employeeId = this.currentDialogEmployeeId;
+        if (!employeeId) {
+            MessageToast.show("Employee not selected");
+            return;
+        }
+
+        const model = this.getView()?.getModel("managerWork") as JSONModel;
+        const data = model?.getData() || {};
+
+        if (!data.name || !data.startDate || !data.endDate || !data.utilizationPercent) {
+            MessageToast.show("Please fill all required fields");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Initiatives");
+
+            listBinding.create({
+                employeeId,
+                initiativeName: String(data.name).trim(),
+                description: String(data.description || "").trim(),
+                startDate: data.startDate,
+                endDate: data.endDate,
+                utilizationPercent: Number(data.utilizationPercent) || 0,
+                status: "Active",
+                type: data.type || "Initiative",
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            });
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            this.managerWorkAssignmentDialog?.close();
+            await this.refreshCurrentDialogData();
+            await this.refreshEmployeeAssignments(employeeId);
+            MessageToast.show(`${data.type || "Work"} assigned successfully`);
+        } catch (error) {
+            console.error("❌ Error saving manager work assignment:", error);
+            MessageToast.show("Error saving work assignment");
+        }
+    }
+
+    public async onManagerCompleteCurrentProject(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        const currentProject = bindingContext?.getObject();
+
+        if (!currentProject?.currentProjectId) {
+            MessageToast.show("Project not found");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/CurrentProjects");
+            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, currentProject.currentProjectId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length > 0) {
+                contexts[0].setProperty("assignmentStatus", "Completed");
+                contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+
+                if (this.currentDialogEmployeeId) {
+                    await this.refreshCurrentDialogData();
+                    await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
+                }
+                MessageToast.show("Project marked as completed");
+            }
+        } catch (error) {
+            console.error("❌ Error completing project:", error);
+            MessageToast.show("Error marking project as completed");
+        }
+    }
+
+    public async onManagerCompleteInitiative(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        const initiative = bindingContext?.getObject();
+
+        if (!initiative?.initiativeId) {
+            MessageToast.show("Initiative not found");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Initiatives");
+            listBinding.filter([new Filter("initiativeId", FilterOperator.EQ, initiative.initiativeId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length > 0) {
+                contexts[0].setProperty("status", "Completed");
+                contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+
+                if (this.currentDialogEmployeeId) {
+                    await this.refreshCurrentDialogData();
+                }
+                MessageToast.show("Initiative/Evaluation marked as completed");
+            }
+        } catch (error) {
+            console.error("❌ Error completing initiative:", error);
+            MessageToast.show("Error marking initiative/evaluation as completed");
+        }
+    }
+
+    public async onOpenAddEmployeeDialog(): Promise<void> {
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData() || {};
+        const defaultManagerId = this.currentManagerId || currentUser?.id || "";
+        const defaultManagerName = currentUser?.name || "Current Manager";
+        const managerTeam = String(currentUser?.team || "CIS").trim();
+        const managerSubTeam = String(currentUser?.subTeam || "Team 1").trim();
+
+        const normalizedSubTeam = /^Team\s*[1-9]$/i.test(managerSubTeam)
+            ? managerSubTeam.replace(/\s+/g, " ")
+            : "Team 1";
+
+        const editorModel = new JSONModel({
+            mode: "create",
+            employeeId: "",
+            name: "",
+            email: "",
+            businessRole: "Employee",
+            professionalRole: "Developer",
+            team: managerTeam || "CIS",
+            subTeam: normalizedSubTeam,
+            managerId: defaultManagerId,
+            managerLabel: `${defaultManagerName} (${defaultManagerId})`,
+            experience: 0,
+            location: "",
+            tLevel: "",
+            gradeLevel: "",
+            specialization: "General"
+        });
+        this.getView()?.setModel(editorModel, "employeeEditor");
+        this.getView()?.setModel(new JSONModel({ skills: [] }), "employeeEditorSkills");
+        this.getView()?.setModel(new JSONModel({ certifications: [] }), "employeeEditorCertifications");
+
+        if (!this.employeeProfileDialog) {
+            this.employeeProfileDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.ManagerEmployeeProfileDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.employeeProfileDialog);
+        }
+
+        this.employeeProfileDialog.open();
+    }
+
+    public async onEditEmployeeFromDialog(): Promise<void> {
+        const detailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+        const details = detailsModel?.getData() || {};
+        const employee = this.findTeamEmployeeById(details.employeeId || this.currentDialogEmployeeId || "");
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData() || {};
+        const effectiveManagerId = details.managerId || this.currentManagerId || "";
+        const effectiveManagerName = currentUser?.name || "Current Manager";
+
+        const editorModel = new JSONModel({
+            mode: "edit",
+            employeeId: details.employeeId || this.currentDialogEmployeeId,
+            name: details.name || "",
+            email: details.email || "",
+            businessRole: employee?.role || "Employee",
+            professionalRole: details.role || "Developer",
+            team: details.team || "",
+            subTeam: details.subTeam || "",
+            managerId: effectiveManagerId,
+            managerLabel: `${effectiveManagerName} (${effectiveManagerId})`,
+            experience: Number(details.experience || 0),
+            location: details.location || "",
+            tLevel: details.tLevel || "",
+            gradeLevel: details.gradeLevel || "",
+            specialization: details.specialization || "General"
+        });
+        this.getView()?.setModel(editorModel, "employeeEditor");
+        this.getView()?.setModel(new JSONModel({ skills: details.skills || [] }), "employeeEditorSkills");
+        this.getView()?.setModel(new JSONModel({ certifications: details.certifications || [] }), "employeeEditorCertifications");
+
+        if (!this.employeeProfileDialog) {
+            this.employeeProfileDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.ManagerEmployeeProfileDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.employeeProfileDialog);
+        }
+
+        this.employeeProfileDialog.open();
+    }
+
+    public onCloseEmployeeProfileDialog(): void {
+        this.employeeProfileDialog?.close();
+    }
+
+    public async onSaveEmployeeProfileFromManager(): Promise<void> {
+        try {
+            const editorModel = this.getView()?.getModel("employeeEditor") as JSONModel;
+            const data = editorModel?.getData() || {};
+            const mode = data.mode || "create";
+            const employeeId = String(data.employeeId || "").trim().toUpperCase();
+            const managerId = mode === "create"
+                ? String(this.currentManagerId || "").trim().toUpperCase()
+                : String(data.managerId || this.currentManagerId || "").trim().toUpperCase();
+            const managerSubTeam = String(data.subTeam || "").trim();
+            const normalizedSubTeam = /^Team\s*[1-9]$/i.test(managerSubTeam)
+                ? managerSubTeam.replace(/\s+/g, " ")
+                : "Team 1";
+
+            if (mode === "create" && !managerId) {
+                MessageToast.show("Current manager context not found. Please re-login and try again.");
+                return;
+            }
+
+            if (!employeeId || !data.name || !data.email || !data.team || !normalizedSubTeam || !data.location || !data.tLevel || !data.gradeLevel) {
+                MessageToast.show("Please fill all required fields");
+                return;
+            }
+
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const employeesBinding = oDataModel.bindList("/Employees");
+            employeesBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const employeeContexts = await employeesBinding.requestContexts(0, 1);
+
+            if (mode === "create" && employeeContexts.length > 0) {
+                MessageToast.show(`Employee ${employeeId} already exists`);
+                return;
+            }
+
+            if (mode === "create") {
+                employeesBinding.create({
+                    employeeId,
+                    name: data.name.trim(),
+                    role: "Employee",
+                    team: data.team.trim(),
+                    subTeam: normalizedSubTeam,
+                    managerId,
+                    email: data.email.trim(),
+                    experience: Number(data.experience || 0),
+                    totalSkills: 0,
+                    totalProjects: 0,
+                    location: data.location.trim(),
+                    tLevel: data.tLevel,
+                    gradeLevel: data.gradeLevel
+                });
+            } else if (employeeContexts.length > 0) {
+                const employeeContext = employeeContexts[0];
+                employeeContext.setProperty("name", data.name.trim());
+                employeeContext.setProperty("role", data.businessRole || "Employee");
+                employeeContext.setProperty("team", data.team.trim());
+                employeeContext.setProperty("subTeam", normalizedSubTeam);
+                employeeContext.setProperty("managerId", managerId);
+                employeeContext.setProperty("email", data.email.trim());
+                employeeContext.setProperty("experience", Number(data.experience || 0));
+                employeeContext.setProperty("location", data.location.trim());
+                employeeContext.setProperty("tLevel", data.tLevel);
+                employeeContext.setProperty("gradeLevel", data.gradeLevel);
+            } else {
+                MessageToast.show("Employee not found for update");
+                return;
+            }
+
+            const profileBinding = oDataModel.bindList("/Profiles");
+            profileBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const profileContexts = await profileBinding.requestContexts(0, 1);
+            const lastUpdated = new Date().toISOString();
+
+            if (profileContexts.length > 0) {
+                const profileContext = profileContexts[0];
+                profileContext.setProperty("specialization", String(data.specialization || "General").trim());
+                profileContext.setProperty("role", data.professionalRole || "Developer");
+                profileContext.setProperty("location", data.location.trim());
+                profileContext.setProperty("tLevel", data.tLevel);
+                profileContext.setProperty("gradeLevel", data.gradeLevel);
+                profileContext.setProperty("lastUpdated", lastUpdated);
+            } else {
+                profileBinding.create({
+                    employeeId,
+                    specialization: String(data.specialization || "General").trim(),
+                    role: data.professionalRole || "Developer",
+                    location: data.location.trim(),
+                    tLevel: data.tLevel,
+                    gradeLevel: data.gradeLevel,
+                    lastUpdated
+                });
+            }
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await this.loadManagerData();
+
+            this.currentDialogEmployeeId = employeeId;
+
+            if (mode === "create") {
+                // Keep the dialog open and move to edit mode so managers can add skills/certifications immediately.
+                editorModel.setProperty("/mode", "edit");
+                await this.refreshEmployeeEditorCollections(employeeId);
+                MessageToast.show("Employee added successfully. You can now add skills and certifications.");
+                return;
+            }
+
+            this.employeeProfileDialog?.close();
+            await this.refreshCurrentDialogData();
+            await this.refreshEmployeeEditorCollections(employeeId);
+            MessageToast.show("Employee updated successfully");
+        } catch (error) {
+            console.error("❌ Error saving employee from manager dialog:", error);
+            MessageToast.show("Error saving employee");
+        }
+    }
+
+    private async refreshCurrentDialogData(): Promise<void> {
+        if (!this.currentDialogEmployeeId) return;
+        const employee = this.findTeamEmployeeById(this.currentDialogEmployeeId) || {
+            employeeId: this.currentDialogEmployeeId,
+            working_on_project: false
+        };
+        await this.openEmployeeDetailsDialog(employee, false);
+    }
+
+    private async refreshEmployeeEditorCollections(employeeId: string): Promise<void> {
+        const [skills, certifications] = await Promise.all([
+            this.getEmployeeSkills(employeeId),
+            this.getCertifications(employeeId)
+        ]);
+
+        this.getView()?.setModel(new JSONModel({ skills: skills || [] }), "employeeEditorSkills");
+        this.getView()?.setModel(new JSONModel({ certifications: certifications || [] }), "employeeEditorCertifications");
+    }
+
+    private getEventObjectFromModels(event: Event, modelNames: string[]): any {
+        const source = event.getSource() as any;
+        for (const modelName of modelNames) {
+            const context = source.getBindingContext(modelName);
+            if (context) return context.getObject();
+        }
+        return null;
+    }
+
+    private findTeamEmployeeById(employeeId: string): any | null {
+        const teamModel = this.getView()?.getModel("managerEmployees") as JSONModel;
+        const employees = teamModel?.getProperty("/employees") || [];
+        return employees.find((emp: any) => emp.employeeId === employeeId) || null;
+    }
+
+    private getSkillCatalogByCategory(category: string): string[] {
+        const catalog: Record<string, string[]> = {
+            Frontend: ["SAPUI5", "Fiori Elements", "JavaScript", "TypeScript", "React", "HTML5", "CSS3"],
+            Backend: ["ABAP", "Java", "Node.js", "Python", "CAP (Cloud Application Programming)"],
+            FullStack: ["SAP CAP", "MEAN Stack", "MERN Stack", "Microservices Architecture"],
+            Database: ["SAP HANA", "HANA Cloud", "SQL", "PostgreSQL", "MongoDB"],
+            Cloud: ["SAP BTP (Business Technology Platform)", "Cloud Foundry", "Kyma Runtime", "Kubernetes", "Docker"],
+            Integration: ["SAP CPI (Cloud Platform Integration)", "SAP Integration Suite", "REST API", "SOAP", "OData"],
+            Analytics: ["SAP Analytics Cloud (SAC)", "Power BI", "Tableau", "SAP BW/4HANA"],
+            Mobile: ["SAP Mobile Services", "iOS Development", "Android Development", "Flutter"],
+            DevOps: ["CI/CD", "Jenkins", "Git", "GitHub Actions", "Terraform"],
+            Testing: ["SAP Test Automation", "Selenium", "Jest", "QUnit", "Postman"],
+            Security: ["SAP Security", "OAuth", "SAML", "Identity & Access Management"],
+            Procurement: ["SAP Ariba", "Ariba Procurement", "Supplier Management"]
+        };
+        return catalog[category] || [];
+    }
+
+    public async onManagerAddSkill(): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Select an employee first");
+            return;
+        }
+
+        if (this.addSkillDialog) {
+            this.addSkillDialog.destroy();
+            this.addSkillDialog = undefined;
+        }
+
+        this.addSkillDialog = await Fragment.load({
+            name: "skillsphere.view.dialogs.AddSkillDialog",
+            controller: this
+        }) as Dialog;
+        this.getView()?.addDependent(this.addSkillDialog);
+
+        this.getView()?.setModel(new JSONModel({
+            skillName: "",
+            category: "",
+            proficiency: "",
+            yearsExperience: 0,
+            certificationStatus: ""
+        }), "newSkill");
+        this.getView()?.setModel(new JSONModel({ skills: [] }), "skillCatalog");
+
+        this.addSkillDialog.open();
+    }
+
+    public onCloseAddSkillDialog(): void {
+        if (!this.addSkillDialog) return;
+        this.addSkillDialog.close();
+        this.addSkillDialog.attachAfterClose(() => {
+            this.addSkillDialog?.destroy();
+            this.addSkillDialog = undefined;
+        });
+    }
+
+    public onSkillCategoryChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedCategory = select.getSelectedKey();
+        const categorySkills = this.getSkillCatalogByCategory(selectedCategory);
+        const skillsWithPlaceholder = [{ name: "" }, ...categorySkills.map(name => ({ name }))];
+
+        const catalogModel = this.getView()?.getModel("skillCatalog") as JSONModel;
+        catalogModel?.setData({ skills: skillsWithPlaceholder });
+
+        const newSkillModel = this.getView()?.getModel("newSkill") as JSONModel;
+        if (newSkillModel) {
+            const data = newSkillModel.getData();
+            data.category = selectedCategory;
+            data.skillName = "";
+            newSkillModel.setData(data);
+        }
+    }
+
+    public onProficiencyChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedKey = select.getSelectedKey();
+        const newSkillModel = this.getView()?.getModel("newSkill") as JSONModel;
+        if (!newSkillModel) return;
+        const data = newSkillModel.getData();
+        data.proficiency = selectedKey;
+        newSkillModel.setData(data);
+    }
+
+    public onCertificationChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedKey = select.getSelectedKey();
+        const newSkillModel = this.getView()?.getModel("newSkill") as JSONModel;
+        if (!newSkillModel) return;
+        const data = newSkillModel.getData();
+        data.certificationStatus = selectedKey;
+        newSkillModel.setData(data);
+    }
+
+    public async onSaveSkill(): Promise<void> {
+        const employeeId = this.currentDialogEmployeeId;
+        if (!employeeId) {
+            MessageToast.show("Employee ID not found");
+            return;
+        }
+
+        const newSkillModel = this.getView()?.getModel("newSkill") as JSONModel;
+        const formData = newSkillModel?.getData();
+
+        if (!formData?.skillName || !formData?.category || !formData?.proficiency) {
+            MessageToast.show("Please fill all required skill fields");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Skills");
+            listBinding.create({
+                employeeId,
+                skillName: formData.skillName,
+                category: formData.category,
+                proficiencyLevel: formData.proficiency,
+                yearsExperience: parseInt(formData.yearsExperience) || 0,
+                certificationStatus: formData.certificationStatus || "None"
+            });
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await this.refreshCurrentDialogData();
+            await this.refreshEmployeeEditorCollections(employeeId);
+            this.onCloseAddSkillDialog();
+            MessageToast.show("Skill added successfully");
+        } catch (error) {
+            console.error("❌ Error adding skill from manager dialog:", error);
+            MessageToast.show("Error adding skill");
+        }
+    }
+
+    public onEditSkillCategoryChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedCategory = select.getSelectedKey();
+        const categorySkills = this.getSkillCatalogByCategory(selectedCategory);
+        const skillsWithPlaceholder = [{ name: "" }, ...categorySkills.map(name => ({ name }))];
+
+        const catalogModel = this.getView()?.getModel("editSkillCatalog") as JSONModel;
+        catalogModel?.setData({ skills: skillsWithPlaceholder });
+
+        const editSkillModel = this.getView()?.getModel("editSkill") as JSONModel;
+        if (editSkillModel) {
+            const data = editSkillModel.getData();
+            data.category = selectedCategory;
+            data.skillName = "";
+            editSkillModel.setData(data);
+        }
+    }
+
+    public onEditProficiencyChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedKey = select.getSelectedKey();
+        const editSkillModel = this.getView()?.getModel("editSkill") as JSONModel;
+        if (!editSkillModel) return;
+        const data = editSkillModel.getData();
+        data.proficiency = selectedKey;
+        editSkillModel.setData(data);
+    }
+
+    public onEditCertificationChange(event: Event): void {
+        const select = event.getSource() as any;
+        const selectedKey = select.getSelectedKey();
+        const editSkillModel = this.getView()?.getModel("editSkill") as JSONModel;
+        if (!editSkillModel) return;
+        const data = editSkillModel.getData();
+        data.certificationStatus = selectedKey;
+        editSkillModel.setData(data);
+    }
+
+    public async onManagerEditSkill(event: Event): Promise<void> {
+        const skillData = this.getEventObjectFromModels(event, ["employeeDetails", "employeeEditorSkills"]);
+        if (!skillData) return;
+
+        if (this.editSkillDialog) {
+            this.editSkillDialog.destroy();
+            this.editSkillDialog = undefined;
+        }
+
+        this.getView()?.setModel(new JSONModel({
+            ...skillData,
+            proficiency: skillData.proficiencyLevel
+        }), "editSkill");
+        this.getView()?.setModel(new JSONModel({ skills: [] }), "editSkillCatalog");
+
+        this.editSkillDialog = await Fragment.load({
+            name: "skillsphere.view.dialogs.EditSkillDialog",
+            controller: this
+        }) as Dialog;
+        this.getView()?.addDependent(this.editSkillDialog);
+
+        if (skillData.category) {
+            const skillsWithPlaceholder = [{ name: "" }, ...this.getSkillCatalogByCategory(skillData.category).map(name => ({ name }))];
+            const catalogModel = this.getView()?.getModel("editSkillCatalog") as JSONModel;
+            catalogModel?.setData({ skills: skillsWithPlaceholder });
+        }
+
+        this.editSkillDialog.open();
+    }
+
+    public onCloseEditSkillDialog(): void {
+        if (!this.editSkillDialog) return;
+        this.editSkillDialog.close();
+        this.editSkillDialog.attachAfterClose(() => {
+            this.editSkillDialog?.destroy();
+            this.editSkillDialog = undefined;
+        });
+    }
+
+    public async onSaveEditedSkill(): Promise<void> {
+        const editSkillModel = this.getView()?.getModel("editSkill") as JSONModel;
+        const skillData = editSkillModel?.getData() || {};
+        const skillId = skillData.skillId || skillData.id;
+
+        if (!skillId || !skillData.skillName || !skillData.proficiency) {
+            MessageToast.show("Please fill all required skill fields");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Skills");
+            listBinding.filter([new Filter("skillId", FilterOperator.EQ, skillId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length === 0) {
+                MessageToast.show("Skill not found");
+                return;
+            }
+
+            const context = contexts[0];
+            context.setProperty("skillName", skillData.skillName);
+            context.setProperty("category", skillData.category);
+            context.setProperty("proficiencyLevel", skillData.proficiency);
+            context.setProperty("yearsExperience", skillData.yearsExperience || 0);
+            context.setProperty("certificationStatus", skillData.certificationStatus || "None");
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await this.refreshCurrentDialogData();
+            if (this.currentDialogEmployeeId) {
+                await this.refreshEmployeeEditorCollections(this.currentDialogEmployeeId);
+            }
+            this.onCloseEditSkillDialog();
+            MessageToast.show("Skill updated successfully");
+        } catch (error) {
+            console.error("❌ Error updating skill:", error);
+            MessageToast.show("Error updating skill");
+        }
+    }
+
+    public async onManagerDeleteSkill(event: Event): Promise<void> {
+        const skillData = this.getEventObjectFromModels(event, ["employeeDetails", "employeeEditorSkills"]);
+        const skillId = skillData?.skillId || skillData?.id;
+
+        if (!skillId) {
+            MessageToast.show("Skill not found");
+            return;
+        }
+
+        const confirmed = await new Promise<boolean>((resolve) => {
+            MessageBox.confirm("Delete this skill?", {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                onClose: (action) => resolve(action === MessageBox.Action.OK)
+            });
+        });
+
+        if (!confirmed) return;
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Skills");
+            listBinding.filter([new Filter("skillId", FilterOperator.EQ, skillId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length === 0) {
+                MessageToast.show("Skill not found");
+                return;
+            }
+
+            contexts[0].delete();
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await this.refreshCurrentDialogData();
+            if (this.currentDialogEmployeeId) {
+                await this.refreshEmployeeEditorCollections(this.currentDialogEmployeeId);
+            }
+            MessageToast.show("Skill deleted successfully");
+        } catch (error) {
+            console.error("❌ Error deleting skill:", error);
+            MessageToast.show("Error deleting skill");
+        }
+    }
+
+    public async onManagerAddCertification(): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Select an employee first");
+            return;
+        }
+
+        if (!this.certificationDialog) {
+            this.certificationDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.CertificationDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.certificationDialog);
+        }
+
+        this.getView()?.setModel(new JSONModel({
+            certificationId: null,
+            name: "",
+            code: "",
+            dateOfCompletion: "",
+            description: "",
+            level: "Associate"
+        }), "certificationDialog");
+
+        this.certificationDialog.open();
+    }
+
+    public async onManagerEditCertification(event: Event): Promise<void> {
+        const certification = this.getEventObjectFromModels(event, ["employeeDetails", "employeeEditorCertifications"]);
+        if (!certification) return;
+
+        if (!this.certificationDialog) {
+            this.certificationDialog = await Fragment.load({
+                id: this.getView()?.getId(),
+                name: "skillsphere.view.dialogs.CertificationDialog",
+                controller: this
+            }) as Dialog;
+            this.getView()?.addDependent(this.certificationDialog);
+        }
+
+        this.getView()?.setModel(new JSONModel(certification), "certificationDialog");
+        this.certificationDialog.open();
+    }
+
+    public async onSaveCertification(): Promise<void> {
+        const dialogModel = this.getView()?.getModel("certificationDialog") as JSONModel;
+        const data = dialogModel?.getData() || {};
+        const employeeId = this.currentDialogEmployeeId;
+
+        if (!employeeId) {
+            MessageToast.show("Employee ID not found");
+            return;
+        }
+
+        if (!data.name || !data.code || !data.dateOfCompletion || !data.level) {
+            MessageToast.show("Please fill all required certification fields");
+            return;
+        }
+
+        const convertToISODate = (dateString: string): string | null => {
+            if (!dateString) return null;
+            const date = new Date(dateString);
+            if (Number.isNaN(date.getTime())) return null;
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, "0");
+            const day = String(date.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        };
+
+        const dateOfCompletionISO = convertToISODate(data.dateOfCompletion);
+        if (!dateOfCompletionISO) {
+            MessageToast.show("Invalid date");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Certifications");
+
+            if (data.certificationId) {
+                listBinding.filter([new Filter("certificationId", FilterOperator.EQ, data.certificationId)]);
+                const contexts = await listBinding.requestContexts(0, 1);
+                if (contexts.length === 0) {
+                    MessageToast.show("Certification not found");
+                    return;
+                }
+
+                const ctx = contexts[0];
+                ctx.setProperty("name", data.name);
+                ctx.setProperty("code", data.code);
+                ctx.setProperty("dateOfCompletion", dateOfCompletionISO);
+                ctx.setProperty("description", data.description || "");
+                ctx.setProperty("level", data.level);
+                ctx.setProperty("lastUpdated", new Date().toISOString());
+            } else {
+                listBinding.create({
+                    employeeId,
+                    name: data.name,
+                    code: data.code,
+                    dateOfCompletion: dateOfCompletionISO,
+                    description: data.description || "",
+                    level: data.level,
+                    createdAt: new Date().toISOString(),
+                    lastUpdated: new Date().toISOString()
+                });
+            }
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            this.certificationDialog?.close();
+            await this.refreshCurrentDialogData();
+            await this.refreshEmployeeEditorCollections(employeeId);
+            MessageToast.show(data.certificationId ? "Certification updated successfully" : "Certification added successfully");
+        } catch (error) {
+            console.error("❌ Error saving certification:", error);
+            MessageToast.show("Error saving certification");
+        }
+    }
+
+    public async onManagerDeleteCertification(event: Event): Promise<void> {
+        const certification = this.getEventObjectFromModels(event, ["employeeDetails", "employeeEditorCertifications"]);
+        const certificationId = certification?.certificationId;
+
+        if (!certificationId) {
+            MessageToast.show("Certification not found");
+            return;
+        }
+
+        const confirmed = await new Promise<boolean>((resolve) => {
+            MessageBox.confirm("Delete this certification?", {
+                actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
+                onClose: (action) => resolve(action === MessageBox.Action.OK)
+            });
+        });
+
+        if (!confirmed) return;
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const listBinding = oDataModel.bindList("/Certifications");
+            listBinding.filter([new Filter("certificationId", FilterOperator.EQ, certificationId)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length === 0) {
+                MessageToast.show("Certification not found");
+                return;
+            }
+
+            contexts[0].delete();
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await this.refreshCurrentDialogData();
+            if (this.currentDialogEmployeeId) {
+                await this.refreshEmployeeEditorCollections(this.currentDialogEmployeeId);
+            }
+            MessageToast.show("Certification deleted successfully");
+        } catch (error) {
+            console.error("❌ Error deleting certification:", error);
+            MessageToast.show("Error deleting certification");
+        }
+    }
+
+    public onCloseCertificationDialog(): void {
+        this.certificationDialog?.close();
     }
 
     /**
@@ -2521,10 +3534,20 @@ export default class ManagerDashboard extends Controller {
         const stateMap: { [key: string]: string } = {
             "Accepted": "Success",
             "Self-Assigned": "Success",
+            "Assigned": "Success",
+            "Completed": "Information",
             "Pending": "Warning",
             "Rejected": "Error"
         };
         return stateMap[status] || "None";
+    }
+
+    public formatAssignmentStatusLabel(status: string): string {
+        if (!status) return "Assigned";
+        if (status === "Pending" || status === "Accepted" || status === "Rejected") {
+            return "Assigned";
+        }
+        return status;
     }
 
     // ==================== AI ASSISTANT METHODS ====================
@@ -3446,7 +4469,7 @@ private initializeAIChat(): void {
                 endDate: endDateISO,
                 utilizationPercent: data.utilizationPercent || 100,
                 description: data.description || "",
-                assignmentStatus: "Accepted", // Directly assigned by manager
+                assignmentStatus: "Assigned",
                 assignedBy: this.currentManagerId,
                 isEvaluation: false,
                 technology: data.technology || "",
@@ -3477,7 +4500,7 @@ private initializeAIChat(): void {
 
     // ==================== ASSIGN PROJECT TO EMPLOYEE ====================
 
-    public async onAssignProjectToEmployee(employeeId: string, projectId: string): Promise<void> {
+    public async onAssignProjectToEmployee(employeeId: string, projectId: string, role: string, utilizationPercent: number): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             
@@ -3493,20 +4516,20 @@ private initializeAIChat(): void {
             
             const project = projectContexts[0].getObject();
             
-            // Create assignment in CurrentProjects with Pending status
+            // Manager assignment is final and immediately active for the employee.
             const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
             currentProjectsBinding.create({
                 employeeId: employeeId,
                 type: "Project",
                 projectName: project.projectName,
-                role: "", // Employee will set this when accepting
+                role: role || "Team Member",
                 projectManager: project.projectManager || "",
                 region: project.region || "",
                 startDate: project.startDate,
                 endDate: project.endDate,
-                utilizationPercent: 100, // Default, employee can change
+                utilizationPercent: utilizationPercent,
                 description: project.description || "",
-                assignmentStatus: "Pending",
+                assignmentStatus: "Assigned",
                 assignedBy: this.currentManagerId,
                 isEvaluation: false,
                 createdAt: new Date().toISOString(),
@@ -3516,7 +4539,7 @@ private initializeAIChat(): void {
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            MessageToast.show(`Project "${project.projectName}" assigned to employee. Status: Pending acceptance.`);
+            MessageToast.show(`Project "${project.projectName}" assigned successfully.`);
             
             // Refresh Gantt Chart and all visualizations
             await this.loadVisualizationData();
@@ -3529,6 +4552,8 @@ private initializeAIChat(): void {
     // Manager assigns project from UI button in employee details dialog
     public async onAssignProject(): Promise<void> {
         const comboBox = this.byId("assignProjectComboBox") as any;
+        const roleComboBox = this.byId("assignProjectRoleCombo") as any;
+        const allocationInput = this.byId("assignProjectAllocationInput") as any;
         if (!comboBox) {
             MessageToast.show("Project selection not found");
             return;
@@ -3544,12 +4569,18 @@ private initializeAIChat(): void {
             MessageToast.show("Employee information not found");
             return;
         }
+
+        const selectedRole = roleComboBox?.getSelectedKey() || "Team Member";
+        const allocationValue = Number(allocationInput?.getValue?.() ?? 100);
+        const utilizationPercent = Math.max(1, Math.min(100, Math.round(allocationValue)));
         
         // Call the assignment method
-        await this.onAssignProjectToEmployee(this.currentDialogEmployeeId, selectedKey);
+        await this.onAssignProjectToEmployee(this.currentDialogEmployeeId, selectedKey, selectedRole, utilizationPercent);
         
         // Clear the selection
         comboBox.setSelectedKey("");
+        roleComboBox?.setSelectedKey("Team Member");
+        allocationInput?.setValue(100);
         
         // Refresh the assignments table
         await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);

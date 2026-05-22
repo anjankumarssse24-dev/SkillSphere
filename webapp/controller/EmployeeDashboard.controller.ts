@@ -356,7 +356,7 @@ export default class EmployeeDashboard extends Controller {
                     startDate: this.formatDate(obj.startDate),
                     endDate: this.formatDate(obj.endDate),
                     utilizationPercent: obj.utilizationPercent,
-                    assignmentStatus: "Accepted",
+                    assignmentStatus: "Assigned",
                     description: obj.description,
                     _source: "Initiatives",
                     _initiativeId: obj.initiativeId
@@ -724,6 +724,21 @@ export default class EmployeeDashboard extends Controller {
         }
         
         return `${utilizationPercent}%`;
+    }
+
+    public formatAssignmentStatusState(status: string): string {
+        const normalized = this.formatAssignmentStatusLabel(status);
+        if (normalized === "Completed") return "Information";
+        if (normalized === "Assigned" || normalized === "Self-Assigned") return "Success";
+        return "None";
+    }
+
+    public formatAssignmentStatusLabel(status: string): string {
+        if (!status) return "Assigned";
+        if (status === "Pending" || status === "Accepted" || status === "Rejected") {
+            return "Assigned";
+        }
+        return status;
     }
 
     public onLogout(): void {
@@ -2055,9 +2070,16 @@ export default class EmployeeDashboard extends Controller {
         }
     }
 
+    private showManagerOnlyAssignmentMessage(): void {
+        MessageToast.show("Work assignments can only be created by your manager.");
+    }
+
     // ==================== Current Project Utilization Methods ====================
     
     public async onMarkCurrentProject(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        return;
+
         if (!this.currentProjectDialog) {
             this.currentProjectDialog = await Fragment.load({
                 id: this.getView()?.getId(),
@@ -2156,6 +2178,12 @@ export default class EmployeeDashboard extends Controller {
         const dialogModel = this.getView()?.getModel("currentProjectDialog") as JSONModel;
         const data = dialogModel.getData();
         const employeeId = this.currentEmployeeId;
+
+        if (!data?.currentProjectId) {
+            this.showManagerOnlyAssignmentMessage();
+            this.currentProjectDialog?.close();
+            return;
+        }
 
         // Validation
         if (!data.projectName || !data.role || !data.projectManager || !data.startDate || !data.endDate || !data.utilizationPercent || data.utilizationPercent <= 0) {
@@ -2364,6 +2392,9 @@ export default class EmployeeDashboard extends Controller {
     private unifiedWorkDialog?: Dialog;
 
     public async onOpenUnifiedWork(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        return;
+
         if (!this.unifiedWorkDialog) {
             this.unifiedWorkDialog = await Fragment.load({
                 id: this.getView()?.getId(),
@@ -2424,6 +2455,10 @@ export default class EmployeeDashboard extends Controller {
     }
 
     public async onSaveUnifiedWork(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        this.unifiedWorkDialog?.close();
+        return;
+
         const dialogModel = this.getView()?.getModel("unifiedWork") as JSONModel;
         const data = dialogModel.getData();
         const employeeId = this.currentEmployeeId;
@@ -2513,65 +2548,19 @@ export default class EmployeeDashboard extends Controller {
         this.unifiedWorkDialog?.close();
     }
 
-    public async onAcceptAssignment(event: Event): Promise<void> {
-        const source = event.getSource() as any;
-        const bindingContext = source.getBindingContext("currentProjects");
-        const assignment = bindingContext?.getObject();
-
-        try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CurrentProjects");
-            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, assignment.currentProjectId)]);
-            
-            const contexts = await listBinding.requestContexts(0, 1);
-            if (contexts.length > 0) {
-                contexts[0].setProperty("assignmentStatus", "Accepted");
-                contexts[0].setProperty("lastUpdated", new Date().toISOString());
-                
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 300));
-                listBinding.refresh();
-                
-                MessageToast.show("Assignment accepted successfully");
-                const employeeId = this.currentEmployeeId;
-                if (employeeId) {
-                    await this.loadCurrentProjects(employeeId);
-                }
-            }
-        } catch (error) {
-            console.error("❌ Error accepting assignment:", error);
-            MessageToast.show("Error accepting assignment");
+    public async onAcceptAssignment(_event: Event): Promise<void> {
+        MessageToast.show("Manager assignments are final and do not require acceptance.");
+        const employeeId = this.currentEmployeeId;
+        if (employeeId) {
+            await this.loadCurrentProjects(employeeId);
         }
     }
 
-    public async onRejectAssignment(event: Event): Promise<void> {
-        const source = event.getSource() as any;
-        const bindingContext = source.getBindingContext("currentProjects");
-        const assignment = bindingContext?.getObject();
-
-        try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CurrentProjects");
-            listBinding.filter([new Filter("currentProjectId", FilterOperator.EQ, assignment.currentProjectId)]);
-            
-            const contexts = await listBinding.requestContexts(0, 1);
-            if (contexts.length > 0) {
-                contexts[0].setProperty("assignmentStatus", "Rejected");
-                contexts[0].setProperty("lastUpdated", new Date().toISOString());
-                
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 300));
-                listBinding.refresh();
-                
-                MessageToast.show("Assignment rejected");
-                const employeeId = this.currentEmployeeId;
-                if (employeeId) {
-                    await this.loadCurrentProjects(employeeId);
-                }
-            }
-        } catch (error) {
-            console.error("❌ Error rejecting assignment:", error);
-            MessageToast.show("Error rejecting assignment");
+    public async onRejectAssignment(_event: Event): Promise<void> {
+        MessageToast.show("Manager assignments are final and cannot be rejected.");
+        const employeeId = this.currentEmployeeId;
+        if (employeeId) {
+            await this.loadCurrentProjects(employeeId);
         }
     }
 
@@ -2580,6 +2569,9 @@ export default class EmployeeDashboard extends Controller {
     private workAssignmentDialog?: Dialog;
 
     public async onOpenWorkAssignment(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        return;
+
         if (!this.workAssignmentDialog) {
             this.workAssignmentDialog = await Fragment.load({
                 id: this.getView()?.getId(),
@@ -2650,6 +2642,10 @@ export default class EmployeeDashboard extends Controller {
     }
 
     public async onSaveWorkAssignment(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        this.workAssignmentDialog?.close();
+        return;
+
         const dialogModel = this.getView()?.getModel("workAssignment") as JSONModel;
         const data = dialogModel.getData();
         const employeeId = this.currentEmployeeId;
@@ -2851,6 +2847,9 @@ export default class EmployeeDashboard extends Controller {
     // ==================== CAIA Utilization Methods ====================
     
     public async onMarkCAIA(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        return;
+
         if (!this.caiaDialog) {
             this.caiaDialog = await Fragment.load({
                 id: this.getView()?.getId(),
@@ -2876,6 +2875,12 @@ export default class EmployeeDashboard extends Controller {
         const dialogModel = this.getView()?.getModel("caiaDialog") as JSONModel;
         const data = dialogModel.getData();
         const employeeId = this.currentEmployeeId;
+
+        if (!data?.caiaId) {
+            this.showManagerOnlyAssignmentMessage();
+            this.caiaDialog?.close();
+            return;
+        }
 
         // Validation
         if (!data.taskName || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {
@@ -3022,6 +3027,9 @@ export default class EmployeeDashboard extends Controller {
     // ==================== POC Utilization Methods ====================
     
     public async onMarkPOC(): Promise<void> {
+        this.showManagerOnlyAssignmentMessage();
+        return;
+
         if (!this.pocDialog) {
             this.pocDialog = await Fragment.load({
                 id: this.getView()?.getId(),
@@ -3047,6 +3055,12 @@ export default class EmployeeDashboard extends Controller {
         const dialogModel = this.getView()?.getModel("pocDialog") as JSONModel;
         const data = dialogModel.getData();
         const employeeId = this.currentEmployeeId;
+
+        if (!data?.pocId) {
+            this.showManagerOnlyAssignmentMessage();
+            this.pocDialog?.close();
+            return;
+        }
 
         // Validation
         if (!data.pocTitle || !data.startDate || !data.endDate || data.hoursPerDay <= 0) {

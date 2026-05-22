@@ -4,3 +4,4 @@ employeeId,name,team,subTeam,managerId,email,experience,totalSkills,totalProject
 "I774156","Arushi Mittal","CIS","Team8","","arushi.mittal@sap.com","0","0","0","Employee","Whitefield, Bangalore","T1","L1"
 "I305034","Nirmala Shettar","CIS","","","nirmala.shettar@sap.com","0","0","0","SeniorManager","Whitefield, Bangalore","",""
 "I042040","Puja K","CIS","Team8","I305034","puja.k@sap.com","0","0","0","Manager","Whitefield, Bangalore","T4","L4"
+"MGR003","Puja K","CIS","Team8","I305034","pujak@sap.com","0","0","0","Manager","Whitefield, Bangalore","T4","L4"
