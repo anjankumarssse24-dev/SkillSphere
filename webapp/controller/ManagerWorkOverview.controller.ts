@@ -20,28 +20,28 @@ import HTML from "sap/ui/core/HTML";
 /**
  * @namespace skillsphere.controller
  */
-export default class SeniorManagerWorkOverview extends Controller {
+export default class ManagerWorkOverview extends Controller {
 
-    private currentSeniorManagerId: string | null = null;
+    private currentManagerId: string | null = null;
     private allWorkOverviewRows: any[] = [];
     private maxPrj: number = 1;
     private maxEvl: number = 1;
     private maxInit: number = 1;
     private isLoadingWorkOverview: boolean = false;
     private workOverviewLoadSeq: number = 0;
-    
+
     // AI Assistant Properties
-    private seniorManagerId: string = "";
-    private currentChatSeniorManagerId: string | null = null;
+    private managerId: string = "";
+    private currentChatManagerId: string | null = null;
     private aiInitialized: boolean = false;
     private typingIndicator: any = null;
 
     public onInit(): void {
-        this.getRouter().getRoute("SeniorManagerWorkOverview")?.attachPatternMatched(this.onRouteMatched, this);
+        this.getRouter().getRoute("ManagerWorkOverview")?.attachPatternMatched(this.onRouteMatched, this);
     }
 
     public onExit(): void {
-        this.getRouter().getRoute("SeniorManagerWorkOverview")?.detachPatternMatched(this.onRouteMatched, this);
+        this.getRouter().getRoute("ManagerWorkOverview")?.detachPatternMatched(this.onRouteMatched, this);
     }
 
     private getRouter(): Router {
@@ -49,13 +49,13 @@ export default class SeniorManagerWorkOverview extends Controller {
     }
 
     public onNavBack(): void {
-        if (!this.currentSeniorManagerId) {
+        if (!this.currentManagerId) {
             this.getRouter().navTo("Landing");
             return;
         }
 
-        this.getRouter().navTo("SeniorManagerDashboard", {
-            seniorManagerId: this.currentSeniorManagerId
+        this.getRouter().navTo("ManagerDashboard", {
+            managerId: this.currentManagerId
         });
     }
 
@@ -70,7 +70,7 @@ export default class SeniorManagerWorkOverview extends Controller {
             });
         }
 
-        this.currentSeniorManagerId = null;
+        this.currentManagerId = null;
         this.allWorkOverviewRows = [];
         this.isLoadingWorkOverview = false;
         this.getRouter().navTo("Landing");
@@ -79,24 +79,23 @@ export default class SeniorManagerWorkOverview extends Controller {
 
     private async onRouteMatched(event: any): Promise<void> {
         const args: any = event.getParameter("arguments");
-        const seniorManagerId = args?.seniorManagerId;
+        const managerId = args?.managerId;
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
 
-        if (!currentUser?.isLoggedIn && !seniorManagerId) {
+        if (!currentUser?.isLoggedIn && !managerId) {
             MessageToast.show("Please login to access the work overview");
             this.getRouter().navTo("Landing");
             return;
         }
 
-        const resolvedSeniorManagerId = seniorManagerId || currentUser?.id;
+        const resolvedManagerId = managerId || currentUser?.id;
 
-        // If a different user logs in, clear cached view data to avoid stale state issues.
-        if (this.currentSeniorManagerId && resolvedSeniorManagerId && this.currentSeniorManagerId !== resolvedSeniorManagerId) {
+        if (this.currentManagerId && resolvedManagerId && this.currentManagerId !== resolvedManagerId) {
             this.allWorkOverviewRows = [];
         }
 
-        this.currentSeniorManagerId = resolvedSeniorManagerId;
+        this.currentManagerId = resolvedManagerId;
 
         const loadSeq = ++this.workOverviewLoadSeq;
         await this.loadWorkOverview(loadSeq);
@@ -105,13 +104,14 @@ export default class SeniorManagerWorkOverview extends Controller {
     private async loadWorkOverview(loadSeq: number): Promise<void> {
         this.isLoadingWorkOverview = true;
         try {
-            const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
+            const page = this.getView()?.byId("managerWorkOverviewPage") as any;
             if (page?.setBusy) page.setBusy(true);
 
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-            // Load all employees
+            // Load only employees under this manager
             const empBinding = oDataModel.bindList("/Employees");
+            empBinding.filter([new Filter("managerId", FilterOperator.EQ, this.currentManagerId)]);
             const empContexts = await empBinding.requestContexts(0, 500);
             const employees = empContexts.map((ctx: any) => ctx.getObject());
 
@@ -133,14 +133,14 @@ export default class SeniorManagerWorkOverview extends Controller {
 
             if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // Load all initiatives from Initiatives entity
+            // Load all initiatives
             const initBinding = oDataModel.bindList("/Initiatives");
             const initContexts = await initBinding.requestContexts(0, 500);
             const initiatives = initContexts.map((ctx: any) => ctx.getObject());
 
             if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // Group current projects by employee - ONLY Projects from CurrentProjects
+            // Group current projects by employee - only Projects from CurrentProjects
             const empProjects: any = {};
             currentProjects.forEach((cp: any) => {
                 if (cp.assignmentStatus === "Completed" || cp.assignmentStatus === "Rejected") return;
@@ -166,12 +166,10 @@ export default class SeniorManagerWorkOverview extends Controller {
                 }
             });
 
-            // Format entry helper
             const formatEntry = (name: string, pct: any) => {
                 return pct ? `${name} (${pct}%)` : name;
             };
 
-            // Build rows
             const rows: any[] = [];
             employees.forEach((emp: any) => {
                 const profile = profileMap[emp.employeeId] || {};
@@ -190,7 +188,6 @@ export default class SeniorManagerWorkOverview extends Controller {
                     techCategory = this.mapTechCategory(projectsList[0].technology);
                 }
 
-                // Calculate total allocation (sum of all utilization percentages)
                 const projectsUtil = projectsList.reduce((sum: number, p: any) => sum + (p.utilizationPercent || 0), 0);
                 const evaluationsUtil = evaluations.reduce((sum: number, e: any) => sum + (e.utilizationPercent || 0), 0);
                 const initiativesUtil = inits.reduce((sum: number, i: any) => sum + (i.utilizationPercent || 0), 0);
@@ -209,7 +206,6 @@ export default class SeniorManagerWorkOverview extends Controller {
                 rows.push(row);
             });
 
-            // Sort by Technology category first, then by name
             rows.sort((a: any, b: any) => {
                 if (a.techCategory !== b.techCategory) {
                     if (!a.techCategory) return 1;
@@ -220,27 +216,25 @@ export default class SeniorManagerWorkOverview extends Controller {
             });
 
             this.allWorkOverviewRows = rows;
-            console.log(`✅ Work overview: ${rows.length} employees`);
+            console.log(`✅ Manager Work Overview: ${rows.length} employees`);
 
-            // Set default filter: T5, T4, T3
             const tLevelFilter = this.byId("woTLevelFilter") as MultiComboBox;
             if (tLevelFilter) {
                 tLevelFilter.setSelectedKeys(["T5", "T4", "T3"]);
             }
 
-            // Apply default filter and build table
-            const defaultFiltered = rows.filter((r: any) => r.tLevel === 'T5' || r.tLevel === 'T4' || r.tLevel === 'T3');
+            const defaultFiltered = rows.filter((r: any) => r.tLevel === "T5" || r.tLevel === "T4" || r.tLevel === "T3");
             this.buildWorkOverviewTable(defaultFiltered);
 
             if (page?.setBusy) page.setBusy(false);
         } catch (error) {
-            console.error("❌ Error loading work overview:", error);
+            console.error("❌ Error loading manager work overview:", error);
             MessageToast.show("Error loading work overview. Please try again.");
-            const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
+            const page = this.getView()?.byId("managerWorkOverviewPage") as any;
             if (page?.setBusy) page.setBusy(false);
         } finally {
             this.isLoadingWorkOverview = false;
-            const page = this.getView()?.byId("seniorManagerWorkOverviewPage") as any;
+            const page = this.getView()?.byId("managerWorkOverviewPage") as any;
             if (page?.setBusy) page.setBusy(false);
         }
     }
@@ -260,7 +254,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         if (!container) return;
         container.destroyItems();
 
-        // Compute max columns from the FILTERED rows
         let maxP = 0, maxE = 0, maxI = 0;
         rows.forEach((r: any) => {
             if (r.projects.length > maxP) maxP = r.projects.length;
@@ -271,9 +264,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.maxEvl = Math.min(maxE, 5) || 1;
         this.maxInit = Math.min(maxI, 5) || 1;
 
-        console.log(`📊 Building WO table: ${rows.length} rows, cols: P=${this.maxPrj} E=${this.maxEvl} I=${this.maxInit}`);
-
-        // Create JSON model for table data
         const oTableModel = new JSONModel({ rows: rows });
 
         const oTable = new Table({
@@ -289,7 +279,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         oTable.setModel(oTableModel);
         oTable.bindRows({ path: "/rows" });
 
-        // Add columns with templates: Employee, Allocation, Tech
         oTable.addColumn(new Column({
             width: "12rem",
             label: new Label({ text: "Employee" }),
@@ -329,7 +318,6 @@ export default class SeniorManagerWorkOverview extends Controller {
             })
         }));
 
-        // Dynamic Project columns
         for (let i = 0; i < this.maxPrj; i++) {
             oTable.addColumn(new Column({
                 width: "10rem",
@@ -347,7 +335,6 @@ export default class SeniorManagerWorkOverview extends Controller {
             }));
         }
 
-        // Dynamic Evaluation columns
         for (let i = 0; i < this.maxEvl; i++) {
             oTable.addColumn(new Column({
                 width: "10rem",
@@ -365,7 +352,6 @@ export default class SeniorManagerWorkOverview extends Controller {
             }));
         }
 
-        // Dynamic Initiative columns
         for (let i = 0; i < this.maxInit; i++) {
             oTable.addColumn(new Column({
                 width: "10rem",
@@ -391,42 +377,30 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.buildWorkOverviewTable(filtered);
     }
 
-    public onSearchWorkOverview(event: any): void {
+    public onSearchWorkOverview(): void {
         this.onWorkOverviewFilterChange();
     }
 
     // ==================== AI Assistant Methods ====================
 
-    /**
-     * Open AI Assistant Dialog
-     */
     public onOpenAIAssistant(): void {
-        const currentUserModel = this.getOwnerComponent()
-            ?.getModel("currentUser") as JSONModel;
-
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const userData = currentUserModel?.getData();
 
         if (!userData?.id) {
-            console.error("❌ No seniorManagerId found in currentUser model");
             MessageToast.show("Please login first");
             return;
         }
 
-        const newSeniorManagerId = userData.id;
-        console.log("🔑 Senior Manager ID for AI (fresh):", newSeniorManagerId);
+        const newManagerId = userData.id;
 
-        // ✅ Clear chat ONLY if senior manager changes
-        if (this.currentChatSeniorManagerId !== newSeniorManagerId) {
-            console.log(
-                `🔄 Different senior manager detected (was: ${this.currentChatSeniorManagerId}, now: ${newSeniorManagerId})`
-            );
-            this.clearChatForNewSeniorManager();
-            this.currentChatSeniorManagerId = newSeniorManagerId;
+        if (this.currentChatManagerId !== newManagerId) {
+            this.clearChatForNewManager();
+            this.currentChatManagerId = newManagerId;
         }
 
-        this.seniorManagerId = newSeniorManagerId;
+        this.managerId = newManagerId;
 
-        // Initialize chat only once per senior manager
         const oContainer = this.byId("messagesContainerWorkOverview") as any;
         if (!oContainer || oContainer.getItems().length === 0) {
             this.initializeAIChat();
@@ -436,65 +410,46 @@ export default class SeniorManagerWorkOverview extends Controller {
         oDialog?.open();
     }
 
-    /**
-     * Close AI Assistant Dialog
-     */
     public onCloseAIDialog(): void {
         const oDialog = this.byId("aiAssistantDialogWorkOverview") as Dialog;
         oDialog?.close();
-        // ❗ Do NOT clear chat here
     }
 
-    private clearChatForNewSeniorManager(): void {
-        console.log("🧹 Clearing chat for new senior manager");
-
+    private clearChatForNewManager(): void {
         const oContainer = this.byId("messagesContainerWorkOverview") as any;
         if (oContainer) {
             oContainer.destroyItems();
         }
-
         if (this.typingIndicator) {
             this.typingIndicator.destroy();
             this.typingIndicator = null;
         }
-
         this.aiInitialized = false;
     }
 
-    /**
-     * Initialize chat with welcome message
-     */
     private initializeAIChat(): void {
-        if (this.aiInitialized) {
-            console.log("ℹ️ Senior Manager AI chat already initialized");
-            return;
-        }
+        if (this.aiInitialized) return;
 
-        const currentUserModel = this.getOwnerComponent()
-            ?.getModel("currentUser") as JSONModel;
-
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const userData = currentUserModel?.getData();
-        const seniorManagerName = userData?.name || "Senior Manager";
+        const managerName = userData?.name || "Manager";
 
         this.addBotMessage(
-            `👋 Hello ${seniorManagerName}! I'm your AI assistant.\n\n` +
-            "You're on Current Work Overview, so I can answer using this page context:\n" +
+            `👋 Hello ${managerName}! I'm your AI assistant.\n\n` +
+            "You're on Current Work Overview for your team:\n" +
             "• Who is currently available\n" +
             "• Who is active on projects/evaluations/initiatives\n" +
             "• T3/T4 allocation snapshot\n" +
             "• Resource balancing recommendations\n\n" +
-            "Try these chart-focused prompts:\n" +
-            "1. How many people are available right now in this chart?\n" +
-            "2. Give the allocation of everyone shown in this chart.\n" +
+            "Try these prompts:\n" +
+            "1. How many people are available right now?\n" +
+            "2. Give the allocation of everyone in my team.\n" +
             "3. Give a detailed summary for everyone."
         );
 
         this.aiInitialized = true;
     }
 
-    /**
-     * Handle quick action buttons
-     */
     public onQuickAction(oEvent: any): void {
         const button = oEvent.getSource() as any;
         const sButtonText = button.getText();
@@ -511,7 +466,6 @@ export default class SeniorManagerWorkOverview extends Controller {
                 query = "Give a detailed summary for everyone";
                 break;
             default:
-                // Keep fallback behavior for any future button labels.
                 query = sButtonText || "";
                 break;
         }
@@ -521,40 +475,23 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.onSendMessage();
     }
 
-    /**
-     * Clear chat manually (button action)
-     */
     public onClearChat(): void {
-        console.log("🧹 Manual chat clear requested");
-        this.clearChatForNewSeniorManager();
+        this.clearChatForNewManager();
         this.initializeAIChat();
     }
 
-    /**
-     * Send message to AI
-     */
     public onSendMessage(): void {
         const input = this.byId("messageInputWorkOverview") as any;
         const userMessage = input?.getValue() || "";
 
-        if (!userMessage.trim()) {
-            return;
-        }
+        if (!userMessage.trim()) return;
 
-        // Add user message to chat
         this.addUserMessage(userMessage);
         input?.setValue("");
-
-        // Show typing indicator
         this.showTypingIndicator();
-
-        // Query AI endpoint
         this.queryAIAssistant(userMessage);
     }
 
-    /**
-     * Add user message to chat UI
-     */
     private addUserMessage(message: string): void {
         const oContainer = this.byId("messagesContainerWorkOverview") as any;
 
@@ -563,9 +500,7 @@ export default class SeniorManagerWorkOverview extends Controller {
             items: [
                 new VBox({
                     items: [
-                        new Text({
-                            text: message
-                        }).addStyleClass("userMessage sapUiSmallMargin")
+                        new Text({ text: message }).addStyleClass("userMessage sapUiSmallMargin")
                     ]
                 }).addStyleClass("messageBox userMessageBox")
             ]
@@ -575,9 +510,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.scrollChatToBottom();
     }
 
-    /**
-     * Add bot message to chat UI
-     */
     private addBotMessage(message: string): void {
         const oContainer = this.byId("messagesContainerWorkOverview") as any;
 
@@ -590,9 +522,7 @@ export default class SeniorManagerWorkOverview extends Controller {
                 new VBox({
                     width: "100%",
                     items: [
-                        new FormattedText({
-                            htmlText: formattedHtml
-                        }).addStyleClass("botMessage sapUiSmallMargin")
+                        new FormattedText({ htmlText: formattedHtml }).addStyleClass("botMessage sapUiSmallMargin")
                     ]
                 }).addStyleClass("messageBox botMessageBox")
             ]
@@ -602,9 +532,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.scrollChatToBottom();
     }
 
-    /**
-     * Parse markdown to HTML for better formatting
-     */
     private parseMarkdown(text: string): string {
         let html = text;
 
@@ -627,9 +554,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         return html;
     }
 
-    /**
-     * Show typing indicator
-     */
     private showTypingIndicator(): void {
         const oContainer = this.byId("messagesContainerWorkOverview") as any;
 
@@ -651,9 +575,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.scrollChatToBottom();
     }
 
-    /**
-     * Remove typing indicator
-     */
     private removeTypingIndicator(): void {
         if (this.typingIndicator) {
             const container = this.byId("messagesContainerWorkOverview") as any;
@@ -665,28 +586,23 @@ export default class SeniorManagerWorkOverview extends Controller {
         }
     }
 
-    /**
-     * Query AI Assistant endpoint
-     */
     private async queryAIAssistant(userMessage: string): Promise<void> {
         try {
-            console.log("🤖 Querying AI Assistant");
-
-            if (!this.seniorManagerId) {
+            if (!this.managerId) {
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
                 const userData = currentUserModel?.getData();
-                this.seniorManagerId = userData?.id || "";
+                this.managerId = userData?.id || "";
             }
 
-            if (!this.seniorManagerId) {
+            if (!this.managerId) {
                 this.removeTypingIndicator();
-                this.addBotMessage("Unable to identify senior manager session. Please login again.");
+                this.addBotMessage("Unable to identify manager session. Please login again.");
                 return;
             }
 
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const oAction = oDataModel.bindContext("/seniorManagerQuery(...)");
-            oAction.setParameter("seniorManagerId", this.seniorManagerId);
+            const oAction = oDataModel.bindContext("/managerQuery(...)");
+            oAction.setParameter("managerId", this.managerId);
             oAction.setParameter("queryType", "work_overview");
             oAction.setParameter("context", this.buildWorkOverviewContext(userMessage));
             await oAction.execute("$auto");
@@ -733,14 +649,13 @@ export default class SeniorManagerWorkOverview extends Controller {
             const projectsText = (row.projects || []).filter((s: string) => !!s).join(", ") || "None";
             const evaluationsText = (row.evaluations || []).filter((s: string) => !!s).join(", ") || "None";
             const initiativesText = (row.initiatives || []).filter((s: string) => !!s).join(", ") || "None";
-
             return `${row.name} (${row.employeeId}) - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
         });
 
         return [
             `User question: ${userMessage}`,
             "",
-            "PAGE: Current Work Overview (visible/filtered rows)",
+            "PAGE: Current Work Overview - Manager's Team (visible/filtered rows)",
             `Visible employees: ${total}`,
             `T3 count: ${t3Count}`,
             `T4 count: ${t4Count}`,
@@ -795,9 +710,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         return filtered;
     }
 
-    /**
-     * Scroll chat to bottom
-     */
     private scrollChatToBottom(): void {
         setTimeout(() => {
             const scrollContainer = this.byId("chatContainerWorkOverview") as any;

@@ -40,6 +40,16 @@ export default class ManagerDashboard extends Controller {
         return (this.getOwnerComponent() as any).getRouter();
     }
 
+    public onOpenWorkOverview(): void {
+        if (!this.currentManagerId) {
+            MessageToast.show("Manager information not found");
+            return;
+        }
+        this.getRouter().navTo("ManagerWorkOverview", {
+            managerId: this.currentManagerId
+        });
+    }
+
     public onLogout(): void {
         // Clear search results before logout
         this.clearSearchResults();
