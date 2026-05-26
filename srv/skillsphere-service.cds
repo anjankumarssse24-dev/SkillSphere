@@ -52,15 +52,15 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'Employee' }
   ]
   action completeFirstTimeSetup(
-    loginEmployeeId: String;
-    employeeId: String;
-    name: String;
-    team: String;
-    subTeam: String;
-    location: String;
-    gradeLevel: String;
-    tLevel: String;
-    experience: Decimal;
+    loginEmployeeId: String,
+    employeeId: String,
+    name: String,
+    team: String,
+    subTeam: String,
+    location: String,
+    gradeLevel: String,
+    tLevel: String,
+    experience: Decimal,
     managerId: String
   ) returns {
     success: Boolean;
@@ -182,10 +182,10 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action createTeamMember(
-    employeeId: String;
-    name: String;
-    email: String;
-    team: String;
+    employeeId: String,
+    name: String,
+    email: String,
+    team: String,
     location: String
   ) returns {
     success: Boolean;
@@ -198,11 +198,11 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action createProjectAssignment(
-    employeeId: String;
-    projectName: String;
-    role: String;
-    startDate: Date;
-    endDate: Date;
+    employeeId: String,
+    projectName: String,
+    role: String,
+    startDate: Date,
+    endDate: Date,
     utilizationPercent: Integer
   ) returns {
     success: Boolean;
@@ -270,9 +270,9 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action addCertification(
-    name: String;
-    code: String;
-    dateOfCompletion: Date;
+    name: String,
+    code: String,
+    dateOfCompletion: Date,
     level: String
   ) returns {
     success: Boolean;
@@ -287,7 +287,7 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action askAIAssistant(
-    query: String;
+    query: String,
     employeeId: String
   ) returns {
     answer: String;
@@ -300,8 +300,8 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action managerQuery(
-    managerId: String;
-    queryType: String;
+    managerId: String,
+    queryType: String,
     context: String
   ) returns {
     answer: String;
@@ -313,8 +313,8 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action seniorManagerQuery(
-    seniorManagerId: String;
-    queryType: String;
+    seniorManagerId: String,
+    queryType: String,
     context: String
   ) returns {
     answer: String;
@@ -356,10 +356,10 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action createInitiative(
-    initiativeName: String;
-    description: String;
-    startDate: Date;
-    endDate: Date;
+    initiativeName: String,
+    description: String,
+    startDate: Date,
+    endDate: Date,
     utilizationPercent: Integer
   ) returns {
     success: Boolean;
@@ -372,8 +372,8 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action generateEmployeeReport(
-    reportType: String;
-    startDate: Date;
+    reportType: String,
+    startDate: Date,
     endDate: Date
   ) returns {
     reportId: String;
@@ -395,8 +395,8 @@ service SkillSphereSecureAPI {
     { grant: 'EXECUTE', to: 'SeniorManager' }
   ]
   action getAuditLogs(
-    startDate: Date;
-    endDate: Date;
+    startDate: Date,
+    endDate: Date,
     userId: String
   ) returns array of {
     timestamp: String;

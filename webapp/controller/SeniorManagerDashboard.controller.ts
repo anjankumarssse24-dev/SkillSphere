@@ -246,11 +246,11 @@ export default class SeniorManagerDashboard extends Controller {
     private async loadMasterWorkItems(): Promise<void> {
         try {
             const [initiativesResponse, evaluationsResponse] = await Promise.all([
-                fetch("/odata/v4/skillsphere/InitiativesMaster", {
+                fetch("/odata/v4/api/v1/InitiativesMaster", {
                     credentials: "same-origin",
                     headers: { Accept: "application/json" }
                 }),
-                fetch("/odata/v4/skillsphere/EvaluationsMaster", {
+                fetch("/odata/v4/api/v1/EvaluationsMaster", {
                     credentials: "same-origin",
                     headers: { Accept: "application/json" }
                 })
@@ -1463,9 +1463,9 @@ export default class SeniorManagerDashboard extends Controller {
             const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}'`);
 
             const [projectRes, initiativeRes, evaluationRes] = await Promise.all([
-                fetch(`/odata/v4/skillsphere/CurrentProjects?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } }),
-                fetch(`/odata/v4/skillsphere/CurrentInitiatives?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } }),
-                fetch(`/odata/v4/skillsphere/CurrentEvaluations?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } })
+                fetch(`/odata/v4/api/v1/CurrentProjects?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } }),
+                fetch(`/odata/v4/api/v1/CurrentInitiatives?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } }),
+                fetch(`/odata/v4/api/v1/CurrentEvaluations?$filter=${filter}`, { credentials: "same-origin", headers: { Accept: "application/json" } })
             ]);
 
             const [projectData, initiativeData, evaluationData] = await Promise.all([
@@ -1515,7 +1515,7 @@ export default class SeniorManagerDashboard extends Controller {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
             const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/skillsphere/Initiatives?$filter=${filter}`, {
+            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
                 credentials: "same-origin",
                 headers: { Accept: "application/json" }
             });
@@ -1545,7 +1545,7 @@ export default class SeniorManagerDashboard extends Controller {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
             const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/skillsphere/Initiatives?$filter=${filter}`, {
+            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
                 credentials: "same-origin",
                 headers: { Accept: "application/json" }
             });

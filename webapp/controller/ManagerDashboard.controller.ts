@@ -533,9 +533,9 @@ export default class ManagerDashboard extends Controller {
             const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
 
             const [historyResponse, completedResponse] = await Promise.all([
-                fetch(`/odata/v4/skillsphere/Projects?$filter=${filter}`, opts),
+                fetch(`/odata/v4/api/v1/Projects?$filter=${filter}`, opts),
                 fetch(
-                    `/odata/v4/skillsphere/CurrentProjects?$filter=${encodeURIComponent(`employeeId eq '${employeeId.replace(/'/g, "''")}' and assignmentStatus eq 'Completed'`)}`,
+                    `/odata/v4/api/v1/CurrentProjects?$filter=${encodeURIComponent(`employeeId eq '${employeeId.replace(/'/g, "''")}' and assignmentStatus eq 'Completed'`)}`,
                     opts
                 )
             ]);
@@ -659,7 +659,7 @@ export default class ManagerDashboard extends Controller {
             // Use fetch() directly to bypass OData model cache so deletions are
             // reflected immediately after a submitBatch cycle.
             const filter = encodeURIComponent(`employeeId eq '${employeeId.replace(/'/g, "''")}'`);
-            const base = "/odata/v4/skillsphere";
+            const base = "/odata/v4/api/v1";
             const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
 
             const [projResp, initResp, evalResp] = await Promise.all([
@@ -719,7 +719,7 @@ export default class ManagerDashboard extends Controller {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
             const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/skillsphere/Initiatives?$filter=${filter}`, {
+            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
                 credentials: "same-origin",
                 headers: { Accept: "application/json" }
             });
@@ -750,7 +750,7 @@ export default class ManagerDashboard extends Controller {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
             const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/skillsphere/Initiatives?$filter=${filter}`, {
+            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
                 credentials: "same-origin",
                 headers: { Accept: "application/json" }
             });
