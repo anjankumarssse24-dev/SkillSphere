@@ -214,8 +214,12 @@ export default class SeniorManagerDashboard extends Controller {
             return;
         }
         
-        // Set current senior manager ID
-        this.currentSeniorManagerId = seniorManagerId || currentUser?.id;
+        // Set current senior manager ID (with backward-compatible alias mapping)
+        const seniorManagerAliasMap: Record<string, string> = {
+            SMGR01: "I305034"
+        };
+        const requestedSeniorManagerId = String(seniorManagerId || currentUser?.id || "").trim().toUpperCase();
+        this.currentSeniorManagerId = seniorManagerAliasMap[requestedSeniorManagerId] || requestedSeniorManagerId;
         
         // Load dashboard data
         await this.loadDashboardData();

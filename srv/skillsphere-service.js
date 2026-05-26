@@ -171,7 +171,7 @@ module.exports = cds.service.impl(async function() {
    * - Managers: See their direct reports + themselves
    * - SeniorManagers: See all employees (for internal operations)
    */
-  this.before(['READ', 'CREATE', 'UPDATE'], Employees, async (req) => {
+  this.before(['READ', 'UPDATE'], Employees, async (req) => {
     const userRole = req.user?.attr?.role || '';
     const userId = req.user?.id || '';
     
@@ -191,7 +191,7 @@ module.exports = cds.service.impl(async function() {
   /**
    * Filter Skills data based on employee ownership
    */
-  this.before(['READ', 'CREATE', 'UPDATE'], Skills, async (req) => {
+  this.before(['READ', 'UPDATE'], Skills, async (req) => {
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: req.user?.id });
     } else if (_hasRole(req, 'Manager')) {
@@ -209,7 +209,7 @@ module.exports = cds.service.impl(async function() {
   /**
    * Filter Projects data based on employee ownership
    */
-  this.before(['READ', 'CREATE', 'UPDATE'], Projects, async (req) => {
+  this.before(['READ', 'UPDATE'], Projects, async (req) => {
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: req.user?.id });
     } else if (_hasRole(req, 'Manager')) {
@@ -224,7 +224,7 @@ module.exports = cds.service.impl(async function() {
   /**
    * Filter CurrentProjects based on user role
    */
-  this.before(['READ', 'CREATE', 'UPDATE'], CurrentProjects, async (req) => {
+  this.before(['READ', 'UPDATE'], CurrentProjects, async (req) => {
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: req.user?.id });
     } else if (_hasRole(req, 'Manager')) {
@@ -238,7 +238,7 @@ module.exports = cds.service.impl(async function() {
   /**
    * Filter Initiatives, CAIAUtilization, POCUtilization based on user role
    */
-  this.before(['READ', 'CREATE', 'UPDATE'], [Initiatives, CAIAUtilization, POCUtilization], async (req) => {
+  this.before(['READ', 'UPDATE'], [Initiatives, CAIAUtilization, POCUtilization], async (req) => {
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: req.user?.id });
     } else if (_hasRole(req, 'Manager')) {
@@ -252,7 +252,7 @@ module.exports = cds.service.impl(async function() {
   /**
    * Filter Certifications based on employee ownership
    */
-  this.before(['READ', 'CREATE', 'UPDATE'], Certifications, async (req) => {
+  this.before(['READ', 'UPDATE'], Certifications, async (req) => {
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: req.user?.id });
     } else if (_hasRole(req, 'Manager')) {
@@ -290,7 +290,7 @@ module.exports = cds.service.impl(async function() {
     logDataAccess(
       req.user?.id,
       'READ',
-      req.query.target?.name,
+      req.target?.name,
       count,
       `| accessed via OData`
     );
@@ -303,7 +303,7 @@ module.exports = cds.service.impl(async function() {
     logDataAccess(
       req.user?.id,
       'CREATE',
-      req.query.target?.name,
+      req.target?.name,
       1,
       `| created new record`
     );
@@ -316,7 +316,7 @@ module.exports = cds.service.impl(async function() {
     logDataAccess(
       req.user?.id,
       'UPDATE',
-      req.query.target?.name,
+      req.target?.name,
       1,
       `| updated record`
     );
@@ -329,7 +329,7 @@ module.exports = cds.service.impl(async function() {
     logDataAccess(
       req.user?.id,
       'DELETE',
-      req.query.target?.name,
+      req.target?.name,
       1,
       `| deleted record`
     );

@@ -99,7 +99,11 @@ export default class ManagerDashboard extends Controller {
             return;
         }
 
-        const resolvedManagerId = String(managerId || currentUser?.id || "").trim().toUpperCase();
+        const managerAliasMap: Record<string, string> = {
+            MGR003: "I042040"
+        };
+        const requestedManagerId = String(managerId || currentUser?.id || "").trim().toUpperCase();
+        const resolvedManagerId = managerAliasMap[requestedManagerId] || requestedManagerId;
         this.currentManagerId = resolvedManagerId || null;
         this.pendingEmployeeIdToOpen = targetEmployeeId || null;
         if (!this.currentManagerId) {
