@@ -2,9 +2,12 @@ namespace skillsphere;
 
 /**
  * Users entity - Identity and authorization only
+ * ⚠️ SECURITY: Password field is not exposed via OData (@cds.api.ignore)
+ * Authentication is delegated to SAP BTP Identity Provider (CIS)
  */
 entity Users {
   key id : String;
+  @cds.api.ignore
   password : String;
   role : String;
   isActive : Boolean default true;

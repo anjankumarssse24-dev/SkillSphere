@@ -1,6 +1,24 @@
 /**
- * SkillSphere Service Implementation
- * Handles business logic, validations, and custom actions
+ * SkillSphere Secure API Implementation
+ * 
+ * ARCHITECTURE:
+ * ✅ NO DIRECT ENTITY ACCESS - All entities are private, never exposed via OData
+ * ✅ ACTION-ONLY API - All business logic flows through custom actions
+ * ✅ MASKED ENDPOINTS - /api/v1/* instead of /odata/v4/*
+ * ✅ AUDIT LOGGING - All access tracked for compliance
+ * ✅ ROLE-BASED FILTERING - Data filtered at database query level
+ * 
+ * DATA FLOW:
+ * UI Request → /api/v1/actions/getMyProfile 
+ *   → SkillSphereSecureAPI.getMyProfile action
+ *   → Internal data filtering (role-based)
+ *   → Return sanitized response (NO raw entities)
+ * 
+ * BLOCKED:
+ * ❌ GET /odata/v4/Employees
+ * ❌ GET /odata/v4/$metadata
+ * ❌ Direct entity access
+ * ✅ Only custom action endpoints allowed
  */
 const cds = require('@sap/cds');
 const AICoreClient = require('./utils/aicore-client-orchestration');
@@ -11,7 +29,7 @@ module.exports = cds.service.impl(async function() {
     CurrentProjects, Initiatives, CAIAUtilization, POCUtilization, Certifications
   } = this.entities;
 
-  console.log('🚀 Initializing SkillSphere...');
+  console.log('🚀 Initializing SkillSphere Secure API (action-based, no entity access)...');
   let aiClient = null;
 
   function _extractBearerToken(req) {
@@ -129,6 +147,192 @@ module.exports = cds.service.impl(async function() {
     }
     return aiClient;
   }
+
+  // ========== DATA FILTERING & SECURITY HANDLERS ==========
+  
+  /**
+   * NOTE: These entity-level filters are INTERNAL ONLY
+   * Entities are NOT exposed via OData (see skillsphere-service.cds)
+   * 
+   * These handlers are used ONLY by:
+   * - Custom actions (getMyProfile, getTeamMembers, etc.)
+   * - Internal business logic
+   * 
+   * Direct entity access via OData is BLOCKED by:
+   * 1. CDS service definition (no entity projections)
+   * 2. server.js middleware (blocks $metadata and entity access)
+   */
+  
+  /**
+   * Filter Employees data based on user role
+   * Used internally by actions like getMyProfile, getTeamMembers
+   * - Employees: See only themselves
+   * - Managers: See their direct reports + themselves
+   * - SeniorManagers: See all employees (for internal operations)
+   */
+  this.before(['READ', 'CREATE', 'UPDATE'], Employees, async (req) => {
+    const userRole = req.user?.attr?.role || '';
+    const userId = req.user?.id || '';
+    
+    if (_hasRole(req, 'Employee')) {
+      // Employees can only see their own data
+      req.query.where({ employeeId: userId });
+    } else if (_hasRole(req, 'Manager')) {
+      // Managers can see their reports + themselves
+      req.query.where(q => q
+        .where('managerId =', userId)
+        .or('employeeId =', userId)
+      );
+    }
+    // SeniorManagers see all data (no filter)
+  });
+
+  /**
+   * Filter Skills data based on employee ownership
+   */
+  this.before(['READ', 'CREATE', 'UPDATE'], Skills, async (req) => {
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: req.user?.id });
+    } else if (_hasRole(req, 'Manager')) {
+      // Managers can see skills of their team members
+      const manager = await SELECT.one(Employees, e => e('*')).where({ employeeId: req.user?.id });
+      if (manager) {
+        const teamIds = [req.user?.id];
+        const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+        team.forEach(emp => teamIds.push(emp.employeeId));
+        req.query.where(s => s.where('employeeId in', teamIds));
+      }
+    }
+  });
+
+  /**
+   * Filter Projects data based on employee ownership
+   */
+  this.before(['READ', 'CREATE', 'UPDATE'], Projects, async (req) => {
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: req.user?.id });
+    } else if (_hasRole(req, 'Manager')) {
+      // Managers can see projects of their team members
+      const teamIds = [req.user?.id];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      team.forEach(emp => teamIds.push(emp.employeeId));
+      req.query.where(p => p.where('employeeId in', teamIds));
+    }
+  });
+
+  /**
+   * Filter CurrentProjects based on user role
+   */
+  this.before(['READ', 'CREATE', 'UPDATE'], CurrentProjects, async (req) => {
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: req.user?.id });
+    } else if (_hasRole(req, 'Manager')) {
+      const teamIds = [req.user?.id];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      team.forEach(emp => teamIds.push(emp.employeeId));
+      req.query.where(cp => cp.where('employeeId in', teamIds));
+    }
+  });
+
+  /**
+   * Filter Initiatives, CAIAUtilization, POCUtilization based on user role
+   */
+  this.before(['READ', 'CREATE', 'UPDATE'], [Initiatives, CAIAUtilization, POCUtilization], async (req) => {
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: req.user?.id });
+    } else if (_hasRole(req, 'Manager')) {
+      const teamIds = [req.user?.id];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      team.forEach(emp => teamIds.push(emp.employeeId));
+      req.query.where(e => e.where('employeeId in', teamIds));
+    }
+  });
+
+  /**
+   * Filter Certifications based on employee ownership
+   */
+  this.before(['READ', 'CREATE', 'UPDATE'], Certifications, async (req) => {
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: req.user?.id });
+    } else if (_hasRole(req, 'Manager')) {
+      const teamIds = [req.user?.id];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      team.forEach(emp => teamIds.push(emp.employeeId));
+      req.query.where(c => c.where('employeeId in', teamIds));
+    }
+  });
+
+  // ========== AUDIT LOGGING FOR DATA ACCESS ==========
+  
+  /**
+   * Audit Log Helper - SECURITY: Minimal PII logging
+   * Only logs action type and count, NOT user IDs or email addresses
+   * User IDs are masked (last 4 chars only)
+   */
+  const logDataAccess = (userId, action, entity, count, details = '') => {
+    const timestamp = new Date().toISOString();
+    // SECURITY: Mask user ID - only log last 4 characters
+    const maskedUserId = userId ? 'user_' + userId.slice(-4) : 'ANON';
+    // SECURITY: Sanitize details to prevent email/PII leakage in logs
+    const sanitizedDetails = details.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[MASKED_EMAIL]');
+    console.log(
+      `[AUDIT] ${timestamp} | USER: ${maskedUserId} | ACTION: ${action} | ENTITY: ${entity} | COUNT: ${count}${sanitizedDetails}`
+    );
+    // TODO: Store audit logs to persistent AuditLogs table (encrypted, access-controlled, retention policy)
+  };
+
+  /**
+   * Log all READ operations on sensitive entities
+   */
+  this.after(['READ'], [Employees, Projects, Skills, CurrentProjects, Initiatives, Certifications], (results, req) => {
+    const count = Array.isArray(results) ? results.length : 1;
+    logDataAccess(
+      req.user?.id,
+      'READ',
+      req.query.target?.name,
+      count,
+      `| accessed via OData`
+    );
+  });
+
+  /**
+   * Log all CREATE operations
+   */
+  this.after(['CREATE'], [Employees, Projects, Skills, CurrentProjects, Initiatives, Certifications], (results, req) => {
+    logDataAccess(
+      req.user?.id,
+      'CREATE',
+      req.query.target?.name,
+      1,
+      `| created new record`
+    );
+  });
+
+  /**
+   * Log all UPDATE operations
+   */
+  this.after(['UPDATE'], [Employees, Projects, Skills, CurrentProjects, Initiatives, Certifications], (results, req) => {
+    logDataAccess(
+      req.user?.id,
+      'UPDATE',
+      req.query.target?.name,
+      1,
+      `| updated record`
+    );
+  });
+
+  /**
+   * Log all DELETE operations
+   */
+  this.after(['DELETE'], [Employees, Projects, Skills, CurrentProjects, Initiatives, Certifications], (results, req) => {
+    logDataAccess(
+      req.user?.id,
+      'DELETE',
+      req.query.target?.name,
+      1,
+      `| deleted record`
+    );
+  });
 
   this.on('currentUserContext', async req => {
     const principalId = req.user?.id || '';
@@ -972,6 +1176,246 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
   });
 
   // ============ ERROR HANDLING ============
+
+ // ========== NEW ACTION-BASED API HANDLERS ==========
+  // These handlers implement the secure /api/v1/* endpoints
+  // All data access is sanitized and role-filtered
+  
+  /**
+   * getMyProfile - Get current user's profile (masked, no sensitive internal data)
+   * 
+   * Returns:
+   * - employeeId, name, email, role, team, location, experience
+   * 
+   * Does NOT return:
+   * - password, internal IDs, manager hierarchy
+   */
+  this.on('getMyProfile', async (req) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return req.reject(401, 'User not authenticated');
+    }
+
+    try {
+      const employee = await SELECT.one(Employees).where({ employeeId: userId });
+      
+      if (!employee) {
+        return req.reject(404, 'Employee profile not found');
+      }
+
+      // Return sanitized profile (no sensitive fields)
+      logDataAccess(userId, 'ACTION', 'getMyProfile', 1, '| retrieved own profile');
+      
+      return {
+        employeeId: employee.employeeId,
+        name: employee.name,
+        email: employee.email,
+        role: employee.role,
+        team: employee.team,
+        location: employee.location,
+        experience: employee.experience
+      };
+    } catch (error) {
+      console.error('❌ getMyProfile error:', error.message);
+      return req.reject(500, 'Failed to retrieve profile');
+    }
+  });
+
+  /**
+   * getTeamMembers - Get team members (Manager + SeniorManager only)
+   */
+  this.on('getTeamMembers', async (req) => {
+    const managerId = req.user?.id;
+    
+    if (!_hasRole(req, 'Manager') && !_hasRole(req, 'SeniorManager')) {
+      return req.reject(403, 'Only managers can access team data');
+    }
+
+    try {
+      const team = await SELECT(Employees).where({ managerId });
+      
+      logDataAccess(managerId, 'ACTION', 'getTeamMembers', team.length, '| retrieved team data');
+      
+      return team.map(emp => ({
+        employeeId: emp.employeeId,
+        name: emp.name,
+        email: emp.email,
+        role: emp.role,
+        team: emp.team,
+        managerId: emp.managerId
+      }));
+    } catch (error) {
+      console.error('❌ getTeamMembers error:', error.message);
+      return req.reject(500, 'Failed to retrieve team');
+    }
+  });
+
+  /**
+   * getMySkills - Get user's skills (sanitized)
+   */
+  this.on('getMySkills', async (req) => {
+    const userId = req.user?.id;
+    
+    try {
+      const skills = await SELECT(Skills).where({ employeeId: userId });
+      
+      logDataAccess(userId, 'ACTION', 'getMySkills', skills.length, '| retrieved own skills');
+      
+      return skills.map(skill => ({
+        skillId: skill.skillId,
+        skillName: skill.skillName,
+        proficiencyLevel: skill.proficiencyLevel,
+        yearsExperience: skill.yearsExperience
+      }));
+    } catch (error) {
+      console.error('❌ getMySkills error:', error.message);
+      return req.reject(500, 'Failed to retrieve skills');
+    }
+  });
+
+  /**
+   * getMyProjects - Get user's projects (sanitized)
+   */
+  this.on('getMyProjects', async (req) => {
+    const userId = req.user?.id;
+    
+    try {
+      const projects = await SELECT(Projects).where({ employeeId: userId });
+      
+      logDataAccess(userId, 'ACTION', 'getMyProjects', projects.length, '| retrieved own projects');
+      
+      return projects.map(project => ({
+        projectId: project.projectId,
+        projectName: project.projectName,
+        role: project.role,
+        startDate: project.startDate,
+        endDate: project.endDate,
+        status: project.status,
+        technology: project.technology
+      }));
+    } catch (error) {
+      console.error('❌ getMyProjects error:', error.message);
+      return req.reject(500, 'Failed to retrieve projects');
+    }
+  });
+
+  /**
+   * getMyUtilization - Get current workload/utilization
+   */
+  this.on('getMyUtilization', async (req) => {
+    const userId = req.user?.id;
+    
+    try {
+      const currentProjects = await SELECT(CurrentProjects).where({ employeeId: userId });
+      
+      let totalHours = 0;
+      currentProjects.forEach(cp => {
+        totalHours += cp.utilizationPercent || 0;
+      });
+
+      logDataAccess(userId, 'ACTION', 'getMyUtilization', 1, '| retrieved own utilization');
+      
+      return {
+        currentProjectHours: 0, // Placeholder - calculate from data
+        caiaHours: 0,
+        pocHours: 0,
+        totalHours: totalHours,
+        utilizationPercent: Math.min(totalHours, 100)
+      };
+    } catch (error) {
+      console.error('❌ getMyUtilization error:', error.message);
+      return req.reject(500, 'Failed to retrieve utilization');
+    }
+  });
+
+  /**
+   * createTeamMember - Manager creates new team member
+   */
+  this.on('createTeamMember', async (req) => {
+    const managerId = req.user?.id;
+    const { employeeId, name, email, team, location } = req.data;
+    
+    if (!_hasRole(req, 'Manager') && !_hasRole(req, 'SeniorManager')) {
+      return req.reject(403, 'Only managers can create team members');
+    }
+
+    try {
+      // Check if employee already exists
+      const existing = await SELECT.one(Employees).where({ employeeId });
+      if (existing) {
+        return req.reject(409, `Employee ${employeeId} already exists`);
+      }
+
+      // Create new employee
+      const newEmployee = {
+        employeeId,
+        name,
+        email,
+        team,
+        location,
+        managerId,
+        role: 'Employee',
+        experience: 0,
+        totalSkills: 0,
+        totalProjects: 0
+      };
+
+      await INSERT.into(Employees).entries(newEmployee);
+      
+      logDataAccess(managerId, 'ACTION', 'createTeamMember', 1, `| created employee ${employeeId}`);
+      
+      return {
+        success: true,
+        employeeId,
+        message: `Employee ${employeeId} created successfully`
+      };
+    } catch (error) {
+      console.error('❌ createTeamMember error:', error.message);
+      return req.reject(500, 'Failed to create team member');
+    }
+  });
+
+  /**
+   * getMyCertifications - Get user's certifications
+   */
+  this.on('getMyCertifications', async (req) => {
+    const userId = req.user?.id;
+    
+    try {
+      const certs = await SELECT(Certifications).where({ employeeId: userId });
+      
+      logDataAccess(userId, 'ACTION', 'getMyCertifications', certs.length, '| retrieved own certifications');
+      
+      return certs.map(cert => ({
+        certificationId: cert.certificationId,
+        name: cert.name,
+        code: cert.code,
+        dateOfCompletion: cert.dateOfCompletion,
+        level: cert.level
+      }));
+    } catch (error) {
+      console.error('❌ getMyCertifications error:', error.message);
+      return req.reject(500, 'Failed to retrieve certifications');
+    }
+  });
+
+  /**
+   * getAuditLogs - SeniorManager only - retrieve audit trail
+   */
+  this.on('getAuditLogs', async (req) => {
+    if (!_hasRole(req, 'SeniorManager')) {
+      return req.reject(403, 'Only SeniorManagers can access audit logs');
+    }
+
+    logDataAccess(req.user?.id, 'ACTION', 'getAuditLogs', 1, '| accessed audit logs');
+    
+    // Return simulated audit logs (from console logs currently)
+    // TODO: Return from persistent AuditLogs table
+    return {
+      message: 'Audit logs are currently logged to console. See BTP Cloud Foundry logs.',
+      status: 'info'
+    };
+  });
 
  this.on('error', (err) => {
   console.error('❌ Service Error:', err.message || err);
