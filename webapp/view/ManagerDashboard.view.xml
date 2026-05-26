@@ -14,6 +14,9 @@
     <uxap:ObjectPageLayout id="managerObjectPage">
         <uxap:headerTitle>
             <uxap:ObjectPageHeader id="managerHeader" objectTitle="{currentUser>/name}" objectSubtitle="Manager Dashboard">
+                <uxap:actions>
+                    <m:Button id="managerWorkOverviewBtn" text="Current Work Overview" icon="sap-icon://work-history" press="onOpenWorkOverview"/>
+                </uxap:actions>
             </uxap:ObjectPageHeader>
         </uxap:headerTitle>
 

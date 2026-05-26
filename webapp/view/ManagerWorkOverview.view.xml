@@ -1,0 +1,142 @@
+<mvc:View
+    controllerName="skillsphere.controller.ManagerWorkOverview"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:core="sap.ui.core"
+    displayBlock="true">
+
+    <m:Page id="managerWorkOverviewPage" class="smWorkOverviewPage" title="Current Work Overview" showNavButton="true" navButtonPress="onNavBack" enableScrolling="true">
+        <m:content>
+            <m:VBox class="sapUiResponsiveContentPadding sapUiMediumMarginBottom smWorkOverviewWrapper" fitContainer="true">
+                <m:Toolbar class="sapUiSmallMarginBottom smWorkOverviewToolbar">
+                    <m:Title text="Employee Work Distribution - Projects, Evaluations &amp; Initiatives" level="H2"/>
+                    <m:ToolbarSpacer/>
+                    <core:Icon src="sap-icon://work-history" size="1.2rem" color="#6a6d70"/>
+                </m:Toolbar>
+
+                <m:Panel class="sapUiMediumMargin smWorkOverviewPanel" backgroundDesign="Solid" width="97%">
+                    <m:headerToolbar>
+                        <m:OverflowToolbar>
+                            <m:Title text="Employee Work Allocation Matrix" level="H3"/>
+                            <m:ToolbarSpacer/>
+                            <m:Label text="T-Level:" class="sapUiSmallMarginEnd"/>
+                            <m:MultiComboBox id="woTLevelFilter" width="12rem" selectionChange="onWorkOverviewFilterChange">
+                                <core:Item key="T5" text="T5"/>
+                                <core:Item key="T4" text="T4"/>
+                                <core:Item key="T3" text="T3"/>
+                                <core:Item key="T2" text="T2"/>
+                                <core:Item key="T1" text="T1"/>
+                            </m:MultiComboBox>
+                            <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
+                            <m:Label text="Technology:" class="sapUiSmallMarginEnd"/>
+                            <m:MultiComboBox id="woTechFilter" width="12rem" selectionChange="onWorkOverviewFilterChange">
+                                <core:Item key="S/4HANA" text="S/4HANA"/>
+                                <core:Item key="BTP" text="BTP"/>
+                                <core:Item key="Data Science" text="Data Science"/>
+                            </m:MultiComboBox>
+                            <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
+                            <m:SearchField id="woSearchField" width="18rem" placeholder="Search by name or ID..." search="onSearchWorkOverview" showSearchButton="true"/>
+                        </m:OverflowToolbar>
+                    </m:headerToolbar>
+                    <m:content>
+                        <m:ScrollContainer height="auto" width="100%" horizontal="true" vertical="false">
+                            <m:VBox id="workOverviewTableContainer"/>
+                        </m:ScrollContainer>
+                    </m:content>
+                </m:Panel>
+            </m:VBox>
+        </m:content>
+
+        <!-- AI Assistant Floating Button -->
+        <m:Button
+            icon="sap-icon://message-assistant"
+            text="AI Assistant"
+            type="Emphasized"
+            press="onOpenAIAssistant"
+            class="aiAssistantFloatingButton"
+            tooltip="Open AI Assistant"/>
+
+        <!-- AI Assistant Dialog -->
+        <m:Dialog
+            id="aiAssistantDialogWorkOverview"
+            title="SkillSphere AI Assistant - Manager"
+            contentWidth="750px"
+            contentHeight="800px"
+            class="aiAssistantDialog"
+            resizable="true"
+            draggable="true">
+
+            <m:customHeader>
+                <m:Bar>
+                    <m:contentLeft>
+                        <core:Icon src="sap-icon://discussion" size="1.5rem" class="sapUiTinyMarginBegin"/>
+                        <m:Title text="AI Assistant" class="sapUiTinyMarginBegin"/>
+                    </m:contentLeft>
+                    <m:contentRight>
+                        <m:Button icon="sap-icon://decline" press="onCloseAIDialog" tooltip="Close"/>
+                    </m:contentRight>
+                </m:Bar>
+            </m:customHeader>
+
+            <m:content>
+                <m:VBox height="100%" width="100%" class="aiAssistantContent">
+
+                    <!-- Chat Messages Area -->
+                    <m:ScrollContainer
+                        id="chatContainerWorkOverview"
+                        height="100%"
+                        vertical="true"
+                        horizontal="false"
+                        class="aiChatScrollArea">
+                        <m:VBox id="messagesContainerWorkOverview" width="100%" class="aiMessagesContainer"/>
+                    </m:ScrollContainer>
+
+                    <!-- Quick Action Buttons -->
+                    <m:HBox justifyContent="Center" class="aiQuickActionsBar">
+                        <m:Button
+                            text="Availability?"
+                            icon="sap-icon://org-chart"
+                            press="onQuickAction"
+                            class="sapUiTinyMarginEnd"
+                            type="Emphasized"/>
+                        <m:Button
+                            text="Allocation"
+                            icon="sap-icon://work-history"
+                            press="onQuickAction"
+                            class="sapUiTinyMarginEnd"
+                            type="Emphasized"/>
+                        <m:Button
+                            text="Team Summary"
+                            icon="sap-icon://learning-assistant"
+                            press="onQuickAction"
+                            type="Emphasized"/>
+                    </m:HBox>
+
+                </m:VBox>
+            </m:content>
+
+            <m:footer>
+                <m:Toolbar class="aiInputBar">
+                    <m:Button text="Clear Chat" press="onClearChat" icon="sap-icon://refresh"/>
+                    <m:ToolbarSpacer/>
+                    <m:Input
+                        id="messageInputWorkOverview"
+                        placeholder="Ask me about your team..."
+                        submit="onSendMessage"
+                        class="aiMessageInput aiMessageInputGrow">
+                        <m:layoutData>
+                            <m:ToolbarLayoutData shrinkable="true" minWidth="12rem" maxWidth="100%"/>
+                        </m:layoutData>
+                    </m:Input>
+                    <m:Button
+                        icon="sap-icon://paper-plane"
+                        type="Emphasized"
+                        press="onSendMessage"
+                        tooltip="Send Message"
+                        class="aiSendButton"/>
+                </m:Toolbar>
+            </m:footer>
+
+        </m:Dialog>
+    </m:Page>
+</mvc:View>

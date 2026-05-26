@@ -168,6 +168,11 @@
           "target": ["TargetSeniorManagerWorkOverview"]
         },
         {
+          "name": "ManagerWorkOverview",
+          "pattern": "manager-work-overview/{managerId}",
+          "target": ["TargetManagerWorkOverview"]
+        },
+        {
           "name": "ManagerTeamView",
           "pattern": "manager-team-view/{managerId}/{seniorManagerId}:?query:",
           "target": ["TargetManagerTeamView"]
@@ -209,6 +214,10 @@
         "TargetSeniorManagerWorkOverview": {
           "id": "SeniorManagerWorkOverview",
           "name": "SeniorManagerWorkOverview"
+        },
+        "TargetManagerWorkOverview": {
+          "id": "ManagerWorkOverview",
+          "name": "ManagerWorkOverview"
         },
         "TargetManagerTeamView": {
           "id": "ManagerTeamView",
