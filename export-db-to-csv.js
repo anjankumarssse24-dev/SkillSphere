@@ -1,12 +1,27 @@
 /**
- * Export SQLite database to CSV files
- * This script exports all tables from db.sqlite to CSV files in db/data/ folder
- * Uses CAP's built-in database connection
+ * Export SQLite database to CSV files - SECURITY RESTRICTED
+ * 
+ * ⚠️ IMPORTANT:
+ * - This script is DISABLED in production (NODE_ENV=production)
+ * - Sensitive organizational hierarchy data (tLevel, gradeLevel, managerId) is INTENTIONALLY EXCLUDED
+ * - Only essential business data is exported
+ * - Password fields are NEVER exported
  */
 
 const cds = require('@sap/cds');
 const fs = require('fs');
 const path = require('path');
+
+// ========== SECURITY CHECK ==========
+if (process.env.NODE_ENV === 'production') {
+    console.error('\n❌ SECURITY POLICY VIOLATION: CSV export is DISABLED in production');
+    console.error('Reason: Prevents bulk PII exposure');
+    console.error('Action: Contact system administrator for authorized data exports');
+    process.exit(1);
+}
+
+console.log('\n⚠️  WARNING: Running in development mode - sensitive data will be exported');
+console.log('Never commit exported CSV files to version control\n');
 
 // CSV directory
 const csvDir = path.join(__dirname, 'db', 'data');
@@ -17,12 +32,15 @@ if (!fs.existsSync(csvDir)) {
 }
 
 // Entity to CSV file mapping
+// ⚠️ SECURITY: tLevel, gradeLevel, managerId are EXCLUDED
+// These fields reveal organizational hierarchy and are confidential
 const entityMappings = [
     { entity: 'skillsphere.Users', file: 'skillsphere-Users.csv', columns: ['id', 'role', 'isActive'] },
-    { entity: 'skillsphere.Employees', file: 'skillsphere-Employees.csv', columns: ['employeeId', 'name', 'role', 'team', 'subTeam', 'managerId', 'email', 'experience', 'totalSkills', 'totalProjects', 'location', 'tLevel', 'gradeLevel'] },
+    // EXCLUDED: tLevel, gradeLevel, managerId (organizational hierarchy - confidential)
+    { entity: 'skillsphere.Employees', file: 'skillsphere-Employees.csv', columns: ['employeeId', 'name', 'email', 'role', 'team', 'experience', 'totalSkills', 'totalProjects', 'location'] },"
     { entity: 'skillsphere.Skills', file: 'skillsphere-Skills.csv', columns: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'] },
     { entity: 'skillsphere.Projects', file: 'skillsphere-Projects.csv', columns: ['projectId', 'employeeId', 'projectName', 'role', 'startDate', 'endDate', 'status', 'description', 'duration', 'projectManager', 'accountExecutiveManager', 'lineManagerPOC', 'projectOrchestrator', 'addedByManager'] },
-    { entity: 'skillsphere.Profiles', file: 'skillsphere-Profiles.csv', columns: ['employeeId', 'specialization', 'role', 'location', 'tLevel', 'gradeLevel', 'lastUpdated'] },
+    { entity: 'skillsphere.Profiles', file: 'skillsphere-Profiles.csv', columns: ['employeeId', 'specialization', 'role', 'location', 'lastUpdated'] },
     { entity: 'skillsphere.CurrentProjects', file: 'skillsphere-CurrentProjects.csv', columns: ['currentProjectId', 'employeeId', 'projectName', 'projectManager', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'] },
     { entity: 'skillsphere.Initiatives', file: 'skillsphere-Initiatives.csv', columns: ['initiativeId', 'employeeId', 'initiativeName', 'description', 'startDate', 'endDate', 'hoursPerDay', 'status', 'type', 'createdAt', 'lastUpdated'] },
     { entity: 'skillsphere.CAIAUtilization', file: 'skillsphere-CAIAUtilization.csv', columns: ['caiaId', 'employeeId', 'taskName', 'startDate', 'endDate', 'hoursPerDay', 'createdAt', 'lastUpdated'] },
