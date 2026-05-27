@@ -18,7 +18,7 @@ module.exports = cds.server;
 /**
  * Block metadata discovery - prevents developers from discovering data structure
  */
-cds.on('serving', (req) => {
+cds.on('serving', () => {
   cds.on('REQUEST', (req, next) => {
     // Block $metadata requests
     if (req.url.includes('$metadata')) {
@@ -31,21 +31,19 @@ cds.on('serving', (req) => {
       return req.reject(410, 'Deprecated endpoint. Use /api/v1 instead');
     }
 
-    // Block direct entity access attempts
-    const blockedPatterns = [
-      '/Employees',
-      '/Projects',
-      '/Skills',
-      '/CurrentProjects',
-      '/Initiatives',
-      '/Certifications',
-      '/Users'
+    // NOTE: UI currently relies on OData entity endpoints + batch updates.
+    // Keep a narrow hard block only for Users entity surface.
+    const blockedUserEntityPatterns = [
+      '/odata/v4/api/v1/Users',
+      '/odata/v4/api/v1/Users(',
+      '/api/v1/Users',
+      '/api/v1/Users('
     ];
 
-    for (const pattern of blockedPatterns) {
-      if (req.url.includes(pattern) && !req.url.includes('$action') && !req.url.includes('$function')) {
-        console.warn(`🚨 SECURITY: Blocked entity access attempt from ${req.user?.id} - ${req.url}`);
-        return req.reject(403, 'Direct entity access is forbidden. Use /api/v1 actions instead');
+    for (const pattern of blockedUserEntityPatterns) {
+      if (req.url.includes(pattern)) {
+        console.warn(`🚨 SECURITY: Blocked Users entity access attempt from ${req.user?.id} - ${req.url}`);
+        return req.reject(403, 'Direct Users entity access is forbidden');
       }
     }
 
@@ -71,12 +69,4 @@ cds.on('REQUEST', (req, next) => {
   return result;
 });
 
-/**
- * Disable $batch processing (to prevent complex queries)
- */
-cds.on('REQUEST', (req, next) => {
-  if (req.url.includes('$batch')) {
-    return req.reject(403, 'Batch requests are not allowed');
-  }
-  return next();
-});
+// Keep $batch enabled because UI5 OData V4 submitBatch is used across dashboards.

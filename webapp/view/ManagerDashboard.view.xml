@@ -671,7 +671,7 @@
                                             <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
                                                 <m:VBox width="48%">
                                                     <m:Label text="Reporting Manager" class="sapUiTinyMarginBottom" required="true"/>
-                                                    <m:Select selectedKey="{selfProfile>/managerId}" width="100%" class="sapUiMediumMarginBottom" items="{reportingManagers>/managers}">
+                                                    <m:Select id="managerReportingManagerSelect" selectedKey="{selfProfile>/managerId}" width="100%" class="sapUiMediumMarginBottom" items="{reportingManagers>/managers}">
                                                         <core:Item key="{reportingManagers>employeeId}" text="{reportingManagers>name} ({reportingManagers>employeeId})"/>
                                                     </m:Select>
                                                 </m:VBox>
@@ -1052,11 +1052,11 @@
                                     <m:VBox class="sapUiSmallMargin">
                                         <m:Label text="Select Project:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="assignProjectComboBox"
-                                                    items="{/Projects}"
+                                                    items="{masterProjects>/projects}"
                                                     placeholder="Select a project to assign..."
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">
-                                            <core:Item key="{projectId}" text="{projectName} - {technology}"/>
+                                            <core:Item key="{masterProjects>projectId}" text="{masterProjects>projectName} - {masterProjects>technology}"/>
                                         </m:ComboBox>
                                         <m:Label text="Role in Project:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="assignProjectRoleCombo"
@@ -1095,7 +1095,7 @@
                                     <m:VBox class="sapUiSmallMargin">
                                         <m:Label text="Select Initiative:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="assignInitiativeComboBox"
-                                                    items="{masterInitiatives>/items}"
+                                                    items="{masterInitiatives>/assignItems}"
                                                     placeholder="Select an initiative to assign..."
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">
@@ -1120,7 +1120,7 @@
                                     <m:VBox class="sapUiSmallMargin">
                                         <m:Label text="Select Evaluation:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="assignEvaluationComboBox"
-                                                    items="{masterEvaluations>/items}"
+                                                    items="{masterEvaluations>/assignItems}"
                                                     placeholder="Select an evaluation to assign..."
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">

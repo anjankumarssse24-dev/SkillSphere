@@ -39,6 +39,19 @@ export default class SeniorManagerDashboard extends Controller {
     private sharedManagerView?: XMLView;
     private sharedManagerController?: any;
 
+    private generateUuid(): string {
+        const cryptoObj: any = (globalThis as any).crypto;
+        if (cryptoObj?.randomUUID) {
+            return cryptoObj.randomUUID();
+        }
+
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === "x" ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     public onInit(): void {
         const router = this.getRouter();
         router.getRoute("SeniorManagerDashboard")?.attachPatternMatched(this.onRouteMatched, this);
@@ -517,20 +530,15 @@ export default class SeniorManagerDashboard extends Controller {
             // Load all employees
             const employeesBinding = oDataModel.bindList("/Employees");
             const employeeContexts = await employeesBinding.requestContexts(0, 1000);
-            const allEmployees = employeeContexts.map((ctx: any) => ctx.getObject())
-                .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
+            const allEmployees = employeeContexts
+                .map((ctx: any) => ctx.getObject())
+                .filter((emp: any) => !!emp.employeeId);
             
-            // Load all profiles for T-Level (filter only T3 and T4)
+            // Load all profiles for T-Level and specialization display
             const profilesBinding = oDataModel.bindList("/Profiles");
             const profileContexts = await profilesBinding.requestContexts(0, 1000);
             const profiles = profileContexts.map((ctx: any) => ctx.getObject());
             const profileMap = new Map(profiles.map((p: any) => [p.employeeId, p]));
-            
-            // Filter only T3 and T4 employees
-            const seniorEmployees = allEmployees.filter((emp: any) => {
-                const profile: any = profileMap.get(emp.employeeId);
-                return profile?.tLevel === 'T3' || profile?.tLevel === 'T4';
-            });
             
             // Load all current projects
             const cpBinding = oDataModel.bindList("/CurrentProjects");
@@ -598,7 +606,7 @@ export default class SeniorManagerDashboard extends Controller {
             let maxEvaluations = 0;
             let maxInitiatives = 0;
             
-            const employeeWorkData = seniorEmployees.map((emp: any) => {
+            const employeeWorkData = allEmployees.map((emp: any) => {
                 const profile: any = profileMap.get(emp.employeeId);
                 const projects = workByEmployee.get(emp.employeeId) || [];
                 const evaluations = evalsByEmployee.get(emp.employeeId) || [];
@@ -669,7 +677,7 @@ export default class SeniorManagerDashboard extends Controller {
             // Rebuild table columns dynamically
             this.rebuildWorkOverviewColumns(maxProjects, maxEvaluations, maxInitiatives);
             
-            console.log(`✅ Work overview loaded for ${employeesOverview.length} senior employees (T3/T4 only)`);
+            console.log(`✅ Work overview loaded for ${employeesOverview.length} employees`);
             
         } catch (error) {
             console.error("❌ Error loading work overview:", error);
@@ -879,22 +887,34 @@ export default class SeniorManagerDashboard extends Controller {
     public async onViewManagerTeam(event: any): Promise<void> {
         const source = event.getSource();
         const bindingContext = source.getBindingContext("allManagers");
-        const manager = bindingContext.getObject();
-        
-        console.log("📋 Navigating to team view for manager:", manager.managerId);
-        
-        // Get the current senior manager ID
-        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
-        const currentUser = currentUserModel?.getData();
-        const seniorMgrId = this.currentSeniorManagerId || currentUser?.id;
-        
-        // Navigate to the new Manager Team View page
-        this.getRouter().navTo("ManagerTeamView", {
-            managerId: manager.managerId,
-            seniorManagerId: seniorMgrId
-        });
-        
-        MessageToast.show(`Loading ${manager.name}'s team dashboard...`);
+        const manager = bindingContext?.getObject();
+
+        if (!manager?.managerId) {
+            MessageToast.show("Manager information not found");
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const employeesBinding = oDataModel.bindList("/Employees");
+            employeesBinding.filter([new Filter("managerId", FilterOperator.EQ, manager.managerId)]);
+            const teamContexts = await employeesBinding.requestContexts(0, 1000);
+            const teamMembers = teamContexts.map((ctx: any) => ctx.getObject());
+
+            this.getView()?.setModel(new JSONModel({
+                managerName: manager.name || "Manager",
+                managerId: manager.managerId,
+                employees: teamMembers
+            }), "managerTeamDetails");
+
+            const dialog = this.byId("managerTeamDialog") as Dialog;
+            dialog?.open();
+
+            MessageToast.show(`Loaded ${teamMembers.length} team member(s) for ${manager.name}`);
+        } catch (error) {
+            console.error("❌ Error loading manager team details:", error);
+            MessageToast.show("Error loading manager team details");
+        }
     }
 
     public onCloseManagerTeamDialog(): void {
@@ -1499,9 +1519,11 @@ export default class SeniorManagerDashboard extends Controller {
 
             const listBinding = oDataModel.bindList(isInitiative ? "/CurrentInitiatives" : "/CurrentEvaluations");
             const now = new Date().toISOString();
+            let createdContext: any;
 
             if (isInitiative) {
-                listBinding.create({
+                createdContext = listBinding.create({
+                    currentInitiativeId: this.generateUuid(),
                     employeeId: this.currentDialogEmployeeId,
                     initiativeId: selected.initiativeId,
                     initiativeName: selected.initiativeName,
@@ -1513,9 +1535,10 @@ export default class SeniorManagerDashboard extends Controller {
                     assignedBy: this.currentSeniorManagerId || "",
                     createdAt: now,
                     lastUpdated: now
-                });
+                }, true);
             } else {
-                listBinding.create({
+                createdContext = listBinding.create({
+                    currentEvaluationId: this.generateUuid(),
                     employeeId: this.currentDialogEmployeeId,
                     evaluationId: selected.evaluationId,
                     evaluationName: selected.evaluationName,
@@ -1527,19 +1550,106 @@ export default class SeniorManagerDashboard extends Controller {
                     assignedBy: this.currentSeniorManagerId || "",
                     createdAt: now,
                     lastUpdated: now
-                });
+                }, true);
             }
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await createdContext?.created?.();
 
             comboBox?.setSelectedKey("");
             allocationInput?.setValue(100);
 
+            await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
             await this.openEmployeeDetailsDialog({ employeeId: this.currentDialogEmployeeId });
             MessageToast.show(`${type} assigned successfully`);
         } catch (error) {
             console.error(`❌ Error assigning ${type.toLowerCase()} from senior manager panel:`, error);
             MessageToast.show(`Error assigning ${type.toLowerCase()}`);
+        }
+    }
+
+    public async onAssignProjectFromPanel(): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Select an employee first");
+            return;
+        }
+
+        const projectCombo = this.byId("smgrAssignProjectComboBox") as any;
+        const roleCombo = this.byId("smgrAssignProjectRoleCombo") as any;
+        const allocationInput = this.byId("smgrAssignProjectAllocationInput") as any;
+
+        const projectId = String(projectCombo?.getSelectedKey?.() || "").trim();
+        if (!projectId) {
+            MessageToast.show("Please select a project to assign");
+            return;
+        }
+
+        const role = String(roleCombo?.getSelectedKey?.() || "Team Member");
+        const allocationValue = Number(allocationInput?.getValue?.() ?? 100);
+        const utilizationPercent = Math.max(1, Math.min(100, Math.round(allocationValue || 0)));
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            const projectsBinding = oDataModel.bindList("/Projects");
+            projectsBinding.filter([new Filter("projectId", FilterOperator.EQ, projectId)]);
+            const projectContexts = await projectsBinding.requestContexts(0, 1);
+            if (projectContexts.length === 0) {
+                MessageToast.show("Project not found");
+                return;
+            }
+
+            const project = projectContexts[0].getObject();
+            if (String(project.status || "").toLowerCase() === "completed") {
+                MessageToast.show("Completed projects cannot be assigned");
+                return;
+            }
+
+            const duplicateBinding = oDataModel.bindList("/CurrentProjects");
+            duplicateBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, this.currentDialogEmployeeId),
+                new Filter("projectName", FilterOperator.EQ, project.projectName)
+            ]);
+            const dupContexts = await duplicateBinding.requestContexts(0, 1);
+            if (dupContexts.length > 0) {
+                MessageToast.show("This project is already assigned to this employee");
+                return;
+            }
+
+            const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
+            const createdContext = currentProjectsBinding.create({
+                currentProjectId: this.generateUuid(),
+                employeeId: this.currentDialogEmployeeId,
+                type: "Project",
+                projectName: project.projectName,
+                role,
+                projectManager: project.projectManager || "",
+                region: project.region || "",
+                technology: project.technology || "",
+                startDate: project.startDate,
+                endDate: project.endDate,
+                utilizationPercent,
+                description: project.description || "",
+                assignmentStatus: "Assigned",
+                assignedBy: this.currentSeniorManagerId || "",
+                isEvaluation: false,
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            }, true);
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await createdContext?.created?.();
+
+            projectCombo?.setSelectedKey("");
+            roleCombo?.setSelectedKey("Team Member");
+            allocationInput?.setValue(100);
+
+            await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
+            await this.openEmployeeDetailsDialog({ employeeId: this.currentDialogEmployeeId });
+            MessageToast.show("Project assigned successfully");
+        } catch (error) {
+            console.error("❌ Error assigning project from senior manager panel:", error);
+            MessageToast.show("Error assigning project");
         }
     }
 
@@ -1549,6 +1659,20 @@ export default class SeniorManagerDashboard extends Controller {
 
     public async onAssignEvaluationFromPanel(): Promise<void> {
         await this.assignMasterWorkFromPanel("Evaluation");
+    }
+
+    private async refreshEmployeeAssignments(employeeId: string): Promise<void> {
+        const detailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+        if (!detailsModel) return;
+
+        const assignments = await this.getCurrentProjects(employeeId);
+        detailsModel.setProperty("/assignments", assignments);
+        detailsModel.setProperty(
+            "/currentProjects",
+            assignments
+                .filter((cp: any) => cp.assignmentStatus !== "Completed")
+                .map((cp: any) => ({ ...cp, isUtilizationEditing: false }))
+        );
     }
 
     public onContactEmployee(): void {

@@ -24,6 +24,8 @@ const cds = require('@sap/cds');
 const AICoreClient = require('./utils/aicore-client-orchestration');
 
 module.exports = cds.service.impl(async function() {
+  const dbEntities = cds.entities('skillsphere') || cds.entities || {};
+  const DbEmployees = dbEntities?.Employees;
   const { 
     Users, Employees, Skills, Projects, Profiles,
     CurrentProjects, InitiativesMaster, EvaluationsMaster, CurrentInitiatives, CurrentEvaluations,
@@ -149,6 +151,152 @@ module.exports = cds.service.impl(async function() {
     return aiClient;
   }
 
+  async function _getSeniorManagerOrgEmployeeIds(seniorManagerId) {
+    if (!seniorManagerId || !DbEmployees) {
+      return [seniorManagerId].filter(Boolean);
+    }
+
+    const managerRows = await SELECT.from(DbEmployees)
+      .columns('employeeId')
+      .where({ managerId: seniorManagerId, role: 'Manager' });
+    const managerIds = managerRows.map(row => row.employeeId).filter(Boolean);
+
+    const directEmployeeRows = await SELECT.from(DbEmployees)
+      .columns('employeeId')
+      .where({ managerId: seniorManagerId, role: 'Employee' });
+    const directEmployeeIds = directEmployeeRows.map(row => row.employeeId).filter(Boolean);
+
+    const indirectEmployeeRows = managerIds.length > 0
+      ? await SELECT.from(DbEmployees)
+          .columns('employeeId')
+          .where({ managerId: { in: managerIds }, role: 'Employee' })
+      : [];
+    const indirectEmployeeIds = indirectEmployeeRows.map(row => row.employeeId).filter(Boolean);
+
+    return Array.from(new Set([
+      seniorManagerId,
+      ...managerIds,
+      ...directEmployeeIds,
+      ...indirectEmployeeIds
+    ].filter(Boolean)));
+  }
+
+  async function _resolveActorEmployeeId(req) {
+    if (Object.prototype.hasOwnProperty.call(req, '_resolvedActorEmployeeId')) {
+      return req._resolvedActorEmployeeId;
+    }
+
+    const principalId = String(req.user?.id || '').trim();
+    const principalEmail = String(req.user?.attr?.email || req.user?.attr?.mail || '').trim().toLowerCase();
+
+    if (!DbEmployees) {
+      req._resolvedActorEmployeeId = principalId;
+      return req._resolvedActorEmployeeId;
+    }
+
+    if (principalEmail) {
+      const byEmail = await SELECT.one.from(DbEmployees)
+        .columns('employeeId')
+        .where({ email: principalEmail });
+      if (byEmail?.employeeId) {
+        req._resolvedActorEmployeeId = String(byEmail.employeeId).trim().toUpperCase();
+        return req._resolvedActorEmployeeId;
+      }
+    }
+
+    if (/^I\d+$/i.test(principalId)) {
+      req._resolvedActorEmployeeId = principalId.toUpperCase();
+      return req._resolvedActorEmployeeId;
+    }
+
+    const byEmployeeId = principalId
+      ? await SELECT.one.from(DbEmployees)
+          .columns('employeeId')
+          .where({ employeeId: principalId })
+      : null;
+
+    req._resolvedActorEmployeeId = byEmployeeId?.employeeId
+      ? String(byEmployeeId.employeeId).trim().toUpperCase()
+      : principalId;
+
+    return req._resolvedActorEmployeeId;
+  }
+
+  function _collectRoleFilters(whereClause, matches = []) {
+    if (!whereClause) return matches;
+    if (Array.isArray(whereClause)) {
+      for (let i = 0; i < whereClause.length; i += 1) {
+        const current = whereClause[i];
+        const next = whereClause[i + 1];
+        const nextNext = whereClause[i + 2];
+
+        const isRoleRef = current?.ref?.[0] === 'role';
+        const isEq = next === '=';
+        const roleVal = nextNext?.val;
+        if (isRoleRef && isEq && typeof roleVal === 'string') {
+          matches.push(roleVal);
+        }
+
+        if (current && typeof current === 'object') {
+          _collectRoleFilters(current.xpr, matches);
+          _collectRoleFilters(current.where, matches);
+          _collectRoleFilters(current.args, matches);
+        }
+      }
+      return matches;
+    }
+
+    if (typeof whereClause === 'object') {
+      _collectRoleFilters(whereClause.xpr, matches);
+      _collectRoleFilters(whereClause.where, matches);
+      _collectRoleFilters(whereClause.args, matches);
+    }
+    return matches;
+  }
+
+  function _isManagerDirectoryRequest(req) {
+    const whereClause = req?.query?.SELECT?.where;
+    const roleFilters = _collectRoleFilters(whereClause)
+      .map(role => String(role || '').trim().toLowerCase())
+      .filter(Boolean);
+
+    if (!roleFilters.length) return false;
+
+    const allowed = new Set(['manager', 'seniormanager']);
+    return roleFilters.every(role => allowed.has(role));
+  }
+
+  function _hasFieldPredicate(whereClause, fieldName) {
+    if (!whereClause) return false;
+
+    if (Array.isArray(whereClause)) {
+      for (const token of whereClause) {
+        if (token?.ref?.[0] === fieldName) return true;
+        if (token && typeof token === 'object') {
+          if (_hasFieldPredicate(token.xpr, fieldName)) return true;
+          if (_hasFieldPredicate(token.where, fieldName)) return true;
+          if (_hasFieldPredicate(token.args, fieldName)) return true;
+        }
+      }
+      return false;
+    }
+
+    if (typeof whereClause === 'object') {
+      return (
+        _hasFieldPredicate(whereClause.xpr, fieldName)
+        || _hasFieldPredicate(whereClause.where, fieldName)
+        || _hasFieldPredicate(whereClause.args, fieldName)
+      );
+    }
+
+    return false;
+  }
+
+  function _isManagerProjectCatalogRequest(req) {
+    const whereClause = req?.query?.SELECT?.where;
+    return _hasFieldPredicate(whereClause, 'addedByManager');
+  }
+
   // ========== DATA FILTERING & SECURITY HANDLERS ==========
   
   /**
@@ -172,37 +320,49 @@ module.exports = cds.service.impl(async function() {
    * - SeniorManagers: See all employees (for internal operations)
    */
   this.before(['READ', 'UPDATE'], Employees, async (req) => {
-    const userRole = req.user?.attr?.role || '';
-    const userId = req.user?.id || '';
+    const userId = await _resolveActorEmployeeId(req);
+
+    if (req.event === 'READ' && _isManagerDirectoryRequest(req)) {
+      req.query.where({ role: { in: ['Manager', 'SeniorManager'] } });
+      return;
+    }
     
     if (_hasRole(req, 'Employee')) {
       // Employees can only see their own data
       req.query.where({ employeeId: userId });
     } else if (_hasRole(req, 'Manager')) {
       // Managers can see their reports + themselves
-      req.query.where(q => q
-        .where('managerId =', userId)
-        .or('employeeId =', userId)
-      );
+      req.query.where([
+        { ref: ['managerId'] }, '=', { val: userId },
+        'or',
+        { ref: ['employeeId'] }, '=', { val: userId }
+      ]);
+    } else if (_hasRole(req, 'SeniorManager')) {
+      // Senior managers can only see their organization (direct managers, direct/indirect employees, and themselves).
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(userId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
-    // SeniorManagers see all data (no filter)
   });
 
   /**
    * Filter Skills data based on employee ownership
    */
   this.before(['READ', 'UPDATE'], Skills, async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
-      req.query.where({ employeeId: req.user?.id });
+      req.query.where({ employeeId: actorEmployeeId });
     } else if (_hasRole(req, 'Manager')) {
       // Managers can see skills of their team members
-      const manager = await SELECT.one(Employees, e => e('*')).where({ employeeId: req.user?.id });
+      const manager = await SELECT.one(Employees, e => e('*')).where({ employeeId: actorEmployeeId });
       if (manager) {
-        const teamIds = [req.user?.id];
-        const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+        const teamIds = [actorEmployeeId];
+        const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
         team.forEach(emp => teamIds.push(emp.employeeId));
-        req.query.where(s => s.where('employeeId in', teamIds));
+        req.query.where({ employeeId: { in: teamIds } });
       }
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -210,14 +370,23 @@ module.exports = cds.service.impl(async function() {
    * Filter Projects data based on employee ownership
    */
   this.before(['READ', 'UPDATE'], Projects, async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
-      req.query.where({ employeeId: req.user?.id });
+      req.query.where({ employeeId: actorEmployeeId });
     } else if (_hasRole(req, 'Manager')) {
+      if (req.event === 'READ' && _isManagerProjectCatalogRequest(req)) {
+        req.query.where({ addedByManager: actorEmployeeId });
+        return;
+      }
+
       // Managers can see projects of their team members
-      const teamIds = [req.user?.id];
-      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      const teamIds = [actorEmployeeId];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
-      req.query.where(p => p.where('employeeId in', teamIds));
+      req.query.where({ employeeId: { in: teamIds } });
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -225,13 +394,17 @@ module.exports = cds.service.impl(async function() {
    * Filter CurrentProjects based on user role
    */
   this.before(['READ', 'UPDATE'], CurrentProjects, async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
-      req.query.where({ employeeId: req.user?.id });
+      req.query.where({ employeeId: actorEmployeeId });
     } else if (_hasRole(req, 'Manager')) {
-      const teamIds = [req.user?.id];
-      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      const teamIds = [actorEmployeeId];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
-      req.query.where(cp => cp.where('employeeId in', teamIds));
+      req.query.where({ employeeId: { in: teamIds } });
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -239,13 +412,17 @@ module.exports = cds.service.impl(async function() {
    * Filter Initiatives, CAIAUtilization, POCUtilization based on user role
    */
   this.before(['READ', 'UPDATE'], [Initiatives, CAIAUtilization, POCUtilization], async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
-      req.query.where({ employeeId: req.user?.id });
+      req.query.where({ employeeId: actorEmployeeId });
     } else if (_hasRole(req, 'Manager')) {
-      const teamIds = [req.user?.id];
-      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      const teamIds = [actorEmployeeId];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
-      req.query.where(e => e.where('employeeId in', teamIds));
+      req.query.where({ employeeId: { in: teamIds } });
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -253,13 +430,17 @@ module.exports = cds.service.impl(async function() {
    * Filter Certifications based on employee ownership
    */
   this.before(['READ', 'UPDATE'], Certifications, async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
-      req.query.where({ employeeId: req.user?.id });
+      req.query.where({ employeeId: actorEmployeeId });
     } else if (_hasRole(req, 'Manager')) {
-      const teamIds = [req.user?.id];
-      const team = await SELECT(Employees, e => e('*')).where({ managerId: req.user?.id });
+      const teamIds = [actorEmployeeId];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
-      req.query.where(c => c.where('employeeId in', teamIds));
+      req.query.where({ employeeId: { in: teamIds } });
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -1028,6 +1209,42 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
   });
 
   /**
+   * CurrentInitiatives - Assign UUID key and timestamps
+   */
+  this.before('CREATE', 'CurrentInitiatives', async (req) => {
+    ensureUuidKey(req, 'currentInitiativeId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
+  });
+
+  /**
+   * CurrentEvaluations - Assign UUID key and timestamps
+   */
+  this.before('CREATE', 'CurrentEvaluations', async (req) => {
+    ensureUuidKey(req, 'currentEvaluationId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
+  });
+
+  /**
+   * InitiativesMaster - Assign UUID key and timestamps
+   */
+  this.before('CREATE', 'InitiativesMaster', async (req) => {
+    ensureUuidKey(req, 'initiativeId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
+  });
+
+  /**
+   * EvaluationsMaster - Assign UUID key and timestamps
+   */
+  this.before('CREATE', 'EvaluationsMaster', async (req) => {
+    ensureUuidKey(req, 'evaluationId');
+    req.data.createdAt = req.data.createdAt || new Date().toISOString();
+    req.data.lastUpdated = new Date().toISOString();
+  });
+
+  /**
    * Initiatives - Assign collision-safe UUID key and timestamps
    */
   this.before('CREATE', 'Initiatives', async (req) => {
@@ -1239,7 +1456,7 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    * getTeamMembers - Get team members (Manager + SeniorManager only)
    */
   this.on('getTeamMembers', async (req) => {
-    const managerId = req.user?.id;
+    const managerId = await _resolveActorEmployeeId(req);
     
     if (!_hasRole(req, 'Manager') && !_hasRole(req, 'SeniorManager')) {
       return req.reject(403, 'Only managers can access team data');
@@ -1346,7 +1563,7 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    * createTeamMember - Manager creates new team member
    */
   this.on('createTeamMember', async (req) => {
-    const managerId = req.user?.id;
+    const managerId = await _resolveActorEmployeeId(req);
     const { employeeId, name, email, team, location } = req.data;
     
     if (!_hasRole(req, 'Manager') && !_hasRole(req, 'SeniorManager')) {

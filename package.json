@@ -61,11 +61,14 @@
     "requires": {
       "db": {
         "kind": "sqlite",
-        "model": "db"
+        "model": [
+          "db",
+          "srv"
+        ]
       },
       "[production]": {
         "db": {
-          "kind": "sqlite"
+          "kind": "hana"
         },
         "auth": "xsuaa"
       }

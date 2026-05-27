@@ -49,6 +49,19 @@ export default class ManagerDashboard extends Controller {
         return (this.getOwnerComponent() as any).getRouter();
     }
 
+    private generateUuid(): string {
+        const cryptoObj: any = (globalThis as any).crypto;
+        if (cryptoObj?.randomUUID) {
+            return cryptoObj.randomUUID();
+        }
+
+        return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+            const r = Math.random() * 16 | 0;
+            const v = c === "x" ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    }
+
     public onOpenWorkOverview(): void {
         if (!this.currentManagerId) {
             MessageToast.show("Manager information not found");
@@ -357,6 +370,14 @@ export default class ManagerDashboard extends Controller {
 
             const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
             const profileData = selfProfileModel?.getData();
+            const managerSelect = this.byId("managerReportingManagerSelect") as any;
+            const selectedManagerId = String(
+                managerSelect?.getSelectedKey?.() || profileData?.managerId || ""
+            ).trim();
+
+            if (profileData) {
+                profileData.managerId = selectedManagerId;
+            }
 
             if (!profileData?.name?.trim()) {
                 MessageToast.show("Please enter your name");
@@ -377,7 +398,7 @@ export default class ManagerDashboard extends Controller {
                 return;
             }
 
-            if (!profileData?.managerId?.trim()) {
+            if (!selectedManagerId) {
                 MessageToast.show("Please select your reporting manager");
                 return;
             }
@@ -419,7 +440,7 @@ export default class ManagerDashboard extends Controller {
             employeeContext.setProperty("email", profileData.email.trim());
             employeeContext.setProperty("team", "CIS");
             employeeContext.setProperty("subTeam", normalizedSubTeam);
-            employeeContext.setProperty("managerId", String(profileData.managerId).trim());
+            employeeContext.setProperty("managerId", selectedManagerId);
             employeeContext.setProperty("experience", Number(profileData.experience || 0));
             employeeContext.setProperty("location", profileData.location.trim());
             employeeContext.setProperty("tLevel", profileData.tLevel);
@@ -2832,9 +2853,10 @@ export default class ManagerDashboard extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const isInitiative = (data.type || "Initiative") === "Initiative";
             const listBinding = oDataModel.bindList(isInitiative ? "/CurrentInitiatives" : "/CurrentEvaluations");
+            let createdContext: any;
 
             if (isInitiative) {
-                listBinding.create({
+                createdContext = listBinding.create({
                     employeeId,
                     initiativeId: data.selectedId,
                     initiativeName: String(data.name).trim(),
@@ -2848,7 +2870,7 @@ export default class ManagerDashboard extends Controller {
                     lastUpdated: new Date().toISOString()
                 });
             } else {
-                listBinding.create({
+                createdContext = listBinding.create({
                     employeeId,
                     evaluationId: data.selectedId,
                     evaluationName: String(data.name).trim(),
@@ -2864,6 +2886,7 @@ export default class ManagerDashboard extends Controller {
             }
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await createdContext?.created?.();
             this.managerAssignWorkDialog?.close();
             await this.refreshCurrentDialogData();
             await this.refreshEmployeeAssignments(employeeId);
@@ -2920,11 +2943,13 @@ export default class ManagerDashboard extends Controller {
                 });
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await masterCtx.created();
             const createdMaster = masterCtx.getObject();
 
             const currentBinding = oDataModel.bindList(isInitiative ? "/CurrentInitiatives" : "/CurrentEvaluations");
+            let currentCtx: any;
             if (isInitiative) {
-                currentBinding.create({
+                currentCtx = currentBinding.create({
                     employeeId,
                     initiativeId: createdMaster?.initiativeId,
                     initiativeName: String(data.name).trim(),
@@ -2938,7 +2963,7 @@ export default class ManagerDashboard extends Controller {
                     lastUpdated: new Date().toISOString()
                 });
             } else {
-                currentBinding.create({
+                currentCtx = currentBinding.create({
                     employeeId,
                     evaluationId: createdMaster?.evaluationId,
                     evaluationName: String(data.name).trim(),
@@ -2954,6 +2979,7 @@ export default class ManagerDashboard extends Controller {
             }
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await currentCtx?.created?.();
             this.managerWorkAssignmentDialog?.close();
             await this.loadMasterWorkItems();
             await this.refreshCurrentDialogData();
@@ -4657,7 +4683,8 @@ private initializeAIChat(): void {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
             const listBinding = oDataModel.bindList("/Projects");
-            listBinding.create({
+            const createdProjectCtx = listBinding.create({
+                projectId: this.generateUuid(),
                 employeeId: "",
                 projectName: data.projectName,
                 role: "",
@@ -4675,10 +4702,10 @@ private initializeAIChat(): void {
                 projectOrchestrator: data.projectOrchestrator || "",
                 technology: data.technology || "",
                 addedByManager: this.currentManagerId || ""
-            });
+            }, true);
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-            await new Promise(resolve => setTimeout(resolve, 600));
+            await createdProjectCtx.created();
 
             MessageToast.show("Project created successfully");
             this.createMasterProjectDialog?.close();
@@ -4837,21 +4864,50 @@ private initializeAIChat(): void {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const initiativesBinding = oDataModel.bindList("/InitiativesMaster");
-            initiativesBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
+            const scopedInitiativesBinding = oDataModel.bindList("/InitiativesMaster");
+            scopedInitiativesBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
 
-            const evaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
-            evaluationsBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
+            const scopedEvaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
+            scopedEvaluationsBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
 
-            const [initiativeContexts, evaluationContexts] = await Promise.all([
-                initiativesBinding.requestContexts(0, 1000),
-                evaluationsBinding.requestContexts(0, 1000)
+            let [initiativeContexts, evaluationContexts] = await Promise.all([
+                scopedInitiativesBinding.requestContexts(0, 1000),
+                scopedEvaluationsBinding.requestContexts(0, 1000)
             ]);
+
+            // Backward-compatibility fallback: if manager-scoped catalogs are empty due legacy IDs,
+            // surface active global catalogs so assign dropdowns do not appear blank.
+            if (initiativeContexts.length === 0 && evaluationContexts.length === 0) {
+                const allInitiativesBinding = oDataModel.bindList("/InitiativesMaster");
+                const allEvaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
+
+                [initiativeContexts, evaluationContexts] = await Promise.all([
+                    allInitiativesBinding.requestContexts(0, 1000),
+                    allEvaluationsBinding.requestContexts(0, 1000)
+                ]);
+            }
+
             const initiatives = initiativeContexts.map((ctx: any) => ctx.getObject());
             const evaluations = evaluationContexts.map((ctx: any) => ctx.getObject());
 
-            this.getView()?.setModel(new JSONModel({ items: initiatives, allItems: initiatives }), "masterInitiatives");
-            this.getView()?.setModel(new JSONModel({ items: evaluations, allItems: evaluations }), "masterEvaluations");
+            initiatives.sort((a: any, b: any) => String(a?.initiativeName || "").localeCompare(String(b?.initiativeName || "")));
+            evaluations.sort((a: any, b: any) => String(a?.evaluationName || "").localeCompare(String(b?.evaluationName || "")));
+
+            const assignInitiatives = initiatives
+                .filter((item: any) => String(item?.status || "").toLowerCase() !== "completed");
+            const assignEvaluations = evaluations
+                .filter((item: any) => String(item?.status || "").toLowerCase() !== "completed");
+
+            this.getView()?.setModel(new JSONModel({
+                items: initiatives,
+                allItems: initiatives,
+                assignItems: assignInitiatives
+            }), "masterInitiatives");
+            this.getView()?.setModel(new JSONModel({
+                items: evaluations,
+                allItems: evaluations,
+                assignItems: assignEvaluations
+            }), "masterEvaluations");
         } catch (error) {
             console.error("❌ Error loading master work items:", error);
             this.getView()?.setModel(new JSONModel({ items: [], allItems: [] }), "masterInitiatives");
@@ -5166,7 +5222,8 @@ private initializeAIChat(): void {
             
             // Create project in Projects master data
             const listBinding = oDataModel.bindList("/Projects");
-            listBinding.create({
+            const createdProjectCtx = listBinding.create({
+                projectId: this.generateUuid(),
                 employeeId: employeeId,
                 projectName: data.projectName,
                 role: "",
@@ -5183,11 +5240,12 @@ private initializeAIChat(): void {
                 projectOrchestrator: data.projectOrchestrator || "",
                 technology: data.technology || "",
                 addedByManager: this.currentManagerId || "Manager"
-            });
+            }, true);
 
             // Also create assignment in CurrentProjects for Gantt Chart visibility
             const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
-            currentProjectsBinding.create({
+            const createdCurrentProjectCtx = currentProjectsBinding.create({
+                currentProjectId: this.generateUuid(),
                 employeeId: employeeId,
                 type: "Project",
                 projectName: data.projectName,
@@ -5203,10 +5261,11 @@ private initializeAIChat(): void {
                 technology: data.technology || "",
                 createdAt: new Date().toISOString(),
                 lastUpdated: new Date().toISOString()
-            });
+            }, true);
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-            await new Promise(resolve => setTimeout(resolve, 600));
+            await createdProjectCtx.created();
+            await createdCurrentProjectCtx.created();
 
             MessageToast.show("Project added successfully");
             this.managerAddProjectDialog?.close();
@@ -5256,7 +5315,8 @@ private initializeAIChat(): void {
             
             // Manager assignment is final and immediately active for the employee.
             const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
-            currentProjectsBinding.create({
+            const createdAssignmentCtx = currentProjectsBinding.create({
+                currentProjectId: this.generateUuid(),
                 employeeId: employeeId,
                 type: "Project",
                 projectName: project.projectName,
@@ -5272,10 +5332,10 @@ private initializeAIChat(): void {
                 isEvaluation: false,
                 createdAt: new Date().toISOString(),
                 lastUpdated: new Date().toISOString()
-            });
+            }, true);
             
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await createdAssignmentCtx.created();
             
             MessageToast.show(`Project "${project.projectName}" assigned successfully.`);
             
@@ -5407,8 +5467,10 @@ private initializeAIChat(): void {
             const listBinding = oDataModel.bindList(isInitiative ? "/CurrentInitiatives" : "/CurrentEvaluations");
             const now = new Date().toISOString();
 
+            let createdCtx: any;
             if (isInitiative) {
-                listBinding.create({
+                createdCtx = listBinding.create({
+                    currentInitiativeId: this.generateUuid(),
                     employeeId: this.currentDialogEmployeeId,
                     initiativeId: selected.initiativeId,
                     initiativeName: String(selected[nameField] || "").trim(),
@@ -5420,9 +5482,10 @@ private initializeAIChat(): void {
                     assignedBy: this.currentManagerId,
                     createdAt: now,
                     lastUpdated: now
-                });
+                }, true);
             } else {
-                listBinding.create({
+                createdCtx = listBinding.create({
+                    currentEvaluationId: this.generateUuid(),
                     employeeId: this.currentDialogEmployeeId,
                     evaluationId: selected.evaluationId,
                     evaluationName: String(selected[nameField] || "").trim(),
@@ -5434,14 +5497,16 @@ private initializeAIChat(): void {
                     assignedBy: this.currentManagerId,
                     createdAt: now,
                     lastUpdated: now
-                });
+                }, true);
             }
 
             await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await createdCtx.created();
 
             comboBox.setSelectedKey("");
             allocationInput?.setValue(100);
 
+            await this.loadVisualizationData();
             await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
             await this.refreshCurrentDialogData();
             await this.loadManagerData();
@@ -5522,57 +5587,18 @@ private initializeAIChat(): void {
     // Refresh assignments table in employee details dialog
     private async refreshEmployeeAssignments(employeeId: string): Promise<void> {
         try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            
-            const projectsBinding = oDataModel.bindList("/CurrentProjects");
-            projectsBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const assignments = await this.getCurrentProjects(employeeId);
 
-            const initiativesBinding = oDataModel.bindList("/CurrentInitiatives");
-            initiativesBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-
-            const evaluationsBinding = oDataModel.bindList("/CurrentEvaluations");
-            evaluationsBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-
-            const [projectContexts, initiativeContexts, evaluationContexts] = await Promise.all([
-                projectsBinding.requestContexts(),
-                initiativesBinding.requestContexts(),
-                evaluationsBinding.requestContexts()
-            ]);
-
-            const projectAssignments = projectContexts.map((ctx: any) => ctx.getObject());
-            const initiativeAssignments = initiativeContexts.map((ctx: any) => {
-                const initiative = ctx.getObject();
-                return {
-                    type: "Initiative",
-                    projectName: initiative.initiativeName,
-                    assignmentStatus: initiative.status === "Completed" ? "Completed" : "Assigned",
-                    startDate: initiative.startDate,
-                    endDate: initiative.endDate,
-                    utilizationPercent: initiative.utilizationPercent,
-                    currentInitiativeId: initiative.currentInitiativeId,
-                    _source: "CurrentInitiatives"
-                };
-            });
-            const evaluationAssignments = evaluationContexts.map((ctx: any) => {
-                const evaluation = ctx.getObject();
-                return {
-                    type: "Evaluation",
-                    projectName: evaluation.evaluationName,
-                    assignmentStatus: evaluation.status === "Completed" ? "Completed" : "Assigned",
-                    startDate: evaluation.startDate,
-                    endDate: evaluation.endDate,
-                    utilizationPercent: evaluation.utilizationPercent,
-                    currentEvaluationId: evaluation.currentEvaluationId,
-                    _source: "CurrentEvaluations"
-                };
-            });
-            const completedHistoryAssignments = await this.getCompletedMasterWorkHistory(employeeId);
-            const assignments = [...projectAssignments, ...initiativeAssignments, ...evaluationAssignments, ...completedHistoryAssignments];
-            
-            // Update the model
             const detailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
             if (detailsModel) {
                 detailsModel.setProperty("/assignments", assignments);
+                const activeCurrentProjects = assignments
+                    .filter((cp: any) => cp.assignmentStatus !== "Completed")
+                    .map((cp: any) => ({
+                        ...cp,
+                        isUtilizationEditing: false
+                    }));
+                detailsModel.setProperty("/currentProjects", activeCurrentProjects);
             }
             
         } catch (error) {

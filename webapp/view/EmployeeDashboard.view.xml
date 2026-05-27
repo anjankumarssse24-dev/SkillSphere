@@ -391,7 +391,7 @@
                                             <m:FlexBox direction="Row" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom" width="100%">
                                                 <m:VBox width="48%">
                                                     <m:Label text="Reporting Manager" class="sapUiTinyMarginBottom" required="true"/>
-                                                    <m:Select selectedKey="{selfProfile>/managerId}" width="100%" class="sapUiMediumMarginBottom" items="{managersList>/managers}">
+                                                    <m:Select id="employeeReportingManagerSelect" selectedKey="{selfProfile>/managerId}" width="100%" class="sapUiMediumMarginBottom" items="{managersList>/managers}">
                                                         <core:Item key="{managersList>employeeId}" text="{managersList>name} ({managersList>employeeId})"/>
                                                     </m:Select>
                                                 </m:VBox>

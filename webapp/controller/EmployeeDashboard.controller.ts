@@ -1540,6 +1540,7 @@ export default class EmployeeDashboard extends Controller {
                 // Submit all pending changes
                 const submitResult = await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
                 console.log('✅ Batch submitted, result:', submitResult);
+                await context.created();
                 
                 // Wait for backend
                 await new Promise(resolve => setTimeout(resolve, 800));
@@ -1874,6 +1875,14 @@ export default class EmployeeDashboard extends Controller {
 
             const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
             const profileData = selfProfileModel?.getData();
+            const managerSelect = this.byId("employeeReportingManagerSelect") as any;
+            const selectedManagerId = String(
+                managerSelect?.getSelectedKey?.() || profileData?.managerId || ""
+            ).trim();
+
+            if (profileData) {
+                profileData.managerId = selectedManagerId;
+            }
 
             if (!profileData?.name?.trim()) {
                 MessageToast.show("Please enter your name");
@@ -1895,7 +1904,7 @@ export default class EmployeeDashboard extends Controller {
                 return;
             }
             
-            if (!profileData?.managerId?.trim()) {
+            if (!selectedManagerId) {
                 MessageToast.show("Please enter your reporting manager ID");
                 return;
             }
@@ -1954,7 +1963,7 @@ export default class EmployeeDashboard extends Controller {
                 employeeContext.setProperty("email", profileData.email.trim());
                 employeeContext.setProperty("team", profileData.team.trim());
                 employeeContext.setProperty("subTeam", profileData.subTeam.trim());
-                employeeContext.setProperty("managerId", profileData.managerId.trim());
+                employeeContext.setProperty("managerId", selectedManagerId);
                 employeeContext.setProperty("experience", Number(profileData.experience || 0));
                 employeeContext.setProperty("location", profileData.location.trim());
                 employeeContext.setProperty("tLevel", profileData.tLevel);
@@ -1997,7 +2006,7 @@ export default class EmployeeDashboard extends Controller {
                 profileBinding.refresh();
                 employeeBinding.refresh();
 
-                const managerName = await this.getManagerNameById(profileData.managerId.trim());
+                const managerName = await this.getManagerNameById(selectedManagerId);
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
                 currentUserModel?.setData({
                     ...(currentUserModel?.getData() || {}),
@@ -2011,7 +2020,7 @@ export default class EmployeeDashboard extends Controller {
                     tLevel: profileData.tLevel,
                     gradeLevel: profileData.gradeLevel,
                     experience: Number(profileData.experience || 0),
-                    managerId: profileData.managerId.trim(),
+                    managerId: selectedManagerId,
                     manager: managerName,
                     isLoggedIn: true
                 });
