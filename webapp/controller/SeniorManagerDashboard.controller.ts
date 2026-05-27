@@ -285,6 +285,9 @@ export default class SeniorManagerDashboard extends Controller {
                 .map((row: any) => ({
                     initiativeId: row.initiativeId,
                     initiativeName: row.initiativeName,
+                    description: row.description || "",
+                    startDate: row.startDate,
+                    endDate: row.endDate,
                     status: row.status
                 }));
 
@@ -294,6 +297,9 @@ export default class SeniorManagerDashboard extends Controller {
                 .map((row: any) => ({
                     evaluationId: row.evaluationId,
                     evaluationName: row.evaluationName,
+                    description: row.description || "",
+                    startDate: row.startDate,
+                    endDate: row.endDate,
                     status: row.status
                 }));
 
@@ -1766,36 +1772,53 @@ export default class SeniorManagerDashboard extends Controller {
                 _source: "CurrentEvaluations"
             }));
 
+            const activeInitiatives = initiatives.filter((i: any) => i.assignmentStatus !== "Completed");
+            const activeEvaluations = evaluations.filter((e: any) => e.assignmentStatus !== "Completed");
             const completedHistory = await this.getCompletedMasterWorkHistory(employeeId);
-            return [...projects, ...initiatives, ...evaluations, ...completedHistory];
+            return [...projects, ...activeInitiatives, ...activeEvaluations, ...completedHistory];
         } catch { return []; }
     }
 
     private async getCompletedMasterWorkHistory(employeeId: string): Promise<any[]> {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
-            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
-                credentials: "same-origin",
-                headers: { Accept: "application/json" }
-            });
+            const completedFilter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
+            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
+            const base = "/odata/v4/api/v1";
 
-            if (!response.ok) return [];
-            const data = await response.json();
+            const [initResp, evalResp] = await Promise.all([
+                fetch(`${base}/CurrentInitiatives?$filter=${completedFilter}`, opts),
+                fetch(`${base}/CurrentEvaluations?$filter=${completedFilter}`, opts)
+            ]);
 
-            return (data.value || []).map((obj: any) => {
-                const isEvaluation = String(obj.type || "").toLowerCase() === "evaluation";
-                return {
-                    employeeId: obj.employeeId,
-                    type: isEvaluation ? "Evaluation" : "Initiative",
-                    projectName: obj.initiativeName,
-                    startDate: obj.startDate,
-                    endDate: obj.endDate,
-                    utilizationPercent: obj.utilizationPercent,
-                    assignmentStatus: "Completed",
-                    _source: "InitiativesHistory"
-                };
-            });
+            const [initData, evalData] = await Promise.all([
+                initResp.ok ? initResp.json() : { value: [] },
+                evalResp.ok ? evalResp.json() : { value: [] }
+            ]);
+
+            const completedInitiatives = (initData.value || []).map((obj: any) => ({
+                employeeId: obj.employeeId,
+                type: "Initiative",
+                projectName: obj.initiativeName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                utilizationPercent: obj.utilizationPercent,
+                assignmentStatus: "Completed",
+                _source: "InitiativesHistory"
+            }));
+
+            const completedEvaluations = (evalData.value || []).map((obj: any) => ({
+                employeeId: obj.employeeId,
+                type: "Evaluation",
+                projectName: obj.evaluationName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                utilizationPercent: obj.utilizationPercent,
+                assignmentStatus: "Completed",
+                _source: "InitiativesHistory"
+            }));
+
+            return [...completedInitiatives, ...completedEvaluations];
         } catch {
             return [];
         }
@@ -1804,32 +1827,33 @@ export default class SeniorManagerDashboard extends Controller {
     private async getCompletedInitiativeEvaluationForTabs(employeeId: string): Promise<{ initiatives: any[]; evaluations: any[] }> {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
-            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
-                credentials: "same-origin",
-                headers: { Accept: "application/json" }
-            });
+            const completedFilter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
+            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
+            const base = "/odata/v4/api/v1";
 
-            if (!response.ok) return { initiatives: [], evaluations: [] };
-            const data = await response.json();
+            const [initResp, evalResp] = await Promise.all([
+                fetch(`${base}/CurrentInitiatives?$filter=${completedFilter}`, opts),
+                fetch(`${base}/CurrentEvaluations?$filter=${completedFilter}`, opts)
+            ]);
 
-            const initiatives = (data.value || [])
-                .filter((obj: any) => String(obj.type || "").toLowerCase() !== "evaluation")
-                .map((obj: any) => ({
-                    projectName: obj.initiativeName,
-                    startDate: obj.startDate,
-                    endDate: obj.endDate,
-                    status: "Completed"
-                }));
+            const [initData, evalData] = await Promise.all([
+                initResp.ok ? initResp.json() : { value: [] },
+                evalResp.ok ? evalResp.json() : { value: [] }
+            ]);
 
-            const evaluations = (data.value || [])
-                .filter((obj: any) => String(obj.type || "").toLowerCase() === "evaluation")
-                .map((obj: any) => ({
-                    projectName: obj.initiativeName,
-                    startDate: obj.startDate,
-                    endDate: obj.endDate,
-                    status: "Completed"
-                }));
+            const initiatives = (initData.value || []).map((obj: any) => ({
+                projectName: obj.initiativeName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                status: "Completed"
+            }));
+
+            const evaluations = (evalData.value || []).map((obj: any) => ({
+                projectName: obj.evaluationName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                status: "Completed"
+            }));
 
             return { initiatives, evaluations };
         } catch {

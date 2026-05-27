@@ -374,12 +374,34 @@ module.exports = cds.service.impl(async function() {
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
     } else if (_hasRole(req, 'Manager')) {
-      if (req.event === 'READ' && _isManagerProjectCatalogRequest(req)) {
-        req.query.where({ addedByManager: actorEmployeeId });
-        return;
-      }
+      // Managers can see: (1) their team members' projects, (2) master projects they added (addedByManager)
+      const teamIds = [actorEmployeeId];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
+      team.forEach(emp => teamIds.push(emp.employeeId));
+      req.query.where([
+        { ref: ['employeeId'] }, 'in', { list: teamIds.map(id => ({ val: id })) },
+        'or',
+        { ref: ['addedByManager'] }, '=', { val: actorEmployeeId }
+      ]);
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      // SMs can see: (1) org members' projects, (2) master projects added by any manager in their org
+      req.query.where([
+        { ref: ['employeeId'] }, 'in', { list: visibleEmployeeIds.map(id => ({ val: id })) },
+        'or',
+        { ref: ['addedByManager'] }, 'in', { list: visibleEmployeeIds.map(id => ({ val: id })) }
+      ]);
+    }
+  });
 
-      // Managers can see projects of their team members
+  /**
+   * Filter CurrentProjects based on user role
+   */
+  this.before(['READ', 'UPDATE'], CurrentProjects, async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: actorEmployeeId });
+    } else if (_hasRole(req, 'Manager')) {
       const teamIds = [actorEmployeeId];
       const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
@@ -391,9 +413,27 @@ module.exports = cds.service.impl(async function() {
   });
 
   /**
-   * Filter CurrentProjects based on user role
+   * Filter CurrentInitiatives based on user role
    */
-  this.before(['READ', 'UPDATE'], CurrentProjects, async (req) => {
+  this.before(['READ', 'UPDATE'], CurrentInitiatives, async (req) => {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
+    if (_hasRole(req, 'Employee')) {
+      req.query.where({ employeeId: actorEmployeeId });
+    } else if (_hasRole(req, 'Manager')) {
+      const teamIds = [actorEmployeeId];
+      const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
+      team.forEach(emp => teamIds.push(emp.employeeId));
+      req.query.where({ employeeId: { in: teamIds } });
+    } else if (_hasRole(req, 'SeniorManager')) {
+      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
+      req.query.where({ employeeId: { in: visibleEmployeeIds } });
+    }
+  });
+
+  /**
+   * Filter CurrentEvaluations based on user role
+   */
+  this.before(['READ', 'UPDATE'], CurrentEvaluations, async (req) => {
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });

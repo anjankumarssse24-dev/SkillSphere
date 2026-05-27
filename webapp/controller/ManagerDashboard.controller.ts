@@ -732,8 +732,10 @@ export default class ManagerDashboard extends Controller {
                 _source: "CurrentEvaluations"
             }));
 
+            const activeInitiatives = initiatives.filter((i: any) => i.assignmentStatus !== "Completed");
+            const activeEvaluations = evaluations.filter((e: any) => e.assignmentStatus !== "Completed");
             const completedHistory = await this.getCompletedMasterWorkHistory(employeeId);
-            return [...projects, ...initiatives, ...evaluations, ...completedHistory];
+            return [...projects, ...activeInitiatives, ...activeEvaluations, ...completedHistory];
         } catch (error) {
             console.error(`Error loading current projects for ${employeeId}:`, error);
             return [];
@@ -743,28 +745,43 @@ export default class ManagerDashboard extends Controller {
     private async getCompletedMasterWorkHistory(employeeId: string): Promise<any[]> {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
-            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
-                credentials: "same-origin",
-                headers: { Accept: "application/json" }
-            });
+            const completedFilter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
+            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
+            const base = "/odata/v4/api/v1";
 
-            if (!response.ok) return [];
-            const data = await response.json();
+            const [initResp, evalResp] = await Promise.all([
+                fetch(`${base}/CurrentInitiatives?$filter=${completedFilter}`, opts),
+                fetch(`${base}/CurrentEvaluations?$filter=${completedFilter}`, opts)
+            ]);
 
-            return (data.value || []).map((obj: any) => {
-                const isEvaluation = String(obj.type || "").toLowerCase() === "evaluation";
-                return {
-                    employeeId: obj.employeeId,
-                    type: isEvaluation ? "Evaluation" : "Initiative",
-                    projectName: obj.initiativeName,
-                    startDate: obj.startDate,
-                    endDate: obj.endDate,
-                    utilizationPercent: obj.utilizationPercent,
-                    assignmentStatus: "Completed",
-                    _source: "InitiativesHistory"
-                };
-            });
+            const [initData, evalData] = await Promise.all([
+                initResp.ok ? initResp.json() : { value: [] },
+                evalResp.ok ? evalResp.json() : { value: [] }
+            ]);
+
+            const completedInitiatives = (initData.value || []).map((obj: any) => ({
+                employeeId: obj.employeeId,
+                type: "Initiative",
+                projectName: obj.initiativeName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                utilizationPercent: obj.utilizationPercent,
+                assignmentStatus: "Completed",
+                _source: "InitiativesHistory"
+            }));
+
+            const completedEvaluations = (evalData.value || []).map((obj: any) => ({
+                employeeId: obj.employeeId,
+                type: "Evaluation",
+                projectName: obj.evaluationName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                utilizationPercent: obj.utilizationPercent,
+                assignmentStatus: "Completed",
+                _source: "InitiativesHistory"
+            }));
+
+            return [...completedInitiatives, ...completedEvaluations];
         } catch (error) {
             console.error(`Error loading completed initiative/evaluation history for ${employeeId}:`, error);
             return [];
@@ -774,32 +791,33 @@ export default class ManagerDashboard extends Controller {
     private async getCompletedInitiativeEvaluationForTabs(employeeId: string): Promise<{ initiatives: any[]; evaluations: any[] }> {
         try {
             const escapedEmployeeId = employeeId.replace(/'/g, "''");
-            const filter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const response = await fetch(`/odata/v4/api/v1/Initiatives?$filter=${filter}`, {
-                credentials: "same-origin",
-                headers: { Accept: "application/json" }
-            });
+            const completedFilter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
+            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
+            const base = "/odata/v4/api/v1";
 
-            if (!response.ok) return { initiatives: [], evaluations: [] };
-            const data = await response.json();
+            const [initResp, evalResp] = await Promise.all([
+                fetch(`${base}/CurrentInitiatives?$filter=${completedFilter}`, opts),
+                fetch(`${base}/CurrentEvaluations?$filter=${completedFilter}`, opts)
+            ]);
 
-            const initiatives = (data.value || [])
-                .filter((obj: any) => String(obj.type || "").toLowerCase() !== "evaluation")
-                .map((obj: any) => ({
-                    projectName: obj.initiativeName,
-                    startDate: obj.startDate,
-                    endDate: obj.endDate,
-                    status: "Completed"
-                }));
+            const [initData, evalData] = await Promise.all([
+                initResp.ok ? initResp.json() : { value: [] },
+                evalResp.ok ? evalResp.json() : { value: [] }
+            ]);
 
-            const evaluations = (data.value || [])
-                .filter((obj: any) => String(obj.type || "").toLowerCase() === "evaluation")
-                .map((obj: any) => ({
-                    projectName: obj.initiativeName,
-                    startDate: obj.startDate,
-                    endDate: obj.endDate,
-                    status: "Completed"
-                }));
+            const initiatives = (initData.value || []).map((obj: any) => ({
+                projectName: obj.initiativeName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                status: "Completed"
+            }));
+
+            const evaluations = (evalData.value || []).map((obj: any) => ({
+                projectName: obj.evaluationName,
+                startDate: obj.startDate,
+                endDate: obj.endDate,
+                status: "Completed"
+            }));
 
             return { initiatives, evaluations };
         } catch (error) {
@@ -2890,6 +2908,7 @@ export default class ManagerDashboard extends Controller {
             this.managerAssignWorkDialog?.close();
             await this.refreshCurrentDialogData();
             await this.refreshEmployeeAssignments(employeeId);
+            await this.loadManagerData();
             MessageToast.show(`${data.type || "Work"} assigned from master catalog`);
         } catch (error) {
             console.error("❌ Error assigning work from catalog:", error);
@@ -2984,6 +3003,7 @@ export default class ManagerDashboard extends Controller {
             await this.loadMasterWorkItems();
             await this.refreshCurrentDialogData();
             await this.refreshEmployeeAssignments(employeeId);
+            await this.loadManagerData();
             MessageToast.show(`${data.type || "Work"} assigned successfully`);
         } catch (error) {
             console.error("❌ Error saving manager work assignment:", error);
@@ -3038,60 +3058,44 @@ export default class ManagerDashboard extends Controller {
         const bindingContext = source.getBindingContext("employeeDetails");
         const initiative = bindingContext?.getObject();
 
-        const isEvaluation = initiative?.type === "Evaluation";
+        const isEvaluation = initiative?.type === "Evaluation" || initiative?._source === "CurrentEvaluations";
         const currentAssignmentId = isEvaluation
-            ? (initiative?.currentEvaluationId || initiative?.initiativeId)
-            : (initiative?.currentInitiativeId || initiative?.initiativeId);
+            ? (initiative?.currentEvaluationId || initiative?.currentProjectId)
+            : (initiative?.currentInitiativeId || initiative?.currentProjectId);
 
         if (!currentAssignmentId) {
-            MessageToast.show("Initiative not found");
+            MessageToast.show("Assignment ID not found");
             return;
         }
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList(isEvaluation ? "/CurrentEvaluations" : "/CurrentInitiatives");
-            listBinding.filter([
-                new Filter(
-                    isEvaluation ? "currentEvaluationId" : "currentInitiativeId",
-                    FilterOperator.EQ,
-                    currentAssignmentId
-                )
-            ]);
+            const entityPath = isEvaluation ? "/CurrentEvaluations" : "/CurrentInitiatives";
+            const keyField = isEvaluation ? "currentEvaluationId" : "currentInitiativeId";
+
+            const listBinding = oDataModel.bindList(entityPath);
+            listBinding.filter([new Filter(keyField, FilterOperator.EQ, currentAssignmentId)]);
             const contexts = await listBinding.requestContexts(0, 1);
 
-            if (contexts.length > 0) {
-                // Archive to initiatives as completed
-                const assignmentData = contexts[0].getObject();
-                const initiativesBinding = oDataModel.bindList("/Initiatives");
-                initiativesBinding.create({
-                    employeeId: assignmentData.employeeId,
-                    initiativeName: isEvaluation ? assignmentData.evaluationName : assignmentData.initiativeName,
-                    description: assignmentData.description,
-                    startDate: assignmentData.startDate,
-                    endDate: assignmentData.endDate,
-                    utilizationPercent: assignmentData.utilizationPercent,
-                    status: "Completed",
-                    type: isEvaluation ? "Evaluation" : "Initiative",
-                    createdAt: new Date().toISOString(),
-                    lastUpdated: new Date().toISOString()
-                });
-
-                // Delete from current
-                contexts[0].delete();
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 600));
-
-                if (this.currentDialogEmployeeId) {
-                    await this.refreshCurrentDialogData();
-                    await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
-                    await this.loadManagerData();
-                }
-                MessageToast.show("Initiative/Evaluation marked as completed and moved to history");
+            if (contexts.length === 0) {
+                MessageToast.show("Assignment not found");
+                return;
             }
+
+            contexts[0].setProperty("status", "Completed");
+            contexts[0].setProperty("lastUpdated", new Date().toISOString());
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 400));
+
+            if (this.currentDialogEmployeeId) {
+                await this.refreshCurrentDialogData();
+                await this.refreshEmployeeAssignments(this.currentDialogEmployeeId);
+                await this.loadManagerData();
+            }
+            MessageToast.show("Marked as completed");
         } catch (error) {
-            console.error("❌ Error completing initiative:", error);
-            MessageToast.show("Error marking initiative/evaluation as completed");
+            console.error("❌ Error completing initiative/evaluation:", error);
+            MessageToast.show("Error marking as completed");
         }
     }
 
