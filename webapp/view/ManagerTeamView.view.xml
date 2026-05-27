@@ -232,7 +232,7 @@
                                                     <m:VBox class="sapUiSmallMargin" width="30%">
                                                         <m:Title text="Current Projects" level="H4" class="sapUiTinyMarginBottom"/>
                                                         <m:VBox id="mtvCurrentProjectsChart" height="250px" alignItems="Center" justifyContent="Center">
-                                                            <m:Text text="Loading chart..." class="sapUiSmallMargin"/>
+                                                            <m:Text text="No data available" class="sapUiSmallMargin"/>
                                                         </m:VBox>
                                                         <m:HBox justifyContent="Center" class="sapUiTinyMarginTop">
                                                             <m:Label text="Utilized: " class="sapUiTinyMarginEnd"/>
@@ -246,7 +246,7 @@
                                                     <m:VBox class="sapUiSmallMargin" width="30%">
                                                         <m:Title text="Strategic Initiatives" level="H4" class="sapUiTinyMarginBottom"/>
                                                         <m:VBox id="mtvInitiativesChart" height="250px" alignItems="Center" justifyContent="Center">
-                                                            <m:Text text="Loading chart..." class="sapUiSmallMargin"/>
+                                                            <m:Text text="No data available" class="sapUiSmallMargin"/>
                                                         </m:VBox>
                                                         <m:HBox justifyContent="Center" class="sapUiTinyMarginTop">
                                                             <m:Label text="Utilized: " class="sapUiTinyMarginEnd"/>
@@ -286,7 +286,7 @@
                                                     <!-- Gantt Chart Container -->
                                                     <m:ScrollContainer height="500px" horizontal="true" vertical="true">
                                                         <m:VBox id="mtvGanttChartContainer" class="ganttChart">
-                                                            <m:Text text="Loading Gantt Chart..." class="sapUiMediumMargin"/>
+                                                            <m:Text text="No data available" class="sapUiMediumMargin"/>
                                                         </m:VBox>
                                                     </m:ScrollContainer>
                                                 </m:VBox>
@@ -356,7 +356,7 @@
                                                     </m:HBox>
                                                     <m:ScrollContainer height="400px">
                                                         <m:VBox id="mtvSkillsDistributionChart" width="100%" height="100%">
-                                                            <m:Text text="Loading skills chart..." class="sapUiMediumMargin"/>
+                                                            <m:Text text="No data available" class="sapUiMediumMargin"/>
                                                         </m:VBox>
                                                     </m:ScrollContainer>
                                                 </m:VBox>

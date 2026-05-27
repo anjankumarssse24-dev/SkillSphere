@@ -186,6 +186,7 @@
                                     <m:headerToolbar>
                                         <m:Toolbar>
                                             <m:Title text="My Team" level="H3"/>
+                                            <m:Text text="(Click row to view details)" class="sapUiTinyMarginBegin sapThemeTextSubtle-asColor"/>
                                             <m:ToolbarSpacer/>
                                             <m:Button text="Add Employee" icon="sap-icon://add-employee" type="Emphasized" press="onOpenAddEmployeeDialog"/>
                                         </m:Toolbar>
@@ -213,7 +214,7 @@
                                                 </m:Column>
                                             </m:columns>
                                             <m:items>
-                                                <m:ColumnListItem type="Active" press="onViewIndividualEmployeeDetails">
+                                                <m:ColumnListItem type="Navigation" press="onViewIndividualEmployeeDetails">
                                                     <m:cells>
                                                         <m:ObjectIdentifier title="{allManagers>name}"/>
                                                         <m:Text text="{allManagers>employeeId}"/>
@@ -221,7 +222,7 @@
                                                         <m:Text text="{allManagers>displayExperience}" textAlign="Center"/>
                                                         <m:Text text="{allManagers>specialization}"/>
                                                         <m:ObjectStatus 
-                                                            text="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatusWithArrow'}"
+                                                            text="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatus'}"
                                                             state="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatusState'}"/>
                                                     </m:cells>
                                                 </m:ColumnListItem>
@@ -619,9 +620,12 @@
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Technical Skills Portfolio" expandable="false">
                                 <m:content>
                                     <m:VBox class="sapUiSmallMargin">
-                                        <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
+                                        <m:FlexBox class="sapUiMediumMarginBottom" justifyContent="SpaceBetween" alignItems="Center">
                                             <m:Label text="Total Skills: " class="sapUiMediumMarginEnd"/>
-                                            <m:ObjectNumber id="smgrDialogTotalSkills" number="0" unit="skills" emphasized="true"/>
+                                            <m:HBox alignItems="Center">
+                                                <m:ObjectNumber id="smgrDialogTotalSkills" number="0" unit="skills" emphasized="true" class="sapUiSmallMarginEnd"/>
+                                                <m:Button text="Add Skill" icon="sap-icon://add" type="Emphasized" press="onSMgrAddSkill"/>
+                                            </m:HBox>
                                         </m:FlexBox>
                                         <m:Table id="smgrDialogSkillsTable" items="{employeeDetails>/skills}" class="sapUiSmallMarginTop">
                                             <m:columns>
@@ -629,7 +633,7 @@
                                                 <m:Column><m:Text text="Proficiency Level"/></m:Column>
                                                 <m:Column><m:Text text="Category"/></m:Column>
                                                 <m:Column><m:Text text="Years of Experience"/></m:Column>
-                                                <m:Column><m:Text text="Certification Status"/></m:Column>
+                                                <m:Column width="120px" hAlign="Center"><m:Text text="Actions"/></m:Column>
                                             </m:columns>
                                             <m:items>
                                                 <m:ColumnListItem>
@@ -637,35 +641,10 @@
                                                     <m:ObjectStatus text="{employeeDetails>proficiencyLevel}" state="{path: 'employeeDetails>proficiencyLevel', formatter: '.formatProficiencyState'}"/>
                                                     <m:Text text="{employeeDetails>category}"/>
                                                     <m:Text text="{employeeDetails>yearsExperience}"/>
-                                                    <m:ObjectStatus text="{employeeDetails>certificationStatus}" state="{path: 'employeeDetails>certificationStatus', formatter: '.formatCertificationState'}"/>
-                                                </m:ColumnListItem>
-                                            </m:items>
-                                        </m:Table>
-                                    </m:VBox>
-                                </m:content>
-                            </m:Panel>
-                            <m:Panel class="sapUiSmallMarginTop" headerText="Professional Certifications" expandable="true" expanded="true">
-                                <m:content>
-                                    <m:VBox class="sapUiSmallMargin">
-                                        <m:FlexBox class="sapUiMediumMarginBottom" alignItems="Center">
-                                            <m:Label text="Total Certifications: " class="sapUiMediumMarginEnd"/>
-                                            <m:ObjectNumber id="smgrDialogTotalCertifications" number="0" unit="certifications" emphasized="true"/>
-                                        </m:FlexBox>
-                                        <m:Table id="smgrDialogCertificationsTable" items="{employeeDetails>/certifications}" class="sapUiSmallMarginTop">
-                                            <m:columns>
-                                                <m:Column><m:Text text="Certification Name"/></m:Column>
-                                                <m:Column><m:Text text="Code"/></m:Column>
-                                                <m:Column><m:Text text="Date of Completion"/></m:Column>
-                                                <m:Column><m:Text text="Level"/></m:Column>
-                                                <m:Column minScreenWidth="Desktop" demandPopin="true"><m:Text text="Description"/></m:Column>
-                                            </m:columns>
-                                            <m:items>
-                                                <m:ColumnListItem>
-                                                    <m:Text text="{employeeDetails>name}"/>
-                                                    <m:Text text="{employeeDetails>code}"/>
-                                                    <m:Text text="{employeeDetails>dateOfCompletion}"/>
-                                                    <m:ObjectStatus text="{employeeDetails>level}" state="Success"/>
-                                                    <m:Text text="{employeeDetails>description}"/>
+                                                    <m:HBox justifyContent="Center" alignItems="Center">
+                                                        <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit Skill" press="onSMgrEditSkill" class="sapUiTinyMarginEnd"/>
+                                                        <m:Button icon="sap-icon://delete" type="Transparent" tooltip="Delete Skill" press="onSMgrDeleteSkill"/>
+                                                    </m:HBox>
                                                 </m:ColumnListItem>
                                             </m:items>
                                         </m:Table>
@@ -673,6 +652,46 @@
                                 </m:content>
                             </m:Panel>
                         </m:VBox>
+                    </m:IconTabFilter>
+
+                    <!-- Certifications Tab -->
+                    <m:IconTabFilter icon="sap-icon://employee-approvals" text="Certifications" key="certifications">
+                        <m:Panel class="sapUiSmallMargin" headerText="Professional Certifications" expandable="false">
+                            <m:content>
+                                <m:VBox class="sapUiSmallMargin">
+                                    <m:FlexBox class="sapUiMediumMarginBottom" justifyContent="SpaceBetween" alignItems="Center">
+                                        <m:Label text="Total Certifications: " class="sapUiMediumMarginEnd"/>
+                                        <m:HBox alignItems="Center">
+                                            <m:ObjectNumber id="smgrDialogTotalCertifications" number="0" unit="certifications" emphasized="true" class="sapUiSmallMarginEnd"/>
+                                            <m:Button text="Add Certification" icon="sap-icon://add" type="Emphasized" press="onSMgrAddCertification"/>
+                                        </m:HBox>
+                                    </m:FlexBox>
+                                    <m:Table id="smgrDialogCertificationsTable" items="{employeeDetails>/certifications}" class="sapUiSmallMarginTop">
+                                        <m:columns>
+                                            <m:Column><m:Text text="Certification Name"/></m:Column>
+                                            <m:Column><m:Text text="Code"/></m:Column>
+                                            <m:Column><m:Text text="Date of Completion"/></m:Column>
+                                            <m:Column><m:Text text="Level"/></m:Column>
+                                            <m:Column minScreenWidth="Desktop" demandPopin="true"><m:Text text="Description"/></m:Column>
+                                            <m:Column width="120px" hAlign="Center"><m:Text text="Actions"/></m:Column>
+                                        </m:columns>
+                                        <m:items>
+                                            <m:ColumnListItem>
+                                                <m:Text text="{employeeDetails>name}"/>
+                                                <m:Text text="{employeeDetails>code}"/>
+                                                <m:Text text="{employeeDetails>dateOfCompletion}"/>
+                                                <m:ObjectStatus text="{employeeDetails>level}" state="Success"/>
+                                                <m:Text text="{employeeDetails>description}"/>
+                                                <m:HBox justifyContent="Center" alignItems="Center">
+                                                    <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit Certification" press="onSMgrEditCertification" class="sapUiTinyMarginEnd"/>
+                                                    <m:Button icon="sap-icon://delete" type="Transparent" tooltip="Delete Certification" press="onSMgrDeleteCertification"/>
+                                                </m:HBox>
+                                            </m:ColumnListItem>
+                                        </m:items>
+                                    </m:Table>
+                                </m:VBox>
+                            </m:content>
+                        </m:Panel>
                     </m:IconTabFilter>
 
                     <!-- Projects Tab -->
@@ -752,7 +771,8 @@
                     <!-- Utilization Tab -->
                     <m:IconTabFilter icon="sap-icon://chart-table-view" text="Utilization" key="utilization">
                         <m:VBox class="sapUiSmallMargin">
-                            <m:Panel class="sapUiSmallMarginBottom" headerText="Current Projects" expandable="true" expanded="true">
+                            <!-- Current Work Utilization - matching Manager's cleaner layout -->
+                            <m:Panel class="sapUiSmallMarginBottom" headerText="Current Work" expandable="true" expanded="true">
                                 <m:content>
                                     <m:Table id="smgrDialogCurrentProjectsTable" items="{employeeDetails>/currentProjects}">
                                         <m:columns>
@@ -770,52 +790,21 @@
                                                 <m:Text text="{employeeDetails>projectName}"/>
                                                 <m:Text text="{employeeDetails>startDate}"/>
                                                 <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{= ${employeeDetails>utilizationPercent} + '%' }"/>
+                                                <m:VBox width="8rem">
+                                                    <m:Text text="{= ${employeeDetails>utilizationPercent} + '%' }"
+                                                            visible="{= !${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Input value="{employeeDetails>utilizationPercent}"
+                                                             type="Number"
+                                                             width="100%"
+                                                             visible="{= ${employeeDetails>isUtilizationEditing} }"/>
+                                                </m:VBox>
                                                 <m:ObjectStatus text="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusLabel'}"
                                                                state="{path: 'employeeDetails>assignmentStatus', formatter: '.formatAssignmentStatusState'}"/>
                                                 <m:HBox justifyContent="Center" alignItems="Center">
-                                                    <m:Text text="--"/>
+                                                    <m:Button icon="sap-icon://edit" type="Transparent" tooltip="Edit utilization" press="onSMgrEditUtilization" class="sapUiTinyMarginEnd" visible="{= !${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Button icon="sap-icon://save" type="Transparent" tooltip="Save utilization" press="onSMgrSaveUtilization" class="sapUiTinyMarginEnd" visible="{= ${employeeDetails>isUtilizationEditing} }"/>
+                                                    <m:Button icon="sap-icon://complete" type="Accept" tooltip="Mark as Completed" press="onSMgrCompleteCurrentProject"/>
                                                 </m:HBox>
-                                            </m:ColumnListItem>
-                                        </m:items>
-                                    </m:Table>
-                                </m:content>
-                            </m:Panel>
-                            <m:Panel class="sapUiSmallMarginBottom" headerText="CAIA Activities" expandable="true" expanded="false">
-                                <m:content>
-                                    <m:Table id="smgrDialogCAIATable" items="{employeeDetails>/caiaUtilization}">
-                                        <m:columns>
-                                            <m:Column><m:Text text="Task Name"/></m:Column>
-                                            <m:Column><m:Text text="Start Date"/></m:Column>
-                                            <m:Column><m:Text text="End Date"/></m:Column>
-                                            <m:Column><m:Text text="Utilization"/></m:Column>
-                                        </m:columns>
-                                        <m:items>
-                                            <m:ColumnListItem>
-                                                <m:Text text="{employeeDetails>taskName}"/>
-                                                <m:Text text="{employeeDetails>startDate}"/>
-                                                <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
-                                            </m:ColumnListItem>
-                                        </m:items>
-                                    </m:Table>
-                                </m:content>
-                            </m:Panel>
-                            <m:Panel class="sapUiSmallMarginBottom" headerText="POC Projects" expandable="true" expanded="false">
-                                <m:content>
-                                    <m:Table id="smgrDialogPOCTable" items="{employeeDetails>/pocUtilization}">
-                                        <m:columns>
-                                            <m:Column><m:Text text="POC Title"/></m:Column>
-                                            <m:Column><m:Text text="Start Date"/></m:Column>
-                                            <m:Column><m:Text text="End Date"/></m:Column>
-                                            <m:Column><m:Text text="Utilization"/></m:Column>
-                                        </m:columns>
-                                        <m:items>
-                                            <m:ColumnListItem>
-                                                <m:Text text="{employeeDetails>pocTitle}"/>
-                                                <m:Text text="{employeeDetails>startDate}"/>
-                                                <m:Text text="{employeeDetails>endDate}"/>
-                                                <m:Text text="{path: 'employeeDetails>hoursPerDay', formatter: '.formatUtilizationPercent'}"/>
                                             </m:ColumnListItem>
                                         </m:items>
                                     </m:Table>
@@ -827,6 +816,7 @@
                     <!-- Assign Work Tab -->
                     <m:IconTabFilter icon="sap-icon://add-coursebook" text="Assign Work" key="assign">
                         <m:VBox class="sapUiSmallMargin">
+                            <!-- Assign New Project - matching Manager's layout -->
                             <m:Panel class="sapUiSmallMarginBottom" headerText="Assign Project to Employee" expandable="false">
                                 <m:content>
                                     <m:VBox class="sapUiSmallMargin">
@@ -847,6 +837,12 @@
                                             <core:Item key="Tech Lead" text="Tech Lead"/>
                                             <core:Item key="Solution Architect" text="Solution Architect"/>
                                             <core:Item key="Team Member" text="Team Member"/>
+                                            <core:Item key="QA Engineer" text="QA Engineer"/>
+                                            <core:Item key="DevOps Engineer" text="DevOps Engineer"/>
+                                            <core:Item key="Data Scientist" text="Data Scientist"/>
+                                            <core:Item key="Frontend Developer" text="Frontend Developer"/>
+                                            <core:Item key="Backend Developer" text="Backend Developer"/>
+                                            <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
                                         </m:ComboBox>
                                         <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
                                         <m:StepInput id="smgrAssignProjectAllocationInput"
@@ -953,6 +949,7 @@
     </m:Dialog>
 
     <!-- AI Assistant Floating Button -->
+    <!-- AI Assistant button hidden until AI Core is configured
     <m:Button
         icon="sap-icon://message-assistant"
         text="AI Assistant"
@@ -960,6 +957,7 @@
         press="onOpenAIAssistant"
         class="aiAssistantFloatingButton"
         tooltip="Open AI Assistant"/>
+    -->
     
     <!-- AI Assistant Dialog -->
     <m:Dialog
