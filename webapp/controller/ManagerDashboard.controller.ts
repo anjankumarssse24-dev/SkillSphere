@@ -552,37 +552,28 @@ export default class ManagerDashboard extends Controller {
      */
     private async getEmployeeProjects(employeeId: string): Promise<any[]> {
         try {
-            // Use fetch() directly to bypass OData model cache so newly completed
-            // projects appear immediately after a create+submitBatch cycle.
-            const filter = encodeURIComponent(`employeeId eq '${employeeId.replace(/'/g, "''")}'`);
-            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const historyBinding = oDataModel.bindList("/Projects");
+            historyBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const allCurrentBinding = oDataModel.bindList("/CurrentProjects");
+            allCurrentBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
 
-            const [historyResponse, completedResponse] = await Promise.all([
-                fetch(`/odata/v4/api/v1/Projects?$filter=${filter}`, opts),
-                fetch(
-                    `/odata/v4/api/v1/CurrentProjects?$filter=${encodeURIComponent(`employeeId eq '${employeeId.replace(/'/g, "''")}' and assignmentStatus eq 'Completed'`)}`,
-                    opts
-                )
+            const [historyContexts, currentContexts] = await Promise.all([
+                historyBinding.requestContexts(0, 1000),
+                allCurrentBinding.requestContexts(0, 1000)
             ]);
 
-            if (!historyResponse.ok) throw new Error(`HTTP ${historyResponse.status}`);
-
-            const [historyData, completedData] = await Promise.all([
-                historyResponse.json(),
-                completedResponse.ok ? completedResponse.json() : Promise.resolve({ value: [] })
-            ]);
-
-            const completedItems = (completedData.value || []).map((obj: any) => ({
+            const currentItems = currentContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
                 projectName: obj.projectName,
                 role: obj.role || "Team Member",
                 startDate: obj.startDate,
                 endDate: obj.endDate,
                 duration: "",
-                status: "Completed"
+                status: obj.assignmentStatus || "Assigned"
             }));
 
-            const historyItems = historyData.value || [];
-            const combined = [...historyItems, ...completedItems];
+            const historyItems = historyContexts.map((ctx: any) => ctx.getObject());
+            const combined = [...historyItems, ...currentItems];
             const seen = new Set<string>();
             return combined.filter((item: any) => {
                 const key = [item.projectName || "", item.role || "", item.startDate || "", item.endDate || ""].join("|");
@@ -681,61 +672,59 @@ export default class ManagerDashboard extends Controller {
      */
     private async getCurrentProjects(employeeId: string): Promise<any[]> {
         try {
-            // Use fetch() directly to bypass OData model cache so deletions are
-            // reflected immediately after a submitBatch cycle.
-            const filter = encodeURIComponent(`employeeId eq '${employeeId.replace(/'/g, "''")}'`);
-            const base = "/odata/v4/api/v1";
-            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const cpBinding = oDataModel.bindList("/CurrentProjects");
+            cpBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const ciBinding = oDataModel.bindList("/CurrentInitiatives");
+            ciBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const ceBinding = oDataModel.bindList("/CurrentEvaluations");
+            ceBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
 
-            const [projResp, initResp, evalResp] = await Promise.all([
-                fetch(`${base}/CurrentProjects?$filter=${filter}`, opts),
-                fetch(`${base}/CurrentInitiatives?$filter=${filter}`, opts),
-                fetch(`${base}/CurrentEvaluations?$filter=${filter}`, opts)
+            const [projectContexts, initiativeContexts, evaluationContexts] = await Promise.all([
+                cpBinding.requestContexts(0, 1000),
+                ciBinding.requestContexts(0, 1000),
+                ceBinding.requestContexts(0, 1000)
             ]);
 
-            const [projData, initData, evalData] = await Promise.all([
-                projResp.ok ? projResp.json() : { value: [] },
-                initResp.ok ? initResp.json() : { value: [] },
-                evalResp.ok ? evalResp.json() : { value: [] }
-            ]);
-
-            const projects = (projData.value || []).map((obj: any) => ({
+            const projects = projectContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
                 ...obj,
                 _source: "CurrentProjects"
             }));
-            const initiatives = (initData.value || []).map((obj: any) => ({
-                currentProjectId: obj.currentInitiativeId,
-                currentInitiativeId: obj.currentInitiativeId,
-                employeeId: obj.employeeId,
-                type: "Initiative",
-                projectName: obj.initiativeName,
-                startDate: obj.startDate,
-                endDate: obj.endDate,
-                utilizationPercent: obj.utilizationPercent,
-                description: obj.description,
-                assignmentStatus: obj.status === "Completed" ? "Completed" : "Assigned",
-                lastUpdated: obj.lastUpdated,
-                _source: "CurrentInitiatives"
-            }));
-            const evaluations = (evalData.value || []).map((obj: any) => ({
-                currentProjectId: obj.currentEvaluationId,
-                currentEvaluationId: obj.currentEvaluationId,
-                employeeId: obj.employeeId,
-                type: "Evaluation",
-                projectName: obj.evaluationName,
-                startDate: obj.startDate,
-                endDate: obj.endDate,
-                utilizationPercent: obj.utilizationPercent,
-                description: obj.description,
-                assignmentStatus: obj.status === "Completed" ? "Completed" : "Assigned",
-                lastUpdated: obj.lastUpdated,
-                _source: "CurrentEvaluations"
-            }));
+            const initiatives = initiativeContexts.map((ctx: any) => ctx.getObject())
+                .filter((obj: any) => obj.status !== "Completed")
+                .map((obj: any) => ({
+                    currentProjectId: obj.currentInitiativeId,
+                    currentInitiativeId: obj.currentInitiativeId,
+                    employeeId: obj.employeeId,
+                    type: "Initiative",
+                    projectName: obj.initiativeName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    utilizationPercent: obj.utilizationPercent,
+                    description: obj.description,
+                    assignmentStatus: "Assigned",
+                    lastUpdated: obj.lastUpdated,
+                    _source: "CurrentInitiatives"
+                }));
+            const evaluations = evaluationContexts.map((ctx: any) => ctx.getObject())
+                .filter((obj: any) => obj.status !== "Completed")
+                .map((obj: any) => ({
+                    currentProjectId: obj.currentEvaluationId,
+                    currentEvaluationId: obj.currentEvaluationId,
+                    employeeId: obj.employeeId,
+                    type: "Evaluation",
+                    projectName: obj.evaluationName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    utilizationPercent: obj.utilizationPercent,
+                    description: obj.description,
+                    assignmentStatus: "Assigned",
+                    lastUpdated: obj.lastUpdated,
+                    _source: "CurrentEvaluations"
+                }));
 
-            const activeInitiatives = initiatives.filter((i: any) => i.assignmentStatus !== "Completed");
-            const activeEvaluations = evaluations.filter((e: any) => e.assignmentStatus !== "Completed");
             const completedHistory = await this.getCompletedMasterWorkHistory(employeeId);
-            return [...projects, ...activeInitiatives, ...activeEvaluations, ...completedHistory];
+            return [...projects, ...initiatives, ...evaluations, ...completedHistory];
         } catch (error) {
             console.error(`Error loading current projects for ${employeeId}:`, error);
             return [];
@@ -744,22 +733,22 @@ export default class ManagerDashboard extends Controller {
 
     private async getCompletedMasterWorkHistory(employeeId: string): Promise<any[]> {
         try {
-            const escapedEmployeeId = employeeId.replace(/'/g, "''");
-            const completedFilter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
-            const base = "/odata/v4/api/v1";
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const completedFilters = [
+                new Filter("employeeId", FilterOperator.EQ, employeeId),
+                new Filter("status", FilterOperator.EQ, "Completed")
+            ];
+            const initBinding = oDataModel.bindList("/CurrentInitiatives");
+            initBinding.filter(completedFilters);
+            const evalBinding = oDataModel.bindList("/CurrentEvaluations");
+            evalBinding.filter(completedFilters);
 
-            const [initResp, evalResp] = await Promise.all([
-                fetch(`${base}/CurrentInitiatives?$filter=${completedFilter}`, opts),
-                fetch(`${base}/CurrentEvaluations?$filter=${completedFilter}`, opts)
+            const [initContexts, evalContexts] = await Promise.all([
+                initBinding.requestContexts(0, 1000),
+                evalBinding.requestContexts(0, 1000)
             ]);
 
-            const [initData, evalData] = await Promise.all([
-                initResp.ok ? initResp.json() : { value: [] },
-                evalResp.ok ? evalResp.json() : { value: [] }
-            ]);
-
-            const completedInitiatives = (initData.value || []).map((obj: any) => ({
+            const completedInitiatives = initContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
                 employeeId: obj.employeeId,
                 type: "Initiative",
                 projectName: obj.initiativeName,
@@ -770,7 +759,7 @@ export default class ManagerDashboard extends Controller {
                 _source: "InitiativesHistory"
             }));
 
-            const completedEvaluations = (evalData.value || []).map((obj: any) => ({
+            const completedEvaluations = evalContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
                 employeeId: obj.employeeId,
                 type: "Evaluation",
                 projectName: obj.evaluationName,
@@ -790,29 +779,29 @@ export default class ManagerDashboard extends Controller {
 
     private async getCompletedInitiativeEvaluationForTabs(employeeId: string): Promise<{ initiatives: any[]; evaluations: any[] }> {
         try {
-            const escapedEmployeeId = employeeId.replace(/'/g, "''");
-            const completedFilter = encodeURIComponent(`employeeId eq '${escapedEmployeeId}' and status eq 'Completed'`);
-            const opts: RequestInit = { credentials: "same-origin", headers: { Accept: "application/json" } };
-            const base = "/odata/v4/api/v1";
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const completedFilters = [
+                new Filter("employeeId", FilterOperator.EQ, employeeId),
+                new Filter("status", FilterOperator.EQ, "Completed")
+            ];
+            const initBinding = oDataModel.bindList("/CurrentInitiatives");
+            initBinding.filter(completedFilters);
+            const evalBinding = oDataModel.bindList("/CurrentEvaluations");
+            evalBinding.filter(completedFilters);
 
-            const [initResp, evalResp] = await Promise.all([
-                fetch(`${base}/CurrentInitiatives?$filter=${completedFilter}`, opts),
-                fetch(`${base}/CurrentEvaluations?$filter=${completedFilter}`, opts)
+            const [initContexts, evalContexts] = await Promise.all([
+                initBinding.requestContexts(0, 1000),
+                evalBinding.requestContexts(0, 1000)
             ]);
 
-            const [initData, evalData] = await Promise.all([
-                initResp.ok ? initResp.json() : { value: [] },
-                evalResp.ok ? evalResp.json() : { value: [] }
-            ]);
-
-            const initiatives = (initData.value || []).map((obj: any) => ({
+            const initiatives = initContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
                 projectName: obj.initiativeName,
                 startDate: obj.startDate,
                 endDate: obj.endDate,
                 status: "Completed"
             }));
 
-            const evaluations = (evalData.value || []).map((obj: any) => ({
+            const evaluations = evalContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
                 projectName: obj.evaluationName,
                 startDate: obj.startDate,
                 endDate: obj.endDate,
@@ -2473,6 +2462,9 @@ export default class ManagerDashboard extends Controller {
         console.log(`📋 Loading comprehensive details for employee: ${empId}`);
 
         try {
+            // Refresh master catalogs so assign dropdowns are always up to date
+            await Promise.all([this.loadMasterProjects(), this.loadMasterWorkItems()]);
+
             // Load all data from OData in parallel
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             
@@ -4558,10 +4550,10 @@ private initializeAIChat(): void {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const listBinding = oDataModel.bindList("/Projects");
-            listBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
 
             const contexts = await listBinding.requestContexts(0, 500);
-            const projects = contexts.map((ctx: any) => ctx.getObject());
+            const projects = contexts.map((ctx: any) => ctx.getObject())
+                .filter((p: any) => String(p.status || "").toLowerCase() !== "completed");
 
             console.log(`✅ Loaded ${projects.length} master projects for manager ${this.currentManagerId}`);
 

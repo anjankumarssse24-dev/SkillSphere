@@ -147,7 +147,14 @@
                     <uxap:ObjectPageSubSection id="managersSubSection">
                         <uxap:blocks>
                             <m:VBox width="100%">
-                                <m:Panel id="managersPanel" headerText="Managers" class="sapUiMediumMarginTopBottom smCenteredPanel" width="95%">
+                                <m:Panel id="managersPanel" class="sapUiMediumMarginTopBottom smCenteredPanel" width="95%">
+                                    <m:headerToolbar>
+                                        <m:Toolbar>
+                                            <m:Title text="Managers" level="H3"/>
+                                            <m:ToolbarSpacer/>
+                                            <m:Button id="refreshTeamBtn" text="Refresh" icon="sap-icon://refresh" type="Transparent" press="onRefreshTeamData" tooltip="Reload team data to see latest changes"/>
+                                        </m:Toolbar>
+                                    </m:headerToolbar>
                                     <m:content>
                                         <m:Table id="managersTable" items="{allManagers>/managers}" class="sapUiNoMargin" mode="SingleSelectMaster" selectionChange="onManagerSelect" fixedLayout="true" autoPopinMode="true" width="100%" noDataText="No managers with direct reports found">
                                             <m:columns>
@@ -822,11 +829,11 @@
                                     <m:VBox class="sapUiSmallMargin">
                                         <m:Label text="Select Project:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="smgrAssignProjectComboBox"
-                                                    items="{/Projects}"
+                                                    items="{masterProjects>/projects}"
                                                     placeholder="Select a project to assign..."
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">
-                                            <core:Item key="{projectId}" text="{projectName} - {technology}"/>
+                                            <core:Item key="{masterProjects>projectId}" text="{masterProjects>projectName} - {masterProjects>technology}"/>
                                         </m:ComboBox>
                                         <m:Label text="Role in Project:" class="sapUiTinyMarginBottom"/>
                                         <m:ComboBox id="smgrAssignProjectRoleCombo"
