@@ -46,6 +46,23 @@ export default class SeniorManagerDashboard extends Controller {
     private sharedManagerView?: XMLView;
     private sharedManagerController?: any;
 
+    /** Returns true if the error is an expired/invalid XSUAA session (401). */
+    private _isSessionExpired(error: any): boolean {
+        const msg = String(error?.message || error || "");
+        return msg.includes("401") || msg.toLowerCase().includes("unauthorized");
+    }
+
+    /** Show a session-expired banner and reload the page to re-authenticate. */
+    private _handleSessionExpiry(): void {
+        MessageBox.error(
+            "Your session has expired. The page will reload to re-authenticate.",
+            {
+                title: "Session Expired",
+                onClose: () => { window.location.reload(); }
+            }
+        );
+    }
+
     private generateUuid(): string {
         const cryptoObj: any = (globalThis as any).crypto;
         if (cryptoObj?.randomUUID) {
@@ -63,11 +80,16 @@ export default class SeniorManagerDashboard extends Controller {
         const router = this.getRouter();
         router.getRoute("SeniorManagerDashboard")?.attachPatternMatched(this.onRouteMatched, this);
 
-        // Auto-refresh when the user tabs back in (cross-tab data sync)
+        // Auto-refresh when the user tabs back in (cross-tab data sync).
+        // If the XSUAA session has expired while away, catch 401 and prompt re-auth.
         document.addEventListener("visibilitychange", () => {
             if (document.visibilityState === "visible" && this.currentSeniorManagerId) {
-                this.loadAllManagers().catch(() => undefined);
-                this.loadMasterProjects().catch(() => undefined);
+                this.loadAllManagers().catch((err: any) => {
+                    if (this._isSessionExpired(err)) { this._handleSessionExpiry(); }
+                });
+                this.loadMasterProjects().catch((err: any) => {
+                    if (this._isSessionExpired(err)) { this._handleSessionExpiry(); }
+                });
             }
         });
     }
@@ -329,15 +351,67 @@ export default class SeniorManagerDashboard extends Controller {
     public async loadMasterProjects(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Projects");
-            const contexts = await listBinding.requestContexts(0, 1000);
-            const projects = contexts.map((ctx: any) => ctx.getObject())
-                .filter((p: any) => String(p.status || "").toLowerCase() !== "completed");
 
-            projects.sort((a: any, b: any) => String(a.projectName || "").localeCompare(String(b.projectName || "")));
+            // Load from /Projects master catalog AND /CurrentProjects assignments in parallel.
+            // Manager's "Assign" flow only writes to /CurrentProjects (not /Projects), so
+            // the master catalog can be empty even when real project data exists.
+            const [masterCtx, currentCtx] = await Promise.all([
+                oDataModel.bindList("/Projects").requestContexts(0, 1000),
+                oDataModel.bindList("/CurrentProjects").requestContexts(0, 2000)
+            ]);
+
+            const masterRaw = masterCtx.map((c: any) => c.getObject());
+            const currentRaw = currentCtx.map((c: any) => c.getObject());
+
+            console.log(`📋 SM /Projects raw: ${masterRaw.length}, /CurrentProjects raw: ${currentRaw.length}`);
+
+            // Build a deduplicated map: projectId (or synthetic key) → project record
+            const projectMap = new Map<string, any>();
+
+            // 1. Seed with master catalog entries (have full metadata)
+            masterRaw
+                .filter((p: any) => String(p.status || "").toLowerCase() !== "completed")
+                .forEach((p: any) => {
+                    const key = String(p.projectId || p.projectName || "").trim();
+                    if (key) projectMap.set(key, p);
+                });
+
+            // 2. Back-fill from CurrentProjects for any project names not already in catalog
+            currentRaw
+                .filter((cp: any) => String(cp.assignmentStatus || "").toLowerCase() !== "completed"
+                    && String(cp.type || "").toLowerCase() === "project")
+                .forEach((cp: any) => {
+                    const name = String(cp.projectName || "").trim();
+                    if (!name) return;
+                    // Check if already covered by a master entry with the same name
+                    const alreadyPresent = Array.from(projectMap.values())
+                        .some((p: any) => String(p.projectName || "").trim().toLowerCase() === name.toLowerCase());
+                    if (!alreadyPresent) {
+                        // Synthesize a lightweight entry so the dropdown shows the name
+                        projectMap.set(`cp_${name}`, {
+                            projectId: cp.currentProjectId || name,
+                            projectName: name,
+                            status: "Active",
+                            projectManager: cp.projectManager || "",
+                            technology: cp.technology || "",
+                            description: cp.description || "",
+                            startDate: cp.startDate,
+                            endDate: cp.endDate,
+                            addedByManager: cp.assignedBy || ""
+                        });
+                    }
+                });
+
+            const projects = Array.from(projectMap.values())
+                .sort((a: any, b: any) => String(a.projectName || "").localeCompare(String(b.projectName || "")));
+
             this.getView()?.setModel(new JSONModel({ projects }), "masterProjects");
-            console.log(`✅ SM loaded ${projects.length} master projects for assign dropdown`);
+            console.log(`✅ SM loaded ${projects.length} master projects for assign dropdown (${masterRaw.filter((p: any) => String(p.status || "").toLowerCase() !== "completed").length} from catalog, ${projects.length - masterRaw.filter((p: any) => String(p.status || "").toLowerCase() !== "completed").length} back-filled from CurrentProjects)`);
         } catch (error) {
+            if (this._isSessionExpired(error)) {
+                this._handleSessionExpiry();
+                return;
+            }
             console.error("❌ Error loading master projects for senior manager:", error);
             this.getView()?.setModel(new JSONModel({ projects: [] }), "masterProjects");
         }
@@ -423,6 +497,10 @@ export default class SeniorManagerDashboard extends Controller {
             console.log(`✅ Team overview split for ${seniorMgrId}: ${managersOnly.length} managers, ${individualEmployees.length} direct employees`);
             
         } catch (error) {
+            if (this._isSessionExpired(error)) {
+                this._handleSessionExpiry();
+                return;
+            }
             console.error("❌ Error loading managers:", error);
         }
     }
