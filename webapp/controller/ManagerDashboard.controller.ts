@@ -155,11 +155,25 @@ export default class ManagerDashboard extends Controller {
             const employeeContexts = await employeeBinding.requestContexts(0, 500);
             const employees = employeeContexts.map((ctx: any) => ctx.getObject());
 
-            const [currentProjectContexts, currentInitiativeContexts, currentEvaluationContexts] = await Promise.all([
+            const employeeIds = employees.map((e: any) => String(e.employeeId).trim()).filter(Boolean);
+
+            const skillsBindings = employeeIds.map((id: string) => {
+                const binding = oDataModel.bindList("/Skills");
+                binding.filter([new Filter("employeeId", FilterOperator.EQ, id)]);
+                return binding.requestContexts(0, 500).then((ctxs: any[]) => ctxs.map((c: any) => c.getObject()));
+            });
+
+            const [currentProjectContexts, currentInitiativeContexts, currentEvaluationContexts, ...skillsPerEmployee] = await Promise.all([
                 oDataModel.bindList("/CurrentProjects").requestContexts(0, 5000),
                 oDataModel.bindList("/CurrentInitiatives").requestContexts(0, 5000),
-                oDataModel.bindList("/CurrentEvaluations").requestContexts(0, 5000)
+                oDataModel.bindList("/CurrentEvaluations").requestContexts(0, 5000),
+                ...skillsBindings
             ]);
+
+            const skillsByEmployeeId: { [id: string]: any[] } = {};
+            employeeIds.forEach((id: string, idx: number) => {
+                skillsByEmployeeId[id] = skillsPerEmployee[idx] || [];
+            });
 
             const activeEmployees = new Set<string>();
             const utilizationByEmployee = new Map<string, number>();
@@ -179,7 +193,8 @@ export default class ManagerDashboard extends Controller {
             const enrichedEmployees = employees.map((employee: any) => ({
                 ...employee,
                 working_on_project: activeEmployees.has(employee.employeeId),
-                totalUtilization: Math.round(utilizationByEmployee.get(employee.employeeId) || 0)
+                totalUtilization: Math.round(utilizationByEmployee.get(employee.employeeId) || 0),
+                skills: skillsByEmployeeId[String(employee.employeeId).trim()] || []
             }));
 
             enrichedEmployees.sort((a: any, b: any) => {
@@ -845,7 +860,7 @@ export default class ManagerDashboard extends Controller {
         const totalEmployees = employees.length;
         const availableEmployees = employees.filter((emp: any) => !emp.working_on_project).length;
         const busyEmployees = employees.filter((emp: any) => emp.working_on_project).length;
-        const totalSkills = employees.reduce((sum: number, emp: any) => sum + (emp.totalSkills || 0), 0);
+        const totalSkills = employees.reduce((sum: number, emp: any) => sum + ((emp.skills || []).length || emp.totalSkills || 0), 0);
         
         // Update statistics controls with error checking
         const updateControl = (id: string, value: number | string, method: string = 'setNumber') => {

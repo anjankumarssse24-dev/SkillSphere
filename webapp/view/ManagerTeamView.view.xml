@@ -424,6 +424,51 @@
                                                 </m:Panel>
                                             </m:VBox>
                                         </m:FlexBox>
+
+                                        <m:Title text="Skills Overview" level="H4" class="sapUiSmallMarginTop sapUiSmallMarginBottom"/>
+                                        <m:FlexBox wrap="Wrap" justifyContent="SpaceAround" class="sapUiMediumMarginBottom">
+                                            <m:VBox class="sapUiResponsiveMargin sapUiLargeMarginEnd sapUiMediumMarginBottom analyticsCard" width="15rem">
+                                                <m:Panel class="clickablePanel" headerText="Total Skills">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <m:ObjectNumber id="mtvTotalSkillsCount" number="0" unit="skills" emphasized="true"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+
+                                            <m:VBox class="sapUiResponsiveMargin sapUiLargeMarginEnd sapUiMediumMarginBottom analyticsCard" width="15rem">
+                                                <m:Panel class="clickablePanel" headerText="Utilization Rate">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <m:Text id="mtvUtilizationRate" text="0%" class="sapMTitleStyleH3"/>
+                                                            <m:ProgressIndicator id="mtvUtilizationProgress" percentValue="0" displayValue="0%" width="100%" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+
+                                            <m:VBox class="sapUiResponsiveMargin sapUiMediumMarginBottom analyticsCard" width="15rem">
+                                                <m:Panel class="clickablePanel" headerText="Avg Skills / Employee">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <m:Text id="mtvAvgSkillsPerEmployee" text="0" class="sapMTitleStyleH3"/>
+                                                            <m:Text text="per employee" class="sapUiTinyMarginTop"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+
+                                            <m:VBox class="sapUiResponsiveMargin sapUiMediumMarginBottom analyticsCard" width="15rem">
+                                                <m:Panel class="clickablePanel" headerText="Most Common Level">
+                                                    <m:content>
+                                                        <m:VBox class="sapUiMediumMargin" alignItems="Center">
+                                                            <m:Text id="mtvCommonSkillLevel" text="N/A" class="sapMTitleStyleH3"/>
+                                                        </m:VBox>
+                                                    </m:content>
+                                                </m:Panel>
+                                            </m:VBox>
+                                        </m:FlexBox>
                                     </m:VBox>
                                 </m:content>
                             </m:Panel>

@@ -317,7 +317,7 @@ module.exports = cds.service.impl(async function() {
    * Used internally by actions like getMyProfile, getTeamMembers
    * - Employees: See only themselves
    * - Managers: See their direct reports + themselves
-   * - SeniorManagers: See all employees (for internal operations)
+  * - SeniorManagers: No employee-level filter applied
    */
   this.before(['READ', 'UPDATE'], Employees, async (req) => {
     const userId = await _resolveActorEmployeeId(req);
@@ -327,7 +327,10 @@ module.exports = cds.service.impl(async function() {
       return;
     }
     
-    if (_hasRole(req, 'Employee')) {
+    if (_hasRole(req, 'SeniorManager')) {
+      // Senior managers are intentionally unfiltered for Employees.
+      return;
+    } else if (_hasRole(req, 'Employee')) {
       // Employees can only see their own data
       req.query.where({ employeeId: userId });
     } else if (_hasRole(req, 'Manager')) {
@@ -337,10 +340,6 @@ module.exports = cds.service.impl(async function() {
         'or',
         { ref: ['employeeId'] }, '=', { val: userId }
       ]);
-    } else if (_hasRole(req, 'SeniorManager')) {
-      // Senior managers can only see their organization (direct managers, direct/indirect employees, and themselves).
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(userId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -348,6 +347,10 @@ module.exports = cds.service.impl(async function() {
    * Filter Skills data based on employee ownership
    */
   this.before(['READ', 'UPDATE'], Skills, async (req) => {
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -360,16 +363,22 @@ module.exports = cds.service.impl(async function() {
         team.forEach(emp => teamIds.push(emp.employeeId));
         req.query.where({ employeeId: { in: teamIds } });
       }
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
   /**
-   * Filter Projects data based on employee ownership
+   * Filter Projects updates based on employee ownership.
+   * READ requests stay unfiltered so the master project catalog can be fetched directly.
    */
   this.before(['READ', 'UPDATE'], Projects, async (req) => {
+    if (req.event === 'READ') {
+      return;
+    }
+
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -383,14 +392,6 @@ module.exports = cds.service.impl(async function() {
         'or',
         { ref: ['addedByManager'] }, '=', { val: actorEmployeeId }
       ]);
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      // SMs can see: (1) org members' projects, (2) master projects added by any manager in their org
-      req.query.where([
-        { ref: ['employeeId'] }, 'in', { list: visibleEmployeeIds.map(id => ({ val: id })) },
-        'or',
-        { ref: ['addedByManager'] }, 'in', { list: visibleEmployeeIds.map(id => ({ val: id })) }
-      ]);
     }
   });
 
@@ -398,6 +399,10 @@ module.exports = cds.service.impl(async function() {
    * Filter CurrentProjects based on user role
    */
   this.before(['READ', 'UPDATE'], CurrentProjects, async (req) => {
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -406,9 +411,6 @@ module.exports = cds.service.impl(async function() {
       const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
       req.query.where({ employeeId: { in: teamIds } });
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -416,6 +418,10 @@ module.exports = cds.service.impl(async function() {
    * Filter CurrentInitiatives based on user role
    */
   this.before(['READ', 'UPDATE'], CurrentInitiatives, async (req) => {
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -424,9 +430,6 @@ module.exports = cds.service.impl(async function() {
       const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
       req.query.where({ employeeId: { in: teamIds } });
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -434,6 +437,10 @@ module.exports = cds.service.impl(async function() {
    * Filter CurrentEvaluations based on user role
    */
   this.before(['READ', 'UPDATE'], CurrentEvaluations, async (req) => {
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -442,9 +449,6 @@ module.exports = cds.service.impl(async function() {
       const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
       req.query.where({ employeeId: { in: teamIds } });
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -452,6 +456,10 @@ module.exports = cds.service.impl(async function() {
    * Filter Initiatives, CAIAUtilization, POCUtilization based on user role
    */
   this.before(['READ', 'UPDATE'], [Initiatives, CAIAUtilization, POCUtilization], async (req) => {
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -460,9 +468,6 @@ module.exports = cds.service.impl(async function() {
       const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
       req.query.where({ employeeId: { in: teamIds } });
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 
@@ -470,6 +475,10 @@ module.exports = cds.service.impl(async function() {
    * Filter Certifications based on employee ownership
    */
   this.before(['READ', 'UPDATE'], Certifications, async (req) => {
+    if (_hasRole(req, 'SeniorManager')) {
+      return;
+    }
+
     const actorEmployeeId = await _resolveActorEmployeeId(req);
     if (_hasRole(req, 'Employee')) {
       req.query.where({ employeeId: actorEmployeeId });
@@ -478,9 +487,6 @@ module.exports = cds.service.impl(async function() {
       const team = await SELECT(Employees, e => e('*')).where({ managerId: actorEmployeeId });
       team.forEach(emp => teamIds.push(emp.employeeId));
       req.query.where({ employeeId: { in: teamIds } });
-    } else if (_hasRole(req, 'SeniorManager')) {
-      const visibleEmployeeIds = await _getSeniorManagerOrgEmployeeIds(actorEmployeeId);
-      req.query.where({ employeeId: { in: visibleEmployeeIds } });
     }
   });
 

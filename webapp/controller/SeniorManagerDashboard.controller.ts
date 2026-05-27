@@ -340,6 +340,13 @@ export default class SeniorManagerDashboard extends Controller {
             this.getView()?.setModel(new JSONModel({ items: initiativesItems }), "masterInitiatives");
             this.getView()?.setModel(new JSONModel({ items: evaluationsItems }), "masterEvaluations");
 
+            const refreshCombo = (id: string) => {
+                const combo = this.byId(id) as any;
+                if (combo) { combo.getBinding("items")?.refresh(); }
+            };
+            refreshCombo("smgrAssignInitiativeComboBox");
+            refreshCombo("smgrAssignEvaluationComboBox");
+
             console.log(`✅ Loaded master work items for senior manager assign tab: ${initiativesItems.length} initiatives, ${evaluationsItems.length} evaluations`);
         } catch (error) {
             console.error("❌ Error loading master work items:", error);
@@ -365,15 +372,15 @@ export default class SeniorManagerDashboard extends Controller {
 
             console.log(`📋 SM /Projects raw: ${masterRaw.length}, /CurrentProjects raw: ${currentRaw.length}`);
 
-            // Build a deduplicated map: projectId (or synthetic key) → project record
+            // Build a deduplicated map: projectName → project record (Projects is a history table, same project appears per-employee)
             const projectMap = new Map<string, any>();
 
-            // 1. Seed with master catalog entries (have full metadata)
+            // 1. Seed with master catalog entries, deduplicated by name
             masterRaw
                 .filter((p: any) => String(p.status || "").toLowerCase() !== "completed")
                 .forEach((p: any) => {
-                    const key = String(p.projectId || p.projectName || "").trim();
-                    if (key) projectMap.set(key, p);
+                    const key = String(p.projectName || "").trim().toLowerCase();
+                    if (key && !projectMap.has(key)) projectMap.set(key, p);
                 });
 
             // 2. Back-fill from CurrentProjects for any project names not already in catalog
@@ -406,6 +413,14 @@ export default class SeniorManagerDashboard extends Controller {
                 .sort((a: any, b: any) => String(a.projectName || "").localeCompare(String(b.projectName || "")));
 
             this.getView()?.setModel(new JSONModel({ projects }), "masterProjects");
+
+            // Refresh the ComboBox binding so it picks up the new model data
+            const assignComboBox = this.byId("smgrAssignProjectComboBox") as any;
+            if (assignComboBox) {
+                const binding = assignComboBox.getBinding("items");
+                if (binding) { binding.refresh(); }
+            }
+
             console.log(`✅ SM loaded ${projects.length} master projects for assign dropdown (${masterRaw.filter((p: any) => String(p.status || "").toLowerCase() !== "completed").length} from catalog, ${projects.length - masterRaw.filter((p: any) => String(p.status || "").toLowerCase() !== "completed").length} back-filled from CurrentProjects)`);
         } catch (error) {
             if (this._isSessionExpired(error)) {
@@ -461,7 +476,7 @@ export default class SeniorManagerDashboard extends Controller {
             // Keep all direct-report managers, even if they currently have zero direct reports.
             const managersOnly = managersWithTeamSize;
 
-            // Employee Overview should show direct reports that are not managers.
+            // Employee Overview shows direct reports that are not managers.
             const individualEmployees = directReports
                 .filter((person: any) => !String(person.role || "").toLowerCase().includes("manager"))
                 .map((person: any) => ({
@@ -477,7 +492,7 @@ export default class SeniorManagerDashboard extends Controller {
                 individualEmployees: individualEmployees
             });
             this.getView()?.setModel(managersModel, "allManagers");
-            
+
             // Populate manager dropdown for search
             const managerSelect = this.byId("orgManagerFilter") as Select;
             if (managerSelect) {
@@ -1025,35 +1040,18 @@ export default class SeniorManagerDashboard extends Controller {
             return;
         }
 
-        try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const employeesBinding = oDataModel.bindList("/Employees");
-            employeesBinding.filter([new Filter("managerId", FilterOperator.EQ, manager.managerId)]);
-            const teamContexts = await employeesBinding.requestContexts(0, 1000);
-            const teamMembers = teamContexts.map((ctx: any) => ctx.getObject());
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUser = currentUserModel?.getData();
+        const seniorMgrId = this.currentSeniorManagerId || currentUser?.id;
 
-            // Keep the table's teamSize in sync with live data
-            const allManagersModel = this.getView()?.getModel("allManagers") as JSONModel;
-            const managers: any[] = allManagersModel?.getProperty("/managers") || [];
-            const idx = managers.findIndex((m: any) => m.managerId === manager.managerId);
-            if (idx !== -1) {
-                allManagersModel.setProperty(`/managers/${idx}/teamSize`, teamMembers.length);
-            }
+        console.log("📋 Navigating to team view for manager:", manager.managerId);
 
-            this.getView()?.setModel(new JSONModel({
-                managerName: manager.name || "Manager",
-                managerId: manager.managerId,
-                employees: teamMembers
-            }), "managerTeamDetails");
+        this.getRouter().navTo("ManagerTeamView", {
+            managerId: manager.managerId,
+            seniorManagerId: seniorMgrId
+        });
 
-            const dialog = this.byId("managerTeamDialog") as Dialog;
-            dialog?.open();
-
-            MessageToast.show(`Loaded ${teamMembers.length} team member(s) for ${manager.name}`);
-        } catch (error) {
-            console.error("❌ Error loading manager team details:", error);
-            MessageToast.show("Error loading manager team details");
-        }
+        MessageToast.show(`Loading ${manager.name}'s team dashboard...`);
     }
 
     public onCloseManagerTeamDialog(): void {
@@ -1841,7 +1839,7 @@ export default class SeniorManagerDashboard extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const binding = oDataModel.bindList("/Projects");
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            const contexts = await binding.requestContexts();
+            const contexts = await binding.requestContexts(0, 1000);
             return contexts.map((c: any) => c.getObject());
         } catch { return []; }
     }
@@ -1990,7 +1988,7 @@ export default class SeniorManagerDashboard extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const binding = oDataModel.bindList("/CAIAUtilization");
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            const contexts = await binding.requestContexts();
+            const contexts = await binding.requestContexts(0, 1000);
             return contexts.map((c: any) => c.getObject());
         } catch { return []; }
     }
@@ -2000,7 +1998,7 @@ export default class SeniorManagerDashboard extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const binding = oDataModel.bindList("/POCUtilization");
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            const contexts = await binding.requestContexts();
+            const contexts = await binding.requestContexts(0, 1000);
             return contexts.map((c: any) => c.getObject());
         } catch { return []; }
     }
@@ -2010,7 +2008,7 @@ export default class SeniorManagerDashboard extends Controller {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const binding = oDataModel.bindList("/Certifications");
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            const contexts = await binding.requestContexts();
+            const contexts = await binding.requestContexts(0, 1000);
             return contexts.map((c: any) => c.getObject());
         } catch { return []; }
     }
@@ -3127,15 +3125,20 @@ export default class SeniorManagerDashboard extends Controller {
             const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
             if (!employeeDetailsModel) return;
 
-            // Refresh current projects/work
-            const currentProjects = await this.getCurrentProjects(this.currentDialogEmployeeId);
+            // Refresh current projects/work and completed history in parallel
+            const [currentProjects, completedWork] = await Promise.all([
+                this.getCurrentProjects(this.currentDialogEmployeeId),
+                this.getCompletedInitiativeEvaluationForTabs(this.currentDialogEmployeeId)
+            ]);
+
             const activeCurrentProjects = currentProjects
                 .filter((cp: any) => cp.assignmentStatus !== "Completed")
                 .map((cp: any) => ({ ...cp, isUtilizationEditing: false }));
-            employeeDetailsModel.setProperty("/currentProjects", activeCurrentProjects);
 
-            // Refresh assignments (all current work including completed)
+            employeeDetailsModel.setProperty("/currentProjects", activeCurrentProjects);
             employeeDetailsModel.setProperty("/assignments", currentProjects);
+            employeeDetailsModel.setProperty("/initiativesHistory", completedWork.initiatives);
+            employeeDetailsModel.setProperty("/evaluationsHistory", completedWork.evaluations);
         } catch (error) {
             console.error("Error refreshing dialog data:", error);
         }

@@ -228,7 +228,7 @@
                                                         <m:Text text="{allManagers>team}"/>
                                                         <m:Text text="{allManagers>displayExperience}" textAlign="Center"/>
                                                         <m:Text text="{allManagers>specialization}"/>
-                                                        <m:ObjectStatus 
+                                                        <m:ObjectStatus
                                                             text="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatus'}"
                                                             state="{path: 'allManagers>working_on_project', formatter: '.formatWorkingStatusState'}"/>
                                                     </m:cells>

@@ -1,4 +1,5 @@
 import Controller from "sap/ui/core/mvc/Controller";
+import XMLView from "sap/ui/core/mvc/XMLView";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
 import JSONModel from "sap/ui/model/json/JSONModel";
@@ -25,6 +26,8 @@ export default class ManagerTeamView extends Controller {
     private seniorManagerId: string | null = null;
     private currentDialogEmployeeId: string = "";
     private pendingEmployeeIdToOpen: string | null = null;
+    private sharedManagerView?: XMLView;
+    private sharedManagerController?: any;
 
     public onInit(): void {
         const router = this.getRouter();
@@ -193,7 +196,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Employees");
             listBinding.filter([new Filter("managerId", FilterOperator.EQ, currentManagerId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             const employees = contexts.map((context: any) => context.getObject());
             
             console.log(`✅ Loaded ${employees.length} employees from OData for manager ${currentManagerId}`);
@@ -274,7 +277,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Employees");
             listBinding.filter([new Filter("role", FilterOperator.EQ, "Manager")]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             const allManagers = contexts.map((context: any) => {
                 const manager = context.getObject();
                 return {
@@ -306,7 +309,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Skills");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading skills for ${employeeId}:`, error);
@@ -323,7 +326,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Projects");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading projects for ${employeeId}:`, error);
@@ -340,7 +343,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Profiles");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             const profiles = contexts.map((context: any) => context.getObject());
             return profiles.length > 0 ? profiles[0] : null;
         } catch (error) {
@@ -358,7 +361,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/CurrentProjects");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading current projects for ${employeeId}:`, error);
@@ -405,16 +408,16 @@ export default class ManagerTeamView extends Controller {
         updateControl("mtvTotalEmployeesCount", totalEmployees);
         updateControl("mtvAvailableEmployeesCount", availableEmployees);
         updateControl("mtvBusyEmployeesCount", busyEmployees);
-        updateControl("totalSkillsCount", totalSkills);
+        updateControl("mtvTotalSkillsCount", totalSkills);
         
         // Calculate utilization rate
         const utilizationRate = totalEmployees > 0 ? Math.round((busyEmployees / totalEmployees) * 100) : 0;
-        updateControl("utilizationRate", utilizationRate + "%", "setText");
-        updateControl("utilizationProgress", utilizationRate, "setPercentValue");
+        updateControl("mtvUtilizationRate", utilizationRate + "%", "setText");
+        updateControl("mtvUtilizationProgress", utilizationRate, "setPercentValue");
         
         // Calculate average skills per employee
         const avgSkills = totalEmployees > 0 ? Math.round(totalSkills / totalEmployees) : 0;
-        updateControl("avgSkillsPerEmployee", avgSkills.toString(), "setText");
+        updateControl("mtvAvgSkillsPerEmployee", avgSkills.toString(), "setText");
         
         // Calculate most common skill level based on actual skill data
         const skillsModel = this.getOwnerComponent()?.getModel("skills") as JSONModel;
@@ -423,7 +426,7 @@ export default class ManagerTeamView extends Controller {
             employees.some((emp: any) => emp.id === skill.employeeId)
         );
         const commonLevel = this.getCommonSkillLevel(teamSkills);
-        updateControl("commonSkillLevel", commonLevel, "setText");
+        updateControl("mtvCommonSkillLevel", commonLevel, "setText");
         
         console.log("Analytics updated for manager's team:", { 
             totalEmployees, availableEmployees, busyEmployees, totalSkills, 
@@ -448,11 +451,11 @@ export default class ManagerTeamView extends Controller {
         updateControl("mtvTotalEmployeesCount", 0);
         updateControl("mtvAvailableEmployeesCount", 0);
         updateControl("mtvBusyEmployeesCount", 0);
-        updateControl("totalSkillsCount", 0);
-        updateControl("utilizationRate", "0%", "setText");
-        updateControl("utilizationProgress", 0, "setPercentValue");
-        updateControl("avgSkillsPerEmployee", "0", "setText");
-        updateControl("commonSkillLevel", "N/A", "setText");
+        updateControl("mtvTotalSkillsCount", 0);
+        updateControl("mtvUtilizationRate", "0%", "setText");
+        updateControl("mtvUtilizationProgress", 0, "setPercentValue");
+        updateControl("mtvAvgSkillsPerEmployee", "0", "setText");
+        updateControl("mtvCommonSkillLevel", "N/A", "setText");
     }
 
     private getCommonSkillLevel(skills: any[]): string {
@@ -1456,7 +1459,43 @@ export default class ManagerTeamView extends Controller {
 
     // ==================== END DATA VISUALIZATION METHODS ====================
 
-    public onViewEmployeeDetails(event: Event): void {
+    private async openEmployeeWithManagerModel(employee: any): Promise<void> {
+        try {
+            const managerId = String(this.currentManagerId || employee?.managerId || "").trim().toUpperCase();
+            const employeeId = String(employee?.employeeId || employee?.id || "").trim();
+
+            if (!managerId || !employeeId) {
+                MessageToast.show("Unable to open employee details");
+                return;
+            }
+
+            if (!this.sharedManagerView) {
+                const owner = this.getOwnerComponent() as any;
+                if (owner?.runAsOwner) {
+                    let createdViewPromise: Promise<XMLView> | undefined;
+                    owner.runAsOwner(() => {
+                        createdViewPromise = XMLView.create({ viewName: "skillsphere.view.ManagerDashboard" });
+                    });
+                    this.sharedManagerView = await (createdViewPromise as Promise<XMLView>);
+                } else {
+                    this.sharedManagerView = await XMLView.create({ viewName: "skillsphere.view.ManagerDashboard" });
+                }
+
+                this.getView()?.addDependent(this.sharedManagerView);
+                this.sharedManagerController = (this.sharedManagerView as any).getController();
+            }
+
+            // Reuse the exact manager-side model and dialog flow.
+            this.sharedManagerController.currentManagerId = managerId;
+            await this.sharedManagerController.loadManagerData(managerId);
+            await this.sharedManagerController.openEmployeeDetailsDialog({ employeeId }, false);
+        } catch (error) {
+            console.error("❌ Error opening manager-model employee dialog:", error);
+            MessageToast.show("Unable to open employee details");
+        }
+    }
+
+    public async onViewEmployeeDetails(event: Event): Promise<void> {
         const source = event.getSource();
         // Try to get binding context from managerEmployees model first, fallback to employees
         let bindingContext = (source as any).getBindingContext("managerEmployees");
@@ -1471,7 +1510,7 @@ export default class ManagerTeamView extends Controller {
         }
         
         const employee = bindingContext.getObject();
-        this.openEmployeeDetailsDialog(employee, false);
+        await this.openEmployeeWithManagerModel(employee);
     }
 
     public onSkillTokenUpdate(event: Event): void {
@@ -1604,7 +1643,7 @@ export default class ManagerTeamView extends Controller {
                 const listBinding = oDataModel.bindList("/Employees");
                 listBinding.filter([new Filter("managerId", FilterOperator.EQ, viewedManagerId)]);
                 
-                const contexts = await listBinding.requestContexts();
+                const contexts = await listBinding.requestContexts(0, 1000);
                 allEmployees = contexts.map((context: any) => context.getObject());
                 console.log(`Searching in My Team (${viewedManagerId}): ${allEmployees.length} employees`);
                 
@@ -1620,7 +1659,7 @@ export default class ManagerTeamView extends Controller {
                 const listBinding = oDataModel.bindList("/Employees");
                 listBinding.filter([new Filter("managerId", FilterOperator.EQ, selectedManagerId)]);
                 
-                const contexts = await listBinding.requestContexts();
+                const contexts = await listBinding.requestContexts(0, 1000);
                 allEmployees = contexts.map((context: any) => context.getObject());
                 console.log(`Searching in Manager ${selectedManagerId}'s Team: ${allEmployees.length} employees`);
                 
@@ -1937,7 +1976,7 @@ export default class ManagerTeamView extends Controller {
         this.setAnalyticsDefaults();
     }
 
-    public onViewSearchResult(event: Event): void {
+    public async onViewSearchResult(event: Event): Promise<void> {
         const source = event.getSource();
         let bindingContext = (source as any).getBindingContext("searchResults");
         
@@ -1955,7 +1994,7 @@ export default class ManagerTeamView extends Controller {
         
         const result = bindingContext.getObject();
         console.log("Search result from binding context:", result);
-        this.openEmployeeDetailsDialog(result, true);
+        await this.openEmployeeWithManagerModel(result);
     }
 
     private async openEmployeeDetailsDialog(employee: any, isSearchResult: boolean): Promise<void> {
@@ -2147,7 +2186,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/CAIAUtilization");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading CAIA utilization for ${employeeId}:`, error);
@@ -2164,7 +2203,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/POCUtilization");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading POC utilization for ${employeeId}:`, error);
@@ -2181,7 +2220,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Initiatives");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading initiatives for ${employeeId}:`, error);
@@ -2198,7 +2237,7 @@ export default class ManagerTeamView extends Controller {
             const listBinding = oDataModel.bindList("/Certifications");
             listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
             
-            const contexts = await listBinding.requestContexts();
+            const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading certifications for ${employeeId}:`, error);
@@ -2519,7 +2558,7 @@ export default class ManagerTeamView extends Controller {
             // Get all assignments for this employee
             const binding = oDataModel.bindList("/CurrentProjects");
             binding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            const contexts = await binding.requestContexts();
+            const contexts = await binding.requestContexts(0, 1000);
             const assignments = contexts.map((ctx: any) => ctx.getObject());
             
             // Update the model
