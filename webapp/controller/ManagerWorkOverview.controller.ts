@@ -133,10 +133,16 @@ export default class ManagerWorkOverview extends Controller {
 
             if (loadSeq !== this.workOverviewLoadSeq) return;
 
-            // Load all initiatives
-            const initBinding = oDataModel.bindList("/Initiatives");
-            const initContexts = await initBinding.requestContexts(0, 500);
-            const initiatives = initContexts.map((ctx: any) => ctx.getObject());
+            // Load all current initiatives and evaluations
+            const currentInitiativesBinding = oDataModel.bindList("/CurrentInitiatives");
+            const currentInitiativesContexts = await currentInitiativesBinding.requestContexts(0, 1000);
+            const currentInitiatives = currentInitiativesContexts.map((ctx: any) => ctx.getObject());
+
+            if (loadSeq !== this.workOverviewLoadSeq) return;
+
+            const currentEvaluationsBinding = oDataModel.bindList("/CurrentEvaluations");
+            const currentEvaluationsContexts = await currentEvaluationsBinding.requestContexts(0, 1000);
+            const currentEvaluations = currentEvaluationsContexts.map((ctx: any) => ctx.getObject());
 
             if (loadSeq !== this.workOverviewLoadSeq) return;
 
@@ -151,19 +157,23 @@ export default class ManagerWorkOverview extends Controller {
                 }
             });
 
-            // Group evaluations and initiatives from Initiatives entity
+            // Group evaluations and initiatives from current work entities
             const empEvaluations: any = {};
             const empInitiatives: any = {};
-            initiatives.forEach((init: any) => {
-                if (init.status === "Completed") return;
-                const eid = init.employeeId;
-                if (init.type === "Evaluation") {
-                    if (!empEvaluations[eid]) empEvaluations[eid] = [];
-                    empEvaluations[eid].push(init);
-                } else if (init.type === "Initiative") {
-                    if (!empInitiatives[eid]) empInitiatives[eid] = [];
-                    empInitiatives[eid].push(init);
-                }
+            currentEvaluations.forEach((evaluation: any) => {
+                if (evaluation.status === "Completed") return;
+                const eid = evaluation.employeeId;
+                if (!eid) return;
+                if (!empEvaluations[eid]) empEvaluations[eid] = [];
+                empEvaluations[eid].push(evaluation);
+            });
+
+            currentInitiatives.forEach((initiative: any) => {
+                if (initiative.status === "Completed") return;
+                const eid = initiative.employeeId;
+                if (!eid) return;
+                if (!empInitiatives[eid]) empInitiatives[eid] = [];
+                empInitiatives[eid].push(initiative);
             });
 
             const formatEntry = (name: string, pct: any) => {
@@ -200,8 +210,8 @@ export default class ManagerWorkOverview extends Controller {
                     techCategory: techCategory,
                     totalAllocation: totalAllocation,
                     projects: projectsList.map((p: any) => formatEntry(p.projectName, p.utilizationPercent)),
-                    evaluations: evaluations.map((e: any) => formatEntry(e.initiativeName, e.utilizationPercent)),
-                    initiatives: inits.map((i: any) => formatEntry(i.initiativeName, i.utilizationPercent))
+                    evaluations: evaluations.map((e: any) => formatEntry(e.evaluationName || e.initiativeName || e.description || "Evaluation", e.utilizationPercent)),
+                    initiatives: inits.map((i: any) => formatEntry(i.initiativeName || i.description || "Initiative", i.utilizationPercent))
                 };
                 rows.push(row);
             });

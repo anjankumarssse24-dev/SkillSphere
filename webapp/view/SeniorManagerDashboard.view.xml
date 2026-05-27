@@ -874,7 +874,7 @@
                                         </m:ComboBox>
                                         <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
                                         <m:Input id="smgrAssignInitiativeAllocationInput" type="Number" value="100" width="100%" class="sapUiMediumMarginBottom"/>
-                                        <m:Button text="Assign Initiative" type="Emphasized" icon="sap-icon://add"/>
+                                        <m:Button text="Assign Initiative" type="Emphasized" icon="sap-icon://add" press="onAssignInitiativeFromPanel"/>
                                     </m:VBox>
                                 </m:content>
                             </m:Panel>
@@ -892,7 +892,7 @@
                                         </m:ComboBox>
                                         <m:Label text="Allocation (%):" class="sapUiTinyMarginBottom"/>
                                         <m:Input id="smgrAssignEvaluationAllocationInput" type="Number" value="100" width="100%" class="sapUiMediumMarginBottom"/>
-                                        <m:Button text="Assign Evaluation" type="Emphasized" icon="sap-icon://add"/>
+                                        <m:Button text="Assign Evaluation" type="Emphasized" icon="sap-icon://add" press="onAssignEvaluationFromPanel"/>
                                     </m:VBox>
                                 </m:content>
                             </m:Panel>

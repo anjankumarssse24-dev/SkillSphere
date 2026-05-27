@@ -30,6 +30,7 @@ import ObjectStatus from "sap/m/ObjectStatus";
 export default class SeniorManagerDashboard extends Controller {
 
     private currentSeniorManagerId: string | null = null;
+    private currentDialogEmployeeId: string = "";
     private seniorManagerId: string = "";
     private currentChatSeniorManagerId: string = "";
     private aiInitialized: boolean = false;
@@ -249,36 +250,40 @@ export default class SeniorManagerDashboard extends Controller {
 
     private async loadMasterWorkItems(): Promise<void> {
         try {
-            const [initiativesResponse, evaluationsResponse] = await Promise.all([
-                fetch("/odata/v4/api/v1/InitiativesMaster", {
-                    credentials: "same-origin",
-                    headers: { Accept: "application/json" }
-                }),
-                fetch("/odata/v4/api/v1/EvaluationsMaster", {
-                    credentials: "same-origin",
-                    headers: { Accept: "application/json" }
-                })
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const initiativesBinding = oDataModel.bindList("/InitiativesMaster");
+            const evaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
+
+            const [initiativeContexts, evaluationContexts] = await Promise.all([
+                initiativesBinding.requestContexts(0, 1000),
+                evaluationsBinding.requestContexts(0, 1000)
             ]);
 
-            const [initiativesData, evaluationsData] = await Promise.all([
-                initiativesResponse.ok ? initiativesResponse.json() : { value: [] },
-                evaluationsResponse.ok ? evaluationsResponse.json() : { value: [] }
-            ]);
+            const initiativesItems = initiativeContexts
+                .map((ctx: any) => ctx.getObject())
+                .filter((row: any) => row && row.status !== "Completed")
+                .map((row: any) => ({
+                    initiativeId: row.initiativeId,
+                    initiativeName: row.initiativeName,
+                    status: row.status
+                }));
 
-            const initiativesItems = (initiativesData.value || []).map((row: any) => ({
-                initiativeId: row.initiativeId,
-                initiativeName: row.initiativeName,
-                status: row.status
-            }));
+            const evaluationsItems = evaluationContexts
+                .map((ctx: any) => ctx.getObject())
+                .filter((row: any) => row && row.status !== "Completed")
+                .map((row: any) => ({
+                    evaluationId: row.evaluationId,
+                    evaluationName: row.evaluationName,
+                    status: row.status
+                }));
 
-            const evaluationsItems = (evaluationsData.value || []).map((row: any) => ({
-                evaluationId: row.evaluationId,
-                evaluationName: row.evaluationName,
-                status: row.status
-            }));
+            initiativesItems.sort((a: any, b: any) => String(a.initiativeName || "").localeCompare(String(b.initiativeName || "")));
+            evaluationsItems.sort((a: any, b: any) => String(a.evaluationName || "").localeCompare(String(b.evaluationName || "")));
 
             this.getView()?.setModel(new JSONModel({ items: initiativesItems }), "masterInitiatives");
             this.getView()?.setModel(new JSONModel({ items: evaluationsItems }), "masterEvaluations");
+
+            console.log(`✅ Loaded master work items for senior manager assign tab: ${initiativesItems.length} initiatives, ${evaluationsItems.length} evaluations`);
         } catch (error) {
             console.error("❌ Error loading master work items:", error);
             this.getView()?.setModel(new JSONModel({ items: [] }), "masterInitiatives");
@@ -533,9 +538,13 @@ export default class SeniorManagerDashboard extends Controller {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
-            // Load all initiatives (evaluations + initiatives stored here)
-            const initBinding = oDataModel.bindList("/Initiatives");
-            const initContexts = await initBinding.requestContexts(0, 1000);
+            // Load current initiatives and current evaluations
+            const currentInitiativesBinding = oDataModel.bindList("/CurrentInitiatives");
+            const currentEvaluationsBinding = oDataModel.bindList("/CurrentEvaluations");
+            const [currentInitiativeContexts, currentEvaluationContexts] = await Promise.all([
+                currentInitiativesBinding.requestContexts(0, 1000),
+                currentEvaluationsBinding.requestContexts(0, 1000)
+            ]);
             
             // Group projects by employee (only Projects from CurrentProjects)
             const workByEmployee = new Map<string, any[]>();
@@ -553,27 +562,34 @@ export default class SeniorManagerDashboard extends Controller {
                 }
             });
             
-            // Group evaluations and initiatives by employee (from Initiatives entity)
+            // Group evaluations and initiatives by employee (from current work entities)
             const evalsByEmployee = new Map<string, any[]>();
             const initsByEmployee = new Map<string, any[]>();
-            initContexts.map((ctx: any) => ctx.getObject()).forEach((init: any) => {
-                if (init.status === "Completed") return;
-                if (!init.startDate || !init.endDate) return;
-                const start = new Date(init.startDate); start.setHours(0, 0, 0, 0);
-                const end = new Date(init.endDate); end.setHours(0, 0, 0, 0);
-                
+            currentEvaluationContexts.map((ctx: any) => ctx.getObject()).forEach((evaluation: any) => {
+                if (evaluation.status === "Completed") return;
+                if (!evaluation.startDate || !evaluation.endDate) return;
+                const start = new Date(evaluation.startDate); start.setHours(0, 0, 0, 0);
+                const end = new Date(evaluation.endDate); end.setHours(0, 0, 0, 0);
+
                 if (today >= start && today <= end) {
-                    if (init.type === "Evaluation") {
-                        if (!evalsByEmployee.has(init.employeeId)) {
-                            evalsByEmployee.set(init.employeeId, []);
-                        }
-                        evalsByEmployee.get(init.employeeId)!.push(init);
-                    } else if (init.type === "Initiative") {
-                        if (!initsByEmployee.has(init.employeeId)) {
-                            initsByEmployee.set(init.employeeId, []);
-                        }
-                        initsByEmployee.get(init.employeeId)!.push(init);
+                    if (!evalsByEmployee.has(evaluation.employeeId)) {
+                        evalsByEmployee.set(evaluation.employeeId, []);
                     }
+                    evalsByEmployee.get(evaluation.employeeId)!.push(evaluation);
+                }
+            });
+
+            currentInitiativeContexts.map((ctx: any) => ctx.getObject()).forEach((initiative: any) => {
+                if (initiative.status === "Completed") return;
+                if (!initiative.startDate || !initiative.endDate) return;
+                const start = new Date(initiative.startDate); start.setHours(0, 0, 0, 0);
+                const end = new Date(initiative.endDate); end.setHours(0, 0, 0, 0);
+
+                if (today >= start && today <= end) {
+                    if (!initsByEmployee.has(initiative.employeeId)) {
+                        initsByEmployee.set(initiative.employeeId, []);
+                    }
+                    initsByEmployee.get(initiative.employeeId)!.push(initiative);
                 }
             });
             
@@ -619,16 +635,16 @@ export default class SeniorManagerDashboard extends Controller {
                     });
                 }
                 
-                // Add evaluations dynamically (from Initiatives entity)
+                // Add evaluations dynamically
                 for (let i = 0; i < maxEvaluations; i++) {
                     rowData.evaluations.push({
-                        name: evaluations[i]?.initiativeName || '-',
+                        name: evaluations[i]?.evaluationName || evaluations[i]?.initiativeName || '-',
                         tech: '',
                         util: evaluations[i] ? `${evaluations[i].utilizationPercent}%` : ''
                     });
                 }
                 
-                // Add initiatives dynamically (from Initiatives entity)
+                // Add initiatives dynamically
                 for (let i = 0; i < maxInitiatives; i++) {
                     rowData.initiatives.push({
                         name: initiatives[i]?.initiativeName || '-',
@@ -1218,7 +1234,7 @@ export default class SeniorManagerDashboard extends Controller {
         }
 
         const employee = bindingContext.getObject();
-        this.openManagerSharedEmployeeDialog(employee);
+        this.openEmployeeDetailsDialog(employee);
     }
 
     // Helper methods
@@ -1286,7 +1302,7 @@ export default class SeniorManagerDashboard extends Controller {
             return;
         }
         const result = bindingContext.getObject();
-        this.openManagerSharedEmployeeDialog(result);
+        this.openEmployeeDetailsDialog(result);
     }
 
     private async openManagerSharedEmployeeDialog(employee: any): Promise<void> {
@@ -1331,9 +1347,13 @@ export default class SeniorManagerDashboard extends Controller {
             return;
         }
 
-        const empId = employee.employeeId || employee.id;
+        const empId = String(employee.employeeId || employee.id || "").trim();
+        this.currentDialogEmployeeId = empId;
 
         try {
+            // Ensure assign-work dropdowns always use the latest master catalogs.
+            await this.loadMasterWorkItems();
+
             const [employeeData, profileData, skills, projects, currentProjects, caiaUtilization, pocUtilization, certifications, completedMasterWork] = await Promise.all([
                 this.loadEmployeeData(empId),
                 this.loadProfileData(empId),
@@ -1423,7 +1443,112 @@ export default class SeniorManagerDashboard extends Controller {
     }
 
     public onCloseEmployeeDialog(): void {
+        this.currentDialogEmployeeId = "";
         (this.byId("smgrEmpDetailsDialog") as any)?.close();
+    }
+
+    private async assignMasterWorkFromPanel(type: "Initiative" | "Evaluation"): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Select an employee first");
+            return;
+        }
+
+        const isInitiative = type === "Initiative";
+        const comboBox = this.byId(isInitiative ? "smgrAssignInitiativeComboBox" : "smgrAssignEvaluationComboBox") as any;
+        const allocationInput = this.byId(isInitiative ? "smgrAssignInitiativeAllocationInput" : "smgrAssignEvaluationAllocationInput") as any;
+        const modelName = isInitiative ? "masterInitiatives" : "masterEvaluations";
+        const idField = isInitiative ? "initiativeId" : "evaluationId";
+        const nameField = isInitiative ? "initiativeName" : "evaluationName";
+
+        const selectedKey = String(comboBox?.getSelectedKey?.() || "").trim();
+        if (!selectedKey) {
+            MessageToast.show(`Please select a ${type.toLowerCase()} to assign`);
+            return;
+        }
+
+        const allocationValue = Number(allocationInput?.getValue?.() ?? 100);
+        const utilizationPercent = Math.max(1, Math.min(100, Math.round(allocationValue || 0)));
+
+        const workModel = this.getView()?.getModel(modelName) as JSONModel;
+        const items = workModel?.getProperty("/items") || [];
+        const selected = items.find((item: any) => String(item[idField] || "") === selectedKey);
+
+        if (!selected) {
+            MessageToast.show(`${type} not found`);
+            return;
+        }
+
+        if (String(selected.status || "").toLowerCase() === "completed") {
+            MessageToast.show(`Completed ${type.toLowerCase()}s cannot be assigned`);
+            return;
+        }
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            const existingBinding = oDataModel.bindList(isInitiative ? "/CurrentInitiatives" : "/CurrentEvaluations");
+            existingBinding.filter([
+                new Filter("employeeId", FilterOperator.EQ, this.currentDialogEmployeeId),
+                new Filter(idField, FilterOperator.EQ, selectedKey)
+            ]);
+            const existingContexts = await existingBinding.requestContexts(0, 1);
+            if (existingContexts.length > 0) {
+                MessageToast.show(`This ${type.toLowerCase()} is already assigned to this employee`);
+                return;
+            }
+
+            const listBinding = oDataModel.bindList(isInitiative ? "/CurrentInitiatives" : "/CurrentEvaluations");
+            const now = new Date().toISOString();
+
+            if (isInitiative) {
+                listBinding.create({
+                    employeeId: this.currentDialogEmployeeId,
+                    initiativeId: selected.initiativeId,
+                    initiativeName: selected.initiativeName,
+                    description: selected.description || "",
+                    startDate: selected.startDate,
+                    endDate: selected.endDate,
+                    utilizationPercent,
+                    status: "Active",
+                    assignedBy: this.currentSeniorManagerId || "",
+                    createdAt: now,
+                    lastUpdated: now
+                });
+            } else {
+                listBinding.create({
+                    employeeId: this.currentDialogEmployeeId,
+                    evaluationId: selected.evaluationId,
+                    evaluationName: selected.evaluationName,
+                    description: selected.description || "",
+                    startDate: selected.startDate,
+                    endDate: selected.endDate,
+                    utilizationPercent,
+                    status: "Active",
+                    assignedBy: this.currentSeniorManagerId || "",
+                    createdAt: now,
+                    lastUpdated: now
+                });
+            }
+
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+
+            comboBox?.setSelectedKey("");
+            allocationInput?.setValue(100);
+
+            await this.openEmployeeDetailsDialog({ employeeId: this.currentDialogEmployeeId });
+            MessageToast.show(`${type} assigned successfully`);
+        } catch (error) {
+            console.error(`❌ Error assigning ${type.toLowerCase()} from senior manager panel:`, error);
+            MessageToast.show(`Error assigning ${type.toLowerCase()}`);
+        }
+    }
+
+    public async onAssignInitiativeFromPanel(): Promise<void> {
+        await this.assignMasterWorkFromPanel("Initiative");
+    }
+
+    public async onAssignEvaluationFromPanel(): Promise<void> {
+        await this.assignMasterWorkFromPanel("Evaluation");
     }
 
     public onContactEmployee(): void {
