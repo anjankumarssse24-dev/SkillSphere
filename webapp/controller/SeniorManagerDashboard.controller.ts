@@ -2,6 +2,7 @@ import Controller from "sap/ui/core/mvc/Controller";
 import XMLView from "sap/ui/core/mvc/XMLView";
 import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
+import MessageBox from "sap/m/MessageBox";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
@@ -23,6 +24,11 @@ import ListBinding from "sap/ui/model/ListBinding";
 import FormattedText from "sap/m/FormattedText";
 import OverflowToolbar from "sap/m/OverflowToolbar";
 import ObjectStatus from "sap/m/ObjectStatus";
+import Label from "sap/m/Label";
+import Input from "sap/m/Input";
+import Button from "sap/m/Button";
+import DatePicker from "sap/m/DatePicker";
+import TextArea from "sap/m/TextArea";
 
 /**
  * @namespace skillsphere.controller
@@ -32,6 +38,7 @@ export default class SeniorManagerDashboard extends Controller {
     private currentSeniorManagerId: string | null = null;
     private currentDialogEmployeeId: string = "";
     private seniorManagerId: string = "";
+    private currentManagerId: string = "";
     private currentChatSeniorManagerId: string = "";
     private aiInitialized: boolean = false;
     private typingIndicator: HTML | null = null;
@@ -2169,5 +2176,696 @@ export default class SeniorManagerDashboard extends Controller {
                 oScrollContainer.scrollTo(0, 10000);
             }
         }, 100);
+    }
+
+    // ==================== SKILL MANAGEMENT METHODS ====================
+
+    /**
+     * Add a new skill for the employee
+     */
+    public async onSMgrAddSkill(): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("No employee selected");
+            return;
+        }
+
+        // Create a simple dialog for adding skill
+        const dialogContent = new VBox({
+            items: [
+                new Label({ text: "Skill Name", required: true }),
+                new Input({ id: this.createId("smgrNewSkillName"), placeholder: "Enter skill name" }),
+                new Label({ text: "Proficiency Level" }).addStyleClass("sapUiSmallMarginTop"),
+                new Select({
+                    id: this.createId("smgrNewSkillProficiency"),
+                    items: [
+                        new Item({ key: "Beginner", text: "Beginner" }),
+                        new Item({ key: "Intermediate", text: "Intermediate" }),
+                        new Item({ key: "Proficient", text: "Proficient" }),
+                        new Item({ key: "Advanced", text: "Advanced" }),
+                        new Item({ key: "Expert", text: "Expert" })
+                    ]
+                }),
+                new Label({ text: "Category" }).addStyleClass("sapUiSmallMarginTop"),
+                new Input({ id: this.createId("smgrNewSkillCategory"), placeholder: "e.g., Programming, Cloud, Database" }),
+                new Label({ text: "Years of Experience" }).addStyleClass("sapUiSmallMarginTop"),
+                new Input({ id: this.createId("smgrNewSkillYears"), type: "Number", value: "1" })
+            ]
+        }).addStyleClass("sapUiSmallMargin");
+
+        const dialog = new Dialog({
+            title: "Add Skill",
+            contentWidth: "400px",
+            content: [dialogContent],
+            beginButton: new Button({
+                text: "Add",
+                type: "Emphasized",
+                press: async () => {
+                    const skillName = (this.byId("smgrNewSkillName") as any)?.getValue();
+                    const proficiency = (this.byId("smgrNewSkillProficiency") as any)?.getSelectedKey();
+                    const category = (this.byId("smgrNewSkillCategory") as any)?.getValue();
+                    const years = (this.byId("smgrNewSkillYears") as any)?.getValue();
+
+                    if (!skillName) {
+                        MessageToast.show("Please enter a skill name");
+                        return;
+                    }
+
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                        const listBinding = oDataModel.bindList("/Skills");
+                        
+                        listBinding.create({
+                            employeeId: this.currentDialogEmployeeId,
+                            skillName: skillName,
+                            proficiencyLevel: proficiency || "Beginner",
+                            category: category || "General",
+                            yearsExperience: parseFloat(years) || 1
+                        });
+
+                        await oDataModel.submitBatch("updateGroup");
+                        MessageToast.show("Skill added successfully");
+                        dialog.close();
+                        
+                        // Refresh the employee details
+                        const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+                        const skills = await this.getEmployeeSkills(this.currentDialogEmployeeId);
+                        employeeDetailsModel.setProperty("/skills", skills);
+                        (this.byId("smgrDialogTotalSkills") as any)?.setNumber(skills.length);
+                    } catch (error) {
+                        console.error("Error adding skill:", error);
+                        MessageToast.show("Error adding skill");
+                    }
+                }
+            }),
+            endButton: new Button({
+                text: "Cancel",
+                press: () => dialog.close()
+            }),
+            afterClose: () => dialog.destroy()
+        });
+
+        dialog.open();
+    }
+
+    /**
+     * Edit an existing skill
+     */
+    public onSMgrEditSkill(event: Event): void {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        if (!bindingContext) {
+            MessageToast.show("Unable to get skill details");
+            return;
+        }
+
+        const skill = bindingContext.getObject();
+        const skillPath = bindingContext.getPath();
+
+        const editDialogContent = new VBox({
+            items: [
+                new Label({ text: "Skill Name", required: true }),
+                new Input({ id: this.createId("smgrEditSkillName"), value: skill.skillName }),
+                new Label({ text: "Proficiency Level" }).addStyleClass("sapUiSmallMarginTop"),
+                new Select({
+                    id: this.createId("smgrEditSkillProficiency"),
+                    selectedKey: skill.proficiencyLevel,
+                    items: [
+                        new Item({ key: "Beginner", text: "Beginner" }),
+                        new Item({ key: "Intermediate", text: "Intermediate" }),
+                        new Item({ key: "Proficient", text: "Proficient" }),
+                        new Item({ key: "Advanced", text: "Advanced" }),
+                        new Item({ key: "Expert", text: "Expert" })
+                    ]
+                }),
+                new Label({ text: "Category" }).addStyleClass("sapUiSmallMarginTop"),
+                new Input({ id: this.createId("smgrEditSkillCategory"), value: skill.category }),
+                new Label({ text: "Years of Experience" }).addStyleClass("sapUiSmallMarginTop"),
+                new Input({ id: this.createId("smgrEditSkillYears"), type: "Number", value: String(skill.yearsExperience || 1) })
+            ]
+        }).addStyleClass("sapUiSmallMargin");
+
+        const dialog = new Dialog({
+            title: "Edit Skill",
+            contentWidth: "400px",
+            content: [editDialogContent],
+            beginButton: new Button({
+                text: "Save",
+                type: "Emphasized",
+                press: async () => {
+                    const skillName = (this.byId("smgrEditSkillName") as any)?.getValue();
+                    const proficiency = (this.byId("smgrEditSkillProficiency") as any)?.getSelectedKey();
+                    const category = (this.byId("smgrEditSkillCategory") as any)?.getValue();
+                    const years = (this.byId("smgrEditSkillYears") as any)?.getValue();
+
+                    if (!skillName) {
+                        MessageToast.show("Please enter a skill name");
+                        return;
+                    }
+
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                        const skillBinding = oDataModel.bindContext(`/Skills(ID=${skill.ID},IsActiveEntity=true)`);
+                        await skillBinding.requestObject();
+                        const skillContext = skillBinding.getBoundContext();
+                        
+                        skillContext.setProperty("skillName", skillName);
+                        skillContext.setProperty("proficiencyLevel", proficiency);
+                        skillContext.setProperty("category", category);
+                        skillContext.setProperty("yearsExperience", parseFloat(years) || 1);
+
+                        await oDataModel.submitBatch("updateGroup");
+                        MessageToast.show("Skill updated successfully");
+                        dialog.close();
+                        
+                        // Refresh the employee details
+                        const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+                        const skills = await this.getEmployeeSkills(this.currentDialogEmployeeId);
+                        employeeDetailsModel.setProperty("/skills", skills);
+                    } catch (error) {
+                        console.error("Error updating skill:", error);
+                        MessageToast.show("Error updating skill");
+                    }
+                }
+            }),
+            endButton: new Button({
+                text: "Cancel",
+                press: () => dialog.close()
+            }),
+            afterClose: () => dialog.destroy()
+        });
+
+        dialog.open();
+    }
+
+    /**
+     * Delete a skill
+     */
+    public onSMgrDeleteSkill(event: Event): void {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        if (!bindingContext) {
+            MessageToast.show("Unable to get skill details");
+            return;
+        }
+
+        const skill = bindingContext.getObject();
+
+        MessageBox.confirm(`Are you sure you want to delete the skill "${skill.skillName}"?`, {
+            title: "Confirm Delete",
+            onClose: async (action: string) => {
+                if (action === "OK") {
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                        const skillBinding = oDataModel.bindContext(`/Skills(ID=${skill.ID},IsActiveEntity=true)`);
+                        await skillBinding.requestObject();
+                        const skillContext = skillBinding.getBoundContext();
+                        await skillContext.delete();
+
+                        MessageToast.show("Skill deleted successfully");
+                        
+                        // Refresh the employee details
+                        const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+                        const skills = await this.getEmployeeSkills(this.currentDialogEmployeeId);
+                        employeeDetailsModel.setProperty("/skills", skills);
+                        (this.byId("smgrDialogTotalSkills") as any)?.setNumber(skills.length);
+                    } catch (error) {
+                        console.error("Error deleting skill:", error);
+                        MessageToast.show("Error deleting skill");
+                    }
+                }
+            }
+        });
+    }
+
+    // ==================== CERTIFICATION MANAGEMENT METHODS ====================
+
+    /**
+     * Add a new certification for the employee
+     */
+    public async onSMgrAddCertification(): Promise<void> {
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("No employee selected");
+            return;
+        }
+
+        const certDialogContent = new VBox({
+            items: [
+                new Label({ text: "Certification Name", required: true }),
+                new Input({ id: this.createId("smgrNewCertName"), placeholder: "Enter certification name" }),
+                new Label({ text: "Certification Code" }).addStyleClass("sapUiSmallMarginTop"),
+                new Input({ id: this.createId("smgrNewCertCode"), placeholder: "e.g., AWS-SAA-C03" }),
+                new Label({ text: "Date of Completion" }).addStyleClass("sapUiSmallMarginTop"),
+                new DatePicker({ id: this.createId("smgrNewCertDate"), displayFormat: "yyyy-MM-dd", valueFormat: "yyyy-MM-dd" }),
+                new Label({ text: "Level" }).addStyleClass("sapUiSmallMarginTop"),
+                new Select({
+                    id: this.createId("smgrNewCertLevel"),
+                    items: [
+                        new Item({ key: "Associate", text: "Associate" }),
+                        new Item({ key: "Professional", text: "Professional" }),
+                        new Item({ key: "Expert", text: "Expert" }),
+                        new Item({ key: "Specialty", text: "Specialty" })
+                    ]
+                }),
+                new Label({ text: "Description" }).addStyleClass("sapUiSmallMarginTop"),
+                new TextArea({ id: this.createId("smgrNewCertDesc"), rows: 3, width: "100%" })
+            ]
+        }).addStyleClass("sapUiSmallMargin");
+
+        const dialog = new Dialog({
+            title: "Add Certification",
+            contentWidth: "450px",
+            content: [certDialogContent],
+            beginButton: new Button({
+                text: "Add",
+                type: "Emphasized",
+                press: async () => {
+                    const name = (this.byId("smgrNewCertName") as any)?.getValue();
+                    const code = (this.byId("smgrNewCertCode") as any)?.getValue();
+                    const date = (this.byId("smgrNewCertDate") as any)?.getValue();
+                    const level = (this.byId("smgrNewCertLevel") as any)?.getSelectedKey();
+                    const description = (this.byId("smgrNewCertDesc") as any)?.getValue();
+
+                    if (!name) {
+                        MessageToast.show("Please enter a certification name");
+                        return;
+                    }
+
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                        const listBinding = oDataModel.bindList("/Certifications");
+                        
+                        listBinding.create({
+                            employeeId: this.currentDialogEmployeeId,
+                            name: name,
+                            code: code || "",
+                            dateOfCompletion: date || new Date().toISOString().split('T')[0],
+                            level: level || "Associate",
+                            description: description || ""
+                        });
+
+                        await oDataModel.submitBatch("updateGroup");
+                        MessageToast.show("Certification added successfully");
+                        dialog.close();
+                        
+                        // Refresh the employee details
+                        const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+                        const certifications = await this.getCertifications(this.currentDialogEmployeeId);
+                        employeeDetailsModel.setProperty("/certifications", certifications);
+                        (this.byId("smgrDialogTotalCertifications") as any)?.setNumber(certifications.length);
+                    } catch (error) {
+                        console.error("Error adding certification:", error);
+                        MessageToast.show("Error adding certification");
+                    }
+                }
+            }),
+            endButton: new Button({
+                text: "Cancel",
+                press: () => dialog.close()
+            }),
+            afterClose: () => dialog.destroy()
+        });
+
+        dialog.open();
+    }
+
+    /**
+     * Edit an existing certification
+     */
+    public onSMgrEditCertification(event: Event): void {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        if (!bindingContext) {
+            MessageToast.show("Unable to get certification details");
+            return;
+        }
+
+        const cert = bindingContext.getObject();
+
+        const editCertDialogContent = new VBox({
+            items: [
+                new Label({ text: "Certification Name", required: true }),
+                new Input({ id: this.createId("smgrEditCertName"), value: cert.name }),
+                new Label({ text: "Certification Code" }).addStyleClass("sapUiSmallMarginTop"),
+                new Input({ id: this.createId("smgrEditCertCode"), value: cert.code }),
+                new Label({ text: "Date of Completion" }).addStyleClass("sapUiSmallMarginTop"),
+                new DatePicker({ id: this.createId("smgrEditCertDate"), value: cert.dateOfCompletion, displayFormat: "yyyy-MM-dd", valueFormat: "yyyy-MM-dd" }),
+                new Label({ text: "Level" }).addStyleClass("sapUiSmallMarginTop"),
+                new Select({
+                    id: this.createId("smgrEditCertLevel"),
+                    selectedKey: cert.level,
+                    items: [
+                        new Item({ key: "Associate", text: "Associate" }),
+                        new Item({ key: "Professional", text: "Professional" }),
+                        new Item({ key: "Expert", text: "Expert" }),
+                        new Item({ key: "Specialty", text: "Specialty" })
+                    ]
+                }),
+                new Label({ text: "Description" }).addStyleClass("sapUiSmallMarginTop"),
+                new TextArea({ id: this.createId("smgrEditCertDesc"), value: cert.description, rows: 3, width: "100%" })
+            ]
+        }).addStyleClass("sapUiSmallMargin");
+
+        const dialog = new Dialog({
+            title: "Edit Certification",
+            contentWidth: "450px",
+            content: [editCertDialogContent],
+            beginButton: new Button({
+                text: "Save",
+                type: "Emphasized",
+                press: async () => {
+                    const name = (this.byId("smgrEditCertName") as any)?.getValue();
+                    const code = (this.byId("smgrEditCertCode") as any)?.getValue();
+                    const date = (this.byId("smgrEditCertDate") as any)?.getValue();
+                    const level = (this.byId("smgrEditCertLevel") as any)?.getSelectedKey();
+                    const description = (this.byId("smgrEditCertDesc") as any)?.getValue();
+
+                    if (!name) {
+                        MessageToast.show("Please enter a certification name");
+                        return;
+                    }
+
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                        const certBinding = oDataModel.bindContext(`/Certifications(ID=${cert.ID},IsActiveEntity=true)`);
+                        await certBinding.requestObject();
+                        const certContext = certBinding.getBoundContext();
+                        
+                        certContext.setProperty("name", name);
+                        certContext.setProperty("code", code);
+                        certContext.setProperty("dateOfCompletion", date);
+                        certContext.setProperty("level", level);
+                        certContext.setProperty("description", description);
+
+                        await oDataModel.submitBatch("updateGroup");
+                        MessageToast.show("Certification updated successfully");
+                        dialog.close();
+                        
+                        // Refresh the employee details
+                        const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+                        const certifications = await this.getCertifications(this.currentDialogEmployeeId);
+                        employeeDetailsModel.setProperty("/certifications", certifications);
+                    } catch (error) {
+                        console.error("Error updating certification:", error);
+                        MessageToast.show("Error updating certification");
+                    }
+                }
+            }),
+            endButton: new Button({
+                text: "Cancel",
+                press: () => dialog.close()
+            }),
+            afterClose: () => dialog.destroy()
+        });
+
+        dialog.open();
+    }
+
+    /**
+     * Delete a certification
+     */
+    public onSMgrDeleteCertification(event: Event): void {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        if (!bindingContext) {
+            MessageToast.show("Unable to get certification details");
+            return;
+        }
+
+        const cert = bindingContext.getObject();
+
+        MessageBox.confirm(`Are you sure you want to delete the certification "${cert.name}"?`, {
+            title: "Confirm Delete",
+            onClose: async (action: string) => {
+                if (action === "OK") {
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+                        const certBinding = oDataModel.bindContext(`/Certifications(ID=${cert.ID},IsActiveEntity=true)`);
+                        await certBinding.requestObject();
+                        const certContext = certBinding.getBoundContext();
+                        await certContext.delete();
+
+                        MessageToast.show("Certification deleted successfully");
+                        
+                        // Refresh the employee details
+                        const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+                        const certifications = await this.getCertifications(this.currentDialogEmployeeId);
+                        employeeDetailsModel.setProperty("/certifications", certifications);
+                        (this.byId("smgrDialogTotalCertifications") as any)?.setNumber(certifications.length);
+                    } catch (error) {
+                        console.error("Error deleting certification:", error);
+                        MessageToast.show("Error deleting certification");
+                    }
+                }
+            }
+        });
+    }
+
+    // ==================== UTILIZATION MANAGEMENT ====================
+
+    /**
+     * Edit utilization - toggle editing mode
+     */
+    public onSMgrEditUtilization(event: Event): void {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        if (!bindingContext) {
+            return;
+        }
+        bindingContext.setProperty("isUtilizationEditing", true);
+    }
+
+    /**
+     * Save utilization changes
+     */
+    public async onSMgrSaveUtilization(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        const row = bindingContext?.getObject();
+
+        if (!row || !this.currentDialogEmployeeId) {
+            MessageToast.show("Unable to update utilization");
+            return;
+        }
+
+        const utilizationValue = Number(row.utilizationPercent);
+        const utilizationPercent = Math.max(1, Math.min(100, Math.round(utilizationValue || 0)));
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+            let entityPath = "/CurrentProjects";
+            let keyField = "currentProjectId";
+            let keyValue = row.currentProjectId;
+
+            if (row.type === "Initiative" || row._source === "CurrentInitiatives") {
+                entityPath = "/CurrentInitiatives";
+                keyField = "currentInitiativeId";
+                keyValue = row.currentInitiativeId || row.currentProjectId;
+            } else if (row.type === "Evaluation" || row._source === "CurrentEvaluations") {
+                entityPath = "/CurrentEvaluations";
+                keyField = "currentEvaluationId";
+                keyValue = row.currentEvaluationId || row.currentProjectId;
+            }
+
+            if (!keyValue) {
+                MessageToast.show("Assignment identifier not found");
+                return;
+            }
+
+            const listBinding = oDataModel.bindList(entityPath);
+            listBinding.filter([new Filter(keyField, FilterOperator.EQ, keyValue)]);
+            const contexts = await listBinding.requestContexts(0, 1);
+
+            if (contexts.length === 0) {
+                MessageToast.show("Assignment not found");
+                return;
+            }
+
+            contexts[0].setProperty("utilizationPercent", utilizationPercent);
+            contexts[0].setProperty("lastUpdated", new Date().toISOString());
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+
+            bindingContext.setProperty("isUtilizationEditing", false);
+
+            await this.refreshSMgrCurrentDialogData();
+            MessageToast.show("Utilization updated successfully");
+        } catch (error) {
+            console.error("❌ Error updating utilization:", error);
+            MessageToast.show("Error updating utilization");
+        }
+    }
+
+    /**
+     * Mark current project/work as completed
+     */
+    public async onSMgrCompleteCurrentProject(event: Event): Promise<void> {
+        const source = event.getSource() as any;
+        const bindingContext = source.getBindingContext("employeeDetails");
+        const row = bindingContext?.getObject();
+
+        if (!row || !this.currentDialogEmployeeId) {
+            MessageToast.show("Unable to complete assignment");
+            return;
+        }
+
+        MessageBox.confirm(`Mark "${row.projectName}" as completed?`, {
+            title: "Confirm Completion",
+            onClose: async (action: string) => {
+                if (action === "OK") {
+                    try {
+                        const oDataModel = this.getOwnerComponent()?.getModel() as any;
+
+                        let entityPath = "/CurrentProjects";
+                        let keyField = "currentProjectId";
+                        let keyValue = row.currentProjectId;
+
+                        if (row.type === "Initiative" || row._source === "CurrentInitiatives") {
+                            entityPath = "/CurrentInitiatives";
+                            keyField = "currentInitiativeId";
+                            keyValue = row.currentInitiativeId || row.currentProjectId;
+                        } else if (row.type === "Evaluation" || row._source === "CurrentEvaluations") {
+                            entityPath = "/CurrentEvaluations";
+                            keyField = "currentEvaluationId";
+                            keyValue = row.currentEvaluationId || row.currentProjectId;
+                        }
+
+                        if (!keyValue) {
+                            MessageToast.show("Assignment identifier not found");
+                            return;
+                        }
+
+                        const listBinding = oDataModel.bindList(entityPath);
+                        listBinding.filter([new Filter(keyField, FilterOperator.EQ, keyValue)]);
+                        const contexts = await listBinding.requestContexts(0, 1);
+
+                        if (contexts.length === 0) {
+                            MessageToast.show("Assignment not found");
+                            return;
+                        }
+
+                        contexts[0].setProperty("assignmentStatus", "Completed");
+                        contexts[0].setProperty("status", "Completed");
+                        contexts[0].setProperty("lastUpdated", new Date().toISOString());
+                        await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+
+                        await this.refreshSMgrCurrentDialogData();
+                        MessageToast.show("Assignment marked as completed");
+                    } catch (error) {
+                        console.error("❌ Error completing assignment:", error);
+                        MessageToast.show("Error completing assignment");
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Assign project to employee from Senior Manager dialog
+     */
+    public async onSMgrAssignProject(): Promise<void> {
+        const comboBox = this.byId("smgrAssignProjectComboBox") as any;
+        const roleComboBox = this.byId("smgrAssignProjectRoleCombo") as any;
+        const allocationInput = this.byId("smgrAssignProjectAllocationInput") as any;
+        
+        if (!comboBox) {
+            MessageToast.show("Project selection not found");
+            return;
+        }
+        
+        const selectedKey = comboBox.getSelectedKey();
+        if (!selectedKey) {
+            MessageToast.show("Please select a project to assign");
+            return;
+        }
+        
+        if (!this.currentDialogEmployeeId) {
+            MessageToast.show("Employee information not found");
+            return;
+        }
+
+        const selectedRole = roleComboBox?.getSelectedKey() || "Team Member";
+        const allocationValue = Number(allocationInput?.getValue?.() ?? 100);
+        const utilizationPercent = Math.max(1, Math.min(100, Math.round(allocationValue)));
+
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            
+            // Get project details from Projects master data
+            const projectsBinding = oDataModel.bindList("/Projects");
+            projectsBinding.filter([new Filter("projectId", FilterOperator.EQ, selectedKey)]);
+            const projectContexts = await projectsBinding.requestContexts(0, 1);
+            
+            if (projectContexts.length === 0) {
+                MessageToast.show("Project not found");
+                return;
+            }
+            
+            const project = projectContexts[0].getObject();
+
+            if (String(project.status || "").trim().toLowerCase() === "completed") {
+                MessageToast.show("Completed projects cannot be assigned");
+                return;
+            }
+
+            // Create assignment in CurrentProjects
+            const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
+            currentProjectsBinding.create({
+                employeeId: this.currentDialogEmployeeId,
+                type: "Project",
+                projectName: project.projectName,
+                role: selectedRole,
+                projectManager: project.projectManager || "",
+                region: project.region || "",
+                startDate: project.startDate,
+                endDate: project.endDate,
+                utilizationPercent: utilizationPercent,
+                description: project.description || "",
+                assignmentStatus: "Assigned",
+                assignedBy: this.currentManagerId,
+                isEvaluation: false,
+                createdAt: new Date().toISOString(),
+                lastUpdated: new Date().toISOString()
+            });
+            
+            await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            MessageToast.show(`Project "${project.projectName}" assigned successfully.`);
+            
+            // Clear the selection
+            comboBox.setSelectedKey("");
+            roleComboBox?.setSelectedKey("Team Member");
+            allocationInput?.setValue(100);
+            
+            // Refresh the dialog data
+            await this.refreshSMgrCurrentDialogData();
+        } catch (error) {
+            console.error("❌ Error assigning project:", error);
+            MessageToast.show("Error assigning project to employee");
+        }
+    }
+
+    /**
+     * Refresh current dialog data after changes
+     */
+    private async refreshSMgrCurrentDialogData(): Promise<void> {
+        if (!this.currentDialogEmployeeId) return;
+
+        try {
+            const employeeDetailsModel = this.getView()?.getModel("employeeDetails") as JSONModel;
+            if (!employeeDetailsModel) return;
+
+            // Refresh current projects/work
+            const currentProjects = await this.getCurrentProjects(this.currentDialogEmployeeId);
+            const activeCurrentProjects = currentProjects
+                .filter((cp: any) => cp.assignmentStatus !== "Completed")
+                .map((cp: any) => ({ ...cp, isUtilizationEditing: false }));
+            employeeDetailsModel.setProperty("/currentProjects", activeCurrentProjects);
+
+            // Refresh assignments (all current work including completed)
+            employeeDetailsModel.setProperty("/assignments", currentProjects);
+        } catch (error) {
+            console.error("Error refreshing dialog data:", error);
+        }
     }
 }

@@ -923,3 +923,80 @@
 [id$="individualEmployeesTable"] .sapMListTblSubCntHdr[data-sap-ui-rowaction] {
     display: none !important;
 }
+
+/* ===== Master Projects Section - Overflow Fix ===== */
+.masterProjectsVBox {
+    padding: 0 1rem;
+    box-sizing: border-box;
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+}
+
+.masterProjectsPanel {
+    overflow: hidden !important;
+}
+
+.masterProjectsPanel .sapMPanelContent {
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+}
+
+/* Fix table overflow in Master Projects section */
+#masterProjectsTable,
+#masterInitiativesTable,
+#masterEvaluationsTable {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+}
+
+/* Ensure the ObjectPageSubSection doesn't cause overflow */
+[id$="masterProjectsSubSection"] {
+    overflow-x: hidden !important;
+}
+
+[id$="masterProjectsSubSection"] .sapUxAPBlockBase {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+}
+
+/* Remove extra margins from tables in Master Projects section */
+#masterProjectsPanel .sapMListTbl,
+#masterInitiativesPanel .sapMListTbl,
+#masterEvaluationsPanel .sapMListTbl {
+    margin: 0 !important;
+    width: 100% !important;
+}
+
+/* Ensure panels don't overflow their container */
+#masterProjectsPanel,
+#masterInitiativesPanel,
+#masterEvaluationsPanel {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* Hide horizontal scrollbar on panel content */
+#masterProjectsPanel > .sapMPanelContent,
+#masterInitiativesPanel > .sapMPanelContent,
+#masterEvaluationsPanel > .sapMPanelContent {
+    overflow-x: hidden !important;
+}
+
+/* Fix the responsive margin class that may cause overflow */
+#masterProjectsTable.sapUiResponsiveMargin,
+#masterInitiativesTable.sapUiResponsiveMargin,
+#masterEvaluationsTable.sapUiResponsiveMargin {
+    margin: 0 !important;
+    padding: 0.5rem !important;
+}
+
+/* Ensure ObjectPageSection doesn't overflow */
+#masterProjectsSection {
+    overflow-x: hidden !important;
+}
+
+#masterProjectsSection .sapUxAPObjectPageSubSectionContainer {
+    overflow-x: hidden !important;
+}

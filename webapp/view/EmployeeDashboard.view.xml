@@ -464,13 +464,15 @@
             </uxap:ObjectPageSection>
         </uxap:sections>
     </uxap:ObjectPageLayout>
- <m:Button
+ <!-- AI Assistant button hidden until AI Core is configured
+    <m:Button
         icon="sap-icon://message-assistant"
         text="AI Assistant"
         type="Emphasized"
         press="onOpenAIAssistant"
         class="aiAssistantFloatingButton"
         tooltip="Open AI Assistant"/>
+    -->
     
     <!-- AI Assistant Dialog -->
     <m:Dialog
