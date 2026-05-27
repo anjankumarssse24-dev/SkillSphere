@@ -63,7 +63,6 @@
         "kind": "sqlite",
         "model": "db"
       },
-      "auth": "dummy",
       "[production]": {
         "db": {
           "kind": "sqlite"

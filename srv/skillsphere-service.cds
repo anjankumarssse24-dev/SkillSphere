@@ -26,16 +26,10 @@ using skillsphere from '../db/schema';
  * ✅ All data access is logged & audited
  */
 @path: 'api/v1'
-@requires: 'authenticated-user'
 service SkillSphereSecureAPI {
 
   // ========== AUTHENTICATION & USER CONTEXT ==========
   
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action currentUserContext() returns {
     authenticated: Boolean;
     authorized: Boolean;
@@ -48,9 +42,6 @@ service SkillSphereSecureAPI {
     message: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' }
-  ]
   action completeFirstTimeSetup(
     loginEmployeeId: String,
     employeeId: String,
@@ -82,11 +73,6 @@ service SkillSphereSecureAPI {
    * ❌ password - never exposed via API (stored in external auth system)
    * ❌ admin flags, internal markers
    */
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   // User Management
   entity Users as projection on skillsphere.Users;
   
@@ -138,10 +124,6 @@ service SkillSphereSecureAPI {
    * ❌ managerId - manager hierarchy (we don't expose org structure)
    * ❌ manager relationships - prevents reverse-engineering of hierarchy
    */
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getTeamMembers() returns array of {
     employeeId: String;
     name: String;
@@ -150,11 +132,6 @@ service SkillSphereSecureAPI {
     team: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getMySkills() returns array of {
     skillId: String;
     skillName: String;
@@ -162,11 +139,6 @@ service SkillSphereSecureAPI {
     yearsExperience: Decimal;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getMyProjects() returns array of {
     projectId: String;
     projectName: String;
@@ -177,10 +149,6 @@ service SkillSphereSecureAPI {
     technology: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action createTeamMember(
     employeeId: String,
     name: String,
@@ -193,10 +161,6 @@ service SkillSphereSecureAPI {
     employeeId: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action createProjectAssignment(
     employeeId: String,
     projectName: String,
@@ -212,11 +176,6 @@ service SkillSphereSecureAPI {
 
   // ========== UTILIZATION & WORKLOAD DATA ==========
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getMyUtilization() returns {
     currentProjectHours: Decimal(5,2);
     caiaHours: Decimal(5,2);
@@ -225,11 +184,6 @@ service SkillSphereSecureAPI {
     utilizationPercent: Integer;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getEmployeeStats(employeeId: String) returns {
     employeeId: String;
     totalSkills: Integer;
@@ -238,10 +192,6 @@ service SkillSphereSecureAPI {
     averageUtilization: Decimal;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getTeamUtilization() returns array of {
     employeeId: String;
     employeeName: String;
@@ -251,11 +201,6 @@ service SkillSphereSecureAPI {
 
   // ========== CERTIFICATIONS & QUALIFICATIONS ==========
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getMyCertifications() returns array of {
     certificationId: String;
     name: String;
@@ -264,11 +209,6 @@ service SkillSphereSecureAPI {
     level: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action addCertification(
     name: String,
     code: String,
@@ -281,11 +221,6 @@ service SkillSphereSecureAPI {
   
   // ========== AI ASSISTANT ACTIONS ==========
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action askAIAssistant(
     query: String,
     employeeId: String
@@ -295,10 +230,6 @@ service SkillSphereSecureAPI {
     error: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action managerQuery(
     managerId: String,
     queryType: String,
@@ -309,9 +240,6 @@ service SkillSphereSecureAPI {
     success: Boolean;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action seniorManagerQuery(
     seniorManagerId: String,
     queryType: String,
@@ -324,11 +252,6 @@ service SkillSphereSecureAPI {
 
   // ========== CHAT & PREFERENCES ==========
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action clearChat(userId: String) returns {
     success: Boolean;
     message: String;
@@ -336,11 +259,6 @@ service SkillSphereSecureAPI {
 
   // ========== INITIATIVE & WORK TRACKING ==========
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getMyInitiatives() returns array of {
     initiativeId: String;
     initiativeName: String;
@@ -350,11 +268,6 @@ service SkillSphereSecureAPI {
     status: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'Employee' },
-    { grant: 'EXECUTE', to: 'Manager' },
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action createInitiative(
     initiativeName: String,
     description: String,
@@ -368,9 +281,6 @@ service SkillSphereSecureAPI {
 
   // ========== ADMIN ONLY ACTIONS ==========
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action generateEmployeeReport(
     reportType: String,
     startDate: Date,
@@ -381,9 +291,6 @@ service SkillSphereSecureAPI {
     success: Boolean;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getAllEmployees() returns array of {
     employeeId: String;
     name: String;
@@ -391,9 +298,6 @@ service SkillSphereSecureAPI {
     role: String;
   };
 
-  @restrict: [
-    { grant: 'EXECUTE', to: 'SeniorManager' }
-  ]
   action getAuditLogs(
     startDate: Date,
     endDate: Date,

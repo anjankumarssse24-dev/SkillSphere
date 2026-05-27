@@ -8,7 +8,7 @@ import { CSVParser } from "./CSVParser";
 export class DataManager {
     private static instance: DataManager;
     private dataKey = 'skillsphere_data';
-    private apiBaseUrl = 'http://localhost:4004/odata/v4/skill-sphere';
+    private apiBaseUrl = '/odata/v4/api/v1';
 
     private constructor() {}
 
