@@ -909,66 +909,137 @@ export default class ManagerTeamView extends Controller {
         const visualizationModel = this.getView()?.getModel("visualization") as JSONModel;
         const selectedYear = parseInt(visualizationModel?.getProperty("/selectedYear") || new Date().getFullYear());
         const selectedQuarter = visualizationModel?.getProperty("/selectedQuarter") || "ALL";
-        
+
         const ganttData: any[] = [];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         allData.forEach(d => {
             const employeeData: any = {
                 employeeName: d.employee.name,
                 employeeId: d.employee.employeeId,
                 projects: []
             };
-            
-            // currentProjects now contains ALL items (projects, initiatives, evaluations)
-            // Process them based on their type
-            d.currentProjects.forEach((cp: any) => {
+
+            const upsertProject = (item: any): void => {
+                const normalizedType = item.type === "ProjectHistory" ? "Project" : (item.type || "Project");
+                const key = [
+                    normalizedType,
+                    item.projectName || "",
+                    item.startDate || "",
+                    item.endDate || ""
+                ].join("|");
+
+                const existingIndex = employeeData.projects.findIndex((p: any) => {
+                    const pType = p.type === "ProjectHistory" ? "Project" : (p.type || "Project");
+                    const pKey = [pType, p.projectName || "", p.startDate || "", p.endDate || ""].join("|");
+                    return pKey === key;
+                });
+
+                if (existingIndex === -1) {
+                    employeeData.projects.push(item);
+                    return;
+                }
+
+                const existing = employeeData.projects[existingIndex];
+                const newIsFinished = item.status === "finished";
+                const oldIsFinished = existing.status === "finished";
+
+                if (newIsFinished && !oldIsFinished) {
+                    employeeData.projects[existingIndex] = {
+                        ...existing,
+                        ...item,
+                        status: "finished",
+                        color: "#808080"
+                    };
+                }
+            };
+
+            // Separate CurrentProjects by type
+            const projectsFromCP = d.currentProjects.filter((cp: any) => cp.type === 'Project');
+            const initiativesFromCP = d.currentProjects.filter((cp: any) =>
+                cp.type === 'Initiative' || cp.type === 'Evaluation' || cp.type === 'CAIA' || cp.type === 'POC'
+            );
+
+            // Include Projects from CurrentProjects
+            projectsFromCP.forEach((cp: any) => {
                 if (!cp.startDate || !cp.endDate) return;
-                
+
                 const startDate = new Date(cp.startDate);
                 const endDate = new Date(cp.endDate);
                 startDate.setHours(0, 0, 0, 0);
                 endDate.setHours(0, 0, 0, 0);
-                
-                // Filter by year
+
                 if (startDate.getFullYear() !== selectedYear && endDate.getFullYear() !== selectedYear) return;
-                
-                // Determine project status based on dates
-                let status = "scheduled";
-                if (endDate < today) {
-                    status = "finished"; // Completed projects - Gray
-                } else if (startDate <= today && endDate >= today) {
-                    status = "ongoing"; // Ongoing projects - Green
-                } else if (startDate > today) {
-                    status = "scheduled"; // Scheduled/Future projects - Blue
+
+                const explicitlyCompleted = String(cp.assignmentStatus || "").toLowerCase() === "completed";
+                let status = explicitlyCompleted ? "finished" : "scheduled";
+                if (!explicitlyCompleted && endDate < today) {
+                    status = "finished";
+                } else if (!explicitlyCompleted && startDate <= today && endDate >= today) {
+                    status = "ongoing";
+                } else if (!explicitlyCompleted && startDate > today) {
+                    status = "scheduled";
                 }
-                
-                // Determine color based on type
-                const itemType = cp.type || "Project";
-                let color = status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2";
-                let typeLabel = "Project";
-                
-                if (itemType === "Initiative" || itemType === "Evaluation" || itemType === "CAIA" || itemType === "POC") {
-                    color = "#f39c12"; // Orange for initiatives/evaluations
-                    typeLabel = itemType;
-                }
-                
-                employeeData.projects.push({
+
+                upsertProject({
                     projectName: cp.projectName,
                     startDate: cp.startDate,
                     endDate: cp.endDate,
                     utilizationPercent: cp.utilizationPercent,
                     status: status,
-                    type: itemType === "Project" ? "CurrentProject" : "Initiative",
+                    type: "Project",
+                    color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
+                });
+            });
+
+            // Include Initiatives from CurrentProjects (Initiative, Evaluation, CAIA, POC types)
+            initiativesFromCP.forEach((init: any) => {
+                if (!init.startDate || !init.endDate) return;
+
+                const startDate = new Date(init.startDate);
+                const endDate = new Date(init.endDate);
+                startDate.setHours(0, 0, 0, 0);
+                endDate.setHours(0, 0, 0, 0);
+
+                if (startDate.getFullYear() !== selectedYear && endDate.getFullYear() !== selectedYear) return;
+
+                const explicitlyCompleted = String(init.assignmentStatus || "").toLowerCase() === "completed";
+                let status = explicitlyCompleted ? "finished" : "scheduled";
+                if (!explicitlyCompleted && endDate < today) {
+                    status = "finished";
+                } else if (!explicitlyCompleted && startDate <= today && endDate >= today) {
+                    status = "ongoing";
+                } else if (!explicitlyCompleted && startDate > today) {
+                    status = "scheduled";
+                }
+
+                const typeLabel = init.type || "Initiative";
+                let color = "#f39c12";
+                if (typeLabel === "Evaluation") {
+                    color = "#8e44ad";
+                } else if (typeLabel === "CAIA") {
+                    color = "#16a085";
+                } else if (typeLabel === "POC") {
+                    color = "#d35400";
+                }
+                if (status === "finished") {
+                    color = "#808080";
+                }
+
+                upsertProject({
+                    projectName: init.projectName,
+                    description: init.description,
+                    startDate: init.startDate,
+                    endDate: init.endDate,
+                    utilizationPercent: init.utilizationPercent,
+                    status: status,
+                    type: init.type,
                     typeLabel: typeLabel,
                     color: color
                 });
             });
-            
-            // Skip separate initiatives processing since they're already in currentProjects
-            // This prevents duplicate entries
-            
+
             // Include historical Projects (project history)
             d.projects.forEach((proj: any) => {
                 if (!proj.startDate || !proj.endDate) return;
@@ -978,30 +1049,28 @@ export default class ManagerTeamView extends Controller {
                 startDate.setHours(0, 0, 0, 0);
                 endDate.setHours(0, 0, 0, 0);
 
-                // Filter by year - include if either start or end year matches, or project spans it
                 if (startDate.getFullYear() !== selectedYear && endDate.getFullYear() !== selectedYear &&
                     !(startDate.getFullYear() < selectedYear && endDate.getFullYear() > selectedYear)) return;
 
-                // Historical projects are always "finished" unless still running
-                const status = endDate < today ? "finished" : (startDate <= today ? "ongoing" : "scheduled");
+                const explicitCompleted = String(proj.status || "").toLowerCase() === "completed";
+                const status = explicitCompleted ? "finished" : (endDate < today ? "finished" : (startDate <= today ? "ongoing" : "scheduled"));
 
-                employeeData.projects.push({
+                upsertProject({
                     projectName: proj.projectName,
                     startDate: proj.startDate,
                     endDate: proj.endDate,
                     status: status,
-                    type: "ProjectHistory",
+                    type: "Project",
                     typeLabel: "History",
                     color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
                 });
             });
-            
-            // Only add employee to gantt data if they have projects/initiatives
+
             if (employeeData.projects.length > 0) {
                 ganttData.push(employeeData);
             }
         });
-        
+
         visualizationModel?.setProperty("/ganttData", ganttData);
         console.log("📊 Gantt Data Generated:", ganttData.length, "employees with projects/initiatives");
     }
@@ -1266,88 +1335,74 @@ export default class ManagerTeamView extends Controller {
      */
     private createGanttRow(empData: any, year: number, monthNumbers: number[], totalMonths: number): string {
         let barsHtml = '';
-        
-        // First, calculate positions for all projects to detect overlaps
+
         const projectsWithPositions: any[] = [];
-        
+
         empData.projects.forEach((project: any) => {
             const startDate = new Date(project.startDate);
             const endDate = new Date(project.endDate);
-            
-            // Get month and day information
+
             const startMonth = startDate.getMonth();
             const endMonth = endDate.getMonth();
+            const startYear = startDate.getFullYear();
+            const endYear = endDate.getFullYear();
             const startDay = startDate.getDate();
             const endDay = endDate.getDate();
-            
-            // Check if project overlaps with selected months
+
             const startIndex = monthNumbers.indexOf(startMonth);
             const endIndex = monthNumbers.indexOf(endMonth);
 
-            // Check if project completely spans the visible range
-            // (starts before first visible month AND ends after last visible month)
             const firstVisibleMonth = monthNumbers[0];
             const lastVisibleMonth = monthNumbers[monthNumbers.length - 1];
-            const spansEntireRange = startMonth < firstVisibleMonth && endMonth > lastVisibleMonth;
-            const startsBeforeAndEndsAfter =
-                (startDate.getFullYear() < new Date(startDate.getFullYear(), firstVisibleMonth, 1).getFullYear() ||
-                 startMonth < firstVisibleMonth) &&
-                (endDate.getFullYear() > new Date(endDate.getFullYear(), lastVisibleMonth, 1).getFullYear() ||
-                 endMonth > lastVisibleMonth);
 
-            if (startIndex === -1 && endIndex === -1 && !spansEntireRange) return; // Skip if not in range at all
-            
-            // Calculate precise position with day-level accuracy
+            const startsBeforeRange = (startYear < year) || (startYear === year && startMonth < firstVisibleMonth);
+            const endsAfterRange = (endYear > year) || (endYear === year && endMonth > lastVisibleMonth);
+            const spansEntireRange = startsBeforeRange && endsAfterRange;
+
+            if (startIndex === -1 && endIndex === -1 && !spansEntireRange) return;
+
             let leftPercent = 0;
             let widthPercent = 0;
-            
+
             if (spansEntireRange) {
-                // Project covers entire visible range — full width bar
                 leftPercent = 0;
                 widthPercent = 100;
-            } else if (startIndex !== -1 && endIndex !== -1) {
-                // Both start and end are in visible range
+            } else if (startYear === year && endYear === year && startIndex !== -1 && endIndex !== -1) {
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
-                
-                // Calculate left position: which month + day offset within that month
+
                 const dayOffsetInStartMonth = (startDay - 1) / daysInStartMonth;
                 leftPercent = ((startIndex + dayOffsetInStartMonth) / totalMonths) * 100;
-                
-                // Calculate width: number of months spanned + day fractions
+
                 const monthsSpanned = endIndex - startIndex;
                 const endDayFraction = endDay / daysInEndMonth;
-                
+
                 if (monthsSpanned === 0) {
-                    // Same month - just calculate days between
                     const daysSpanned = endDay - startDay + 1;
                     widthPercent = ((daysSpanned / daysInStartMonth) / totalMonths) * 100;
                 } else {
-                    // Multiple months - calculate total width including partial months
                     const startDayFraction = (daysInStartMonth - startDay + 1) / daysInStartMonth;
                     widthPercent = ((startDayFraction + (monthsSpanned - 1) + endDayFraction) / totalMonths) * 100;
                 }
-            } else if (startIndex !== -1) {
-                // Only start is visible, extends beyond visible range
+            } else if (startYear === year && startIndex !== -1) {
                 const daysInStartMonth = new Date(startDate.getFullYear(), startMonth + 1, 0).getDate();
                 const dayOffsetInStartMonth = (startDay - 1) / daysInStartMonth;
                 leftPercent = ((startIndex + dayOffsetInStartMonth) / totalMonths) * 100;
                 widthPercent = ((totalMonths - startIndex - dayOffsetInStartMonth) / totalMonths) * 100;
-            } else if (endIndex !== -1) {
-                // Only end is visible, starts before visible range
+            } else if (endYear === year && endIndex !== -1) {
                 const daysInEndMonth = new Date(endDate.getFullYear(), endMonth + 1, 0).getDate();
                 const endDayFraction = endDay / daysInEndMonth;
                 leftPercent = 0;
                 widthPercent = ((endIndex + endDayFraction) / totalMonths) * 100;
             }
-            
+
             projectsWithPositions.push({
                 ...project,
                 leftPercent,
                 widthPercent
             });
         });
-        
+
         // Detect overlaps and assign stacking lanes
         const lanes: number[] = new Array(projectsWithPositions.length).fill(0);
         for (let i = 0; i < projectsWithPositions.length; i++) {
@@ -1368,16 +1423,14 @@ export default class ManagerTeamView extends Controller {
             lanes[i] = lane;
         }
         const maxLane = Math.max(0, ...lanes);
-        const laneHeight = 34; // px per lane
+        const laneHeight = 34;
         const rowPadding = 4;
 
-        // Generate bar HTML — keep status-based color, stack overlapping bars vertically
         projectsWithPositions.forEach((project: any, index: number) => {
             const lane = lanes[index];
             const color = project.color || "#2ecc71";
             const top = rowPadding + lane * (laneHeight + 2);
 
-            // Create tooltip with all information
             let tooltipText = `${project.projectName} (${project.startDate} to ${project.endDate})`;
             if (project.typeLabel) {
                 tooltipText += ` [${project.typeLabel}]`;
@@ -1400,14 +1453,14 @@ export default class ManagerTeamView extends Controller {
                      data-description="${project.description || ''}"
                      onmouseover="this.style.opacity='1'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)';"
                      onmouseout="this.style.opacity='0.95'; this.style.boxShadow='none';">
-                    <span class="ganttBarLabel">${project.projectName}</span>
+                    <span class="ganttBarLabel">${project.projectName}${project.typeLabel ? ` [${project.typeLabel}]` : ""}</span>
                 </div>
             `;
         });
 
         const rowHeight = Math.max(40, rowPadding * 2 + (maxLane + 1) * (laneHeight + 2));
         const monthCells = monthNumbers.map(() => '<div class="ganttMonth"></div>').join('');
-        
+
         return `
             <div class="ganttRow" style="height: ${rowHeight}px; min-height: ${rowHeight}px;">
                 <div class="ganttLabel" title="${empData.employeeId}">${empData.employeeName}</div>
