@@ -1039,7 +1039,6 @@ export default class ManagerDashboard extends Controller {
         const selectedQuarter = visualizationModel?.getProperty("/selectedQuarter") || "ALL";
         
         console.log(`📊 Calculating utilization for Year: ${selectedYear}, Quarter: ${selectedQuarter}`);
-        console.log("📊 All employee data:", allData);
         
         // Determine which months to include based on quarter
         let monthsToInclude: number[] = [];
@@ -2292,7 +2291,7 @@ export default class ManagerDashboard extends Controller {
                 totalMatchingSkills: totalMatchingSkills,
                 matchScore: matchScore
             };
-            console.log(`Employee ${emp.employeeId} match score: ${matchScore}%`, result);
+            console.log(`Employee ${emp.employeeId} match score: ${matchScore}%`);
             return result;
         });
 
@@ -2502,7 +2501,7 @@ export default class ManagerDashboard extends Controller {
                 this.getCompletedInitiativeEvaluationForTabs(empId)
             ]);
 
-            console.log("✅ All employee data loaded:", { employeeData, profileData, skills, projects, currentProjects, certifications, completedMasterWork });
+            console.log("✅ All employee data loaded successfully");
 
             const activeCurrentProjects = currentProjects
                 .filter((cp: any) => cp.assignmentStatus !== "Completed")
@@ -4916,28 +4915,15 @@ private initializeAIChat(): void {
 
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const scopedInitiativesBinding = oDataModel.bindList("/InitiativesMaster");
-            scopedInitiativesBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
 
-            const scopedEvaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
-            scopedEvaluationsBinding.filter([new Filter("addedByManager", FilterOperator.EQ, this.currentManagerId)]);
+            // Fetch ALL initiatives and evaluations (not filtered by manager) — same as Projects
+            const allInitiativesBinding = oDataModel.bindList("/InitiativesMaster");
+            const allEvaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
 
             let [initiativeContexts, evaluationContexts] = await Promise.all([
-                scopedInitiativesBinding.requestContexts(0, 1000),
-                scopedEvaluationsBinding.requestContexts(0, 1000)
+                allInitiativesBinding.requestContexts(0, 1000),
+                allEvaluationsBinding.requestContexts(0, 1000)
             ]);
-
-            // Backward-compatibility fallback: if manager-scoped catalogs are empty due legacy IDs,
-            // surface active global catalogs so assign dropdowns do not appear blank.
-            if (initiativeContexts.length === 0 && evaluationContexts.length === 0) {
-                const allInitiativesBinding = oDataModel.bindList("/InitiativesMaster");
-                const allEvaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
-
-                [initiativeContexts, evaluationContexts] = await Promise.all([
-                    allInitiativesBinding.requestContexts(0, 1000),
-                    allEvaluationsBinding.requestContexts(0, 1000)
-                ]);
-            }
 
             const initiatives = initiativeContexts.map((ctx: any) => ctx.getObject());
             const evaluations = evaluationContexts.map((ctx: any) => ctx.getObject());
