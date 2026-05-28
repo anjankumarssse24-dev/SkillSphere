@@ -27,7 +27,7 @@
                     <uxap:ObjectPageSubSection id="masterProjectsSubSection">
                         <uxap:blocks>
                             <m:VBox width="100%" class="masterProjectsVBox">
-                                <m:Panel id="masterProjectsPanel" headerText="Project Registry" class="sapUiSmallMarginBottom masterProjectsPanel" width="100%">
+                                <m:Panel id="masterProjectsPanel" headerText="Project Registry" class="sapUiSmallMarginTop sapUiSmallMarginBottom masterProjectsPanel" width="100%">
                                     <m:headerToolbar>
                                         <m:Toolbar>
                                             <m:Title text="Project Registry" level="H3"/>
@@ -95,7 +95,7 @@
                                     </m:content>
                                 </m:Panel>
 
-                                <m:Panel id="masterInitiativesPanel" headerText="Initiative Registry" class="sapUiSmallMarginBottom" width="100%">
+                                <m:Panel id="masterInitiativesPanel" headerText="Initiative Registry" class="sapUiSmallMarginTop sapUiSmallMarginBottom" width="100%">
                                     <m:headerToolbar>
                                         <m:Toolbar>
                                             <m:Title text="Master Initiatives" level="H3"/>
@@ -152,7 +152,7 @@
                                     </m:content>
                                 </m:Panel>
 
-                                <m:Panel id="masterEvaluationsPanel" headerText="Evaluation Registry" width="100%">
+                                <m:Panel id="masterEvaluationsPanel" headerText="Evaluation Registry" class="sapUiSmallMarginTop sapUiSmallMarginBottom" width="100%">
                                     <m:headerToolbar>
                                         <m:Toolbar>
                                             <m:Title text="Master Evaluations" level="H3"/>
@@ -280,7 +280,7 @@
                 <uxap:subSections>
                     <uxap:ObjectPageSubSection id="teamSubSection">
                         <uxap:blocks>
-                            <m:Panel id="teamPanel" headerText="Team Members" class="sapUiMediumMargin" width="95%">
+                            <m:Panel id="teamPanel" headerText="Team Members" class="sapUiMediumMargin sapUiSmallMarginTop" width="95%">
                                 <m:headerToolbar>
                                     <m:Toolbar>
                                         <m:Title text="Team Members" level="H3"/>

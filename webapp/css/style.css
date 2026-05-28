@@ -933,16 +933,23 @@
 }
 
 .masterProjectsPanel {
-    overflow: hidden !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
 }
 
 .masterProjectsPanel .sapMPanelContent {
-    overflow-x: hidden !important;
-    overflow-y: hidden !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
 }
 
 /* Fix table overflow in Master Projects section */
-#masterProjectsTable,
+#masterProjectsTable {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 1100px !important;
+    table-layout: auto !important;
+}
+
 #masterInitiativesTable,
 #masterEvaluationsTable {
     width: 100% !important;
@@ -969,7 +976,6 @@
 }
 
 /* Ensure panels don't overflow their container */
-#masterProjectsPanel,
 #masterInitiativesPanel,
 #masterEvaluationsPanel {
     max-width: 100% !important;
@@ -977,11 +983,21 @@
     overflow: hidden !important;
 }
 
+#masterProjectsPanel {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
 /* Hide horizontal scrollbar on panel content */
-#masterProjectsPanel > .sapMPanelContent,
 #masterInitiativesPanel > .sapMPanelContent,
 #masterEvaluationsPanel > .sapMPanelContent {
     overflow-x: hidden !important;
+}
+
+#masterProjectsPanel > .sapMPanelContent {
+    overflow-x: auto !important;
 }
 
 /* Fix the responsive margin class that may cause overflow */
