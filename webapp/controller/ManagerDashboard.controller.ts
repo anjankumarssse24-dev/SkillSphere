@@ -3127,29 +3127,14 @@ export default class ManagerDashboard extends Controller {
             try {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-                // CurrentProjects has no projectId; cascade by project name.
-                const currentProjectsBinding = oDataModel.bindList("/CurrentProjects");
-                currentProjectsBinding.filter([
-                    new Filter("type", FilterOperator.EQ, "Project"),
-                    new Filter("projectName", FilterOperator.EQ, projectData.projectName)
-                ]);
-                const currentProjectContexts = await currentProjectsBinding.requestContexts(0, 9999);
-                for (const ctx of currentProjectContexts) {
-                    ctx.setProperty("assignmentStatus", "Completed");
-                    ctx.setProperty("lastUpdated", new Date().toISOString());
-                }
+                // Call backend action — bypasses the per-manager team restriction,
+                // so ALL employees across ALL managers assigned to this project get updated.
+                const oAction = oDataModel.bindContext("/markProjectCompleted(...)");
+                oAction.setParameter("projectId", projectData.projectId);
+                await oAction.execute("$auto");
+                const result = oAction.getBoundContext()?.getObject() || {};
 
-                // Mark master project status as completed.
-                const masterProjectsBinding = oDataModel.bindList("/Projects");
-                masterProjectsBinding.filter([new Filter("projectId", FilterOperator.EQ, projectData.projectId)]);
-                const masterContexts = await masterProjectsBinding.requestContexts(0, 1);
-                if (masterContexts.length > 0) {
-                    masterContexts[0].setProperty("status", "Completed");
-                }
-
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                await new Promise(resolve => setTimeout(resolve, 600));
-                MessageToast.show(`Project marked as completed for ${currentProjectContexts.length} employee(s)`);
+                MessageToast.show(result.message || "Project marked as completed");
                 await this.loadMasterProjects();
                 await this.loadManagerData();
                 await this.refreshCurrentDialogData();
@@ -3171,37 +3156,14 @@ export default class ManagerDashboard extends Controller {
             try {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-                const currentInitiativesBinding = oDataModel.bindList("/CurrentInitiatives");
-                currentInitiativesBinding.filter([new Filter("initiativeId", FilterOperator.EQ, initiativeData.initiativeId)]);
-                const currentInitiativeContexts = await currentInitiativesBinding.requestContexts(0, 9999);
+                // Call backend action — bypasses the per-manager team restriction,
+                // so ALL employees across ALL managers assigned to this initiative get updated.
+                const oAction = oDataModel.bindContext("/markInitiativeCompleted(...)");
+                oAction.setParameter("initiativeId", initiativeData.initiativeId);
+                await oAction.execute("$auto");
+                const result = oAction.getBoundContext()?.getObject() || {};
 
-                const initiativesBinding = oDataModel.bindList("/Initiatives");
-                for (const ctx of currentInitiativeContexts) {
-                    const currentInitiativeData = ctx.getObject();
-                    initiativesBinding.create({
-                        employeeId: currentInitiativeData.employeeId,
-                        initiativeName: currentInitiativeData.initiativeName,
-                        description: currentInitiativeData.description,
-                        startDate: currentInitiativeData.startDate,
-                        endDate: currentInitiativeData.endDate,
-                        utilizationPercent: currentInitiativeData.utilizationPercent,
-                        status: "Completed",
-                        type: "Initiative",
-                        createdAt: new Date().toISOString(),
-                        lastUpdated: new Date().toISOString()
-                    });
-                    ctx.delete();
-                }
-
-                const masterInitiativesBinding = oDataModel.bindList("/InitiativesMaster");
-                masterInitiativesBinding.filter([new Filter("initiativeId", FilterOperator.EQ, initiativeData.initiativeId)]);
-                const masterContexts = await masterInitiativesBinding.requestContexts(0, 1);
-                if (masterContexts.length > 0) {
-                    masterContexts[0].setProperty("status", "Completed");
-                }
-
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                MessageToast.show(`Initiative marked as completed for ${currentInitiativeContexts.length} employee(s)`);
+                MessageToast.show(result.message || "Initiative marked as completed");
                 await this.loadMasterWorkItems();
                 await this.loadManagerData();
                 await this.refreshCurrentDialogData();
@@ -3223,37 +3185,14 @@ export default class ManagerDashboard extends Controller {
             try {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-                const currentEvaluationsBinding = oDataModel.bindList("/CurrentEvaluations");
-                currentEvaluationsBinding.filter([new Filter("evaluationId", FilterOperator.EQ, evaluationData.evaluationId)]);
-                const currentEvaluationContexts = await currentEvaluationsBinding.requestContexts(0, 9999);
+                // Call backend action — bypasses the per-manager team restriction,
+                // so ALL employees across ALL managers assigned to this evaluation get updated.
+                const oAction = oDataModel.bindContext("/markEvaluationCompleted(...)");
+                oAction.setParameter("evaluationId", evaluationData.evaluationId);
+                await oAction.execute("$auto");
+                const result = oAction.getBoundContext()?.getObject() || {};
 
-                const initiativesBinding = oDataModel.bindList("/Initiatives");
-                for (const ctx of currentEvaluationContexts) {
-                    const currentEvaluationData = ctx.getObject();
-                    initiativesBinding.create({
-                        employeeId: currentEvaluationData.employeeId,
-                        initiativeName: currentEvaluationData.evaluationName,
-                        description: currentEvaluationData.description,
-                        startDate: currentEvaluationData.startDate,
-                        endDate: currentEvaluationData.endDate,
-                        utilizationPercent: currentEvaluationData.utilizationPercent,
-                        status: "Completed",
-                        type: "Evaluation",
-                        createdAt: new Date().toISOString(),
-                        lastUpdated: new Date().toISOString()
-                    });
-                    ctx.delete();
-                }
-
-                const masterEvaluationsBinding = oDataModel.bindList("/EvaluationsMaster");
-                masterEvaluationsBinding.filter([new Filter("evaluationId", FilterOperator.EQ, evaluationData.evaluationId)]);
-                const masterContexts = await masterEvaluationsBinding.requestContexts(0, 1);
-                if (masterContexts.length > 0) {
-                    masterContexts[0].setProperty("status", "Completed");
-                }
-
-                await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                MessageToast.show(`Evaluation marked as completed for ${currentEvaluationContexts.length} employee(s)`);
+                MessageToast.show(result.message || "Evaluation marked as completed");
                 await this.loadMasterWorkItems();
                 await this.loadManagerData();
                 await this.refreshCurrentDialogData();
@@ -4576,8 +4515,7 @@ private initializeAIChat(): void {
             const listBinding = oDataModel.bindList("/Projects");
 
             const contexts = await listBinding.requestContexts(0, 500);
-            const projects = contexts.map((ctx: any) => ctx.getObject())
-                .filter((p: any) => String(p.status || "").toLowerCase() !== "completed");
+            const projects = contexts.map((ctx: any) => ctx.getObject());
 
             console.log(`✅ Loaded ${projects.length} master projects for manager ${this.currentManagerId}`);
 

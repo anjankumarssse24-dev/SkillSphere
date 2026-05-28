@@ -279,6 +279,26 @@ service SkillSphereSecureAPI {
     initiativeId: String;
   };
 
+  // ========== MARK COMPLETED ACTIONS (cross-manager) ==========
+
+  action markProjectCompleted(projectId: String) returns {
+    success: Boolean;
+    updatedCount: Integer;
+    message: String;
+  };
+
+  action markInitiativeCompleted(initiativeId: String) returns {
+    success: Boolean;
+    updatedCount: Integer;
+    message: String;
+  };
+
+  action markEvaluationCompleted(evaluationId: String) returns {
+    success: Boolean;
+    updatedCount: Integer;
+    message: String;
+  };
+
   // ========== ADMIN ONLY ACTIONS ==========
 
   action generateEmployeeReport(

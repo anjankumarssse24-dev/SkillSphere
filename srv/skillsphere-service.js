@@ -986,6 +986,134 @@ ${projects.length ? projects.map(p =>
     }
   });
 
+  // ========== MARK COMPLETED ACTIONS (cross-manager, no team restriction) ==========
+
+  /**
+   * Mark a master Project as Completed and cascade to ALL CurrentProjects across every manager.
+   */
+  this.on('markProjectCompleted', async req => {
+    try {
+      if (!_requireAnyRole(req, ['Manager', 'SeniorManager'])) {
+        return req.reject(403, 'Forbidden');
+      }
+      const { projectId } = req.data;
+      if (!projectId) return req.reject(400, 'projectId is required');
+
+      // Fetch the master project to get its name (needed for CurrentProjects lookup)
+      const [project] = await SELECT(Projects).where({ projectId });
+      if (!project) return req.reject(404, `Project ${projectId} not found`);
+
+      const now = new Date().toISOString();
+
+      // Cascade: update ALL CurrentProjects rows (across ALL managers) for this project
+      const updated = await UPDATE(CurrentProjects)
+        .set({ assignmentStatus: 'Completed', lastUpdated: now })
+        .where({ type: 'Project', projectName: project.projectName });
+
+      // Mark the master Projects record as Completed
+      await UPDATE(Projects).set({ status: 'Completed' }).where({ projectId });
+
+      const count = typeof updated === 'number' ? updated : 0;
+      console.log(`✅ markProjectCompleted: project "${project.projectName}" — ${count} assignment(s) updated`);
+      return { success: true, updatedCount: count, message: `Project marked as completed (${count} assignment(s) updated)` };
+    } catch (err) {
+      console.error('❌ markProjectCompleted error:', err);
+      return req.reject(500, err.message || 'Internal error');
+    }
+  });
+
+  /**
+   * Mark a master Initiative as Completed and cascade to ALL CurrentInitiatives across every manager.
+   * Moves each assignment from CurrentInitiatives → Initiatives (history) with status Completed.
+   */
+  this.on('markInitiativeCompleted', async req => {
+    try {
+      if (!_requireAnyRole(req, ['Manager', 'SeniorManager'])) {
+        return req.reject(403, 'Forbidden');
+      }
+      const { initiativeId } = req.data;
+      if (!initiativeId) return req.reject(400, 'initiativeId is required');
+
+      const now = new Date().toISOString();
+
+      // Fetch all current assignments across ALL managers
+      const currentRows = await SELECT(CurrentInitiatives).where({ initiativeId });
+
+      // Move each to history
+      if (currentRows.length > 0) {
+        const historyEntries = currentRows.map(row => ({
+          employeeId: row.employeeId,
+          initiativeName: row.initiativeName,
+          description: row.description,
+          startDate: row.startDate,
+          endDate: row.endDate,
+          utilizationPercent: row.utilizationPercent,
+          status: 'Completed',
+          type: 'Initiative',
+          createdAt: row.createdAt || now,
+          lastUpdated: now
+        }));
+        await INSERT.into(Initiatives).entries(historyEntries);
+        await DELETE(CurrentInitiatives).where({ initiativeId });
+      }
+
+      // Mark master record as Completed
+      await UPDATE(InitiativesMaster).set({ status: 'Completed' }).where({ initiativeId });
+
+      console.log(`✅ markInitiativeCompleted: initiativeId "${initiativeId}" — ${currentRows.length} assignment(s) moved to history`);
+      return { success: true, updatedCount: currentRows.length, message: `Initiative marked as completed (${currentRows.length} assignment(s) updated)` };
+    } catch (err) {
+      console.error('❌ markInitiativeCompleted error:', err);
+      return req.reject(500, err.message || 'Internal error');
+    }
+  });
+
+  /**
+   * Mark a master Evaluation as Completed and cascade to ALL CurrentEvaluations across every manager.
+   * Moves each assignment from CurrentEvaluations → Initiatives (history) with type Evaluation.
+   */
+  this.on('markEvaluationCompleted', async req => {
+    try {
+      if (!_requireAnyRole(req, ['Manager', 'SeniorManager'])) {
+        return req.reject(403, 'Forbidden');
+      }
+      const { evaluationId } = req.data;
+      if (!evaluationId) return req.reject(400, 'evaluationId is required');
+
+      const now = new Date().toISOString();
+
+      // Fetch all current assignments across ALL managers
+      const currentRows = await SELECT(CurrentEvaluations).where({ evaluationId });
+
+      // Move each to history (Initiatives table, type=Evaluation)
+      if (currentRows.length > 0) {
+        const historyEntries = currentRows.map(row => ({
+          employeeId: row.employeeId,
+          initiativeName: row.evaluationName,
+          description: row.description,
+          startDate: row.startDate,
+          endDate: row.endDate,
+          utilizationPercent: row.utilizationPercent,
+          status: 'Completed',
+          type: 'Evaluation',
+          createdAt: row.createdAt || now,
+          lastUpdated: now
+        }));
+        await INSERT.into(Initiatives).entries(historyEntries);
+        await DELETE(CurrentEvaluations).where({ evaluationId });
+      }
+
+      // Mark master record as Completed
+      await UPDATE(EvaluationsMaster).set({ status: 'Completed' }).where({ evaluationId });
+
+      console.log(`✅ markEvaluationCompleted: evaluationId "${evaluationId}" — ${currentRows.length} assignment(s) moved to history`);
+      return { success: true, updatedCount: currentRows.length, message: `Evaluation marked as completed (${currentRows.length} assignment(s) updated)` };
+    } catch (err) {
+      console.error('❌ markEvaluationCompleted error:', err);
+      return req.reject(500, err.message || 'Internal error');
+    }
+  });
+
   /**
    * AI Assistant for MANAGERS - with team context
    */
