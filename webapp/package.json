@@ -12,7 +12,10 @@
   },
   "scripts": {
     "build": "ui5 build --clean-dest --dest dist",
-    "build:ui": "npm run clean && npm run build && npm run zip",
+    "apply:variant": "node ../scripts/set-ui-variant.js",
+    "build:ui": "npm run clean && npm run apply:variant && npm run build && npm run zip",
+    "build:ui:test": "set UI_VARIANT=test&& npm run build:ui",
+    "build:ui:prod": "set UI_VARIANT=prod&& npm run build:ui",
     "zip": "cd dist && npx bestzip skillsphere.zip *",
     "clean": "rimraf dist skillsphere.zip"
   },

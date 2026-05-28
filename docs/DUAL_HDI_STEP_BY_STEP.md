@@ -12,6 +12,14 @@ You deploy the same MTAR twice with different extension files:
 1. `mta.test.mtaext` -> test apps + existing test DB container
 2. `mta.prod.mtaext` -> prod apps + new prod DB container
 
+Important: deploy with different namespaces (`test` and `prod`).
+If namespace is omitted, the second deployment updates the same MTA instance and can remove the first app (for example `skillsphere-srv-test` route no longer exists).
+
+UI app identity is environment-specific:
+
+1. Test HTML5 app ID: `skillsphere.test` (`sap.cloud.service: skillsphere-test`)
+2. Prod HTML5 app ID: `skillsphere.prod` (`sap.cloud.service: skillsphere-prod`)
+
 ## Prerequisites
 
 1. Cloud Foundry CLI is installed.
@@ -52,21 +60,22 @@ cf services
 
 Ensure `skillsphere-db` is present before test deploy.
 
-## Step 3 - Build MTAR Once
+## Step 3 - Build Test MTAR
 
 ```powershell
 npm install
-mbt build -p cf -t mta_archives
+$env:UI_VARIANT="test"
+mbt build -p cf -t mta_archives_test
 ```
 
 Expected artifact:
 
-`mta_archives/skillsphere_1.0.0.mtar`
+`mta_archives_test/skillsphere_1.0.0.mtar`
 
 ## Step 4 - Deploy Test Landscape (Existing HDI)
 
 ```powershell
-cf deploy mta_archives/skillsphere_1.0.0.mtar -e mta.test.mtaext -f --retries 0
+cf deploy mta_archives_test/skillsphere_1.0.0.mtar -e mta.test.mtaext --namespace test -f --retries 0
 ```
 
 Expected:
@@ -81,10 +90,21 @@ Run bug fixes and test data operations only in test deployment.
 
 Never run dummy seeding against prod deployment.
 
-## Step 6 - Deploy Prod Landscape (New HDI)
+## Step 6 - Build Prod MTAR
 
 ```powershell
-cf deploy mta_archives/skillsphere_1.0.0.mtar -e mta.prod.mtaext -f --retries 0
+$env:UI_VARIANT="prod"
+mbt build -p cf -t mta_archives_prod
+```
+
+Expected artifact:
+
+`mta_archives_prod/skillsphere_1.0.0.mtar`
+
+## Step 7 - Deploy Prod Landscape (New HDI)
+
+```powershell
+cf deploy mta_archives_prod/skillsphere_1.0.0.mtar -e mta.prod.mtaext --namespace prod -f --retries 0
 ```
 
 Expected:
@@ -93,13 +113,14 @@ Expected:
 2. App `skillsphere-srv-prod` is created/updated.
 3. Prod app is bound to `skillsphere-db-prod`.
 
-## Step 7 - Verify Isolation
+## Step 8 - Verify Isolation
 
 Run:
 
 ```powershell
 cf services
 cf apps
+cf mtas
 cf env skillsphere-srv-test
 cf env skillsphere-srv-prod
 ```
@@ -113,11 +134,10 @@ If you get `App '<name>' not found`, that app has not been deployed yet in the c
 
 ## Step 8 - Recommended Release Discipline
 
-1. Build once.
-2. Deploy test.
-3. Validate functionality and data.
-4. Deploy same MTAR to prod.
-5. Keep prod seed/dummy data disabled.
+1. Build test artifact with `UI_VARIANT=test` and deploy test.
+2. Validate functionality and data.
+3. Build prod artifact with `UI_VARIANT=prod` and deploy prod.
+4. Keep prod seed/dummy data disabled.
 
 ## Security Note
 

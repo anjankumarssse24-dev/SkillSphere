@@ -1,11 +1,13 @@
 {
   "_version": "1.76.0",
   "sap.app": {
-    "id": "skillsphere",
+    "id": "skillsphere.prod",
     "type": "application",
     "i18n": {
       "bundleUrl": "i18n/i18n.properties",
-      "supportedLocales": ["en"],
+      "supportedLocales": [
+        "en"
+      ],
       "fallbackLocale": "en"
     },
     "applicationVersion": {
@@ -45,7 +47,7 @@
   },
   "sap.cloud": {
     "public": true,
-    "service": "skillsphere"
+    "service": "skillsphere-prod"
   },
   "sap.ui": {
     "technology": "UI5",
@@ -125,57 +127,79 @@
         {
           "name": "Landing",
           "pattern": "",
-          "target": ["TargetLanding"]
+          "target": [
+            "TargetLanding"
+          ]
         },
         {
           "name": "firstTimeSetup",
           "pattern": "first-time-setup",
-          "target": ["TargetFirstTimeSetup"]
+          "target": [
+            "TargetFirstTimeSetup"
+          ]
         },
         {
           "name": "EmployeeLogin",
           "pattern": "employee-login",
-          "target": ["TargetEmployeeLogin"]
+          "target": [
+            "TargetEmployeeLogin"
+          ]
         },
         {
           "name": "ManagerLogin",
           "pattern": "manager-login",
-          "target": ["TargetManagerLogin"]
+          "target": [
+            "TargetManagerLogin"
+          ]
         },
         {
           "name": "SeniorManagerLogin",
           "pattern": "senior-manager-login",
-          "target": ["TargetSeniorManagerLogin"]
+          "target": [
+            "TargetSeniorManagerLogin"
+          ]
         },
         {
           "name": "EmployeeDashboard",
           "pattern": "employee-dashboard/{employeeId}",
-          "target": ["TargetEmployeeDashboard"]
+          "target": [
+            "TargetEmployeeDashboard"
+          ]
         },
         {
           "name": "ManagerDashboard",
           "pattern": "manager-dashboard/{managerId}:?query:",
-          "target": ["TargetManagerDashboard"]
+          "target": [
+            "TargetManagerDashboard"
+          ]
         },
         {
           "name": "SeniorManagerDashboard",
           "pattern": "senior-manager-dashboard/{seniorManagerId}",
-          "target": ["TargetSeniorManagerDashboard"]
+          "target": [
+            "TargetSeniorManagerDashboard"
+          ]
         },
         {
           "name": "SeniorManagerWorkOverview",
           "pattern": "senior-manager-work-overview/{seniorManagerId}",
-          "target": ["TargetSeniorManagerWorkOverview"]
+          "target": [
+            "TargetSeniorManagerWorkOverview"
+          ]
         },
         {
           "name": "ManagerWorkOverview",
           "pattern": "manager-work-overview/{managerId}",
-          "target": ["TargetManagerWorkOverview"]
+          "target": [
+            "TargetManagerWorkOverview"
+          ]
         },
         {
           "name": "ManagerTeamView",
           "pattern": "manager-team-view/{managerId}/{seniorManagerId}:?query:",
-          "target": ["TargetManagerTeamView"]
+          "target": [
+            "TargetManagerTeamView"
+          ]
         }
       ],
       "targets": {
