@@ -134,6 +134,7 @@ entity CurrentProjects {
 entity InitiativesMaster {
   key initiativeId : UUID;
   initiativeName : String;
+  creatorName : String;
   description : String;
   startDate : Date;
   endDate : Date;
@@ -149,6 +150,7 @@ entity InitiativesMaster {
 entity EvaluationsMaster {
   key evaluationId : UUID;
   evaluationName : String;
+  creatorName : String;
   description : String;
   startDate : Date;
   endDate : Date;

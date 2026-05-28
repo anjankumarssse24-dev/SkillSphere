@@ -1442,8 +1442,15 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    */
   this.before('CREATE', 'InitiativesMaster', async (req) => {
     ensureUuidKey(req, 'initiativeId');
+    req.data.creatorName = await _resolveActorDisplayName(req);
     req.data.createdAt = req.data.createdAt || new Date().toISOString();
     req.data.lastUpdated = new Date().toISOString();
+  });
+
+  this.before('UPDATE', 'InitiativesMaster', async (req) => {
+    if (Object.prototype.hasOwnProperty.call(req.data, 'creatorName')) {
+      delete req.data.creatorName;
+    }
   });
 
   /**
@@ -1451,8 +1458,15 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    */
   this.before('CREATE', 'EvaluationsMaster', async (req) => {
     ensureUuidKey(req, 'evaluationId');
+    req.data.creatorName = await _resolveActorDisplayName(req);
     req.data.createdAt = req.data.createdAt || new Date().toISOString();
     req.data.lastUpdated = new Date().toISOString();
+  });
+
+  this.before('UPDATE', 'EvaluationsMaster', async (req) => {
+    if (Object.prototype.hasOwnProperty.call(req.data, 'creatorName')) {
+      delete req.data.creatorName;
+    }
   });
 
   /**

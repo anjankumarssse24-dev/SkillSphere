@@ -421,7 +421,6 @@ export default class ManagerDashboard extends Controller {
                 MessageToast.show("Please select sub-team from Team 1 to Team 9 or Nirmala Team");
                 return;
             }
-
             if (!selectedManagerId) {
                 MessageToast.show("Please select your reporting manager");
                 return;
@@ -2953,10 +2952,14 @@ export default class ManagerDashboard extends Controller {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             const isInitiative = (data.type || "Initiative") === "Initiative";
+            const creatorName = await this.getCurrentManagerName();
+            const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+            const currentUserName = String(currentUserModel?.getProperty("/name") || "").trim();
             const masterBinding = oDataModel.bindList(isInitiative ? "/InitiativesMaster" : "/EvaluationsMaster");
             const masterCtx = isInitiative
                 ? masterBinding.create({
                     initiativeName: String(data.name).trim(),
+                    creatorName: creatorName || currentUserName || "",
                     description: String(data.description || "").trim(),
                     startDate: data.startDate,
                     endDate: data.endDate,
@@ -2967,6 +2970,7 @@ export default class ManagerDashboard extends Controller {
                 })
                 : masterBinding.create({
                     evaluationName: String(data.name).trim(),
+                    creatorName: creatorName || currentUserName || "",
                     description: String(data.description || "").trim(),
                     startDate: data.startDate,
                     endDate: data.endDate,
@@ -4412,6 +4416,23 @@ private initializeAIChat(): void {
         }
     }
 
+    private resolveCreatorName(rawCreator: any, fallbackCreatorId?: any): string {
+        const creator = String(rawCreator || "").trim();
+        if (creator && !/^I\d+$/i.test(creator)) {
+            return creator;
+        }
+
+        const creatorId = String((/^I\d+$/i.test(creator) ? creator : (fallbackCreatorId || "")) || "").trim().toUpperCase();
+        if (!creatorId) {
+            return creator;
+        }
+
+        const managersModel = this.getView()?.getModel("managers") as JSONModel;
+        const managers = (managersModel?.getProperty("/managers") || []) as any[];
+        const manager = managers.find((m: any) => String(m?.employeeId || "").trim().toUpperCase() === creatorId);
+        return String(manager?.name || creatorId);
+    }
+
     private async loadManagersForProjectDialog(): Promise<void> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
@@ -4863,8 +4884,20 @@ private initializeAIChat(): void {
                 allEvaluationsBinding.requestContexts(0, 1000)
             ]);
 
-            const initiatives = initiativeContexts.map((ctx: any) => ctx.getObject());
-            const evaluations = evaluationContexts.map((ctx: any) => ctx.getObject());
+            const initiatives = initiativeContexts.map((ctx: any) => {
+                const item = ctx.getObject();
+                return {
+                    ...item,
+                    creatorName: this.resolveCreatorName(item?.creatorName, item?.addedByManager)
+                };
+            });
+            const evaluations = evaluationContexts.map((ctx: any) => {
+                const item = ctx.getObject();
+                return {
+                    ...item,
+                    creatorName: this.resolveCreatorName(item?.creatorName, item?.addedByManager)
+                };
+            });
 
             initiatives.sort((a: any, b: any) => String(a?.initiativeName || "").localeCompare(String(b?.initiativeName || "")));
             evaluations.sort((a: any, b: any) => String(a?.evaluationName || "").localeCompare(String(b?.evaluationName || "")));
@@ -4886,12 +4919,12 @@ private initializeAIChat(): void {
             }), "masterEvaluations");
 
             this.getView()?.setModel(new JSONModel({
-                creators: this.buildSelectOptions(initiatives.map((i: any) => String(i.addedByManager || "")), "All Creators"),
+                creators: this.buildSelectOptions(initiatives.map((i: any) => String(i.creatorName || i.addedByManager || "")), "All Creators"),
                 statuses: this.buildSelectOptions(initiatives.map((i: any) => String(i.status || "")), "All Status")
             }), "masterInitiativeFilterOptions");
 
             this.getView()?.setModel(new JSONModel({
-                creators: this.buildSelectOptions(evaluations.map((e: any) => String(e.addedByManager || "")), "All Creators"),
+                creators: this.buildSelectOptions(evaluations.map((e: any) => String(e.creatorName || e.addedByManager || "")), "All Creators"),
                 statuses: this.buildSelectOptions(evaluations.map((e: any) => String(e.status || "")), "All Status")
             }), "masterEvaluationFilterOptions");
 
@@ -4923,12 +4956,13 @@ private initializeAIChat(): void {
         const allItems = model.getProperty("/allItems") || [];
 
         const filtered = allItems.filter((item: any) => {
+            const creatorName = String(item.creatorName || item.addedByManager || "");
             const matchesText = !query
                 || (item.initiativeName || "").toLowerCase().includes(query)
                 || (item.description || "").toLowerCase().includes(query)
                 || (item.status || "").toLowerCase().includes(query)
-                || (item.addedByManager || "").toLowerCase().includes(query);
-            const matchesCreator = !selectedCreator || String(item.addedByManager || "").trim() === selectedCreator;
+                || creatorName.toLowerCase().includes(query);
+            const matchesCreator = !selectedCreator || creatorName.trim() === selectedCreator;
             const matchesStatus = !selectedStatus || String(item.status || "").trim() === selectedStatus;
             return matchesText && matchesCreator && matchesStatus;
         });
@@ -4955,12 +4989,13 @@ private initializeAIChat(): void {
         const allItems = model.getProperty("/allItems") || [];
 
         const filtered = allItems.filter((item: any) => {
+            const creatorName = String(item.creatorName || item.addedByManager || "");
             const matchesText = !query
                 || (item.evaluationName || "").toLowerCase().includes(query)
                 || (item.description || "").toLowerCase().includes(query)
                 || (item.status || "").toLowerCase().includes(query)
-                || (item.addedByManager || "").toLowerCase().includes(query);
-            const matchesCreator = !selectedCreator || String(item.addedByManager || "").trim() === selectedCreator;
+                || creatorName.toLowerCase().includes(query);
+            const matchesCreator = !selectedCreator || creatorName.trim() === selectedCreator;
             const matchesStatus = !selectedStatus || String(item.status || "").trim() === selectedStatus;
             return matchesText && matchesCreator && matchesStatus;
         });
@@ -4978,12 +5013,19 @@ private initializeAIChat(): void {
         }
 
         const isEdit = !!(type === "Initiative" ? existing?.initiativeId : existing?.evaluationId);
+        const currentManagerName = await this.getCurrentManagerName();
+        const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+        const currentUserName = String(currentUserModel?.getProperty("/name") || "").trim();
+        const effectiveCreatorName = isEdit
+            ? this.resolveCreatorName(existing?.creatorName, existing?.addedByManager)
+            : String(currentManagerName || currentUserName || "").trim();
         const model = new JSONModel({
             mode: isEdit ? "edit" : "create",
             dialogTitle: isEdit ? `Edit ${type}` : `Create New ${type}`,
             itemId: type === "Initiative" ? (existing?.initiativeId || "") : (existing?.evaluationId || ""),
             type,
             name: type === "Initiative" ? (existing?.initiativeName || "") : (existing?.evaluationName || ""),
+            creatorName: effectiveCreatorName,
             description: existing?.description || "",
             startDate: existing?.startDate || null,
             endDate: existing?.endDate || null,
@@ -5038,6 +5080,9 @@ private initializeAIChat(): void {
             const listPath = isInitiative ? "/InitiativesMaster" : "/EvaluationsMaster";
             const keyField = isInitiative ? "initiativeId" : "evaluationId";
             const nameField = isInitiative ? "initiativeName" : "evaluationName";
+            const creatorName = await this.getCurrentManagerName();
+            const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
+            const currentUserName = String(currentUserModel?.getProperty("/name") || "").trim();
 
             if (data.mode === "edit" && data.itemId) {
                 const listBinding = oDataModel.bindList(listPath);
@@ -5063,6 +5108,7 @@ private initializeAIChat(): void {
                     startDate: data.startDate || null,
                     endDate: data.endDate || null,
                     status: data.status || "Active",
+                    creatorName: creatorName || currentUserName || "",
                     addedByManager: this.currentManagerId || "",
                     createdAt: new Date().toISOString(),
                     lastUpdated: new Date().toISOString()

@@ -15,6 +15,9 @@
                 <Label text="Description" class="sapUiTinyMarginBottom"/>
                 <TextArea value="{masterWorkItemEditor>/description}" rows="3" class="sapUiMediumMarginBottom"/>
 
+                <Label text="Creator" class="sapUiTinyMarginBottom"/>
+                <Input value="{masterWorkItemEditor>/creatorName}" editable="false" class="sapUiMediumMarginBottom"/>
+
                 <Label text="Start Date" class="sapUiTinyMarginBottom"/>
                 <DatePicker value="{masterWorkItemEditor>/startDate}" valueFormat="yyyy-MM-dd" displayFormat="medium" width="100%" class="sapUiMediumMarginBottom"/>
 
