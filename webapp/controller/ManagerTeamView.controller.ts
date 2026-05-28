@@ -353,18 +353,103 @@ export default class ManagerTeamView extends Controller {
     }
 
     /**
-     * Get current projects (utilization) for an employee
+     * Get current projects (utilization) for an employee - includes projects, initiatives, and evaluations
      */
     private async getCurrentProjects(employeeId: string): Promise<any[]> {
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/CurrentProjects");
-            listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            
-            const contexts = await listBinding.requestContexts(0, 1000);
-            return contexts.map((context: any) => context.getObject());
+            const cpBinding = oDataModel.bindList("/CurrentProjects");
+            cpBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const ciBinding = oDataModel.bindList("/CurrentInitiatives");
+            ciBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const ceBinding = oDataModel.bindList("/CurrentEvaluations");
+            ceBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+
+            const [projectContexts, initiativeContexts, evaluationContexts] = await Promise.all([
+                cpBinding.requestContexts(0, 1000),
+                ciBinding.requestContexts(0, 1000),
+                ceBinding.requestContexts(0, 1000)
+            ]);
+
+            const projects = projectContexts.map((ctx: any) => ctx.getObject()).map((obj: any) => ({
+                ...obj,
+                type: "Project",
+                _source: "CurrentProjects"
+            }));
+            const initiatives = initiativeContexts.map((ctx: any) => ctx.getObject())
+                .filter((obj: any) => obj.status !== "Completed")
+                .map((obj: any) => ({
+                    currentProjectId: obj.currentInitiativeId,
+                    currentInitiativeId: obj.currentInitiativeId,
+                    employeeId: obj.employeeId,
+                    type: "Initiative",
+                    projectName: obj.initiativeName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    utilizationPercent: obj.utilizationPercent,
+                    description: obj.description,
+                    assignmentStatus: "Assigned",
+                    lastUpdated: obj.lastUpdated,
+                    _source: "CurrentInitiatives"
+                }));
+            const evaluations = evaluationContexts.map((ctx: any) => ctx.getObject())
+                .filter((obj: any) => obj.status !== "Completed")
+                .map((obj: any) => ({
+                    currentProjectId: obj.currentEvaluationId,
+                    currentEvaluationId: obj.currentEvaluationId,
+                    employeeId: obj.employeeId,
+                    type: "Evaluation",
+                    projectName: obj.evaluationName,
+                    startDate: obj.startDate,
+                    endDate: obj.endDate,
+                    utilizationPercent: obj.utilizationPercent,
+                    description: obj.description,
+                    assignmentStatus: "Assigned",
+                    lastUpdated: obj.lastUpdated,
+                    _source: "CurrentEvaluations"
+                }));
+
+            return [...projects, ...initiatives, ...evaluations];
         } catch (error) {
             console.error(`Error loading current projects for ${employeeId}:`, error);
+            return [];
+        }
+    }
+
+    /**
+     * Get initiatives for an employee (for visualization)
+     */
+    private async getInitiatives(employeeId: string): Promise<any[]> {
+        try {
+            const oDataModel = this.getOwnerComponent()?.getModel() as any;
+            const ciBinding = oDataModel.bindList("/CurrentInitiatives");
+            ciBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+            const ceBinding = oDataModel.bindList("/CurrentEvaluations");
+            ceBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
+
+            const [initiativeContexts, evaluationContexts] = await Promise.all([
+                ciBinding.requestContexts(0, 1000),
+                ceBinding.requestContexts(0, 1000)
+            ]);
+
+            const initiatives = initiativeContexts.map((ctx: any) => ctx.getObject())
+                .filter((obj: any) => obj.status !== "Completed")
+                .map((obj: any) => ({
+                    ...obj,
+                    type: obj.type || "Initiative",
+                    initiativeName: obj.initiativeName
+                }));
+            const evaluations = evaluationContexts.map((ctx: any) => ctx.getObject())
+                .filter((obj: any) => obj.status !== "Completed")
+                .map((obj: any) => ({
+                    ...obj,
+                    type: obj.type || "Evaluation",
+                    initiativeName: obj.evaluationName
+                }));
+
+            return [...initiatives, ...evaluations];
+        } catch (error) {
+            console.error(`Error loading initiatives for ${employeeId}:`, error);
             return [];
         }
     }
@@ -585,48 +670,62 @@ export default class ManagerTeamView extends Controller {
         
         console.log(`📊 Team: ${totalEmployees} employees, Months: ${monthsCount}, Available: ${totalAvailableHours} hours total`);
 
-        // Calculate average utilization percentages for each type
+        // Team allocation must be average employee capacity usage (not assignment-count based).
+        // This matches the ManagerDashboard calculation for consistency.
         let currentProjectsTotal = 0;
         let currentProjectsCount = 0;
         let initiativesTotal = 0;
         let initiativesCount = 0;
 
         allData.forEach(empData => {
+            let employeeProjectUtilization = 0;
+            let employeeInitiativeUtilization = 0;
+
             console.log(`📊 Processing ${empData.employee?.employeeId}:`, {
                 currentProjects: empData.currentProjects?.length || 0,
                 initiatives: empData.initiatives?.length || 0
             });
-            
-            // Current Projects - use utilizationPercent directly
-            empData.currentProjects.forEach((cp: any) => {
-                const isActive = this.isActiveInPeriod(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
-                const utilizationPercent = parseInt(cp.utilizationPercent) || 0;
-                const activeMonths = this.countActiveMonths(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
-                console.log(`  📘 Current Project: ${cp.projectName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
-                if (isActive && utilizationPercent > 0) {
-                    currentProjectsTotal += utilizationPercent;
-                    currentProjectsCount++;
-                }
+
+            // Filter active assignments for the selected period
+            const activeAssignments = (empData.currentProjects || []).filter((cp: any) => {
+                if (cp.assignmentStatus === "Completed") return false;
+                if (!cp.startDate || !cp.endDate) return true;
+                return this.isActiveInPeriod(cp.startDate, cp.endDate, selectedYear, monthsToInclude);
             });
 
-            // Initiatives - use utilizationPercent directly
-            empData.initiatives.forEach((initiative: any) => {
-                const isActive = this.isActiveInPeriod(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
-                const utilizationPercent = parseInt(initiative.utilizationPercent) || 0;
-                const activeMonths = this.countActiveMonths(initiative.startDate, initiative.endDate, selectedYear, monthsToInclude);
-                console.log(`  🎯 Initiative: ${initiative.initiativeName}, Active: ${isActive}, Months: ${activeMonths}, Utilization: ${utilizationPercent}%`);
-                if (isActive && utilizationPercent > 0) {
-                    initiativesTotal += utilizationPercent;
-                    initiativesCount++;
-                }
+            // Separate projects from initiatives/evaluations
+            const projects = activeAssignments.filter((cp: any) => cp.type === "Project");
+            const initiatives = activeAssignments.filter((cp: any) =>
+                cp.type === "Initiative" || cp.type === "Evaluation" || cp.type === "CAIA" || cp.type === "POC"
+            );
+
+            // Current Projects - sum utilization per employee (capped at 100%)
+            projects.forEach((cp: any) => {
+                const utilizationPercent = Math.max(0, Number(cp.utilizationPercent) || 0);
+                console.log(`  📘 Current Project: ${cp.projectName}, Utilization: ${utilizationPercent}%`);
+                employeeProjectUtilization += utilizationPercent;
+                currentProjectsCount++;
             });
+
+            // Initiatives - sum utilization per employee (capped at 100%)
+            initiatives.forEach((initiative: any) => {
+                const utilizationPercent = Math.max(0, Number(initiative.utilizationPercent) || 0);
+                console.log(`  🎯 Initiative: ${initiative.initiativeName || initiative.projectName}, Utilization: ${utilizationPercent}%`);
+                employeeInitiativeUtilization += utilizationPercent;
+                initiativesCount++;
+            });
+
+            // Cap each employee's utilization at 100% before adding to team total
+            currentProjectsTotal += Math.min(100, employeeProjectUtilization);
+            initiativesTotal += Math.min(100, employeeInitiativeUtilization);
         });
 
-        // Calculate average percentages
-        const currentProjectsUtilized = currentProjectsCount > 0 ? Math.round(currentProjectsTotal / currentProjectsCount) : 0;
-        const initiativesUtilized = initiativesCount > 0 ? Math.round(initiativesTotal / initiativesCount) : 0;
+        // Calculate team-capacity based percentages (same formula as ManagerDashboard)
+        const teamCapacity = Math.max(1, totalEmployees);
+        const currentProjectsUtilized = Math.min(100, Math.round(currentProjectsTotal / teamCapacity));
+        const initiativesUtilized = Math.min(100, Math.round(initiativesTotal / teamCapacity));
 
-        console.log(`📊 Utilization: CP=${currentProjectsUtilized}% (${currentProjectsCount} projects), Initiatives=${initiativesUtilized}% (${initiativesCount} initiatives)`);
+        console.log(`📊 Utilization: CP=${currentProjectsUtilized}% (${currentProjectsCount} assignments), Initiatives=${initiativesUtilized}% (${initiativesCount} assignments), Team=${totalEmployees}`);
 
         // Update visualization model
         const vizModel = this.getView()?.getModel("visualization") as JSONModel;
@@ -822,7 +921,8 @@ export default class ManagerTeamView extends Controller {
                 projects: []
             };
             
-            // Include Current Projects
+            // currentProjects now contains ALL items (projects, initiatives, evaluations)
+            // Process them based on their type
             d.currentProjects.forEach((cp: any) => {
                 if (!cp.startDate || !cp.endDate) return;
                 
@@ -844,56 +944,31 @@ export default class ManagerTeamView extends Controller {
                     status = "scheduled"; // Scheduled/Future projects - Blue
                 }
                 
+                // Determine color based on type
+                const itemType = cp.type || "Project";
+                let color = status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2";
+                let typeLabel = "Project";
+                
+                if (itemType === "Initiative" || itemType === "Evaluation" || itemType === "CAIA" || itemType === "POC") {
+                    color = "#f39c12"; // Orange for initiatives/evaluations
+                    typeLabel = itemType;
+                }
+                
                 employeeData.projects.push({
                     projectName: cp.projectName,
                     startDate: cp.startDate,
                     endDate: cp.endDate,
                     utilizationPercent: cp.utilizationPercent,
                     status: status,
-                    type: "CurrentProject",
-                    color: status === "finished" ? "#808080" : status === "ongoing" ? "#2ecc71" : "#0070f2"
-                });
-            });
-            
-            // Include Initiatives (strategic initiatives, CAIA, POC, etc.)
-            d.initiatives.forEach((init: any) => {
-                if (!init.startDate || !init.endDate) return;
-                
-                const startDate = new Date(init.startDate);
-                const endDate = new Date(init.endDate);
-                startDate.setHours(0, 0, 0, 0);
-                endDate.setHours(0, 0, 0, 0);
-                
-                // Filter by year
-                if (startDate.getFullYear() !== selectedYear && endDate.getFullYear() !== selectedYear) return;
-                
-                // Determine status based on dates
-                let status = "scheduled";
-                if (endDate < today) {
-                    status = "finished";
-                } else if (startDate <= today && endDate >= today) {
-                    status = "ongoing";
-                } else if (startDate > today) {
-                    status = "scheduled";
-                }
-                
-                // All initiatives (Initiative, CAIA, POC) — always orange regardless of status
-                const color = "#f39c12";
-                const typeLabel = init.type || "Initiative";
-                
-                employeeData.projects.push({
-                    projectName: init.initiativeName,
-                    description: init.description,
-                    startDate: init.startDate,
-                    endDate: init.endDate,
-                    utilizationPercent: init.utilizationPercent,
-                    status: status,
-                    type: "Initiative",
+                    type: itemType === "Project" ? "CurrentProject" : "Initiative",
                     typeLabel: typeLabel,
                     color: color
                 });
             });
-
+            
+            // Skip separate initiatives processing since they're already in currentProjects
+            // This prevents duplicate entries
+            
             // Include historical Projects (project history)
             d.projects.forEach((proj: any) => {
                 if (!proj.startDate || !proj.endDate) return;
@@ -2207,23 +2282,6 @@ export default class ManagerTeamView extends Controller {
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
             console.error(`Error loading POC utilization for ${employeeId}:`, error);
-            return [];
-        }
-    }
-
-    /**
-     * Get initiatives for an employee (combines strategic initiatives from various sources)
-     */
-    private async getInitiatives(employeeId: string): Promise<any[]> {
-        try {
-            const oDataModel = this.getOwnerComponent()?.getModel() as any;
-            const listBinding = oDataModel.bindList("/Initiatives");
-            listBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
-            
-            const contexts = await listBinding.requestContexts(0, 1000);
-            return contexts.map((context: any) => context.getObject());
-        } catch (error) {
-            console.error(`Error loading initiatives for ${employeeId}:`, error);
             return [];
         }
     }
