@@ -33,6 +33,15 @@
                                             <m:Title text="My Projects" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterProjectSearch" placeholder="Search projects..." liveChange="onMasterProjectSearch" width="15rem"/>
+                                            <m:Select id="masterProjectTechFilter" width="10rem" change="onMasterProjectFilterChange" forceSelection="false" items="{masterProjectFilterOptions>/technologies}">
+                                                <core:Item key="{masterProjectFilterOptions>key}" text="{masterProjectFilterOptions>text}"/>
+                                            </m:Select>
+                                            <m:Select id="masterProjectCreatorFilter" width="12rem" change="onMasterProjectFilterChange" forceSelection="false" items="{masterProjectFilterOptions>/creators}">
+                                                <core:Item key="{masterProjectFilterOptions>key}" text="{masterProjectFilterOptions>text}"/>
+                                            </m:Select>
+                                            <m:Select id="masterProjectStatusFilter" width="10rem" change="onMasterProjectFilterChange" forceSelection="false" items="{masterProjectFilterOptions>/statuses}">
+                                                <core:Item key="{masterProjectFilterOptions>key}" text="{masterProjectFilterOptions>text}"/>
+                                            </m:Select>
                                             <m:Button text="Create New Project" icon="sap-icon://add" type="Emphasized" press="onCreateMasterProject"/>
                                         </m:Toolbar>
                                     </m:headerToolbar>
@@ -47,6 +56,9 @@
                                                 </m:Column>
                                                 <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
                                                     <m:Text text="Project Manager"/>
+                                                </m:Column>
+                                                <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
+                                                    <m:Text text="Project Creator"/>
                                                 </m:Column>
                                                 <m:Column minScreenWidth="Desktop" demandPopin="true">
                                                     <m:Text text="Start Date"/>
@@ -66,6 +78,7 @@
                                                     <m:Text text="{masterProjects>projectName}"/>
                                                     <m:Text text="{masterProjects>technology}"/>
                                                     <m:Text text="{masterProjects>projectManager}"/>
+                                                    <m:Text text="{masterProjects>projectCreator}"/>
                                                     <m:Text text="{masterProjects>startDate}"/>
                                                     <m:Text text="{masterProjects>endDate}"/>
                                                     <m:ObjectStatus 
@@ -88,6 +101,12 @@
                                             <m:Title text="Master Initiatives" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterInitiativeSearch" placeholder="Search initiatives..." liveChange="onMasterInitiativeSearch" width="15rem"/>
+                                            <m:Select id="masterInitiativeCreatorFilter" width="12rem" change="onMasterInitiativeFilterChange" forceSelection="false" items="{masterInitiativeFilterOptions>/creators}">
+                                                <core:Item key="{masterInitiativeFilterOptions>key}" text="{masterInitiativeFilterOptions>text}"/>
+                                            </m:Select>
+                                            <m:Select id="masterInitiativeStatusFilter" width="10rem" change="onMasterInitiativeFilterChange" forceSelection="false" items="{masterInitiativeFilterOptions>/statuses}">
+                                                <core:Item key="{masterInitiativeFilterOptions>key}" text="{masterInitiativeFilterOptions>text}"/>
+                                            </m:Select>
                                             <m:Button text="Create New Initiative" icon="sap-icon://add" type="Emphasized" press="onCreateMasterInitiative"/>
                                         </m:Toolbar>
                                     </m:headerToolbar>
@@ -139,6 +158,12 @@
                                             <m:Title text="Master Evaluations" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterEvaluationSearch" placeholder="Search evaluations..." liveChange="onMasterEvaluationSearch" width="15rem"/>
+                                            <m:Select id="masterEvaluationCreatorFilter" width="12rem" change="onMasterEvaluationFilterChange" forceSelection="false" items="{masterEvaluationFilterOptions>/creators}">
+                                                <core:Item key="{masterEvaluationFilterOptions>key}" text="{masterEvaluationFilterOptions>text}"/>
+                                            </m:Select>
+                                            <m:Select id="masterEvaluationStatusFilter" width="10rem" change="onMasterEvaluationFilterChange" forceSelection="false" items="{masterEvaluationFilterOptions>/statuses}">
+                                                <core:Item key="{masterEvaluationFilterOptions>key}" text="{masterEvaluationFilterOptions>text}"/>
+                                            </m:Select>
                                             <m:Button text="Create New Evaluation" icon="sap-icon://add" type="Emphasized" press="onCreateMasterEvaluation"/>
                                         </m:Toolbar>
                                     </m:headerToolbar>
@@ -696,6 +721,7 @@
                                                         <core:Item key="Team 7" text="Team 7"/>
                                                         <core:Item key="Team 8" text="Team 8"/>
                                                         <core:Item key="Team 9" text="Team 9"/>
+                                                        <core:Item key="Nirmala Team" text="Nirmala Team"/>
                                                     </m:Select>
                                                 </m:VBox>
                                                 <m:VBox width="30%">

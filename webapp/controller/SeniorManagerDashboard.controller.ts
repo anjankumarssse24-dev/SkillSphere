@@ -191,7 +191,7 @@ export default class SeniorManagerDashboard extends Controller {
             const subTeamRaw = String(data.subTeam || "").trim();
             const normalizedSubTeam = /^Team\s*[1-9]$/i.test(subTeamRaw)
                 ? subTeamRaw.replace(/\s+/g, " ")
-                : "Team 1";
+                : (/^Nirmala Team$/i.test(subTeamRaw) ? "Nirmala Team" : "Team 1");
 
             if (!employeeId || !data.name || !data.email || !data.team || !normalizedSubTeam || !data.location || !data.tLevel || !data.gradeLevel || !managerId) {
                 MessageToast.show("Please fill all required fields");

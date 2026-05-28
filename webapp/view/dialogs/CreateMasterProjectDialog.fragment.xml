@@ -56,6 +56,12 @@
                     <core:Item key="{projectManagerList>name}" text="{projectManagerList>name}"/>
                 </ComboBox>
 
+                <Label text="Project Creator:" class="sapUiSmallMarginTop" required="true"/>
+                <Input
+                    value="{newMasterProject>/projectCreator}"
+                    editable="false"
+                    width="100%"/>
+
                 <Label text="Region:" class="sapUiSmallMarginTop" required="true"/>
                 <Select selectedKey="{newMasterProject>/region}" width="100%">
                     <core:Item key="APAC" text="APAC"/>

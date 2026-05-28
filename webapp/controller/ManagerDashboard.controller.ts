@@ -39,6 +39,14 @@ export default class ManagerDashboard extends Controller {
     private managerProfileSnapshot: any = null;
     private pendingEmployeeIdToOpen: string | null = null;
 
+    private buildSelectOptions(values: string[], allLabel: string): Array<{ key: string; text: string }> {
+        const uniqueValues = Array.from(new Set(values.map((v) => String(v || "").trim()).filter(Boolean))).sort();
+        return [
+            { key: "", text: allLabel },
+            ...uniqueValues.map((value) => ({ key: value, text: value }))
+        ];
+    }
+
     public onInit(): void {
         const router = this.getRouter();
         router.getRoute("ManagerDashboard")?.attachPatternMatched(this.onRouteMatched, this);
@@ -404,12 +412,13 @@ export default class ManagerDashboard extends Controller {
                 return;
             }
 
-            const normalizedSubTeam = /^Team\s*[1-9]$/i.test(String(profileData?.subTeam || "").trim())
-                ? String(profileData.subTeam).trim().replace(/\s+/g, " ")
-                : "";
+            const rawSubTeam = String(profileData?.subTeam || "").trim();
+            const normalizedSubTeam = /^Team\s*[1-9]$/i.test(rawSubTeam)
+                ? rawSubTeam.replace(/\s+/g, " ")
+                : (/^Nirmala Team$/i.test(rawSubTeam) ? "Nirmala Team" : "");
 
             if (!normalizedSubTeam) {
-                MessageToast.show("Please select sub-team from Team 1 to Team 9");
+                MessageToast.show("Please select sub-team from Team 1 to Team 9 or Nirmala Team");
                 return;
             }
 
@@ -3319,7 +3328,7 @@ export default class ManagerDashboard extends Controller {
             const managerSubTeam = String(data.subTeam || "").trim();
             const normalizedSubTeam = /^Team\s*[1-9]$/i.test(managerSubTeam)
                 ? managerSubTeam.replace(/\s+/g, " ")
-                : "Team 1";
+                : (/^Nirmala Team$/i.test(managerSubTeam) ? "Nirmala Team" : "Team 1");
 
             if (mode === "create" && !managerId) {
                 MessageToast.show("Current manager context not found. Please re-login and try again.");
@@ -4574,6 +4583,13 @@ private initializeAIChat(): void {
 
             const masterProjectsModel = new JSONModel({ projects: projects, allProjects: projects });
             this.getView()?.setModel(masterProjectsModel, "masterProjects");
+            this.getView()?.setModel(new JSONModel({
+                technologies: this.buildSelectOptions(projects.map((p: any) => String(p.technology || "")), "All Tech"),
+                creators: this.buildSelectOptions(projects.map((p: any) => String(p.projectCreator || "")), "All Creators"),
+                statuses: this.buildSelectOptions(projects.map((p: any) => String(p.status || "")), "All Status")
+            }), "masterProjectFilterOptions");
+
+            this.applyMasterProjectFilters();
 
             // Refresh the OData /Projects binding so the assign ComboBox picks up new/edited/deleted projects
             const assignComboBox = this.byId("assignProjectComboBox") as any;
@@ -4593,19 +4609,36 @@ private initializeAIChat(): void {
      * Search/filter master projects
      */
     public onMasterProjectSearch(event: Event): void {
-        const query = ((event.getParameter as any)("newValue") || "").toLowerCase();
+        this.applyMasterProjectFilters();
+    }
+
+    public onMasterProjectFilterChange(): void {
+        this.applyMasterProjectFilters();
+    }
+
+    private applyMasterProjectFilters(): void {
         const model = this.getView()?.getModel("masterProjects") as JSONModel;
         if (!model) return;
+
+        const query = String((this.byId("masterProjectSearch") as any)?.getValue?.() || "").toLowerCase();
+        const selectedTech = String((this.byId("masterProjectTechFilter") as any)?.getSelectedKey?.() || "").trim();
+        const selectedCreator = String((this.byId("masterProjectCreatorFilter") as any)?.getSelectedKey?.() || "").trim();
+        const selectedStatus = String((this.byId("masterProjectStatusFilter") as any)?.getSelectedKey?.() || "").trim();
+
         const allProjects = model.getProperty("/allProjects") || [];
-        if (!query) {
-            model.setProperty("/projects", allProjects);
-            return;
-        }
-        const filtered = allProjects.filter((p: any) =>
-            (p.projectName || "").toLowerCase().includes(query) ||
-            (p.technology || "").toLowerCase().includes(query) ||
-            (p.status || "").toLowerCase().includes(query)
-        );
+
+        const filtered = allProjects.filter((p: any) => {
+            const matchesText = !query
+                || (p.projectName || "").toLowerCase().includes(query)
+                || (p.technology || "").toLowerCase().includes(query)
+                || (p.status || "").toLowerCase().includes(query)
+                || (p.projectCreator || "").toLowerCase().includes(query);
+            const matchesTech = !selectedTech || String(p.technology || "").trim() === selectedTech;
+            const matchesCreator = !selectedCreator || String(p.projectCreator || "").trim() === selectedCreator;
+            const matchesStatus = !selectedStatus || String(p.status || "").trim() === selectedStatus;
+            return matchesText && matchesTech && matchesCreator && matchesStatus;
+        });
+
         model.setProperty("/projects", filtered);
     }
 
@@ -4619,6 +4652,11 @@ private initializeAIChat(): void {
         }
 
         const currentManagerName = await this.getCurrentManagerName();
+        const currentManagerLabel = [currentManagerName, this.currentManagerId]
+            .filter((value) => Boolean(String(value || "").trim()))
+            .join(" (")
+            .replace(/\($/, "")
+            .concat(currentManagerName && this.currentManagerId ? ")" : "");
         await this.loadProjectManagerCandidates();
 
         const newProjectModel = new JSONModel({
@@ -4631,6 +4669,7 @@ private initializeAIChat(): void {
             accountExecutiveManager: "",
             projectOrchestrator: "",
             projectManager: currentManagerName,
+            projectCreator: currentManagerLabel || currentManagerName || this.currentManagerId || "",
             region: ""
         });
         this.getView()?.setModel(newProjectModel, "newMasterProject");
@@ -4697,6 +4736,7 @@ private initializeAIChat(): void {
             const createdProjectCtx = listBinding.create({
                 projectId: this.generateUuid(),
                 employeeId: "",
+                projectCreator: data.projectCreator || "",
                 projectName: data.projectName,
                 role: "",
                 startDate: startDateISO,
@@ -4760,6 +4800,7 @@ private initializeAIChat(): void {
             status: projectData.status,
             description: projectData.description || "",
             projectManager: projectData.projectManager || "",
+            projectCreator: projectData.projectCreator || "",
             region: projectData.region || ""
         });
         this.getView()?.setModel(editModel, "editMasterProject");
@@ -4919,6 +4960,19 @@ private initializeAIChat(): void {
                 allItems: evaluations,
                 assignItems: assignEvaluations
             }), "masterEvaluations");
+
+            this.getView()?.setModel(new JSONModel({
+                creators: this.buildSelectOptions(initiatives.map((i: any) => String(i.addedByManager || "")), "All Creators"),
+                statuses: this.buildSelectOptions(initiatives.map((i: any) => String(i.status || "")), "All Status")
+            }), "masterInitiativeFilterOptions");
+
+            this.getView()?.setModel(new JSONModel({
+                creators: this.buildSelectOptions(evaluations.map((e: any) => String(e.addedByManager || "")), "All Creators"),
+                statuses: this.buildSelectOptions(evaluations.map((e: any) => String(e.status || "")), "All Status")
+            }), "masterEvaluationFilterOptions");
+
+            this.applyMasterInitiativeFilters();
+            this.applyMasterEvaluationFilters();
         } catch (error) {
             console.error("❌ Error loading master work items:", error);
             this.getView()?.setModel(new JSONModel({ items: [], allItems: [] }), "masterInitiatives");
@@ -4927,40 +4981,66 @@ private initializeAIChat(): void {
     }
 
     public onMasterInitiativeSearch(event: Event): void {
-        const query = ((event.getParameter as any)("newValue") || "").toLowerCase();
+        this.applyMasterInitiativeFilters();
+    }
+
+    public onMasterInitiativeFilterChange(): void {
+        this.applyMasterInitiativeFilters();
+    }
+
+    private applyMasterInitiativeFilters(): void {
         const model = this.getView()?.getModel("masterInitiatives") as JSONModel;
         if (!model) return;
 
-        const allItems = model.getProperty("/allItems") || [];
-        if (!query) {
-            model.setProperty("/items", allItems);
-            return;
-        }
+        const query = String((this.byId("masterInitiativeSearch") as any)?.getValue?.() || "").toLowerCase();
+        const selectedCreator = String((this.byId("masterInitiativeCreatorFilter") as any)?.getSelectedKey?.() || "").trim();
+        const selectedStatus = String((this.byId("masterInitiativeStatusFilter") as any)?.getSelectedKey?.() || "").trim();
 
-        const filtered = allItems.filter((item: any) =>
-            (item.initiativeName || "").toLowerCase().includes(query) ||
-            (item.description || "").toLowerCase().includes(query) ||
-            (item.status || "").toLowerCase().includes(query)
-        );
+        const allItems = model.getProperty("/allItems") || [];
+
+        const filtered = allItems.filter((item: any) => {
+            const matchesText = !query
+                || (item.initiativeName || "").toLowerCase().includes(query)
+                || (item.description || "").toLowerCase().includes(query)
+                || (item.status || "").toLowerCase().includes(query)
+                || (item.addedByManager || "").toLowerCase().includes(query);
+            const matchesCreator = !selectedCreator || String(item.addedByManager || "").trim() === selectedCreator;
+            const matchesStatus = !selectedStatus || String(item.status || "").trim() === selectedStatus;
+            return matchesText && matchesCreator && matchesStatus;
+        });
+
         model.setProperty("/items", filtered);
     }
 
     public onMasterEvaluationSearch(event: Event): void {
-        const query = ((event.getParameter as any)("newValue") || "").toLowerCase();
+        this.applyMasterEvaluationFilters();
+    }
+
+    public onMasterEvaluationFilterChange(): void {
+        this.applyMasterEvaluationFilters();
+    }
+
+    private applyMasterEvaluationFilters(): void {
         const model = this.getView()?.getModel("masterEvaluations") as JSONModel;
         if (!model) return;
 
-        const allItems = model.getProperty("/allItems") || [];
-        if (!query) {
-            model.setProperty("/items", allItems);
-            return;
-        }
+        const query = String((this.byId("masterEvaluationSearch") as any)?.getValue?.() || "").toLowerCase();
+        const selectedCreator = String((this.byId("masterEvaluationCreatorFilter") as any)?.getSelectedKey?.() || "").trim();
+        const selectedStatus = String((this.byId("masterEvaluationStatusFilter") as any)?.getSelectedKey?.() || "").trim();
 
-        const filtered = allItems.filter((item: any) =>
-            (item.evaluationName || "").toLowerCase().includes(query) ||
-            (item.description || "").toLowerCase().includes(query) ||
-            (item.status || "").toLowerCase().includes(query)
-        );
+        const allItems = model.getProperty("/allItems") || [];
+
+        const filtered = allItems.filter((item: any) => {
+            const matchesText = !query
+                || (item.evaluationName || "").toLowerCase().includes(query)
+                || (item.description || "").toLowerCase().includes(query)
+                || (item.status || "").toLowerCase().includes(query)
+                || (item.addedByManager || "").toLowerCase().includes(query);
+            const matchesCreator = !selectedCreator || String(item.addedByManager || "").trim() === selectedCreator;
+            const matchesStatus = !selectedStatus || String(item.status || "").trim() === selectedStatus;
+            return matchesText && matchesCreator && matchesStatus;
+        });
+
         model.setProperty("/items", filtered);
     }
 

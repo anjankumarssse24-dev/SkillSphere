@@ -44,7 +44,9 @@ export default class FirstTimeSetup extends Controller {
         { key: "Team 5", text: "Team 5" },
         { key: "Team 6", text: "Team 6" },
         { key: "Team 7", text: "Team 7" },
-        { key: "Team 8", text: "Team 8" }
+        { key: "Team 8", text: "Team 8" },
+        { key: "Team 9", text: "Team 9" },
+        { key: "Nirmala Team", text: "Nirmala Team" }
       ],
       locationsList: [
         { key: "Whitefield, Bangalore", text: "Whitefield, Bangalore" },

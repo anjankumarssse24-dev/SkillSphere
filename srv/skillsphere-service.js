@@ -222,6 +222,23 @@ module.exports = cds.service.impl(async function() {
     return req._resolvedActorEmployeeId;
   }
 
+  async function _resolveActorDisplayName(req) {
+    const actorEmployeeId = await _resolveActorEmployeeId(req);
+    if (!DbEmployees || !actorEmployeeId) {
+      return actorEmployeeId;
+    }
+
+    const actor = await SELECT.one.from(DbEmployees)
+      .columns('name', 'employeeId')
+      .where({ employeeId: actorEmployeeId });
+
+    if (actor?.name && actor?.employeeId) {
+      return `${actor.name} (${actor.employeeId})`;
+    }
+
+    return actor?.name || actorEmployeeId;
+  }
+
   function _collectRoleFilters(whereClause, matches = []) {
     if (!whereClause) return matches;
     if (Array.isArray(whereClause)) {
@@ -334,7 +351,17 @@ module.exports = cds.service.impl(async function() {
       // Employees can only see their own data
       req.query.where({ employeeId: userId });
     } else if (_hasRole(req, 'Manager')) {
-      // Managers can see their reports + themselves
+      if (req.event === 'READ') {
+        // Managers can read their own profile + all employees (role=Employee) across teams.
+        req.query.where([
+          { ref: ['role'] }, '=', { val: 'Employee' },
+          'or',
+          { ref: ['employeeId'] }, '=', { val: userId }
+        ]);
+        return;
+      }
+
+      // For updates, keep the original scope to manager's team + self.
       req.query.where([
         { ref: ['managerId'] }, '=', { val: userId },
         'or',
@@ -392,6 +419,16 @@ module.exports = cds.service.impl(async function() {
         'or',
         { ref: ['addedByManager'] }, '=', { val: actorEmployeeId }
       ]);
+    }
+  });
+
+  this.before('CREATE', Projects, async (req) => {
+    req.data.projectCreator = await _resolveActorDisplayName(req);
+  });
+
+  this.before('UPDATE', Projects, async (req) => {
+    if (Object.prototype.hasOwnProperty.call(req.data, 'projectCreator')) {
+      delete req.data.projectCreator;
     }
   });
 

@@ -69,6 +69,7 @@ entity Skills {
 entity Projects {
   key projectId : UUID;
   employeeId : String;
+  projectCreator : String;
   projectName : String;
   role : String;
   startDate : Date;

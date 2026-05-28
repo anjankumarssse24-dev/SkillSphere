@@ -109,9 +109,8 @@ export default class ManagerWorkOverview extends Controller {
 
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
 
-            // Load only employees under this manager
+            // Load all employees so managers get org-wide current work visibility.
             const empBinding = oDataModel.bindList("/Employees");
-            empBinding.filter([new Filter("managerId", FilterOperator.EQ, this.currentManagerId)]);
             const empContexts = await empBinding.requestContexts(0, 500);
             const employees = empContexts.map((ctx: any) => ctx.getObject());
 
@@ -230,11 +229,10 @@ export default class ManagerWorkOverview extends Controller {
 
             const tLevelFilter = this.byId("woTLevelFilter") as MultiComboBox;
             if (tLevelFilter) {
-                tLevelFilter.setSelectedKeys(["T5", "T4", "T3"]);
+                tLevelFilter.setSelectedKeys([]);
             }
 
-            const defaultFiltered = rows.filter((r: any) => r.tLevel === "T5" || r.tLevel === "T4" || r.tLevel === "T3");
-            this.buildWorkOverviewTable(defaultFiltered);
+            this.buildWorkOverviewTable(rows);
 
             if (page?.setBusy) page.setBusy(false);
         } catch (error) {
