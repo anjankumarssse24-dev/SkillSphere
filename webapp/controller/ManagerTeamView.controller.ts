@@ -200,7 +200,6 @@ export default class ManagerTeamView extends Controller {
             const employees = contexts.map((context: any) => context.getObject());
             
             console.log(`✅ Loaded ${employees.length} employees from OData for manager ${currentManagerId}`);
-            console.log("📊 Sample employee data:", employees[0]); // Debug: Check what fields are loaded
             
             // Load skills, profile and current projects for each employee
             const enrichedEmployees = await Promise.all(employees.map(async (emp: any) => {
@@ -243,7 +242,7 @@ export default class ManagerTeamView extends Controller {
                 return nameA.localeCompare(nameB);
             });
 
-            console.log("✅ Employees with enriched data (sorted):", enrichedEmployees);
+            console.log("✅ Employees with enriched data loaded and sorted");
 
             // Create local model for employees
             const localEmployeesModel = new JSONModel({ employees: enrichedEmployees });
@@ -459,7 +458,7 @@ export default class ManagerTeamView extends Controller {
         const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
         const employees = managerEmployeesModel?.getData()?.employees || [];
         
-        console.log("Updating analytics with manager's employees:", employees);
+        console.log("Updating analytics with manager's employees count:", employees.length);
         
         if (employees.length === 0) {
             console.warn("No employees data available for analytics");
@@ -649,7 +648,6 @@ export default class ManagerTeamView extends Controller {
         const selectedQuarter = visualizationModel?.getProperty("/selectedQuarter") || "ALL";
         
         console.log(`📊 Calculating utilization for Year: ${selectedYear}, Quarter: ${selectedQuarter}`);
-        console.log("📊 All employee data:", allData);
         
         // Determine which months to include based on quarter
         let monthsToInclude: number[] = [];
@@ -1812,7 +1810,7 @@ export default class ManagerTeamView extends Controller {
                 };
             }));
 
-            console.log("Employees loaded with skills and profiles:", enrichedEmployees);
+            console.log("Employees loaded with skills and profiles count:", enrichedEmployees.length);
 
             // Perform skill-based and role-based search
             const searchResults = this.performSkillSearch(enrichedEmployees, searchSkills, experienceLevel, roleFilter);
@@ -1926,7 +1924,7 @@ export default class ManagerTeamView extends Controller {
                 totalMatchingSkills: totalMatchingSkills,
                 matchScore: matchScore
             };
-            console.log(`Employee ${emp.employeeId} match score: ${matchScore}%`, result);
+            console.log(`Employee ${emp.employeeId} match score: ${matchScore}%`);
             return result;
         });
 
@@ -2153,7 +2151,7 @@ export default class ManagerTeamView extends Controller {
                 this.getCertifications(empId)
             ]);
 
-            console.log("✅ All employee data loaded:", { employeeData, profileData, skills, projects, currentProjects, caiaUtilization, pocUtilization, certifications });
+            console.log("✅ All employee data loaded successfully");
 
             // Merge all data
             const completeData = {

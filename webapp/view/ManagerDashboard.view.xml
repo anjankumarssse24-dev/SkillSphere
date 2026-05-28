@@ -30,7 +30,7 @@
                                 <m:Panel id="masterProjectsPanel" headerText="Project Registry" class="sapUiSmallMarginBottom masterProjectsPanel" width="100%">
                                     <m:headerToolbar>
                                         <m:Toolbar>
-                                            <m:Title text="My Projects" level="H3"/>
+                                            <m:Title text="Project Registry" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterProjectSearch" placeholder="Search projects..." liveChange="onMasterProjectSearch" width="15rem"/>
                                             <m:Select id="masterProjectTechFilter" width="10rem" change="onMasterProjectFilterChange" forceSelection="false" items="{masterProjectFilterOptions>/technologies}">

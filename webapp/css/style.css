@@ -1000,3 +1000,35 @@
 #masterProjectsSection .sapUxAPObjectPageSubSectionContainer {
     overflow-x: hidden !important;
 }
+
+/* ===== Master Panels - Sidebar accent + header padding ===== */
+#masterProjectsPanel,
+#masterInitiativesPanel,
+#masterEvaluationsPanel {
+    border-left: 4px solid #0070f2 !important;
+    margin-bottom: 1.25rem !important;
+}
+
+#masterInitiativesPanel {
+    border-left-color: #f39c12 !important;
+}
+
+#masterEvaluationsPanel {
+    border-left-color: #8e44ad !important;
+}
+
+/* Extra top padding on panel header toolbars */
+#masterProjectsPanel .sapMTB,
+#masterInitiativesPanel .sapMTB,
+#masterEvaluationsPanel .sapMTB {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
+
+/* Panel header text spacing */
+#masterProjectsPanel .sapMPanelHdr,
+#masterInitiativesPanel .sapMPanelHdr,
+#masterEvaluationsPanel .sapMPanelHdr {
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
+}
