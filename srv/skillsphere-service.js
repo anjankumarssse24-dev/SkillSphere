@@ -32,7 +32,6 @@ module.exports = cds.service.impl(async function() {
     Initiatives, CAIAUtilization, POCUtilization, Certifications
   } = this.entities;
 
-  console.log('🚀 Initializing SkillSphere Secure API (action-based, no entity access)...');
   let aiClient = null;
 
   function _extractBearerToken(req) {
@@ -136,17 +135,14 @@ module.exports = cds.service.impl(async function() {
         return await AICoreClient.create({ jwt });
       } catch (error) {
         const expectedAuthNoneError = error.message?.includes('XSUAA service binding matching the token');
-        if (expectedAuthNoneError) {
-          console.log('ℹ️ Request-scoped destination lookup skipped (no XSUAA binding for token).');
-        } else {
-          console.warn('⚠️ Request-scoped AI Core initialization failed:', error.message);
+        if (!expectedAuthNoneError) {
+          console.error('⚠️ Request-scoped AI Core initialization failed:', error.message);
         }
       }
     }
 
     if (!aiClient) {
       aiClient = await AICoreClient.create();
-      console.log('🤖 Using SAP AI Core client');
     }
     return aiClient;
   }
@@ -632,20 +628,6 @@ module.exports = cds.service.impl(async function() {
     const hasManagerRole = _hasRole(req, 'Manager');
     const hasEmployeeRole = _hasRole(req, 'Employee');
 
-    console.log('🪪 currentUserContext role summary:', {
-      principalId,
-      principalEmail,
-      userIsEmployee: req.user?.is?.('Employee') || false,
-      userIsManager: req.user?.is?.('Manager') || false,
-      userIsSeniorManager: req.user?.is?.('SeniorManager') || false,
-      scopeCount: uniqueScopes.length,
-      roleCollectionCount: uniqueRoleCollections.length,
-      firstScopes: uniqueScopes.slice(0, 5),
-      firstRoleCollections: uniqueRoleCollections.slice(0, 5),
-      hasSeniorManagerRole,
-      hasManagerRole,
-      hasEmployeeRole
-    });
 
     let resolvedRole = '';
     let targetDashboard = '';
@@ -662,12 +644,7 @@ module.exports = cds.service.impl(async function() {
     }
 
     if (!resolvedRole) {
-      console.warn('⛔ currentUserContext authorization failed: no supported role found', {
-        principalId,
-        principalEmail,
-        grantedScopes: uniqueScopes,
-        roleCollections: uniqueRoleCollections
-      });
+      console.error('⛔ currentUserContext: no business role assigned');
       return {
         authenticated: true,
         authorized: false,
@@ -689,7 +666,6 @@ module.exports = cds.service.impl(async function() {
     }
 
     if (!employee) {
-      console.log('ℹ️ No employee master record found; routing to first-time setup');
       return {
         authenticated: true,
         authorized: true,
@@ -703,16 +679,6 @@ module.exports = cds.service.impl(async function() {
       };
     }
 
-    console.log('✅ currentUserContext resolved:', {
-      principalId,
-      principalEmail,
-      resolvedRole,
-      targetDashboard,
-      employeeFound: !!employee,
-      employeeId: employee?.employeeId || principalId,
-      employeeName: employee?.name || principalEmail || principalId,
-      isFirstTime: !employee?.team && !employee?.location
-    });
 
     // Check if this is a first-time user (no team/location filled yet)
     const isFirstTime = !employee?.team || !employee?.location;
@@ -753,7 +719,6 @@ module.exports = cds.service.impl(async function() {
       const normalizedEmployeeId = String(employeeId || '').trim().toUpperCase();
       const normalizedManagerId = String(managerId || '').trim().toUpperCase();
 
-      console.log('📝 Completing first-time setup for:', normalizedEmployeeId, 'from login ID:', normalizedLoginEmployeeId);
 
       if (!normalizedEmployeeId || !team || !location) {
         return req.reject(400, 'employeeId, team, and location are required');
@@ -897,7 +862,6 @@ module.exports = cds.service.impl(async function() {
         }]));
       }
 
-      console.log('✅ First-time setup completed for:', normalizedEmployeeId);
 
       return {
         success: true,
@@ -921,7 +885,6 @@ module.exports = cds.service.impl(async function() {
         return req.reject(403, 'Forbidden');
       }
 
-      console.log('🧪 askAIAssistant runtime:', { employeeId });
 
       if (!employeeId || !query) {
         return req.reject(400, 'employeeId and query are required');
@@ -967,7 +930,6 @@ ${projects.length ? projects.map(p =>
     `- ${p.projectName} (${p.role}, ${p.hoursPerDay} hrs/day)`).join('\n') : 'No active projects'}
 `;
 
-      console.log('📤 Sending employee AI request...');
       const aiClient = await getAIClient(req);
       if (!aiClient) {
         return req.reject(503, 'AI Core service unavailable');
@@ -978,7 +940,6 @@ ${projects.length ? projects.map(p =>
         userPrompt
       });
 
-      console.log('✅ Employee AI response received');
       return { answer, success: true };
     } catch (error) {
       console.error('❌ askAIAssistant error:', error);
@@ -1014,7 +975,6 @@ ${projects.length ? projects.map(p =>
       await UPDATE(Projects).set({ status: 'Completed' }).where({ projectId });
 
       const count = typeof updated === 'number' ? updated : 0;
-      console.log(`✅ markProjectCompleted: project "${project.projectName}" — ${count} assignment(s) updated`);
       return { success: true, updatedCount: count, message: `Project marked as completed (${count} assignment(s) updated)` };
     } catch (err) {
       console.error('❌ markProjectCompleted error:', err);
@@ -1060,7 +1020,6 @@ ${projects.length ? projects.map(p =>
       // Mark master record as Completed
       await UPDATE(InitiativesMaster).set({ status: 'Completed' }).where({ initiativeId });
 
-      console.log(`✅ markInitiativeCompleted: initiativeId "${initiativeId}" — ${currentRows.length} assignment(s) moved to history`);
       return { success: true, updatedCount: currentRows.length, message: `Initiative marked as completed (${currentRows.length} assignment(s) updated)` };
     } catch (err) {
       console.error('❌ markInitiativeCompleted error:', err);
@@ -1106,7 +1065,6 @@ ${projects.length ? projects.map(p =>
       // Mark master record as Completed
       await UPDATE(EvaluationsMaster).set({ status: 'Completed' }).where({ evaluationId });
 
-      console.log(`✅ markEvaluationCompleted: evaluationId "${evaluationId}" — ${currentRows.length} assignment(s) moved to history`);
       return { success: true, updatedCount: currentRows.length, message: `Evaluation marked as completed (${currentRows.length} assignment(s) updated)` };
     } catch (err) {
       console.error('❌ markEvaluationCompleted error:', err);
@@ -1125,7 +1083,6 @@ ${projects.length ? projects.map(p =>
         return req.reject(403, 'Forbidden');
       }
 
-      console.log('🧪 managerQuery runtime:', { managerId });
 
       if (!managerId || !context) {
         return req.reject(400, 'managerId and query are required');
@@ -1147,7 +1104,6 @@ ${projects.length ? projects.map(p =>
         ? await SELECT.from(CurrentProjects).where({ employeeId: { in: teamIds } })
         : [];
 
-      console.log(`📊 Manager data: ${team.length} team members, ${skills.length} skills, ${projects.length} projects`);
 
       const systemPrompt = `
 You are an AI assistant for SkillSphere helping a manager.
@@ -1179,7 +1135,6 @@ ${projects.map(p =>
   `- ${p.projectName} (${p.role}) - ${p.employeeId}`).join('\n')}
 `;
 
-      console.log('📤 Sending manager AI request...');
       const aiClient = await getAIClient(req);
       if (!aiClient) {
         return req.reject(503, 'AI Core service unavailable');
@@ -1190,7 +1145,6 @@ ${projects.map(p =>
         userPrompt
       });
 
-      console.log('✅ Manager AI response received');
       return { answer, success: true };
     } catch (error) {
       console.error('❌ managerQuery error:', error);
@@ -1209,7 +1163,6 @@ ${projects.map(p =>
         return req.reject(403, 'Forbidden');
       }
 
-      console.log('🧪 seniorManagerQuery runtime:', { seniorManagerId });
 
       if (!seniorManagerId || !context) {
         return req.reject(400, 'seniorManagerId and query are required');
@@ -1255,7 +1208,6 @@ ${projects.map(p =>
         ? await SELECT.from(Certifications).where({ employeeId: { in: employeeIds } })
         : [];
 
-      console.log(`📊 Data loaded: ${managers.length} managers, ${orgEmployees.length} employees, ${skills.length} skills, ${projects.length} projects, ${certifications.length} certifications`);
 
       const systemPrompt = `
 You are an AI assistant for SkillSphere helping a senior manager/VP.
@@ -1301,7 +1253,6 @@ ${certifications.slice(0, 30).map(c =>
 ${certifications.length > 30 ? `... and ${certifications.length - 30} more certifications` : ''}
 `;
 
-      console.log('📤 Sending request to AI...');
       const aiClient = await getAIClient(req);
       if (!aiClient) {
         return req.reject(503, 'AI Core service unavailable');
@@ -1312,7 +1263,6 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
         userPrompt
       });
 
-      console.log('✅ AI response received successfully');
       return { answer, success: true };
     } catch (error) {
       console.error('❌ seniorManagerQuery error:', error);
@@ -1334,7 +1284,6 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     try {
       const aiClient = await getAIClient(req);
       await aiClient.clearUserChat(userId);
-      console.log(`🗑️ Chat cleared for user: ${userId}`);
       return { success: true, message: 'Chat history cleared successfully' };
     } catch (error) {
       console.error('❌ Error clearing chat:', error.message);
@@ -1497,23 +1446,14 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
    * Log and track Employee profile updates
    */
   this.before('UPDATE', 'Employees', async (req) => {
-    console.log('📝 Updating Employee profile:', req.data);
     req.data.lastUpdated = new Date().toISOString();
   });
 
-  /**
-   * Log and track Skills updates
-   */
   this.before('UPDATE', 'Skills', async (req) => {
-    console.log('📝 Updating Skill:', req.data);
     req.data.lastUpdated = new Date().toISOString();
   });
 
-  /**
-   * Log and track Projects updates
-   */
   this.before('UPDATE', 'Projects', async (req) => {
-    console.log('📝 Updating Project:', req.data);
     req.data.lastUpdated = new Date().toISOString();
   });
 
@@ -1541,23 +1481,9 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
   /**
    * Log successful reads (optional - can be removed for production)
    */
-  this.after('READ', 'Skills', (skills) => {
-    if (Array.isArray(skills)) {
-      console.log(`📖 Retrieved ${skills.length} skills`);
-    }
-  });
-
-  this.after('READ', 'Projects', (projects) => {
-    if (Array.isArray(projects)) {
-      console.log(`📖 Retrieved ${projects.length} projects`);
-    }
-  });
-
-  this.after('READ', 'Employees', (employees) => {
-    if (Array.isArray(employees)) {
-      console.log(`📖 Retrieved ${employees.length} employees`);
-    }
-  });
+  this.after('READ', 'Skills', () => {});
+  this.after('READ', 'Projects', () => {});
+  this.after('READ', 'Employees', () => {});
 
   // ============ AFTER CREATE/UPDATE/DELETE HANDLERS ============
 
@@ -1570,7 +1496,6 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     if (employeeId) {
       const skills = await SELECT.from(Skills).where({ employeeId });
       await UPDATE(Employees).set({ totalSkills: skills.length }).where({ employeeId });
-      console.log(`✅ Updated skill count for employee ${employeeId}: ${skills.length} skills`);
     }
   });
 
@@ -1581,41 +1506,19 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
     const employeeId = data.employeeId || req.data?.employeeId;
     
     if (employeeId) {
-      const projects = await SELECT.from(Projects).where({ employeeId });
-      await UPDATE(Employees).set({ totalProjects: projects.length }).where({ employeeId });
-      console.log(`✅ Updated project count for employee ${employeeId}: ${projects.length} projects`);
+      const projects = await SELECT.from(Projects).where({ employeeId });      await UPDATE(Employees).set({ totalProjects: projects.length }).where({ employeeId });
     }
   });
 
   /**
    * Success logging for creates
    */
-  this.after('CREATE', 'Skills', (skill) => {
-    console.log(`✅ Skill created successfully:`, skill.skillId);
-  });
-
-  this.after('CREATE', 'Projects', (project) => {
-    console.log(`✅ Project created successfully:`, project.projectId);
-  });
-
-  this.after('CREATE', 'Employees', (employee) => {
-    console.log(`✅ Employee created successfully:`, employee.employeeId);
-  });
-
-  /**
-   * Success logging for updates
-   */
-  this.after('UPDATE', 'Employees', (employee) => {
-    console.log(`✅ Employee updated successfully:`, employee);
-  });
-
-  this.after('UPDATE', 'Skills', (skill) => {
-    console.log(`✅ Skill updated successfully:`, skill);
-  });
-
-  this.after('UPDATE', 'Projects', (project) => {
-    console.log(`✅ Project updated successfully:`, project);
-  });
+  this.after('CREATE', 'Skills', () => {});
+  this.after('CREATE', 'Projects', () => {});
+  this.after('CREATE', 'Employees', () => {});
+  this.after('UPDATE', 'Employees', () => {});
+  this.after('UPDATE', 'Skills', () => {});
+  this.after('UPDATE', 'Projects', () => {});
 
   // ============ ERROR HANDLING ============
 
@@ -1864,5 +1767,4 @@ ${certifications.length > 30 ? `... and ${certifications.length - 30} more certi
 });
 
 
-  console.log('🚀 SkillSphere Service initialized successfully');
 });
