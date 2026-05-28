@@ -76,9 +76,11 @@ const LOCAL_MOCK_USERS: LocalMockUser[] = [
 export default class LocalAuth {
     public static isLocalMode(): boolean {
         const hostname = window.location.hostname.toLowerCase();
-        const forceLocal = new URLSearchParams(window.location.search).get("localAuth") === "true";
+        const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
+        // ?localAuth=true is only honoured on localhost — never on production URLs
+        const forceLocal = isLocalHost && new URLSearchParams(window.location.search).get("localAuth") === "true";
 
-        return forceLocal || hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0";
+        return forceLocal || isLocalHost;
     }
 
     public static getMockUsers(): Array<Pick<LocalMockUser, "id" | "name" | "role" | "email">> {
