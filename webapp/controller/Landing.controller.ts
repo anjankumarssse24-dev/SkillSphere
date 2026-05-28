@@ -45,7 +45,6 @@ export default class Landing extends Controller {
                 contact: "Please contact your SkillSphere administrator."
             });
         } catch (error) {
-            console.warn("Authorization state check skipped:", error);
         }
     }
 

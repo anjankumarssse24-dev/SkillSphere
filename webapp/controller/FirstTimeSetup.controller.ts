@@ -115,7 +115,6 @@ export default class FirstTimeSetup extends Controller {
 
       this.model.setProperty("/managerList", managerList);
     } catch (error) {
-      console.warn("Failed to load manager list:", error);
       this.model.setProperty("/managerList", [{ key: "", text: "Select later" }]);
     }
   }

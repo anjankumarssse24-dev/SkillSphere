@@ -154,7 +154,7 @@ export default class SeniorManagerDashboard extends Controller {
             team: defaultTeam,
             subTeam: defaultSubTeam,
             managerId: seniorManagerId,
-            managerLabel: `${managerName} (${seniorManagerId})`,
+            managerLabel: `${managerName}`,
             experience: 0,
             location: "",
             tLevel: "",
@@ -249,7 +249,6 @@ export default class SeniorManagerDashboard extends Controller {
         const args: any = event.getParameter("arguments");
         const seniorManagerId = args?.seniorManagerId;
         
-        console.log("Route matched for Senior Manager:", seniorManagerId);
         
         // Scroll to top
         window.scrollTo({ top: 0, behavior: 'auto' });
@@ -259,7 +258,6 @@ export default class SeniorManagerDashboard extends Controller {
         const currentUser = currentUserModel?.getData();
         
         if (!currentUser?.isLoggedIn && !seniorManagerId) {
-            console.log("No senior manager session found, redirecting to login");
             MessageToast.show("Please login to access the dashboard");
             this.getRouter().navTo("Landing");
             return;
@@ -278,7 +276,6 @@ export default class SeniorManagerDashboard extends Controller {
 
     private async loadDashboardData(): Promise<void> {
         try {
-            console.log("📊 Loading Senior Manager dashboard data...");
             
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             
@@ -347,7 +344,6 @@ export default class SeniorManagerDashboard extends Controller {
             refreshCombo("smgrAssignInitiativeComboBox");
             refreshCombo("smgrAssignEvaluationComboBox");
 
-            console.log(`✅ Loaded master work items for senior manager assign tab: ${initiativesItems.length} initiatives, ${evaluationsItems.length} evaluations`);
         } catch (error) {
             console.error("❌ Error loading master work items:", error);
             this.getView()?.setModel(new JSONModel({ items: [] }), "masterInitiatives");
@@ -370,7 +366,6 @@ export default class SeniorManagerDashboard extends Controller {
             const masterRaw = masterCtx.map((c: any) => c.getObject());
             const currentRaw = currentCtx.map((c: any) => c.getObject());
 
-            console.log(`📋 SM /Projects raw: ${masterRaw.length}, /CurrentProjects raw: ${currentRaw.length}`);
 
             // Build a deduplicated map: projectName → project record (Projects is a history table, same project appears per-employee)
             const projectMap = new Map<string, any>();
@@ -421,7 +416,6 @@ export default class SeniorManagerDashboard extends Controller {
                 if (binding) { binding.refresh(); }
             }
 
-            console.log(`✅ SM loaded ${projects.length} master projects for assign dropdown (${masterRaw.filter((p: any) => String(p.status || "").toLowerCase() !== "completed").length} from catalog, ${projects.length - masterRaw.filter((p: any) => String(p.status || "").toLowerCase() !== "completed").length} back-filled from CurrentProjects)`);
         } catch (error) {
             if (this._isSessionExpired(error)) {
                 this._handleSessionExpiry();
@@ -440,7 +434,6 @@ export default class SeniorManagerDashboard extends Controller {
             const seniorMgrId = this.currentSeniorManagerId || currentUser?.id;
 
             if (!seniorMgrId) {
-                console.warn("⚠️ Senior manager ID missing, cannot load team overview");
                 this.getView()?.setModel(new JSONModel({ managers: [], individualEmployees: [] }), "allManagers");
                 return;
             }
@@ -461,7 +454,6 @@ export default class SeniorManagerDashboard extends Controller {
                     managerId: String(mgr.employeeId || "").trim().toUpperCase()
                 }));
 
-            console.log(`✅ Loaded ${directReports.length} direct reports for ${seniorMgrId} (${managers.length} managers)`);
 
             // Load team size for each direct-report manager
             const managersWithTeamSize = await Promise.all(managers.map(async (mgr: any) => {
@@ -503,13 +495,12 @@ export default class SeniorManagerDashboard extends Controller {
                     managerSelect.addItem(
                         new Item({
                             key: mgr.managerId,
-                            text: `${mgr.name} (${mgr.team})`
+                            text: `${mgr.name}`
                         })
                     );
                 });
             }
 
-            console.log(`✅ Team overview split for ${seniorMgrId}: ${managersOnly.length} managers, ${individualEmployees.length} direct employees`);
             
         } catch (error) {
             if (this._isSessionExpired(error)) {
@@ -529,7 +520,7 @@ export default class SeniorManagerDashboard extends Controller {
             const contexts = await employeesBinding.requestContexts(0, 1000);
             return contexts.length;
         } catch (error) {
-            console.error(`Error getting team size for ${managerId}:`, error);
+            console.error(`Error getting team size:`, error);
             return 0;
         }
     }
@@ -647,7 +638,6 @@ export default class SeniorManagerDashboard extends Controller {
                 allSkills: allSkillsRanked
             }), "orgMetricsCache");
 
-            console.log(`✅ Metrics — Managers: ${totalManagers}, Employees: ${totalEmployees}, On Project: ${onProjectCount}, On Bench: ${onBenchCount}, Skills: ${uniqueSkillsCount}`);
 
         } catch (error) {
             console.error("❌ Error loading organization metrics:", error);
@@ -656,7 +646,6 @@ export default class SeniorManagerDashboard extends Controller {
 
     private async loadWorkOverview(): Promise<void> {
         try {
-            console.log("📊 Loading work overview...");
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             
             // Load all employees
@@ -752,7 +741,6 @@ export default class SeniorManagerDashboard extends Controller {
                 return { emp, profile, projects, evaluations, initiatives };
             });
             
-            console.log(`📊 Dynamic columns: ${maxProjects} projects, ${maxEvaluations} evaluations, ${maxInitiatives} initiatives`);
             
             // Build overview data with dynamic columns
             const employeesOverview = employeeWorkData.map(({ emp, profile, projects, evaluations, initiatives }: any) => {
@@ -809,7 +797,6 @@ export default class SeniorManagerDashboard extends Controller {
             // Rebuild table columns dynamically
             this.rebuildWorkOverviewColumns(maxProjects, maxEvaluations, maxInitiatives);
             
-            console.log(`✅ Work overview loaded for ${employeesOverview.length} employees`);
             
         } catch (error) {
             console.error("❌ Error loading work overview:", error);
@@ -819,7 +806,6 @@ export default class SeniorManagerDashboard extends Controller {
     private rebuildWorkOverviewColumns(maxProjects: number, maxEvaluations: number, maxInitiatives: number): void {
         const table = this.byId("workOverviewTable") as Table;
         if (!table) {
-            console.warn("⚠️ workOverviewTable not found");
             return;
         }
 
@@ -963,7 +949,6 @@ export default class SeniorManagerDashboard extends Controller {
             template: template
         });
 
-        console.log(`✅ Rebuilt table with ${columns.length} dynamic columns`);
     }
 
     public onSearchWorkOverview(event: any): void {
@@ -1044,7 +1029,6 @@ export default class SeniorManagerDashboard extends Controller {
         const currentUser = currentUserModel?.getData();
         const seniorMgrId = this.currentSeniorManagerId || currentUser?.id;
 
-        console.log("📋 Navigating to team view for manager:", manager.managerId);
 
         this.getRouter().navTo("ManagerTeamView", {
             managerId: manager.managerId,
@@ -1072,37 +1056,36 @@ export default class SeniorManagerDashboard extends Controller {
     public onViewAllManagers(): void {
         const cache = (this.getView()?.getModel("orgMetricsCache") as JSONModel)?.getData();
         const rows = cache?.managers || [];
-        this.openOrgMetricsDialog(`All Managers (${rows.length})`, "managers", rows);
+        this.openOrgMetricsDialog(`All Managers`, "managers", rows);
     }
 
     public onViewAllEmployees(): void {
         const cache = (this.getView()?.getModel("orgMetricsCache") as JSONModel)?.getData();
         const rows = cache?.allEmployees || [];
-        this.openOrgMetricsDialog(`All Employees (${rows.length})`, "employees", rows);
+        this.openOrgMetricsDialog(`All Employees`, "employees", rows);
     }
 
     public onViewAllSkills(): void {
         const cache = (this.getView()?.getModel("orgMetricsCache") as JSONModel)?.getData();
         const rows = cache?.allSkills || [];
-        this.openOrgMetricsDialog(`All Unique Skills (${rows.length})`, "skills", rows);
+        this.openOrgMetricsDialog(`All Unique Skills`, "skills", rows);
     }
 
     public onViewOnProjectEmployees(): void {
         const cache = (this.getView()?.getModel("orgMetricsCache") as JSONModel)?.getData();
         const rows = cache?.onProjectEmployees || [];
-        this.openOrgMetricsDialog(`Working on Project Today (${rows.length})`, "employees", rows);
+        this.openOrgMetricsDialog(`Working on Project Today`, "employees", rows);
     }
 
     public onViewAvailableEmployees(): void {
         const cache = (this.getView()?.getModel("orgMetricsCache") as JSONModel)?.getData();
         const rows = cache?.availableEmployees || [];
-        this.openOrgMetricsDialog(`Available Employees (${rows.length})`, "employees", rows);
+        this.openOrgMetricsDialog(`Available Employees`, "employees", rows);
     }
 
     public onOrgSkillTokenUpdate(event: Event): void {
         const multiInput = event.getSource() as MultiInput;
         const tokens = multiInput.getTokens();
-        console.log("Current org skill tokens:", tokens.map(token => token.getText()));
     }
 
     public onOrgSkillSubmit(event: Event): void {
@@ -1157,7 +1140,6 @@ export default class SeniorManagerDashboard extends Controller {
         const selectedTeam = teamFilter?.getSelectedKey() || "";
         const experienceLevel = experienceSelect?.getSelectedKey() || "";
         
-        console.log("Organization search:", { searchSkills, selectedManager, selectedTeam, experienceLevel });
         
         
         try {
@@ -1196,7 +1178,6 @@ export default class SeniorManagerDashboard extends Controller {
             const allEmployees = contexts.map((ctx: any) => ctx.getObject())
                 .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
             
-            console.log(`Found ${allEmployees.length} employees matching filters`);
             
             // Load skills and profiles for matching employees
             const enrichedEmployees = await Promise.all(allEmployees.map(async (emp: any) => {
@@ -1214,7 +1195,6 @@ export default class SeniorManagerDashboard extends Controller {
             // Perform search filtering
             const searchResults = this.performOrgSearch(enrichedEmployees, searchSkills, experienceLevel);
             
-            console.log(`Search complete: ${searchResults.length} results`);
             
             // Display results
             this.displayOrgSearchResults(searchResults);
@@ -1266,7 +1246,7 @@ export default class SeniorManagerDashboard extends Controller {
                         s.skillName.toLowerCase().includes(searchSkill)
                     )
                 )
-                .map((s: any) => `${s.skillName} (${s.proficiencyLevel})`)
+                .map((s: any) => `${s.skillName}`)
                 .join(", ");
             
             const matchScore = this.calculateMatchScore(emp.skills, searchSkills);
@@ -1374,7 +1354,6 @@ export default class SeniorManagerDashboard extends Controller {
         if (selectedItem) {
             const bindingContext = selectedItem.getBindingContext("allManagers");
             const manager = bindingContext.getObject();
-            console.log("Manager selected:", manager);
         }
     }
 
@@ -1400,7 +1379,7 @@ export default class SeniorManagerDashboard extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading skills for ${employeeId}:`, error);
+            console.error(`Error loading skills:`, error);
             return [];
         }
     }
@@ -1415,7 +1394,7 @@ export default class SeniorManagerDashboard extends Controller {
             const profiles = contexts.map((context: any) => context.getObject());
             return profiles.length > 0 ? profiles[0] : null;
         } catch (error) {
-            console.error(`Error loading profile for ${employeeId}:`, error);
+            console.error(`Error loading profile:`, error);
             return null;
         }
     }
@@ -1436,7 +1415,7 @@ export default class SeniorManagerDashboard extends Controller {
             }
             return managerId;
         } catch (error) {
-            console.error(`Error loading manager name for ${managerId}:`, error);
+            console.error(`Error loading manager name:`, error);
             return managerId;
         }
     }
@@ -2104,13 +2083,9 @@ export default class SeniorManagerDashboard extends Controller {
         }
 
         const newSeniorManagerId = userData.id;
-        console.log("🔑 Senior Manager ID for AI (fresh):", newSeniorManagerId);
 
         // ✅ Clear chat ONLY if senior manager changes
         if (this.currentChatSeniorManagerId !== newSeniorManagerId) {
-            console.log(
-                `🔄 Different senior manager detected (was: ${this.currentChatSeniorManagerId}, now: ${newSeniorManagerId})`
-            );
             this.clearChatForNewSeniorManager();
             this.currentChatSeniorManagerId = newSeniorManagerId;
         }
@@ -2137,7 +2112,6 @@ export default class SeniorManagerDashboard extends Controller {
     }
 
     private clearChatForNewSeniorManager(): void {
-        console.log("🧹 Clearing chat for new senior manager");
 
         const oContainer = this.byId("messagesContainerSeniorManager") as any;
         if (oContainer) {
@@ -2157,7 +2131,6 @@ export default class SeniorManagerDashboard extends Controller {
      */
     private initializeAIChat(): void {
         if (this.aiInitialized) {
-            console.log("ℹ️ Senior Manager AI chat already initialized");
             return;
         }
 
@@ -2210,7 +2183,6 @@ export default class SeniorManagerDashboard extends Controller {
      * Clear chat manually (button action)
      */
     public onClearChat(): void {
-        console.log("🧹 Manual chat clear requested");
         const oContainer = this.byId("messagesContainerSeniorManager") as any;
         oContainer?.destroyItems();
 
@@ -2260,9 +2232,6 @@ export default class SeniorManagerDashboard extends Controller {
      */
     private async queryAI(query: string): Promise<void> {
         try {
-            console.log("🤖 Querying AI");
-            console.log("  - Senior Manager ID:", this.seniorManagerId);
-            console.log("  - Query:", query);
 
             if (!this.seniorManagerId) {
                 throw new Error("Senior Manager ID is required");
@@ -2284,7 +2253,6 @@ export default class SeniorManagerDashboard extends Controller {
                 this.addBotMessage(result.value.answer);
             } else {
                 this.addBotMessage("⚠️ Received an unexpected response format.");
-                console.log("Response:", result);
             }
         } catch (error: any) {
             this.removeTypingIndicator();

@@ -230,7 +230,6 @@ export default class SeniorManagerWorkOverview extends Controller {
             });
 
             this.allWorkOverviewRows = rows;
-            console.log(`✅ Work overview: ${rows.length} employees`);
 
             // Set default filter: T5, T4, T3
             const tLevelFilter = this.byId("woTLevelFilter") as MultiComboBox;
@@ -281,7 +280,6 @@ export default class SeniorManagerWorkOverview extends Controller {
         this.maxEvl = Math.min(maxE, 5) || 1;
         this.maxInit = Math.min(maxI, 5) || 1;
 
-        console.log(`📊 Building WO table: ${rows.length} rows, cols: P=${this.maxPrj} E=${this.maxEvl} I=${this.maxInit}`);
 
         // Create JSON model for table data
         const oTableModel = new JSONModel({ rows: rows });
@@ -423,13 +421,9 @@ export default class SeniorManagerWorkOverview extends Controller {
         }
 
         const newSeniorManagerId = userData.id;
-        console.log("🔑 Senior Manager ID for AI (fresh):", newSeniorManagerId);
 
         // ✅ Clear chat ONLY if senior manager changes
         if (this.currentChatSeniorManagerId !== newSeniorManagerId) {
-            console.log(
-                `🔄 Different senior manager detected (was: ${this.currentChatSeniorManagerId}, now: ${newSeniorManagerId})`
-            );
             this.clearChatForNewSeniorManager();
             this.currentChatSeniorManagerId = newSeniorManagerId;
         }
@@ -456,7 +450,6 @@ export default class SeniorManagerWorkOverview extends Controller {
     }
 
     private clearChatForNewSeniorManager(): void {
-        console.log("🧹 Clearing chat for new senior manager");
 
         const oContainer = this.byId("messagesContainerWorkOverview") as any;
         if (oContainer) {
@@ -476,7 +469,6 @@ export default class SeniorManagerWorkOverview extends Controller {
      */
     private initializeAIChat(): void {
         if (this.aiInitialized) {
-            console.log("ℹ️ Senior Manager AI chat already initialized");
             return;
         }
 
@@ -535,7 +527,6 @@ export default class SeniorManagerWorkOverview extends Controller {
      * Clear chat manually (button action)
      */
     public onClearChat(): void {
-        console.log("🧹 Manual chat clear requested");
         this.clearChatForNewSeniorManager();
         this.initializeAIChat();
     }
@@ -680,7 +671,6 @@ export default class SeniorManagerWorkOverview extends Controller {
      */
     private async queryAIAssistant(userMessage: string): Promise<void> {
         try {
-            console.log("🤖 Querying AI Assistant");
 
             if (!this.seniorManagerId) {
                 const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
@@ -725,7 +715,7 @@ export default class SeniorManagerWorkOverview extends Controller {
         const hasItems = (arr: string[]): boolean => arr && arr.length > 0 && arr.some((s: string) => !!s);
 
         const availableRows = rows.filter((row: any) => !hasItems(row.projects) && !hasItems(row.evaluations) && !hasItems(row.initiatives));
-        const availableNames = availableRows.slice(0, 20).map((row: any) => `${row.name} (${row.employeeId})`);
+        const availableNames = availableRows.slice(0, 20).map((row: any) => `${row.name}`);
 
         const projectCount = rows.filter((row: any) => hasItems(row.projects)).length;
         const evaluationCount = rows.filter((row: any) => hasItems(row.evaluations)).length;
@@ -744,7 +734,7 @@ export default class SeniorManagerWorkOverview extends Controller {
             const evaluationsText = (row.evaluations || []).filter((s: string) => !!s).join(", ") || "None";
             const initiativesText = (row.initiatives || []).filter((s: string) => !!s).join(", ") || "None";
 
-            return `${row.name} (${row.employeeId}) - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
+            return `${row.name} - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
         });
 
         return [

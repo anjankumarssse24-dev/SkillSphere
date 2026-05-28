@@ -36,6 +36,7 @@ modules:
       - name: skillsphere-auth
       - name: skillsphere-destination
       - name: skillsphere-connectivity
+      - name: skillsphere-cloud-logging
 
   # HANA Database Deployer
   - name: skillsphere-db-deployer
@@ -174,3 +175,9 @@ resources:
     parameters:
       service: connectivity
       service-plan: lite
+
+  # Cloud Logging Service
+  - name: skillsphere-cloud-logging
+    type: org.cloudfoundry.existing-service
+    parameters:
+      service-name: skillsphere-cloud-logging

@@ -225,7 +225,6 @@ export default class ManagerWorkOverview extends Controller {
             });
 
             this.allWorkOverviewRows = rows;
-            console.log(`✅ Manager Work Overview: ${rows.length} employees`);
 
             const tLevelFilter = this.byId("woTLevelFilter") as MultiComboBox;
             if (tLevelFilter) {
@@ -639,7 +638,7 @@ export default class ManagerWorkOverview extends Controller {
         const hasItems = (arr: string[]): boolean => arr && arr.length > 0 && arr.some((s: string) => !!s);
 
         const availableRows = rows.filter((row: any) => !hasItems(row.projects) && !hasItems(row.evaluations) && !hasItems(row.initiatives));
-        const availableNames = availableRows.slice(0, 20).map((row: any) => `${row.name} (${row.employeeId})`);
+        const availableNames = availableRows.slice(0, 20).map((row: any) => `${row.name}`);
 
         const projectCount = rows.filter((row: any) => hasItems(row.projects)).length;
         const evaluationCount = rows.filter((row: any) => hasItems(row.evaluations)).length;
@@ -657,7 +656,7 @@ export default class ManagerWorkOverview extends Controller {
             const projectsText = (row.projects || []).filter((s: string) => !!s).join(", ") || "None";
             const evaluationsText = (row.evaluations || []).filter((s: string) => !!s).join(", ") || "None";
             const initiativesText = (row.initiatives || []).filter((s: string) => !!s).join(", ") || "None";
-            return `${row.name} (${row.employeeId}) - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
+            return `${row.name} - Projects: ${projectsText}; Evaluations: ${evaluationsText}; Initiatives: ${initiativesText}`;
         });
 
         return [

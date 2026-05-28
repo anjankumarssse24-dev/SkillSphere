@@ -252,7 +252,7 @@ export default class ManagerDashboard extends Controller {
             team,
             subTeam,
             managerId,
-            managerLabel: `${managerName} (${managerId})`,
+            managerLabel: `${managerName}`,
             experience: 0,
             location: "",
             tLevel: "",
@@ -288,7 +288,6 @@ export default class ManagerDashboard extends Controller {
             const contexts = await listBinding.requestContexts();
             const allManagers = contexts.map((context: any) => context.getObject());
             
-            console.log(`✅ Loaded ${allManagers.length} managers for search dropdown`);
             
             // Create managers model for the dropdown
             const managersModel = new JSONModel({ managers: allManagers });
@@ -325,7 +324,7 @@ export default class ManagerDashboard extends Controller {
                 name: employee.name || "",
                 email: employee.email || "",
                 managerId: employee.managerId || "",
-                managerLabel: managerRecord ? `${managerRecord.name} (${managerRecord.employeeId})` : (employee.managerId || ""),
+                managerLabel: managerRecord ? `${managerRecord.name}` : (employee.managerId || ""),
                 team: "CIS",
                 subTeam: employee.subTeam || "Team 1",
                 experience: Number(employee.experience || 0),
@@ -565,7 +564,7 @@ export default class ManagerDashboard extends Controller {
             const contexts = await listBinding.requestContexts();
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading skills for ${employeeId}:`, error);
+            console.error(`Error loading skills:`, error);
             return [];
         }
     }
@@ -605,7 +604,7 @@ export default class ManagerDashboard extends Controller {
                 return true;
             });
         } catch (error) {
-            console.error(`Error loading projects for ${employeeId}:`, error);
+            console.error(`Error loading projects:`, error);
             return [];
         }
     }
@@ -685,7 +684,7 @@ export default class ManagerDashboard extends Controller {
             const profiles = contexts.map((context: any) => context.getObject());
             return profiles.length > 0 ? profiles[0] : null;
         } catch (error) {
-            console.error(`Error loading profile for ${employeeId}:`, error);
+            console.error(`Error loading profile:`, error);
             return null;
         }
     }
@@ -749,7 +748,7 @@ export default class ManagerDashboard extends Controller {
             const completedHistory = await this.getCompletedMasterWorkHistory(employeeId);
             return [...projects, ...initiatives, ...evaluations, ...completedHistory];
         } catch (error) {
-            console.error(`Error loading current projects for ${employeeId}:`, error);
+            console.error(`Error loading current projects:`, error);
             return [];
         }
     }
@@ -795,7 +794,7 @@ export default class ManagerDashboard extends Controller {
 
             return [...completedInitiatives, ...completedEvaluations];
         } catch (error) {
-            console.error(`Error loading completed initiative/evaluation history for ${employeeId}:`, error);
+            console.error(`Error loading completed initiative/evaluation history:`, error);
             return [];
         }
     }
@@ -833,7 +832,7 @@ export default class ManagerDashboard extends Controller {
 
             return { initiatives, evaluations };
         } catch (error) {
-            console.error(`Error loading initiative/evaluation tabs history for ${employeeId}:`, error);
+            console.error(`Error loading initiative/evaluation tabs history:`, error);
             return { initiatives: [], evaluations: [] };
         }
     }
@@ -855,10 +854,8 @@ export default class ManagerDashboard extends Controller {
         const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
         const employees = managerEmployeesModel?.getData()?.employees || [];
         
-        console.log("Updating analytics with manager's employees:", employees);
         
         if (employees.length === 0) {
-            console.warn("No employees data available for analytics");
             // Set default values when no employees
             this.setAnalyticsDefaults();
             return;
@@ -882,7 +879,6 @@ export default class ManagerDashboard extends Controller {
                     control.setPercentValue(value);
                 }
             } else {
-                console.warn(`Control ${id} not found`);
             }
         };
         
@@ -905,10 +901,6 @@ export default class ManagerDashboard extends Controller {
         const commonLevel = this.getCommonSkillLevel(teamSkills);
         updateControl("commonSkillLevel", commonLevel, "setText");
         
-        console.log("Analytics updated for manager's team:", { 
-            totalEmployees, availableEmployees, busyEmployees, totalSkills, 
-            utilizationRate, avgSkills, commonLevel 
-        });
     }
 
     private setAnalyticsDefaults(): void {
@@ -962,7 +954,6 @@ export default class ManagerDashboard extends Controller {
      * Initialize visualization data
      */
     private async initializeVisualization(): Promise<void> {
-        console.log("📊 Initializing Data Visualization...");
         
         const currentYear = new Date().getFullYear();
         const visualizationModel = new JSONModel({
@@ -991,11 +982,9 @@ export default class ManagerDashboard extends Controller {
             const employees = managerEmployeesModel?.getData()?.employees || [];
             
             if (employees.length === 0) {
-                console.warn("No employees loaded for visualization");
                 return;
             }
 
-            console.log(`📊 Loading visualization data for ${employees.length} employees`);
 
             // Load utilization data for all employees
             const utilizationPromises = employees.map(async (emp: any) => ({
@@ -1020,7 +1009,6 @@ export default class ManagerDashboard extends Controller {
             this.renderGanttChart();
             this.renderSkillsDistribution();
 
-            console.log("✅ Visualization data loaded successfully");
         } catch (error) {
             console.error("❌ Error loading visualization data:", error);
         }
@@ -1037,7 +1025,6 @@ export default class ManagerDashboard extends Controller {
         const selectedYear = Number(visualizationModel?.getProperty("/selectedYear") || new Date().getFullYear());
         const selectedQuarter = visualizationModel?.getProperty("/selectedQuarter") || "ALL";
         
-        console.log(`📊 Calculating utilization for Year: ${selectedYear}, Quarter: ${selectedQuarter}`);
         
         // Determine which months to include based on quarter
         let monthsToInclude: number[] = [];
@@ -1094,7 +1081,6 @@ export default class ManagerDashboard extends Controller {
         const currentProjectsUtilized = Math.min(100, Math.round(currentProjectsTotal / teamCapacity));
         const initiativesUtilized = Math.min(100, Math.round(initiativesTotal / teamCapacity));
 
-        console.log(`📊 Utilization: CP=${currentProjectsUtilized}% (${currentProjectsCount} assignments), Initiatives=${initiativesUtilized}% (${initiativesCount} assignments), Team=${totalEmployees}`);
 
         // Update visualization model
         const vizModel = this.getView()?.getModel("visualization") as JSONModel;
@@ -1269,7 +1255,6 @@ export default class ManagerDashboard extends Controller {
         const visualizationModel = this.getView()?.getModel("visualization") as JSONModel;
         visualizationModel?.setProperty("/availabilityForecast", forecast);
         
-        console.log("📅 Availability Forecast:", forecast);
     }
 
     /**
@@ -1450,7 +1435,6 @@ export default class ManagerDashboard extends Controller {
         });
         
         visualizationModel?.setProperty("/ganttData", ganttData);
-        console.log("📊 Gantt Data Generated:", ganttData.length, "employees with projects/initiatives");
     }
 
     /**
@@ -1460,7 +1444,6 @@ export default class ManagerDashboard extends Controller {
         const visualizationModel = this.getView()?.getModel("visualization") as JSONModel;
         const utilizationData = visualizationModel?.getProperty("/utilizationData");
         
-        console.log("📊 Rendering utilization charts with data:", utilizationData);
         
         if (!utilizationData) {
             console.error("❌ No utilization data found for rendering");
@@ -1478,7 +1461,6 @@ export default class ManagerDashboard extends Controller {
         (this.byId("initiativesUtilized") as any)?.setText(`${initiativesUtilized}%`);
         (this.byId("initiativesAvailable") as any)?.setText(`${initiativesAvailable}%`);
         
-        console.log(`📊 Rendering charts - CP: ${currentProjectsUtilized}%, Initiatives: ${initiativesUtilized}%`);
         
         // Render SVG donut charts
         this.renderDonutChart("currentProjectsChart", currentProjectsUtilized, "#0070f2");
@@ -1491,11 +1473,9 @@ export default class ManagerDashboard extends Controller {
     private renderDonutChart(containerId: string, percentage: number, color: string): void {
         const container = this.byId(containerId);
         if (!container) {
-            console.warn(`⚠️ Container ${containerId} not found for donut chart`);
             return;
         }
         
-        console.log(`📊 Rendering donut chart in ${containerId}: ${percentage}%`);
         
         // Ensure percentage is valid
         const validPercentage = Math.max(0, Math.min(100, percentage || 0));
@@ -1552,7 +1532,6 @@ export default class ManagerDashboard extends Controller {
                 content: svg
             });
             (container as any).addItem(html);
-            console.log(`✅ Chart rendered successfully in ${containerId}`);
         } catch (error) {
             console.error(`❌ Error rendering chart in ${containerId}:`, error);
         }
@@ -1890,7 +1869,6 @@ export default class ManagerDashboard extends Controller {
         visualizationModel?.setProperty("/selectedYear", selectedYear);
         visualizationModel?.setProperty("/selectedQuarter", selectedQuarter);
         
-        console.log(`📊 Filters applied: Year=${selectedYear}, Quarter=${selectedQuarter}`);
         
         // Reload visualization data with new filters
         this.loadVisualizationData();
@@ -2004,7 +1982,6 @@ export default class ManagerDashboard extends Controller {
         // Handle skill token updates
         const multiInput = event.getSource() as MultiInput;
         const tokens = multiInput.getTokens();
-        console.log("Current skill tokens:", tokens.map(token => token.getText()));
     }
 
     public onSkillSubmit(event: Event): void {
@@ -2117,7 +2094,6 @@ export default class ManagerDashboard extends Controller {
         const currentUser = currentUserModel?.getData();
         const currentManagerId = currentUser?.id;
 
-        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel, roleFilter });
 
         try {
             let allEmployees: any[] = [];
@@ -2132,7 +2108,6 @@ export default class ManagerDashboard extends Controller {
                 
                 const contexts = await listBinding.requestContexts();
                 allEmployees = contexts.map((context: any) => context.getObject());
-                console.log(`Searching in My Team (${currentManagerId}): ${allEmployees.length} employees`);
                 
             } else if (searchScope === "ByManager") {
                 // Load selected manager's team
@@ -2148,7 +2123,6 @@ export default class ManagerDashboard extends Controller {
                 
                 const contexts = await listBinding.requestContexts();
                 allEmployees = contexts.map((context: any) => context.getObject());
-                console.log(`Searching in Manager ${selectedManagerId}'s Team: ${allEmployees.length} employees`);
                 
             } else if (searchScope === "EntireOrganization") {
                 // Load all employees (exclude managers)
@@ -2157,7 +2131,6 @@ export default class ManagerDashboard extends Controller {
                 const contexts = await listBinding.requestContexts(0, 9999);
                 allEmployees = contexts.map((context: any) => context.getObject())
                     .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
-                console.log(`Searching in Entire Organization: ${allEmployees.length} employees`);
             }
 
             // Load skills and profiles for all employees
@@ -2171,11 +2144,9 @@ export default class ManagerDashboard extends Controller {
                 };
             }));
 
-            console.log("Employees loaded with skills and profiles:", enrichedEmployees);
 
             // Perform skill-based and role-based search
             const searchResults = this.performSkillSearch(enrichedEmployees, searchSkills, experienceLevel, roleFilter);
-            console.log("Search results generated:", searchResults);
 
             // Mark ownership: only employees belonging to THIS manager get full detail popup
             searchResults.forEach((result: any) => {
@@ -2191,7 +2162,6 @@ export default class ManagerDashboard extends Controller {
     }
 
     private performSkillSearch(employees: any[], searchSkills: string[], experienceLevel: string, roleFilter: string): any[] {
-        console.log("Searching employees - Skills:", searchSkills, "Role:", roleFilter, "Experience:", experienceLevel);
         
         // Flexible search: filter employees based on provided criteria
         const results = employees.filter(emp => {
@@ -2258,7 +2228,7 @@ export default class ManagerDashboard extends Controller {
                     .filter((s: any) => 
                         matchingSkillsArray.some((ms: string) => s.skillName.toLowerCase() === ms.toLowerCase())
                     )
-                    .map((s: any) => `${s.skillName} (${s.proficiencyLevel})`)
+                    .map((s: any) => `${s.skillName}`)
                     .join(", ");
                 
                 matchingSkills = matchedSkillDetails || matchingSkillsArray.join(", ");
@@ -2271,7 +2241,7 @@ export default class ManagerDashboard extends Controller {
                 if (experienceLevel) {
                     const qualifiedSkills = empSkills.filter((s: any) => 
                         this.matchesExperienceRequirement(s.proficiencyLevel, experienceLevel)
-                    ).map((s: any) => `${s.skillName} (${s.proficiencyLevel})`);
+                    ).map((s: any) => `${s.skillName}`);
                     
                     if (qualifiedSkills.length > 0) {
                         matchingSkills = matchingSkills 
@@ -2290,7 +2260,6 @@ export default class ManagerDashboard extends Controller {
                 totalMatchingSkills: totalMatchingSkills,
                 matchScore: matchScore
             };
-            console.log(`Employee ${emp.employeeId} match score: ${matchScore}%`);
             return result;
         });
 
@@ -2387,7 +2356,6 @@ export default class ManagerDashboard extends Controller {
         const resultsModel = new JSONModel({ results });
         this.getView()?.setModel(resultsModel, "searchResults");
 
-        console.log("Search results data set:", results);
 
         // Show search results panel
         searchResultsPanel.setVisible(true);
@@ -2405,7 +2373,6 @@ export default class ManagerDashboard extends Controller {
      * Clear search results and reset search inputs
      */
     private clearSearchResults(): void {
-        console.log("Clearing previous search results");
         
         // Hide search results panel
         const searchResultsPanel = this.byId("searchResultsPanel") as any;
@@ -2442,7 +2409,6 @@ export default class ManagerDashboard extends Controller {
             experienceSelect.setSelectedKey("");
         }
         
-        console.log("✅ Search results cleared successfully");
     }
 
     public onViewSearchResult(event: Event): void {
@@ -2462,7 +2428,6 @@ export default class ManagerDashboard extends Controller {
         }
         
         const result = bindingContext.getObject();
-        console.log("Search result from binding context:", result);
         if (!result.isOwnEmployee) {
             // Non-own employees are displayed in the table for reference only — no detail popup
             return;
@@ -2481,7 +2446,6 @@ export default class ManagerDashboard extends Controller {
         // Use employeeId or id for backward compatibility
         const empId = employee.employeeId || employee.id;
 
-        console.log(`📋 Loading comprehensive details for employee: ${empId}`);
 
         try {
             // Refresh master catalogs so assign dropdowns are always up to date
@@ -2500,7 +2464,6 @@ export default class ManagerDashboard extends Controller {
                 this.getCompletedInitiativeEvaluationForTabs(empId)
             ]);
 
-            console.log("✅ All employee data loaded successfully");
 
             const activeCurrentProjects = currentProjects
                 .filter((cp: any) => cp.assignmentStatus !== "Completed")
@@ -2622,7 +2585,7 @@ export default class ManagerDashboard extends Controller {
             }
             return {};
         } catch (error) {
-            console.error(`Error loading employee data for ${employeeId}:`, error);
+            console.error(`Error loading employee data:`, error);
             return {};
         }
     }
@@ -2642,7 +2605,7 @@ export default class ManagerDashboard extends Controller {
             }
             return {};
         } catch (error) {
-            console.error(`Error loading profile data for ${employeeId}:`, error);
+            console.error(`Error loading profile data:`, error);
             return {};
         }
     }
@@ -2686,7 +2649,7 @@ export default class ManagerDashboard extends Controller {
 
             return [...initiatives, ...evaluations];
         } catch (error) {
-            console.error(`Error loading initiatives for ${employeeId}:`, error);
+            console.error(`Error loading initiatives:`, error);
             return [];
         }
     }
@@ -2703,7 +2666,7 @@ export default class ManagerDashboard extends Controller {
             const contexts = await listBinding.requestContexts();
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading certifications for ${employeeId}:`, error);
+            console.error(`Error loading certifications:`, error);
             return [];
         }
     }
@@ -3231,7 +3194,7 @@ export default class ManagerDashboard extends Controller {
             team: details.team || "",
             subTeam: details.subTeam || "",
             managerId: effectiveManagerId,
-            managerLabel: `${effectiveManagerName} (${effectiveManagerId})`,
+            managerLabel: `${effectiveManagerName}`,
             experience: Number(details.experience || 0),
             location: details.location || "",
             tLevel: details.tLevel || "",
@@ -3870,7 +3833,6 @@ export default class ManagerDashboard extends Controller {
         const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
         const allEmployees = managerEmployeesModel?.getData()?.employees || [];
         
-        console.log(`📊 Showing all ${allEmployees.length} team members`);
         
         this.openAnalyticsListDialog("All Team Members", allEmployees);
     }
@@ -3884,7 +3846,6 @@ export default class ManagerDashboard extends Controller {
         
         const availableEmployees = allEmployees.filter((emp: any) => !emp.working_on_project);
         
-        console.log(`📊 Showing ${availableEmployees.length} available employees`);
         
         this.openAnalyticsListDialog("Available Resources", availableEmployees);
     }
@@ -3898,7 +3859,6 @@ export default class ManagerDashboard extends Controller {
         
         const busyEmployees = allEmployees.filter((emp: any) => emp.working_on_project);
         
-        console.log(`📊 Showing ${busyEmployees.length} employees on projects`);
         
         this.openAnalyticsListDialog("Employees Working on Projects", busyEmployees);
     }
@@ -3914,7 +3874,7 @@ export default class ManagerDashboard extends Controller {
         }
 
         // Set dialog title
-        dialog.setTitle(title + ` (${employees.length})`);
+        dialog.setTitle(title + ``);
 
         // Create model for analytics list
         const analyticsModel = new JSONModel({ employees: employees });
@@ -4062,13 +4022,9 @@ private currentChatManagerId: string = "";
     }
 
     const newManagerId = userData.managerId;
-    console.log("🔑 Manager ID for AI (fresh):", newManagerId);
 
     // ✅ Clear chat ONLY if manager changes
     if (this.currentChatManagerId !== newManagerId) {
-        console.log(
-            `🔄 Different manager detected (was: ${this.currentChatManagerId}, now: ${newManagerId})`
-        );
         this.clearChatForNewManager();
         this.currentChatManagerId = newManagerId;
     }
@@ -4096,7 +4052,6 @@ public onCloseAIDialog(): void {
 }
 
 private clearChatForNewManager(): void {
-    console.log("🧹 Clearing chat for new manager");
 
     const oContainer = this.byId("messagesContainerManager") as any;
     if (oContainer) {
@@ -4116,7 +4071,6 @@ private clearChatForNewManager(): void {
  */
 private initializeAIChat(): void {
     if (this.aiInitialized) {
-        console.log("ℹ️ Manager AI chat already initialized");
         return;
     }
 
@@ -4204,9 +4158,6 @@ private initializeAIChat(): void {
      */
    private async queryAI(query: string): Promise<void> {
     try {
-        console.log("🤖 Querying AI");
-        console.log("  - Manager ID:", this.managerId);
-        console.log("  - Query:", query);
 
         if (!this.managerId) {
             throw new Error("Manager ID is required");
@@ -4228,7 +4179,6 @@ private initializeAIChat(): void {
             this.addBotMessage(result.value.answer);
         } else {
             this.addBotMessage("⚠️ Received an unexpected response format.");
-            console.log("Response:", result);
         }
     } catch (error: any) {
         this.removeTypingIndicator();
@@ -4379,7 +4329,6 @@ private initializeAIChat(): void {
      * Clear chat
      */
     public onClearChat(): void {
-        console.log("🧹 Manual chat clear requested");
         const oContainer = this.byId("messagesContainerManager") as any;
         oContainer?.destroyItems();
 
@@ -4447,7 +4396,6 @@ private initializeAIChat(): void {
             this.getView()?.setModel(new JSONModel({ managers }), "pmList");
             this.getView()?.setModel(new JSONModel({ managers }), "lmList");
             
-            console.log(`Loaded ${managers.length} managers for project dialog dropdowns`);
         } catch (error) {
             console.error("Error loading managers for project dialog:", error);
             this.getView()?.setModel(new JSONModel({ managers: [] }), "pmList");
@@ -4515,7 +4463,6 @@ private initializeAIChat(): void {
             });
 
             this.getView()?.setModel(new JSONModel({ managers: candidates }), "projectManagerList");
-            console.log(`✅ Loaded ${candidates.length} project manager candidates (T3/T4/T5 + managers)`);
         } catch (error) {
             console.error("Error loading project manager candidates:", error);
             this.getView()?.setModel(new JSONModel({ managers: [] }), "projectManagerList");
@@ -4537,7 +4484,6 @@ private initializeAIChat(): void {
             const contexts = await listBinding.requestContexts(0, 500);
             const projects = contexts.map((ctx: any) => ctx.getObject());
 
-            console.log(`✅ Loaded ${projects.length} master projects for manager ${this.currentManagerId}`);
 
             const masterProjectsModel = new JSONModel({ projects: projects, allProjects: projects });
             this.getView()?.setModel(masterProjectsModel, "masterProjects");

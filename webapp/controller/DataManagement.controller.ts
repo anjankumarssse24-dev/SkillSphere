@@ -12,7 +12,6 @@ export default class DataManagement extends Controller {
 
     public onInit(): void {
         this.dataUpdateService = DataUpdateService.getInstance();
-        console.log("DataManagement controller initialized");
     }
 
     /**
@@ -112,7 +111,6 @@ export default class DataManagement extends Controller {
      */
     public onGetData(): void {
         const data = this.dataUpdateService.getAllData();
-        console.log("Current data:", data);
         MessageToast.show("Data logged to console. Check developer tools.");
     }
 }

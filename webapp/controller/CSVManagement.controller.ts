@@ -12,7 +12,6 @@ export default class CSVManagement extends Controller {
 
     public onInit(): void {
         this.dataManager = DataManager.getInstance();
-        console.log("CSVManagement controller initialized");
     }
 
     /**
@@ -90,7 +89,6 @@ export default class CSVManagement extends Controller {
     public async onCheckCSVStatus(): Promise<any> {
         try {
             const status = await this.checkCSVFiles();
-            console.log("CSV file status:", status);
             MessageToast.show("CSV status checked. See console for details.");
             return status;
         } catch (error) {
@@ -106,7 +104,6 @@ export default class CSVManagement extends Controller {
     private updateAllModels(data: any): void {
         const component = this.getOwnerComponent();
         if (!component) {
-            console.warn('Owner component not available - cannot update models');
             return;
         }
 
@@ -134,7 +131,6 @@ export default class CSVManagement extends Controller {
             projectsModel.setData({ projects: data.projects || [] });
         }
         
-        console.log("All models updated with CSV data");
     }
 
     /**
