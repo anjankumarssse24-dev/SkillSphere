@@ -27,7 +27,7 @@ module.exports = cds.service.impl(async function() {
   const dbEntities = cds.entities('skillsphere') || cds.entities || {};
   const DbEmployees = dbEntities?.Employees;
   const { 
-    Users, Employees, Skills, Projects, Profiles,
+    Employees, Skills, Projects, Profiles,
     CurrentProjects, InitiativesMaster, EvaluationsMaster, CurrentInitiatives, CurrentEvaluations,
     Initiatives, CAIAUtilization, POCUtilization, Certifications
   } = this.entities;

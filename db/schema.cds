@@ -1,20 +1,6 @@
 namespace skillsphere;
 
 /**
- * Users entity - Identity and authorization only
- * ⚠️ SECURITY: Password field is not exposed via OData (@cds.api.ignore)
- * Authentication is delegated to SAP BTP Identity Provider (CIS)
- */
-entity Users {
-  key id : String;
-  @cds.api.ignore
-  password : String;
-  role : String;
-  isActive : Boolean default true;
-}
-//not used
-
-/**
  * Employees entity - Unified people master data
  * Contains employees, managers, and senior managers.
  */
@@ -32,8 +18,6 @@ entity Employees {
   location : String;
   tLevel : String;
   gradeLevel : String;
-
-  user : Association to one Users on user.id = $self.employeeId;
   manager : Association to one Employees on manager.employeeId = $self.managerId; //ask if keep
   reports : Composition of many Employees on reports.managerId = $self.employeeId;
 

@@ -1,0 +1,65 @@
+_schema-version: 3.3.0
+ID: skillsphere-test-ext
+extends: skillsphere
+
+targets:
+  - org: "*"
+    space: "*"
+
+modules:
+  - name: skillsphere-srv
+    parameters:
+      app-name: skillsphere-srv-test
+      host: skillsphere-srv-test
+
+  - name: skillsphere-db-deployer
+    parameters:
+      app-name: skillsphere-db-deployer-test
+
+  - name: skillsphere-app-deployer
+    parameters:
+      app-name: skillsphere-app-deployer-test
+
+  - name: skillsphere-destination-content
+    parameters:
+      app-name: skillsphere-destination-content-test
+      content:
+        instance:
+          destinations:
+            - Name: skillsphere_html5_repo_host
+              ServiceInstanceName: skillsphere-html5-repo-host-test
+              ServiceKeyName: skillsphere-html5-repo-host-key
+              sap.cloud.service: skillsphere-test
+            - Name: skillsphere_auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: skillsphere-auth-test
+              ServiceKeyName: skillsphere-auth-key
+              sap.cloud.service: skillsphere-test
+          existing_destinations_policy: update
+
+resources:
+  - name: skillsphere-db
+    parameters:
+      service-name: skillsphere-db
+
+  - name: skillsphere-auth
+    parameters:
+      service-name: skillsphere-auth-test
+      config:
+        xsappname: skillsphere-test
+
+  - name: skillsphere-destination
+    parameters:
+      service-name: skillsphere-destination-test
+
+  - name: skillsphere-html5-repo-host
+    parameters:
+      service-name: skillsphere-html5-repo-host-test
+
+  - name: skillsphere-connectivity
+    parameters:
+      service-name: skillsphere-connectivity-test
+
+  - name: skillsphere-cloud-logging
+    parameters:
+      service-name: skillsphere-cloud-logging

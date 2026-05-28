@@ -31,22 +31,6 @@ cds.on('serving', () => {
       return req.reject(410, 'Deprecated endpoint. Use /api/v1 instead');
     }
 
-    // NOTE: UI currently relies on OData entity endpoints + batch updates.
-    // Keep a narrow hard block only for Users entity surface.
-    const blockedUserEntityPatterns = [
-      '/odata/v4/api/v1/Users',
-      '/odata/v4/api/v1/Users(',
-      '/api/v1/Users',
-      '/api/v1/Users('
-    ];
-
-    for (const pattern of blockedUserEntityPatterns) {
-      if (req.url.includes(pattern)) {
-        console.warn(`🚨 SECURITY: Blocked Users entity access attempt from ${req.user?.id} - ${req.url}`);
-        return req.reject(403, 'Direct Users entity access is forbidden');
-      }
-    }
-
     return next();
   });
 });

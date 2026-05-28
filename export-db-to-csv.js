@@ -35,7 +35,6 @@ if (!fs.existsSync(csvDir)) {
 // ⚠️ SECURITY: tLevel, gradeLevel, managerId are EXCLUDED
 // These fields reveal organizational hierarchy and are confidential
 const entityMappings = [
-    { entity: 'skillsphere.Users', file: 'skillsphere-Users.csv', columns: ['id', 'role', 'isActive'] },
     // EXCLUDED: tLevel, gradeLevel, managerId (organizational hierarchy - confidential)
     { entity: 'skillsphere.Employees', file: 'skillsphere-Employees.csv', columns: ['employeeId', 'name', 'email', 'role', 'team', 'experience', 'totalSkills', 'totalProjects', 'location'] },"
     { entity: 'skillsphere.Skills', file: 'skillsphere-Skills.csv', columns: ['skillId', 'skillName', 'category', 'employeeId', 'proficiencyLevel', 'yearsExperience', 'certificationStatus'] },

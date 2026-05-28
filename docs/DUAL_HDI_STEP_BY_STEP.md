@@ -63,7 +63,6 @@ Ensure `skillsphere-db` is present before test deploy.
 ## Step 3 - Build Test MTAR
 
 ```powershell
-npm install
 $env:UI_VARIANT="test"
 mbt build -p cf -t mta_archives_test
 ```
@@ -75,7 +74,7 @@ Expected artifact:
 ## Step 4 - Deploy Test Landscape (Existing HDI)
 
 ```powershell
-cf deploy mta_archives_test/skillsphere_1.0.0.mtar -e mta.test.mtaext --namespace test -f --retries 0
+cf deploy mta_archives_test/skillsphere_1.0.0.mtar -e mta.test.mtaext --namespace test --apply-namespace-service-names false --apply-namespace-app-names false --apply-namespace-app-routes false -f --retries 0
 ```
 
 Expected:
@@ -104,7 +103,7 @@ Expected artifact:
 ## Step 7 - Deploy Prod Landscape (New HDI)
 
 ```powershell
-cf deploy mta_archives_prod/skillsphere_1.0.0.mtar -e mta.prod.mtaext --namespace prod -f --retries 0
+cf deploy mta_archives_prod/skillsphere_1.0.0.mtar -e mta.prod.mtaext --namespace prod --apply-namespace-service-names false --apply-namespace-app-names false --apply-namespace-app-routes false -f --retries 0
 ```
 
 Expected:

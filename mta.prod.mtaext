@@ -1,0 +1,65 @@
+_schema-version: 3.3.0
+ID: skillsphere-prod-ext
+extends: skillsphere
+
+targets:
+  - org: "*"
+    space: "*"
+
+modules:
+  - name: skillsphere-srv
+    parameters:
+      app-name: skillsphere-srv-prod
+      host: skillsphere-srv-prod
+
+  - name: skillsphere-db-deployer
+    parameters:
+      app-name: skillsphere-db-deployer-prod
+
+  - name: skillsphere-app-deployer
+    parameters:
+      app-name: skillsphere-app-deployer-prod
+
+  - name: skillsphere-destination-content
+    parameters:
+      app-name: skillsphere-destination-content-prod
+      content:
+        instance:
+          destinations:
+            - Name: skillsphere_html5_repo_host
+              ServiceInstanceName: skillsphere-html5-repo-host-prod
+              ServiceKeyName: skillsphere-html5-repo-host-key
+              sap.cloud.service: skillsphere-prod
+            - Name: skillsphere_auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: skillsphere-auth-prod
+              ServiceKeyName: skillsphere-auth-key
+              sap.cloud.service: skillsphere-prod
+          existing_destinations_policy: update
+
+resources:
+  - name: skillsphere-db
+    parameters:
+      service-name: skillsphere-db-prod
+
+  - name: skillsphere-auth
+    parameters:
+      service-name: skillsphere-auth-prod
+      config:
+        xsappname: skillsphere-prod
+
+  - name: skillsphere-destination
+    parameters:
+      service-name: skillsphere-destination-prod
+
+  - name: skillsphere-html5-repo-host
+    parameters:
+      service-name: skillsphere-html5-repo-host-prod
+
+  - name: skillsphere-connectivity
+    parameters:
+      service-name: skillsphere-connectivity-prod
+
+  - name: skillsphere-cloud-logging
+    parameters:
+      service-name: skillsphere-cloud-logging

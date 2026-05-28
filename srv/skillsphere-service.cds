@@ -73,9 +73,6 @@ service SkillSphereSecureAPI {
    * ❌ password - never exposed via API (stored in external auth system)
    * ❌ admin flags, internal markers
    */
-  // User Management
-  entity Users as projection on skillsphere.Users;
-  
   // People Management
   entity Employees as projection on skillsphere.Employees;
   
