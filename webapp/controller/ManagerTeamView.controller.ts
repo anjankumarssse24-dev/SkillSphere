@@ -67,7 +67,6 @@ export default class ManagerTeamView extends Controller {
         const seniorManagerId = args?.seniorManagerId;
         const targetEmployeeId = String(args?.["?query"]?.employeeId || "").trim();
         
-        console.log("Route matched for viewing manager team:", managerId, "by senior manager:", seniorManagerId);
         
         // ALWAYS scroll to top when dashboard loads
         window.scrollTo({ top: 0, behavior: 'auto' });
@@ -120,7 +119,6 @@ export default class ManagerTeamView extends Controller {
      * Load manager information to display in header
      */
     private async loadManagerInfo(managerId: string): Promise<void> {
-        console.log("📊 Loading manager information for:", managerId);
         
         try {
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
@@ -134,7 +132,6 @@ export default class ManagerTeamView extends Controller {
             
             if (contexts.length > 0) {
                 const manager = contexts[0].getObject();
-                console.log("✅ Manager info loaded:", manager);
                 
                 // Create a model for manager team info to display in the header
                 const managerTeamInfoModel = new JSONModel({
@@ -163,7 +160,6 @@ export default class ManagerTeamView extends Controller {
         const currentUser = currentUserModel?.getData();
         const seniorMgrId = this.seniorManagerId || currentUser?.id;
         
-        console.log("📌 Navigating back to Senior Manager Dashboard:", seniorMgrId);
         
         if (seniorMgrId) {
             this.getRouter().navTo("SeniorManagerDashboard", { seniorManagerId: seniorMgrId });
@@ -188,7 +184,6 @@ export default class ManagerTeamView extends Controller {
         const managerInfo = managerTeamInfoModel?.getData();
         const currentManagerName = managerInfo?.managerName || "Unknown Manager";
 
-        console.log("📊 Loading data for manager:", currentManagerId, currentManagerName);
 
         try {
             // Load employees reporting to this manager from OData
@@ -199,7 +194,6 @@ export default class ManagerTeamView extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             const employees = contexts.map((context: any) => context.getObject());
             
-            console.log(`✅ Loaded ${employees.length} employees from OData for manager ${currentManagerId}`);
             
             // Load skills, profile and current projects for each employee
             const enrichedEmployees = await Promise.all(employees.map(async (emp: any) => {
@@ -242,7 +236,6 @@ export default class ManagerTeamView extends Controller {
                 return nameA.localeCompare(nameB);
             });
 
-            console.log("✅ Employees with enriched data loaded and sorted");
 
             // Create local model for employees
             const localEmployeesModel = new JSONModel({ employees: enrichedEmployees });
@@ -285,7 +278,6 @@ export default class ManagerTeamView extends Controller {
                 };
             });
             
-            console.log(`✅ Loaded ${allManagers.length} managers for search dropdown`);
             
             // Create managers model for the dropdown
             const managersModel = new JSONModel({ managers: allManagers });
@@ -311,7 +303,7 @@ export default class ManagerTeamView extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading skills for ${employeeId}:`, error);
+            console.error(`Error loading skills:`, error);
             return [];
         }
     }
@@ -328,7 +320,7 @@ export default class ManagerTeamView extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading projects for ${employeeId}:`, error);
+            console.error(`Error loading projects:`, error);
             return [];
         }
     }
@@ -346,7 +338,7 @@ export default class ManagerTeamView extends Controller {
             const profiles = contexts.map((context: any) => context.getObject());
             return profiles.length > 0 ? profiles[0] : null;
         } catch (error) {
-            console.error(`Error loading profile for ${employeeId}:`, error);
+            console.error(`Error loading profile:`, error);
             return null;
         }
     }
@@ -410,7 +402,7 @@ export default class ManagerTeamView extends Controller {
 
             return [...projects, ...initiatives, ...evaluations];
         } catch (error) {
-            console.error(`Error loading current projects for ${employeeId}:`, error);
+            console.error(`Error loading current projects:`, error);
             return [];
         }
     }
@@ -448,7 +440,7 @@ export default class ManagerTeamView extends Controller {
 
             return [...initiatives, ...evaluations];
         } catch (error) {
-            console.error(`Error loading initiatives for ${employeeId}:`, error);
+            console.error(`Error loading initiatives:`, error);
             return [];
         }
     }
@@ -458,10 +450,8 @@ export default class ManagerTeamView extends Controller {
         const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
         const employees = managerEmployeesModel?.getData()?.employees || [];
         
-        console.log("Updating analytics with manager's employees count:", employees.length);
         
         if (employees.length === 0) {
-            console.warn("No employees data available for analytics");
             // Set default values when no employees
             this.setAnalyticsDefaults();
             return;
@@ -485,7 +475,6 @@ export default class ManagerTeamView extends Controller {
                     control.setPercentValue(value);
                 }
             } else {
-                console.warn(`Control ${id} not found`);
             }
         };
         
@@ -512,10 +501,6 @@ export default class ManagerTeamView extends Controller {
         const commonLevel = this.getCommonSkillLevel(teamSkills);
         updateControl("mtvCommonSkillLevel", commonLevel, "setText");
         
-        console.log("Analytics updated for manager's team:", { 
-            totalEmployees, availableEmployees, busyEmployees, totalSkills, 
-            utilizationRate, avgSkills, commonLevel 
-        });
     }
 
     private setAnalyticsDefaults(): void {
@@ -569,7 +554,6 @@ export default class ManagerTeamView extends Controller {
      * Initialize visualization data
      */
     private async initializeVisualization(): Promise<void> {
-        console.log("📊 Initializing Data Visualization...");
         
         const currentYear = new Date().getFullYear();
         const visualizationModel = new JSONModel({
@@ -598,11 +582,9 @@ export default class ManagerTeamView extends Controller {
             const employees = managerEmployeesModel?.getData()?.employees || [];
             
             if (employees.length === 0) {
-                console.warn("No employees loaded for visualization");
                 return;
             }
 
-            console.log(`📊 Loading visualization data for ${employees.length} employees`);
 
             // Load utilization data for all employees
             const utilizationPromises = employees.map(async (emp: any) => ({
@@ -628,7 +610,6 @@ export default class ManagerTeamView extends Controller {
             this.renderGanttChart();
             this.renderSkillsDistribution();
 
-            console.log("✅ Visualization data loaded successfully");
         } catch (error) {
             console.error("❌ Error loading visualization data:", error);
         }
@@ -647,7 +628,6 @@ export default class ManagerTeamView extends Controller {
         const selectedYear = visualizationModel?.getProperty("/selectedYear") || new Date().getFullYear();
         const selectedQuarter = visualizationModel?.getProperty("/selectedQuarter") || "ALL";
         
-        console.log(`📊 Calculating utilization for Year: ${selectedYear}, Quarter: ${selectedQuarter}`);
         
         // Determine which months to include based on quarter
         let monthsToInclude: number[] = [];
@@ -666,7 +646,6 @@ export default class ManagerTeamView extends Controller {
         const monthsCount = monthsToInclude.length;
         const totalAvailableHours = totalEmployees * STANDARD_HOURS_PER_MONTH * monthsCount;
         
-        console.log(`📊 Team: ${totalEmployees} employees, Months: ${monthsCount}, Available: ${totalAvailableHours} hours total`);
 
         // Team allocation must be average employee capacity usage (not assignment-count based).
         // This matches the ManagerDashboard calculation for consistency.
@@ -678,11 +657,6 @@ export default class ManagerTeamView extends Controller {
         allData.forEach(empData => {
             let employeeProjectUtilization = 0;
             let employeeInitiativeUtilization = 0;
-
-            console.log(`📊 Processing ${empData.employee?.employeeId}:`, {
-                currentProjects: empData.currentProjects?.length || 0,
-                initiatives: empData.initiatives?.length || 0
-            });
 
             // Filter active assignments for the selected period
             const activeAssignments = (empData.currentProjects || []).filter((cp: any) => {
@@ -700,7 +674,6 @@ export default class ManagerTeamView extends Controller {
             // Current Projects - sum utilization per employee (capped at 100%)
             projects.forEach((cp: any) => {
                 const utilizationPercent = Math.max(0, Number(cp.utilizationPercent) || 0);
-                console.log(`  📘 Current Project: ${cp.projectName}, Utilization: ${utilizationPercent}%`);
                 employeeProjectUtilization += utilizationPercent;
                 currentProjectsCount++;
             });
@@ -708,7 +681,6 @@ export default class ManagerTeamView extends Controller {
             // Initiatives - sum utilization per employee (capped at 100%)
             initiatives.forEach((initiative: any) => {
                 const utilizationPercent = Math.max(0, Number(initiative.utilizationPercent) || 0);
-                console.log(`  🎯 Initiative: ${initiative.initiativeName || initiative.projectName}, Utilization: ${utilizationPercent}%`);
                 employeeInitiativeUtilization += utilizationPercent;
                 initiativesCount++;
             });
@@ -723,7 +695,6 @@ export default class ManagerTeamView extends Controller {
         const currentProjectsUtilized = Math.min(100, Math.round(currentProjectsTotal / teamCapacity));
         const initiativesUtilized = Math.min(100, Math.round(initiativesTotal / teamCapacity));
 
-        console.log(`📊 Utilization: CP=${currentProjectsUtilized}% (${currentProjectsCount} assignments), Initiatives=${initiativesUtilized}% (${initiativesCount} assignments), Team=${totalEmployees}`);
 
         // Update visualization model
         const vizModel = this.getView()?.getModel("visualization") as JSONModel;
@@ -897,7 +868,6 @@ export default class ManagerTeamView extends Controller {
         const visualizationModel = this.getView()?.getModel("visualization") as JSONModel;
         visualizationModel?.setProperty("/availabilityForecast", forecast);
         
-        console.log("📅 Availability Forecast:", forecast);
     }
 
     /**
@@ -1070,7 +1040,6 @@ export default class ManagerTeamView extends Controller {
         });
 
         visualizationModel?.setProperty("/ganttData", ganttData);
-        console.log("📊 Gantt Data Generated:", ganttData.length, "employees with projects/initiatives");
     }
 
     /**
@@ -1080,7 +1049,6 @@ export default class ManagerTeamView extends Controller {
         const visualizationModel = this.getView()?.getModel("visualization") as JSONModel;
         const utilizationData = visualizationModel?.getProperty("/utilizationData");
         
-        console.log("📊 Rendering utilization charts with data:", utilizationData);
         
         if (!utilizationData) {
             console.error("❌ No utilization data found for rendering");
@@ -1098,7 +1066,6 @@ export default class ManagerTeamView extends Controller {
         (this.byId("mtvInitiativesUtilized") as any)?.setText(`${initiativesUtilized}%`);
         (this.byId("mtvInitiativesAvailable") as any)?.setText(`${initiativesAvailable}%`);
         
-        console.log(`📊 Rendering charts - CP: ${currentProjectsUtilized}%, Initiatives: ${initiativesUtilized}%`);
         
         // Render SVG donut charts
         this.renderDonutChart("mtvCurrentProjectsChart", currentProjectsUtilized, "#0070f2");
@@ -1111,11 +1078,9 @@ export default class ManagerTeamView extends Controller {
     private renderDonutChart(containerId: string, percentage: number, color: string): void {
         const container = this.byId(containerId);
         if (!container) {
-            console.warn(`⚠️ Container ${containerId} not found for donut chart`);
             return;
         }
         
-        console.log(`📊 Rendering donut chart in ${containerId}: ${percentage}%`);
         
         // Ensure percentage is valid
         const validPercentage = Math.max(0, Math.min(100, percentage || 0));
@@ -1172,7 +1137,6 @@ export default class ManagerTeamView extends Controller {
                 content: svg
             });
             (container as any).addItem(html);
-            console.log(`✅ Chart rendered successfully in ${containerId}`);
         } catch (error) {
             console.error(`❌ Error rendering chart in ${containerId}:`, error);
         }
@@ -1493,7 +1457,6 @@ export default class ManagerTeamView extends Controller {
         visualizationModel?.setProperty("/selectedYear", selectedYear);
         visualizationModel?.setProperty("/selectedQuarter", selectedQuarter);
         
-        console.log(`📊 Filters applied: Year=${selectedYear}, Quarter=${selectedQuarter}`);
         
         // Reload visualization data with new filters
         this.loadVisualizationData();
@@ -1643,7 +1606,6 @@ export default class ManagerTeamView extends Controller {
         // Handle skill token updates
         const multiInput = event.getSource() as MultiInput;
         const tokens = multiInput.getTokens();
-        console.log("Current skill tokens:", tokens.map(token => token.getText()));
     }
 
     public onSkillSubmit(event: Event): void {
@@ -1756,7 +1718,6 @@ export default class ManagerTeamView extends Controller {
         const currentUserModel = this.getOwnerComponent()?.getModel("currentUser") as JSONModel;
         const currentUser = currentUserModel?.getData();
 
-        console.log("Search parameters:", { searchSkills, searchScope, experienceLevel, roleFilter, viewedManagerId });
 
         try {
             let allEmployees: any[] = [];
@@ -1771,7 +1732,6 @@ export default class ManagerTeamView extends Controller {
                 
                 const contexts = await listBinding.requestContexts(0, 1000);
                 allEmployees = contexts.map((context: any) => context.getObject());
-                console.log(`Searching in My Team (${viewedManagerId}): ${allEmployees.length} employees`);
                 
             } else if (searchScope === "ByManager") {
                 // Load selected manager's team
@@ -1787,7 +1747,6 @@ export default class ManagerTeamView extends Controller {
                 
                 const contexts = await listBinding.requestContexts(0, 1000);
                 allEmployees = contexts.map((context: any) => context.getObject());
-                console.log(`Searching in Manager ${selectedManagerId}'s Team: ${allEmployees.length} employees`);
                 
             } else if (searchScope === "EntireOrganization") {
                 // Load all employees (exclude managers)
@@ -1796,7 +1755,6 @@ export default class ManagerTeamView extends Controller {
                 const contexts = await listBinding.requestContexts(0, 9999);
                 allEmployees = contexts.map((context: any) => context.getObject())
                     .filter((emp: any) => emp.employeeId && !emp.employeeId.startsWith("MGR"));
-                console.log(`Searching in Entire Organization: ${allEmployees.length} employees`);
             }
 
             // Load skills and profiles for all employees
@@ -1810,11 +1768,9 @@ export default class ManagerTeamView extends Controller {
                 };
             }));
 
-            console.log("Employees loaded with skills and profiles count:", enrichedEmployees.length);
 
             // Perform skill-based and role-based search
             const searchResults = this.performSkillSearch(enrichedEmployees, searchSkills, experienceLevel, roleFilter);
-            console.log("Search results generated:", searchResults);
 
             // Display results
             this.displaySearchResults(searchResults);
@@ -1825,7 +1781,6 @@ export default class ManagerTeamView extends Controller {
     }
 
     private performSkillSearch(employees: any[], searchSkills: string[], experienceLevel: string, roleFilter: string): any[] {
-        console.log("Searching employees - Skills:", searchSkills, "Role:", roleFilter, "Experience:", experienceLevel);
         
         // Flexible search: filter employees based on provided criteria
         const results = employees.filter(emp => {
@@ -1892,7 +1847,7 @@ export default class ManagerTeamView extends Controller {
                     .filter((s: any) => 
                         matchingSkillsArray.some((ms: string) => s.skillName.toLowerCase() === ms.toLowerCase())
                     )
-                    .map((s: any) => `${s.skillName} (${s.proficiencyLevel})`)
+                    .map((s: any) => `${s.skillName}`)
                     .join(", ");
                 
                 matchingSkills = matchedSkillDetails || matchingSkillsArray.join(", ");
@@ -1905,7 +1860,7 @@ export default class ManagerTeamView extends Controller {
                 if (experienceLevel) {
                     const qualifiedSkills = empSkills.filter((s: any) => 
                         this.matchesExperienceRequirement(s.proficiencyLevel, experienceLevel)
-                    ).map((s: any) => `${s.skillName} (${s.proficiencyLevel})`);
+                    ).map((s: any) => `${s.skillName}`);
                     
                     if (qualifiedSkills.length > 0) {
                         matchingSkills = matchingSkills 
@@ -1924,7 +1879,6 @@ export default class ManagerTeamView extends Controller {
                 totalMatchingSkills: totalMatchingSkills,
                 matchScore: matchScore
             };
-            console.log(`Employee ${emp.employeeId} match score: ${matchScore}%`);
             return result;
         });
 
@@ -2021,7 +1975,6 @@ export default class ManagerTeamView extends Controller {
         const resultsModel = new JSONModel({ results });
         this.getView()?.setModel(resultsModel, "searchResults");
 
-        console.log("Search results data set:", results);
 
         // Show search results panel
         searchResultsPanel.setVisible(true);
@@ -2039,7 +1992,6 @@ export default class ManagerTeamView extends Controller {
      * Clear search results and reset search inputs
      */
     private clearSearchResults(): void {
-        console.log("Clearing previous search results");
         
         // Hide search results panel
         const searchResultsPanel = this.byId("mtvSearchResultsPanel") as any;
@@ -2076,14 +2028,12 @@ export default class ManagerTeamView extends Controller {
             experienceSelect.setSelectedKey("");
         }
         
-        console.log("✅ Search results cleared successfully");
     }
 
     /**
      * Clear previous manager team data to prevent stale data when switching managers
      */
     private clearManagerTeamData(): void {
-        console.log("Clearing previous manager team data");
         
         // Clear manager team info model
         const emptyManagerInfo = new JSONModel({
@@ -2119,7 +2069,6 @@ export default class ManagerTeamView extends Controller {
         }
         
         const result = bindingContext.getObject();
-        console.log("Search result from binding context:", result);
         await this.openEmployeeWithManagerModel(result);
     }
 
@@ -2134,7 +2083,6 @@ export default class ManagerTeamView extends Controller {
         // Use employeeId or id for backward compatibility
         const empId = employee.employeeId || employee.id;
 
-        console.log(`📋 Loading comprehensive details for employee: ${empId}`);
 
         try {
             // Load all data from OData in parallel
@@ -2151,7 +2099,6 @@ export default class ManagerTeamView extends Controller {
                 this.getCertifications(empId)
             ]);
 
-            console.log("✅ All employee data loaded successfully");
 
             // Merge all data
             const completeData = {
@@ -2278,7 +2225,7 @@ export default class ManagerTeamView extends Controller {
             }
             return {};
         } catch (error) {
-            console.error(`Error loading employee data for ${employeeId}:`, error);
+            console.error(`Error loading employee data:`, error);
             return {};
         }
     }
@@ -2298,7 +2245,7 @@ export default class ManagerTeamView extends Controller {
             }
             return {};
         } catch (error) {
-            console.error(`Error loading profile data for ${employeeId}:`, error);
+            console.error(`Error loading profile data:`, error);
             return {};
         }
     }
@@ -2315,7 +2262,7 @@ export default class ManagerTeamView extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading CAIA utilization for ${employeeId}:`, error);
+            console.error(`Error loading CAIA utilization:`, error);
             return [];
         }
     }
@@ -2332,7 +2279,7 @@ export default class ManagerTeamView extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading POC utilization for ${employeeId}:`, error);
+            console.error(`Error loading POC utilization:`, error);
             return [];
         }
     }
@@ -2349,7 +2296,7 @@ export default class ManagerTeamView extends Controller {
             const contexts = await listBinding.requestContexts(0, 1000);
             return contexts.map((context: any) => context.getObject());
         } catch (error) {
-            console.error(`Error loading certifications for ${employeeId}:`, error);
+            console.error(`Error loading certifications:`, error);
             return [];
         }
     }
@@ -2377,7 +2324,6 @@ export default class ManagerTeamView extends Controller {
         const managerEmployeesModel = this.getView()?.getModel("managerEmployees") as JSONModel;
         const allEmployees = managerEmployeesModel?.getData()?.employees || [];
         
-        console.log(`📊 Showing all ${allEmployees.length} team members`);
         
         this.openAnalyticsListDialog("All Team Members", allEmployees);
     }
@@ -2391,7 +2337,6 @@ export default class ManagerTeamView extends Controller {
         
         const availableEmployees = allEmployees.filter((emp: any) => !emp.working_on_project);
         
-        console.log(`📊 Showing ${availableEmployees.length} available employees`);
         
         this.openAnalyticsListDialog("Available Resources", availableEmployees);
     }
@@ -2405,7 +2350,6 @@ export default class ManagerTeamView extends Controller {
         
         const busyEmployees = allEmployees.filter((emp: any) => emp.working_on_project);
         
-        console.log(`📊 Showing ${busyEmployees.length} employees on projects`);
         
         this.openAnalyticsListDialog("Employees Working on Projects", busyEmployees);
     }
@@ -2421,7 +2365,7 @@ export default class ManagerTeamView extends Controller {
         }
 
         // Set dialog title
-        dialog.setTitle(title + ` (${employees.length})`);
+        dialog.setTitle(title + ``);
 
         // Create model for analytics list
         const analyticsModel = new JSONModel({ employees: employees });
@@ -2707,13 +2651,9 @@ private currentChatManagerId: string = "";
     }
 
     const newManagerId = userData.managerId;
-    console.log("🔑 Manager ID for AI (fresh):", newManagerId);
 
     // ✅ Clear chat ONLY if manager changes
     if (this.currentChatManagerId !== newManagerId) {
-        console.log(
-            `🔄 Different manager detected (was: ${this.currentChatManagerId}, now: ${newManagerId})`
-        );
         this.clearChatForNewManager();
         this.currentChatManagerId = newManagerId;
     }
@@ -2741,7 +2681,6 @@ public onCloseAIDialog(): void {
 }
 
 private clearChatForNewManager(): void {
-    console.log("🧹 Clearing chat for new manager");
 
     const oContainer = this.byId("messagesContainerManager") as any;
     if (oContainer) {
@@ -2761,7 +2700,6 @@ private clearChatForNewManager(): void {
  */
 private initializeAIChat(): void {
     if (this.aiInitialized) {
-        console.log("ℹ️ Manager AI chat already initialized");
         return;
     }
 
@@ -2849,9 +2787,6 @@ private initializeAIChat(): void {
      */
    private async queryAI(query: string): Promise<void> {
     try {
-        console.log("🤖 Querying AI");
-        console.log("  - Manager ID:", this.managerId);
-        console.log("  - Query:", query);
 
         if (!this.managerId) {
             throw new Error("Manager ID is required");
@@ -2873,7 +2808,6 @@ private initializeAIChat(): void {
             this.addBotMessage(result.value.answer);
         } else {
             this.addBotMessage("⚠️ Received an unexpected response format.");
-            console.log("Response:", result);
         }
     } catch (error: any) {
         this.removeTypingIndicator();

@@ -8,7 +8,6 @@ import LocalAuth from "../service/LocalAuth";
 export default class EmployeeLogin extends Controller {
 
     public onInit(): void {
-        console.log("EmployeeLogin controller initialized");
     }
 
     private getRouter(): Router {
@@ -48,16 +47,8 @@ export default class EmployeeLogin extends Controller {
             await actionBinding.execute();
             const userContext = actionBinding.getBoundContext()?.getObject();
 
-            console.log("[EmployeeLogin] currentUserContext response:", userContext);
 
             if (!userContext?.authorized || userContext.role !== "Employee") {
-                console.warn("[EmployeeLogin] Access denied details:", {
-                    authorized: userContext?.authorized,
-                    role: userContext?.role,
-                    email: userContext?.email,
-                    employeeId: userContext?.employeeId,
-                    message: userContext?.message
-                });
                 MessageToast.show(userContext?.message || "Access denied. Employee role required.");
                 return;
             }

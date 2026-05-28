@@ -34,7 +34,6 @@ export default class EmployeeDashboard extends Controller {
         router.getRoute("EmployeeDashboard")?.attachPatternMatched(this.onRouteMatched, this);
         this.getView()?.setModel(new JSONModel({ isEditing: false }), "profileUi");
         
-        console.log("EmployeeDashboard initialized - using OData V4");
     }
 
     private getRouter(): Router {
@@ -45,7 +44,6 @@ export default class EmployeeDashboard extends Controller {
         const args = event.getParameter("arguments");
         const employeeId = args.employeeId;
         
-        console.log("Route matched for employee:", employeeId);
         this.currentEmployeeId = employeeId;
         
         // Load employee-specific data from OData
@@ -54,7 +52,6 @@ export default class EmployeeDashboard extends Controller {
 
     private async loadEmployeeData(employeeId: string): Promise<void> {
         try {
-            console.log('📊 Loading OData for employee:', employeeId);
             
             const oDataModel = this.getOwnerComponent()?.getModel() as any;
             if (!oDataModel) {
@@ -74,7 +71,6 @@ export default class EmployeeDashboard extends Controller {
             if (empContexts.length > 0) {
                 const employee = empContexts[0].getObject();
                 employeeRecord = employee;
-                console.log('✅ Employee data loaded:', employee);
                 
                 // Load manager name if managerId exists
                 if (employee.managerId) {
@@ -87,7 +83,6 @@ export default class EmployeeDashboard extends Controller {
                         if (mgrContexts.length > 0) {
                             const manager = mgrContexts[0].getObject();
                             managerName = manager.name;
-                            console.log('✅ Manager data loaded:', manager.name);
                         }
                     } catch (error) {
                         console.error('Error loading manager:', error);
@@ -115,7 +110,6 @@ export default class EmployeeDashboard extends Controller {
                     isLoggedIn: true
                 });
                 
-                console.log('✅ currentUser model updated with:', currentUserModel.getData());
             }
 
             // Load Skills for this employee
@@ -157,7 +151,6 @@ export default class EmployeeDashboard extends Controller {
             const skillsContexts = await skillsBinding.requestContexts(0, 100);
             const skills = skillsContexts.map((ctx: any) => ctx.getObject());
             
-            console.log(`✅ Loaded ${skills.length} skills from OData`);
             
             const skillsModel = new JSONModel({ skills: skills });
             this.getView()?.setModel(skillsModel, "skills");
@@ -186,7 +179,6 @@ export default class EmployeeDashboard extends Controller {
                 };
             });
             
-            console.log(`✅ Loaded ${projects.length} completed projects from OData`);
             
             const projectsModel = new JSONModel({ projects: projects });
             this.getView()?.setModel(projectsModel, "completedProjects");
@@ -206,7 +198,6 @@ export default class EmployeeDashboard extends Controller {
             
             if (profilesContexts.length > 0) {
                 const profile = profilesContexts[0].getObject();
-                console.log(`✅ Loaded profile from OData`, profile);
                 
                 const profileModel = new JSONModel(profile);
                 this.getView()?.setModel(profileModel, "profile");
@@ -390,7 +381,6 @@ export default class EmployeeDashboard extends Controller {
             const initData = [...initiativeData, ...evaluationData];
 
             const allData = [...cpData, ...initData];
-            console.log(`✅ Loaded ${cpData.length} projects + ${initData.length} evals/inits = ${allData.length} total work items`);
             
             const model = new JSONModel({ data: allData });
             this.getView()?.setModel(model, "currentProjects");
@@ -417,7 +407,6 @@ export default class EmployeeDashboard extends Controller {
                 return formatted;
             });
             
-            console.log(`✅ Loaded ${data.length} CAIA utilization records from OData`);
             
             const model = new JSONModel({ data: data });
             this.getView()?.setModel(model, "caia");
@@ -444,7 +433,6 @@ export default class EmployeeDashboard extends Controller {
                 return formatted;
             });
             
-            console.log(`✅ Loaded ${data.length} POC utilization records from OData`);
             
             const model = new JSONModel({ data: data });
             this.getView()?.setModel(model, "poc");
@@ -494,7 +482,6 @@ export default class EmployeeDashboard extends Controller {
 
             const data = [...initiatives, ...evaluations];
             
-            console.log(`✅ Loaded ${data.length} initiatives from OData`);
             
             const model = new JSONModel({ data: data });
             this.getView()?.setModel(model, "initiatives");
@@ -752,7 +739,6 @@ export default class EmployeeDashboard extends Controller {
                 return dateB - dateA;
             });
             
-            console.log(`✅ Loaded ${certifications.length} certifications from OData (sorted descending by date)`);
             
             // Store all certs separately so year filter can always work from full list
             const model = new JSONModel({
@@ -874,7 +860,6 @@ export default class EmployeeDashboard extends Controller {
 
     public async onSaveSkill(): Promise<void> {
         try {
-            console.log("onSaveSkill called");
             
             const employeeId = this.currentEmployeeId;
 
@@ -887,7 +872,6 @@ export default class EmployeeDashboard extends Controller {
             const newSkillModel = this.getView()?.getModel("newSkill") as JSONModel;
             const formData = newSkillModel?.getData();
             
-            console.log("Form data from newSkill model:", formData);
 
             // Validate required fields
             if (!formData || !formData.skillName || !formData.category) {
@@ -909,31 +893,25 @@ export default class EmployeeDashboard extends Controller {
                 certificationStatus: formData.certificationStatus || "None"
             };
 
-            console.log('Adding skill data:', skillData);
             
             // Use OData to create skill
             try {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
                 const listBinding = oDataModel.bindList("/Skills");
                 
-                console.log('📝 Creating new skill in OData...');
                 
                 // Create the skill - this adds it to the batch
                 const context = listBinding.create(skillData);
                 
-                console.log('📝 Skill added to batch, submitting...');
                 
                 // Submit all pending changes
                 const submitResult = await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                console.log('✅ Batch submitted, result:', submitResult);
                 
                 // Wait for backend to process
                 await new Promise(resolve => setTimeout(resolve, 800));
                 
                 // Reload skills to get the updated list
-                console.log('📝 Reloading skills...');
                 await this.loadSkills(this.currentEmployeeId!);
-                console.log('✅ Skills reloaded');
                 
                 MessageToast.show("Skill added successfully");
                 this.onCloseAddSkillDialog();
@@ -969,7 +947,6 @@ export default class EmployeeDashboard extends Controller {
             const data = newSkillModel.getData();
             data.proficiency = selectedKey;
             newSkillModel.setData(data);
-            console.log("Proficiency updated to:", selectedKey);
         }
     }
 
@@ -977,7 +954,6 @@ export default class EmployeeDashboard extends Controller {
         const select = event.getSource() as any;
         const selectedCategory = select.getSelectedKey();
         
-        console.log("Selected category:", selectedCategory);
         
         // Define SAP skill catalog by category
         const sapSkillCatalog: { [key: string]: string[] } = {
@@ -1049,7 +1025,6 @@ export default class EmployeeDashboard extends Controller {
             skillCatalogModel.setData({
                 skills: skillsWithPlaceholder
             });
-            console.log(`Loaded ${categorySkills.length} skills for category: ${selectedCategory}`);
         }
         
         // Reset skill name selection
@@ -1066,7 +1041,6 @@ export default class EmployeeDashboard extends Controller {
         const select = event.getSource() as any;
         const selectedCategory = select.getSelectedKey();
         
-        console.log("Edit dialog - Selected category:", selectedCategory);
         
         // Populate the catalog for edit dialog
         this.populateEditSkillCatalog(selectedCategory);
@@ -1152,7 +1126,6 @@ export default class EmployeeDashboard extends Controller {
             editSkillCatalogModel.setData({
                 skills: skillsWithPlaceholder
             });
-            console.log(`Edit dialog - Loaded ${categorySkills.length} skills for category: ${selectedCategory}`);
         }
     }
 
@@ -1164,7 +1137,6 @@ export default class EmployeeDashboard extends Controller {
             const data = newSkillModel.getData();
             data.certificationStatus = selectedKey;
             newSkillModel.setData(data);
-            console.log("Certification Status updated to:", selectedKey);
         }
     }
 
@@ -1176,7 +1148,6 @@ export default class EmployeeDashboard extends Controller {
             const data = editSkillModel.getData();
             data.proficiency = selectedKey;
             editSkillModel.setData(data);
-            console.log("Edit Proficiency updated to:", selectedKey);
         }
     }
 
@@ -1188,7 +1159,6 @@ export default class EmployeeDashboard extends Controller {
             const data = editSkillModel.getData();
             data.certificationStatus = selectedKey;
             editSkillModel.setData(data);
-            console.log("Edit Certification Status updated to:", selectedKey);
         }
     }
 
@@ -1244,7 +1214,6 @@ export default class EmployeeDashboard extends Controller {
             const skillData = context.getProperty();
             const skillId = skillData.id || skillData.skillId;
             
-            console.log("Deleting skill:", skillData);
             
             // Use OData to delete skill
             try {
@@ -1254,13 +1223,10 @@ export default class EmployeeDashboard extends Controller {
                 
                 const contexts = await listBinding.requestContexts(0, 1);
                 if (contexts.length > 0) {
-                    console.log('📝 Deleting skill from database...');
                     contexts[0].delete();
                     
                     // Submit batch with proper update group
-                    console.log('📝 Submitting delete batch...');
                     await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                    console.log('✅ Batch submitted successfully');
                     
                     // Wait for backend
                     await new Promise(resolve => setTimeout(resolve, 300));
@@ -1269,9 +1235,7 @@ export default class EmployeeDashboard extends Controller {
                     listBinding.refresh();
                     
                     // Reload skills
-                    console.log('📝 Reloading skills...');
                     await this.loadSkills(this.currentEmployeeId!);
-                    console.log('✅ Skills reloaded');
                     
                     MessageToast.show("Skill deleted successfully");
                 } else {
@@ -1291,7 +1255,6 @@ export default class EmployeeDashboard extends Controller {
             const editSkillModel = this.getView()?.getModel("editSkill") as JSONModel;
             const skillData = editSkillModel.getData();
             
-            console.log('Updating skill data:', skillData);
             
             // Validate required fields
             if (!skillData.skillName || !skillData.proficiency) {
@@ -1330,11 +1293,9 @@ export default class EmployeeDashboard extends Controller {
                     context.setProperty("yearsExperience", normalizedData.yearsExperience);
                     context.setProperty("certificationStatus", normalizedData.certificationStatus);
                     
-                    console.log('📝 Submitting skill update...');
                     
                     // Submit changes with proper update group
                     await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                    console.log('✅ Batch submitted successfully');
                     
                     // Wait for backend
                     await new Promise(resolve => setTimeout(resolve, 300));
@@ -1412,7 +1373,6 @@ export default class EmployeeDashboard extends Controller {
 
     public async onSaveProject(): Promise<void> {
         try {
-            console.log("onSaveProject called");
             
             const employeeId = this.currentEmployeeId;
             
@@ -1424,11 +1384,6 @@ export default class EmployeeDashboard extends Controller {
             const newProjectModel = this.getView()?.getModel("newProject") as JSONModel;
             const projectData = newProjectModel?.getData();
             
-            console.log('🔍 RAW projectData from model:', JSON.stringify(projectData, null, 2));
-            console.log('🔍 projectManager:', projectData?.projectManager);
-            console.log('🔍 accountExecutiveManager:', projectData?.accountExecutiveManager);
-            console.log('🔍 lineManagerPOC:', projectData?.lineManagerPOC);
-            console.log('🔍 projectOrchestrator:', projectData?.projectOrchestrator);
             
             // Validate required fields
             if (!projectData || !projectData.projectName || !projectData.role) {
@@ -1446,7 +1401,6 @@ export default class EmployeeDashboard extends Controller {
                     
                     // Check if date is valid
                     if (isNaN(date.getTime())) {
-                        console.warn('Invalid date:', dateString);
                         return null;
                     }
                     
@@ -1523,32 +1477,26 @@ export default class EmployeeDashboard extends Controller {
                 projectOrchestrator: projectData.projectOrchestrator || null
             };
             
-            console.log('📋 Adding project data:', JSON.stringify(newProject, null, 2));
             
             // Use OData to create project
             try {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
                 const listBinding = oDataModel.bindList("/Projects");
                 
-                console.log('📝 Creating new project in OData...');
                 
                 // Create the project - this adds it to the batch
                 const context = listBinding.create(newProject);
                 
-                console.log('📝 Project added to batch, submitting...');
                 
                 // Submit all pending changes
                 const submitResult = await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                console.log('✅ Batch submitted, result:', submitResult);
                 await context.created();
                 
                 // Wait for backend
                 await new Promise(resolve => setTimeout(resolve, 800));
                 
                 // Reload projects
-                console.log('📝 Reloading projects...');
                 await this.loadProjects(this.currentEmployeeId!);
-                console.log('✅ Projects reloaded');
                 
                 MessageToast.show("Project added successfully");
             } catch (error: any) {
@@ -1640,7 +1588,6 @@ export default class EmployeeDashboard extends Controller {
             const projectData = context.getProperty();
             const projectId = projectData.id || projectData.projectId;
             
-            console.log("Deleting project:", projectData);
             
             // Use OData to delete project
             try {
@@ -1650,13 +1597,10 @@ export default class EmployeeDashboard extends Controller {
                 
                 const contexts = await listBinding.requestContexts(0, 1);
                 if (contexts.length > 0) {
-                    console.log('📝 Deleting project from database...');
                     contexts[0].delete();
                     
                     // Submit batch with proper update group
-                    console.log('📝 Submitting delete batch...');
                     await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                    console.log('✅ Batch submitted successfully');
                     
                     // Wait for backend
                     await new Promise(resolve => setTimeout(resolve, 300));
@@ -1665,9 +1609,7 @@ export default class EmployeeDashboard extends Controller {
                     listBinding.refresh();
                     
                     // Reload projects
-                    console.log('📝 Reloading projects...');
                     await this.loadProjects(this.currentEmployeeId!);
-                    console.log('✅ Projects reloaded');
                     
                     MessageToast.show("Project deleted successfully");
                 } else {
@@ -1692,7 +1634,6 @@ export default class EmployeeDashboard extends Controller {
             const editProjectModel = this.getView()?.getModel("editProject") as JSONModel;
             const projectData = editProjectModel.getData();
             
-            console.log('Updating project data:', projectData);
             
             // Validate required fields
             if (!projectData.projectName || !projectData.role) {
@@ -1707,7 +1648,6 @@ export default class EmployeeDashboard extends Controller {
                 try {
                     const date = new Date(dateString);
                     if (isNaN(date.getTime())) {
-                        console.warn('Invalid date:', dateString);
                         return null;
                     }
                     
@@ -1791,11 +1731,9 @@ export default class EmployeeDashboard extends Controller {
                     context.setProperty("lineManagerPOC", projectData.lineManagerPOC);
                     context.setProperty("projectOrchestrator", projectData.projectOrchestrator);
                     
-                    console.log('📝 Submitting project update...');
                     
                     // Submit changes with proper update group
                     await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                    console.log('✅ Batch submitted successfully');
                     
                     // Wait for backend
                     await new Promise(resolve => setTimeout(resolve, 300));
@@ -1804,9 +1742,7 @@ export default class EmployeeDashboard extends Controller {
                     listBinding.refresh();
                     
                     // Reload projects
-                    console.log('📝 Reloading projects...');
                     await this.loadProjects(this.currentEmployeeId!);
-                    console.log('✅ Projects reloaded');
                     
                     MessageToast.show("Project updated successfully");
                     this.editProjectDialog?.close();
@@ -1871,7 +1807,6 @@ export default class EmployeeDashboard extends Controller {
                 return;
             }
             
-            console.log("Saving profile for employee:", employeeId);
 
             const selfProfileModel = this.getView()?.getModel("selfProfile") as JSONModel;
             const profileData = selfProfileModel?.getData();
@@ -1938,17 +1873,6 @@ export default class EmployeeDashboard extends Controller {
                 const oDataModel = this.getOwnerComponent()?.getModel() as any;
                 const lastUpdated = new Date().toISOString();
                 
-                console.log('📝 Updating profile for employee:', employeeId);
-                console.log('📝 New values:', {
-                    professionalRole: profileData.professionalRole,
-                    location: profileData.location,
-                    tLevel: profileData.tLevel,
-                    specialization: profileData.specialization,
-                    team: profileData.team,
-                    subTeam: profileData.subTeam,
-                    managerId: profileData.managerId
-                });
-
                 const employeeBinding = oDataModel.bindList("/Employees");
                 employeeBinding.filter([new Filter("employeeId", FilterOperator.EQ, employeeId)]);
                 const employeeContexts = await employeeBinding.requestContexts(0, 1);
@@ -1984,7 +1908,6 @@ export default class EmployeeDashboard extends Controller {
                     context.setProperty("specialization", profileData.specialization.trim());
                     context.setProperty("lastUpdated", lastUpdated);
                     
-                    console.log('📝 Profile properties set, submitting batch...');
                 } else {
                     const newProfile = {
                         employeeId: employeeId,
@@ -1997,11 +1920,9 @@ export default class EmployeeDashboard extends Controller {
                     };
                     
                     profileBinding.create(newProfile);
-                    console.log('📝 New profile created, submitting batch...');
                 }
                 
                 const result = await oDataModel.submitBatch(oDataModel.getUpdateGroupId());
-                console.log('✅ Batch submitted successfully:', result);
 
                 profileBinding.refresh();
                 employeeBinding.refresh();
@@ -2097,7 +2018,6 @@ export default class EmployeeDashboard extends Controller {
 
     private async loadEmployeeProfile(employeeId: string): Promise<void> {
         try {
-            console.log('=== Loading Profile for Employee:', employeeId);
             
             // Initialize profile model with default values
             const defaultProfile = {
@@ -2112,13 +2032,11 @@ export default class EmployeeDashboard extends Controller {
 
             // Load profile from OData - already loaded by loadProfile method in onInit
             // Just ensure the model is set
-            console.log('Profile already loaded by loadProfile method');
             
             // Set the profile model if not already set
             if (!this.getView()?.getModel("profile")) {
                 const profileModel = new JSONModel(defaultProfile);
                 this.getView()?.setModel(profileModel, "profile");
-                console.log('Profile model set with defaults');
             }
         } catch (error: any) {
             console.error('❌ Error loading employee profile:', error);
@@ -2209,7 +2127,6 @@ export default class EmployeeDashboard extends Controller {
             const projectsModel = new JSONModel({ projects: allProjects });
             this.getView()?.setModel(projectsModel, "projectsList");
             
-            console.log(`✅ Loaded ${allProjects.length} projects from master data (created by managers)`);
         } catch (error) {
             console.error("Error loading projects from master data:", error);
             this.getView()?.setModel(new JSONModel({ projects: [] }), "projectsList");
@@ -2229,7 +2146,6 @@ export default class EmployeeDashboard extends Controller {
             const managersModel = new JSONModel({ managers });
             this.getView()?.setModel(managersModel, "managersList");
             
-            console.log(`Loaded ${managers.length} managers for dropdown`);
         } catch (error) {
             console.error("Error loading managers list:", error);
             this.getView()?.setModel(new JSONModel({ managers: [] }), "managersList");
@@ -2254,11 +2170,6 @@ export default class EmployeeDashboard extends Controller {
             dialogModel?.setProperty("/startDate", selectedProject.startDate || null);
             dialogModel?.setProperty("/endDate", selectedProject.endDate || null);
             
-            console.log(`✅ Auto-filled project details from master data:`, {
-                projectManager: selectedProject.projectManager,
-                startDate: selectedProject.startDate,
-                endDate: selectedProject.endDate
-            });
         }
     }
 
@@ -2532,7 +2443,6 @@ export default class EmployeeDashboard extends Controller {
     public onUnifiedWorkTypeChange(event: Event): void {
         const select = event.getSource() as any;
         const selectedType = select.getSelectedKey();
-        console.log(`Work type changed to: ${selectedType}`);
     }
 
     public onUnifiedProjectSelected(event: Event): void {
@@ -2729,7 +2639,6 @@ export default class EmployeeDashboard extends Controller {
     public onWorkTypeChange(event: Event): void {
         const select = event.getSource() as any;
         const isEvaluation = select.getSelectedKey();
-        console.log(`Work type changed to: ${isEvaluation === 'true' ? 'Evaluation' : 'Project'}`);
     }
 
     public onWorkProjectSelected(event: Event): void {
@@ -2759,11 +2668,6 @@ export default class EmployeeDashboard extends Controller {
                 dialogModel?.setProperty("/endDate", selectedProject.endDate || null);
             }
             
-            console.log(`✅ Auto-filled from master data:`, {
-                projectManager: selectedProject.projectManager,
-                startDate: dialogModel?.getProperty("/startDate"),
-                endDate: dialogModel?.getProperty("/endDate")
-            });
         }
     }
 
@@ -2885,7 +2789,6 @@ export default class EmployeeDashboard extends Controller {
             dialogModel?.setProperty("/role", "");
         }
         
-        console.log(`Assignment type changed to: ${selectedType}`);
     }
 
     public async onSaveAssignment(): Promise<void> {
@@ -3529,11 +3432,9 @@ public onOpenAIAssistant(): void {
     }
 
     const newEmployeeId = userData.employeeId;
-    console.log("🔑 Employee ID for AI (fresh):", newEmployeeId);
 
     // ✅ FIX: Clear chat if different employee
     if (this.currentChatEmployeeId !== newEmployeeId) {
-        console.log(`🔄 Different employee detected (was: ${this.currentChatEmployeeId}, now: ${newEmployeeId})`);
         this.clearChatForNewEmployee();
         this.currentChatEmployeeId = newEmployeeId;
     }
@@ -3554,7 +3455,6 @@ public onOpenAIAssistant(): void {
  * Clear chat for new employee - called when employee ID changes
  */
 private clearChatForNewEmployee(): void {
-    console.log("🧹 Clearing chat for new employee");
     const oContainer = this.byId("messagesContainerEmployee") as any;
     
     if (oContainer) {
@@ -3577,7 +3477,6 @@ private clearChatForNewEmployee(): void {
  */
 private initializeAIChat(): void {
     if (this.aiInitialized) {
-        console.log("ℹ️ AI chat already initialized");
         return;
     }
 
@@ -3586,7 +3485,6 @@ private initializeAIChat(): void {
     const userData = currentUserModel?.getData();
     const employeeName = userData?.name || "there";
 
-    console.log("🤖 Initializing AI chat for:", employeeName);
 
     this.addBotMessage(
         `👋 Hello ${employeeName}! I'm your AI assistant.\n\n` +
@@ -3614,7 +3512,6 @@ public onCloseAIDialog(): void {
  * Clear chat manually (button action)
  */
 public onClearChat(): void {
-    console.log("🧹 Manual chat clear requested");
     const oContainer = this.byId("messagesContainerEmployee") as any;
     oContainer?.destroyItems();
     
@@ -3677,8 +3574,6 @@ public onSendMessage(): void {
         return;
     }
 
-    console.log("📤 Sending message:", sMessage);
-    console.log("  - Employee ID:", this.employeeIdForAI);
 
     this.addUserMessage(sMessage);
     oInput.setValue("");
@@ -3691,9 +3586,6 @@ public onSendMessage(): void {
  */
 private async queryAI(query: string): Promise<void> {
     try {
-        console.log("🤖 Querying AI Assistant");
-        console.log("  - Employee ID:", this.employeeIdForAI);
-        console.log("  - Query:", query);
         
         if (!this.employeeIdForAI) {
             throw new Error("Employee ID is required");
@@ -3706,7 +3598,6 @@ private async queryAI(query: string): Promise<void> {
         oAction.setParameter("employeeId", this.employeeIdForAI);
         await oAction.execute("$auto");
         const result = oAction.getBoundContext().getObject();
-        console.log('✅ Backend response received');
 
         this.removeTypingIndicator();
 
@@ -3877,7 +3768,6 @@ private async queryAI(query: string): Promise<void> {
         const selectedTLevel = source.getSelectedKey();
         
         if (selectedTLevel) {
-            console.log("T-Level changed to:", selectedTLevel);
         }
     }
 
@@ -3905,6 +3795,5 @@ private async queryAI(query: string): Promise<void> {
         certModel?.setProperty("/selectedYear", selectedYear);
         certModel?.setProperty("/certifications", filteredCertifications);
         
-        console.log(`📅 Certification filter changed to ${selectedYear}, showing ${filteredCertifications.length} certifications`);
     }
 }

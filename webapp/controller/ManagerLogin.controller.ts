@@ -8,7 +8,6 @@ import LocalAuth from "../service/LocalAuth";
 export default class ManagerLogin extends Controller {
 
     public onInit(): void {
-        console.log("ManagerLogin controller initialized");
     }
 
     private getRouter(): Router {

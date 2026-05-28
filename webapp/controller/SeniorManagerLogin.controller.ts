@@ -11,7 +11,6 @@ import LocalAuth from "../service/LocalAuth";
 export default class SeniorManagerLogin extends Controller {
 
     public onInit(): void {
-        console.log("SeniorManagerLogin controller initialized");
     }
 
     private getRouter(): Router {
@@ -68,7 +67,6 @@ export default class SeniorManagerLogin extends Controller {
                     isLoggedIn: true
                 });
             } else {
-                console.warn("⚠️ currentUser model not found");
             }
 
             // Navigate to Senior Manager Dashboard
