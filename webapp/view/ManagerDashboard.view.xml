@@ -120,7 +120,7 @@
                                                     <m:Text text="Description"/>
                                                 </m:Column>
                                                 <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
-                                                    <m:Text text="Added By"/>
+                                                    <m:Text text="Creator"/>
                                                 </m:Column>
                                                 <m:Column minScreenWidth="Desktop" demandPopin="true">
                                                     <m:Text text="Start Date"/>
@@ -139,7 +139,7 @@
                                                 <m:ColumnListItem>
                                                     <m:Text text="{masterInitiatives>initiativeName}"/>
                                                     <m:Text text="{masterInitiatives>description}" maxLines="1"/>
-                                                    <m:Text text="{masterInitiatives>addedByManager}"/>
+                                                    <m:Text text="{= ${masterInitiatives>creatorName} || ${masterInitiatives>addedByManager} }"/>
                                                     <m:Text text="{masterInitiatives>startDate}"/>
                                                     <m:Text text="{masterInitiatives>endDate}"/>
                                                     <m:ObjectStatus
@@ -181,7 +181,7 @@
                                                     <m:Text text="Description"/>
                                                 </m:Column>
                                                 <m:Column minScreenWidth="Tablet" demandPopin="true" popinDisplay="Inline">
-                                                    <m:Text text="Added By"/>
+                                                    <m:Text text="Creator"/>
                                                 </m:Column>
                                                 <m:Column minScreenWidth="Desktop" demandPopin="true">
                                                     <m:Text text="Start Date"/>
@@ -200,7 +200,7 @@
                                                 <m:ColumnListItem>
                                                     <m:Text text="{masterEvaluations>evaluationName}"/>
                                                     <m:Text text="{masterEvaluations>description}" maxLines="1"/>
-                                                    <m:Text text="{masterEvaluations>addedByManager}"/>
+                                                    <m:Text text="{= ${masterEvaluations>creatorName} || ${masterEvaluations>addedByManager} }"/>
                                                     <m:Text text="{masterEvaluations>startDate}"/>
                                                     <m:Text text="{masterEvaluations>endDate}"/>
                                                     <m:ObjectStatus
