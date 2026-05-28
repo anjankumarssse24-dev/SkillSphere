@@ -29,7 +29,7 @@
                             <m:VBox width="100%" class="masterProjectsVBox">
                                 <m:Panel id="masterProjectsPanel" headerText="Project Registry" class="sapUiSmallMarginTop sapUiSmallMarginBottom masterProjectsPanel" width="100%">
                                     <m:headerToolbar>
-                                        <m:Toolbar>
+                                        <m:Toolbar class="sapUiSmallMarginTop sapUiSmallMarginBottom">
                                             <m:Title text="Project Registry" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterProjectSearch" placeholder="Search projects..." liveChange="onMasterProjectSearch" width="15rem"/>
@@ -97,7 +97,7 @@
 
                                 <m:Panel id="masterInitiativesPanel" headerText="Initiative Registry" class="sapUiSmallMarginTop sapUiSmallMarginBottom" width="100%">
                                     <m:headerToolbar>
-                                        <m:Toolbar>
+                                        <m:Toolbar class="sapUiSmallMarginTop sapUiSmallMarginBottom">
                                             <m:Title text="Master Initiatives" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterInitiativeSearch" placeholder="Search initiatives..." liveChange="onMasterInitiativeSearch" width="15rem"/>
@@ -158,7 +158,7 @@
 
                                 <m:Panel id="masterEvaluationsPanel" headerText="Evaluation Registry" class="sapUiSmallMarginTop sapUiSmallMarginBottom" width="100%">
                                     <m:headerToolbar>
-                                        <m:Toolbar>
+                                        <m:Toolbar class="sapUiSmallMarginTop sapUiSmallMarginBottom">
                                             <m:Title text="Master Evaluations" level="H3"/>
                                             <m:ToolbarSpacer/>
                                             <m:SearchField id="masterEvaluationSearch" placeholder="Search evaluations..." liveChange="onMasterEvaluationSearch" width="15rem"/>
@@ -290,7 +290,7 @@
                         <uxap:blocks>
                             <m:Panel id="teamPanel" headerText="Team Members" class="sapUiMediumMargin sapUiSmallMarginTop" width="95%">
                                 <m:headerToolbar>
-                                    <m:Toolbar>
+                                    <m:Toolbar class="sapUiSmallMarginTop sapUiSmallMarginBottom">
                                         <m:Title text="Team Members" level="H3"/>
                                         <m:ToolbarSpacer/>
                                         <m:Button text="Add Employee" icon="sap-icon://add-employee" type="Emphasized" press="onOpenAddEmployeeDialog"/>
