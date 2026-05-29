@@ -1,32 +1,32 @@
-# Dual HDI Deployment Runbook (One Space)
+# Single App HDI Switch Runbook (One Space)
 
-This document is the exact process for your current target model:
+This runbook describes a single-app deployment model where only the HDI container changes.
 
-- Test uses existing HDI container: `skillsphere-db`
-- Prod uses new HDI container: `skillsphere-db-prod`
+- Test mode binds app to HDI container: `skillsphere-db`
+- Prod mode binds app to HDI container: `skillsphere-db-prod`
+- All other services remain the same (prod service instances)
 
 ## Scope
 
-You deploy the same MTAR twice with different extension files:
+You deploy one MTA app instance and switch its DB binding by choosing extension file:
 
-1. `mta.test.mtaext` -> test apps + existing test DB container
-2. `mta.prod.mtaext` -> prod apps + new prod DB container
+1. `mta.test.mtaext` -> binds `skillsphere-db`
+2. `mta.prod.mtaext` -> binds `skillsphere-db-prod`
 
-Important: deploy with different namespaces (`test` and `prod`).
-If namespace is omitted, the second deployment updates the same MTA instance and can remove the first app (for example `skillsphere-srv-test` route no longer exists).
+This runbook focuses on the repeatable DB switch process for daily operations.
 
-UI app identity is environment-specific:
+Important:
 
-1. Test HTML5 app ID: `skillsphere.test` (`sap.cloud.service: skillsphere-test`)
-2. Prod HTML5 app ID: `skillsphere.prod` (`sap.cloud.service: skillsphere-prod`)
+1. Do not use `--namespace test` or `--namespace prod` in this model.
+2. Namespace creates separate MTA identities, which is not single-app behavior.
 
 ## Prerequisites
 
 1. Cloud Foundry CLI is installed.
-2. MultiApps plugin is installed (`cf deploy` command available).
-3. MBT is installed (`mbt` command available).
+2. MultiApps plugin is installed (`cf deploy` available).
+3. MBT is installed (`mbt` available).
 4. You have `SpaceDeveloper` role in target space.
-5. Required service quota/entitlements are available for one extra prod set.
+5. Both HDI containers exist or can be created by your deployment rights.
 
 Quick checks:
 
@@ -52,94 +52,95 @@ cf target
 
 Confirm org/space in `cf target` output before deploying.
 
-## Step 2 - Confirm Existing Test HDI Container Exists
+## Step 2 - Confirm HDI Containers
 
 ```powershell
 cf services
 ```
 
-Ensure `skillsphere-db` is present before test deploy.
+Verify:
 
-## Step 3 - Build Test MTAR
+1. `skillsphere-db` exists
+2. `skillsphere-db-prod` exists (or will be created on first prod deploy)
+
+## Step 3 - Build MTAR
+
+You can build once and reuse the same artifact for both switches.
 
 ```powershell
-$env:UI_VARIANT="test"
-mbt build -p cf -t mta_archives_test
+mbt build -p cf -t mta_archives
 ```
 
 Expected artifact:
 
-`mta_archives_test/skillsphere_1.0.0.mtar`
+`mta_archives/skillsphere_1.0.0.mtar`
 
-## Step 4 - Deploy Test Landscape (Existing HDI)
+## Step 4 - Switch to Test HDI Container (Repeatable)
+
+Deploy same app using test extension (no namespace):
 
 ```powershell
-cf deploy mta_archives_test/skillsphere_1.0.0.mtar -e mta.test.mtaext --namespace test --apply-namespace-service-names false --apply-namespace-app-names false --apply-namespace-app-routes false -f --retries 0
+cf deploy mta_archives/skillsphere_1.0.0.mtar -e mta.test.mtaext -f --retries 0
+cf env skillsphere-srv
 ```
 
 Expected:
 
-1. App `skillsphere-srv-test` is created/updated.
-2. App is bound to `skillsphere-db`.
-3. No new test HDI container is created.
+1. Existing app is updated (not duplicated).
+2. App binds to `skillsphere-db`.
 
-## Step 5 - Test and Load Dummy Data (Test Only)
+## Step 5 - Switch to Prod HDI Container (Repeatable)
 
-Run bug fixes and test data operations only in test deployment.
-
-Never run dummy seeding against prod deployment.
-
-## Step 6 - Build Prod MTAR
+Deploy same app using prod extension (no namespace):
 
 ```powershell
-$env:UI_VARIANT="prod"
-mbt build -p cf -t mta_archives_prod
-```
-
-Expected artifact:
-
-`mta_archives_prod/skillsphere_1.0.0.mtar`
-
-## Step 7 - Deploy Prod Landscape (New HDI)
-
-```powershell
-cf deploy mta_archives_prod/skillsphere_1.0.0.mtar -e mta.prod.mtaext --namespace prod --apply-namespace-service-names false --apply-namespace-app-names false --apply-namespace-app-routes false -f --retries 0
+cf deploy mta_archives/skillsphere_1.0.0.mtar -e mta.prod.mtaext -f --retries 0
+cf env skillsphere-srv
 ```
 
 Expected:
 
-1. Service `skillsphere-db-prod` is created (first time) or updated.
-2. App `skillsphere-srv-prod` is created/updated.
-3. Prod app is bound to `skillsphere-db-prod`.
+1. Same app is updated in place.
+2. App binds to `skillsphere-db-prod`.
 
-## Step 8 - Verify Isolation
-
-Run:
+## Step 6 - Post-Switch Verification Checklist
 
 ```powershell
 cf services
 cf apps
 cf mtas
-cf env skillsphere-srv-test
-cf env skillsphere-srv-prod
+cf env skillsphere-srv
 ```
 
-What to verify in `cf env` output (`VCAP_SERVICES`):
+Verify each time:
 
-1. `skillsphere-srv-test` references `skillsphere-db`
-2. `skillsphere-srv-prod` references `skillsphere-db-prod`
+1. App name remains `skillsphere-srv` (single app identity)
+2. `VCAP_SERVICES` shows expected HDI (`skillsphere-db` or `skillsphere-db-prod`)
 
-If you get `App '<name>' not found`, that app has not been deployed yet in the currently targeted org/space.
+## Step 7 - Rollback
 
-## Step 8 - Recommended Release Discipline
+Switch back to the other DB by redeploying with the other extension file:
 
-1. Build test artifact with `UI_VARIANT=test` and deploy test.
-2. Validate functionality and data.
-3. Build prod artifact with `UI_VARIANT=prod` and deploy prod.
-4. Keep prod seed/dummy data disabled.
+```powershell
+cf deploy mta_archives/skillsphere_1.0.0.mtar -e mta.test.mtaext -f --retries 0
+```
+
+or
+
+```powershell
+cf deploy mta_archives/skillsphere_1.0.0.mtar -e mta.prod.mtaext -f --retries 0
+```
+
+## Operational Notes
+
+1. This is one running app identity, not two parallel landscapes.
+2. Switching HDI rebinding affects the live app.
+3. Plan the switch in a maintenance window if needed.
+4. Do not run test dummy-data loads after switching to prod HDI.
+5. Do not use `--namespace` flags in this model.
 
 ## Security Note
 
 One-space setup gives technical data isolation by HDI container, but not strict admin isolation.
-Anyone with `SpaceDeveloper` in that same space can still inspect CF resources.
-For stronger confidentiality/compliance, use separate spaces (or separate subaccounts) for test and prod.
+Anyone with `SpaceDeveloper` in the same space can inspect CF resources.
+For stronger confidentiality/compliance, use separate spaces or separate subaccounts.

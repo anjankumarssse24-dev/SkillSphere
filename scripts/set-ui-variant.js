@@ -4,22 +4,15 @@ const path = require('path');
 const manifestPath = path.join(__dirname, '..', 'webapp', 'manifest.json');
 const variant = String(process.env.UI_VARIANT || 'test').trim().toLowerCase();
 
-const variants = {
-  test: {
-    appId: 'skillsphere.test',
-    cloudService: 'skillsphere-test',
-    namespace: 'skillsphere'  // TypeScript @namespace is always 'skillsphere', never changed
-  },
-  prod: {
-    appId: 'skillsphere.prod',
-    cloudService: 'skillsphere-prod',
-    namespace: 'skillsphere'  // TypeScript @namespace is always 'skillsphere', never changed
-  }
+// Single-app workflow: UI identity is fixed regardless of DB-switch extension file.
+const config = {
+  appId: 'skillsphere.prod',
+  cloudService: 'skillsphere-prod',
+  namespace: 'skillsphere'
 };
 
-const config = variants[variant];
-if (!config) {
-  console.error(`Unsupported UI_VARIANT: ${variant}. Use one of: ${Object.keys(variants).join(', ')}`);
+if (!['test', 'prod'].includes(variant)) {
+  console.error(`Unsupported UI_VARIANT: ${variant}. Use one of: test, prod`);
   process.exit(1);
 }
 
@@ -55,6 +48,9 @@ if (manifest['sap.ui5']) {
 
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
 console.log(`Applied UI variant '${variant}':`);
+if (variant === 'test') {
+  console.log('  - Note: in single-app mode, test/prod UI identity is intentionally the same.');
+}
 console.log(`  - sap.app.id: ${config.appId}`);
 console.log(`  - sap.cloud.service: ${config.cloudService}`);
 console.log(`  - namespace: ${config.namespace}`);

@@ -7,22 +7,8 @@ targets:
     space: "*"
 
 modules:
-  - name: skillsphere-srv
-    parameters:
-      app-name: skillsphere-srv-prod
-      host: skillsphere-srv-prod
-
-  - name: skillsphere-db-deployer
-    parameters:
-      app-name: skillsphere-db-deployer-prod
-
-  - name: skillsphere-app-deployer
-    parameters:
-      app-name: skillsphere-app-deployer-prod
-
   - name: skillsphere-destination-content
     parameters:
-      app-name: skillsphere-destination-content-prod
       content:
         instance:
           destinations:
