@@ -532,8 +532,13 @@ module.exports = cds.service.impl(async function() {
    */
   const logDataAccess = (userId, action, entity, count, details = '') => {
     const timestamp = new Date().toISOString();
-    // SECURITY: Mask user ID - only log last 4 characters
-    const maskedUserId = userId ? 'user_' + userId.slice(-4) : 'ANON';
+    // SECURITY: userId may be an email (XSUAA) or an employee ID — strip all PII
+    // Strip email domain entirely, then take last 4 chars of the local part
+    let maskedUserId = 'ANON';
+    if (userId) {
+      const localPart = userId.includes('@') ? userId.split('@')[0] : userId;
+      maskedUserId = 'user_' + localPart.slice(-4);
+    }
     // SECURITY: Sanitize details to prevent email/PII leakage in logs
     const sanitizedDetails = details.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[MASKED_EMAIL]');
     console.log(

@@ -66,6 +66,9 @@
     }
   },
   "sap.ui5": {
+    "resourceRoots": {
+      "skillsphere": "./"
+    },
     "flexEnabled": false,
     "dependencies": {
       "minUI5Version": "1.140.0",
