@@ -49,14 +49,23 @@
                                         <FlexBox wrap="Wrap" justifyContent="SpaceBetween">
                                             <VBox width="32%">
                                                 <Label text="Team" required="true"/>
-                                                <Input value="{employeeEditor>/team}" editable="false" enabled="false"/>
+                                                <Input value="CIS Engineering APAC Build" editable="false" enabled="false"/>
                                             </VBox>
                                             <VBox width="32%">
                                                 <Label text="Sub Team" required="true"/>
-                                                <Input value="{employeeEditor>/subTeam}" editable="false" enabled="false"/>
+                                                <Select selectedKey="{employeeEditor>/subTeam}" width="100%">
+                                                    <core:Item key="Team 1 - Sachin Muralidhar Tadse" text="Team 1 - Sachin Muralidhar Tadse"/>
+                                                    <core:Item key="Team 2 - Fazal Ilahi" text="Team 2 - Fazal Ilahi"/>
+                                                    <core:Item key="Team 3 - Deepak" text="Team 3 - Deepak"/>
+                                                    <core:Item key="Team 4 - Abhishek Garg" text="Team 4 - Abhishek Garg"/>
+                                                    <core:Item key="Team 5 - Hemlata Janawa" text="Team 5 - Hemlata Janawa"/>
+                                                    <core:Item key="Team 7 - Pawan Jain" text="Team 7 - Pawan Jain"/>
+                                                    <core:Item key="Team 8 - Puja K" text="Team 8 - Puja K"/>
+                                                    <core:Item key="Team 9 - Agya Pal Singh" text="Team 9 - Agya Pal Singh"/>
+                                                </Select>
                                             </VBox>
                                             <VBox width="32%">
-                                                <Label text="Experience (Years)"/>
+                                                <Label text="Total years of Experience"/>
                                                 <StepInput value="{employeeEditor>/experience}" min="0" max="50" step="0.5"/>
                                             </VBox>
                                         </FlexBox>
@@ -93,15 +102,16 @@
                                                     <core:Item key="Whitefield, Bangalore" text="Whitefield, Bangalore"/>
                                                     <core:Item key="Devanahalli, Bangalore" text="Devanahalli, Bangalore"/>
                                                     <core:Item key="Gurgaon" text="Gurgaon"/>
+                                                    <core:Item key="Pune" text="Pune"/>
                                                 </Select>
                                             </VBox>
                                         </FlexBox>
 
                                         <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
                                             <VBox width="32%">
-                                                <Label text="T Level" required="true"/>
+                                                <Label text="T-Level" required="true"/>
                                                 <Select selectedKey="{employeeEditor>/tLevel}">
-                                                    <core:Item key="" text="-- Select T Level --"/>
+                                                    <core:Item key="" text="-- Select T-Level --"/>
                                                     <core:Item key="T1" text="T1"/>
                                                     <core:Item key="T2" text="T2"/>
                                                     <core:Item key="T3" text="T3"/>
@@ -116,8 +126,6 @@
                                                     <core:Item key="L1" text="L1"/>
                                                     <core:Item key="L2" text="L2"/>
                                                     <core:Item key="L3" text="L3"/>
-                                                    <core:Item key="L4" text="L4"/>
-                                                    <core:Item key="L5" text="L5"/>
                                                 </Select>
                                             </VBox>
                                             <VBox width="32%">
