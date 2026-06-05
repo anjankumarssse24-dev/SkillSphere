@@ -3,10 +3,19 @@
     xmlns:core="sap.ui.core">
     <Dialog
         id="availableEmployeesDialog"
-        title="{availableEmployeesDialog>/title}"
         contentWidth="600px"
         contentHeight="500px"
         resizable="true">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="{availableEmployeesDialog>/title}"/>
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://decline" press="onCloseAvailableEmployeesDialog" tooltip="Close"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
         <content>
             <VBox class="sapUiSmallMargin">
                 <Text text="{availableEmployeesDialog>/subtitle}" class="sapUiTinyMarginBottom"/>

@@ -46,7 +46,13 @@
                                         </m:Toolbar>
                                     </m:headerToolbar>
                                     <m:content>
-                                        <m:Table id="masterProjectsTable" items="{masterProjects>/projects}" class="sapUiResponsiveMargin" mode="None" fixedLayout="false">
+                                        <m:Table id="masterProjectsTable" items="{masterProjects>/projects}" class="sapUiResponsiveMargin" mode="None" fixedLayout="false" growing="true" growingThreshold="50">
+                                            <m:headerToolbar>
+                                                <m:OverflowToolbar>
+                                                    <m:ToolbarSpacer/>
+                                                    <m:Button icon="sap-icon://sort" tooltip="Sort" press="onSortMasterProjects"/>
+                                                </m:OverflowToolbar>
+                                            </m:headerToolbar>
                                             <m:columns>
                                                 <m:Column minScreenWidth="Phone" demandPopin="true">
                                                     <m:Text text="Project Name"/>
@@ -88,6 +94,7 @@
                                                         <m:Button icon="sap-icon://edit" tooltip="Edit Project" type="Ghost" press="onEditMasterProject" class="sapUiTinyMarginEnd"/>
                                                         <m:Button icon="sap-icon://complete" tooltip="Mark as Completed" type="Ghost" press="onMarkMasterProjectCompleted" class="sapUiTinyMarginEnd" enabled="{= ${masterProjects>status} !== 'Completed'}"/>
                                                         <m:Button icon="sap-icon://delete" tooltip="Delete Project" type="Ghost" press="onDeleteMasterProject"/>
+                                                        <m:Button icon="sap-icon://group" tooltip="Assign Team Members" type="Ghost" press="onAssignTeamMembers" class="sapUiTinyMarginBegin"/>
                                                     </m:HBox>
                                                 </m:ColumnListItem>
                                             </m:items>
@@ -297,7 +304,13 @@
                                     </m:Toolbar>
                                 </m:headerToolbar>
                                 <m:content>
-                                    <m:Table id="teamTable" items="{managerEmployees>/employees}" class="sapUiResponsiveMargin" mode="None" fixedLayout="false">
+                                    <m:Table id="teamTable" items="{managerEmployees>/employees}" class="sapUiResponsiveMargin" mode="None" fixedLayout="false" growing="true" growingThreshold="50">
+                                        <m:headerToolbar>
+                                            <m:OverflowToolbar>
+                                                <m:ToolbarSpacer/>
+                                                <m:Button icon="sap-icon://sort" tooltip="Sort" press="onSortTeamMembers"/>
+                                            </m:OverflowToolbar>
+                                        </m:headerToolbar>
                                         <m:columns>
                                             <m:Column minScreenWidth="Phone" demandPopin="true">
                                                 <m:Text text="Employee Name"/>
@@ -1099,6 +1112,7 @@
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">
                                             <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Senior Developer" text="Senior Developer"/>
                                             <core:Item key="Tech Lead" text="Tech Lead"/>
                                             <core:Item key="Solution Architect" text="Solution Architect"/>
                                             <core:Item key="Team Member" text="Team Member"/>

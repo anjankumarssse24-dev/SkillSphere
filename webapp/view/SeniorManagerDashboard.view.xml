@@ -843,6 +843,7 @@
                                                     width="100%"
                                                     class="sapUiMediumMarginBottom">
                                             <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Senior Developer" text="Senior Developer"/>
                                             <core:Item key="Tech Lead" text="Tech Lead"/>
                                             <core:Item key="Solution Architect" text="Solution Architect"/>
                                             <core:Item key="Team Member" text="Team Member"/>

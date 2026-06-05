@@ -16,6 +16,7 @@ import Dialog from "sap/m/Dialog";
 import Label from "sap/m/Label";
 import FormattedText from "sap/m/FormattedText";
 import HTML from "sap/ui/core/HTML";
+import Item from "sap/ui/core/Item";
 
 /**
  * @namespace skillsphere.controller
@@ -181,6 +182,10 @@ export default class SeniorManagerWorkOverview extends Controller {
                 return pct ? `${name} (${pct}%)` : name;
             };
 
+            // Build employee ID to name map for manager lookup
+            const empNameMap: any = {};
+            employees.forEach((emp: any) => { empNameMap[emp.employeeId] = emp.name; });
+
             // Build rows
             const rows: any[] = [];
             employees.forEach((emp: any) => {
@@ -206,12 +211,17 @@ export default class SeniorManagerWorkOverview extends Controller {
                 const initiativesUtil = inits.reduce((sum: number, i: any) => sum + (i.utilizationPercent || 0), 0);
                 const totalAllocation = projectsUtil + evaluationsUtil + initiativesUtil;
 
+                const managerId = emp.managerId || "";
+                const managerName = managerId ? (empNameMap[managerId] || managerId) : "";
+
                 const row: any = {
                     name: emp.name,
                     employeeId: emp.employeeId,
                     tLevel: tLevel,
                     techCategory: techCategory,
                     totalAllocation: totalAllocation,
+                    managerId: managerId,
+                    managerName: managerName,
                     projects: projectsList.map((p: any) => formatEntry(p.projectName, p.utilizationPercent)),
                     evaluations: evaluations.map((e: any) => formatEntry(e.evaluationName || e.initiativeName || e.description || "Evaluation", e.utilizationPercent)),
                     initiatives: inits.map((i: any) => formatEntry(i.initiativeName || i.description || "Initiative", i.utilizationPercent))
@@ -219,8 +229,13 @@ export default class SeniorManagerWorkOverview extends Controller {
                 rows.push(row);
             });
 
+            // Filter out "available" employees (those with no projects, evaluations, or initiatives)
+            const activeRows = rows.filter((r: any) =>
+                r.projects.length > 0 || r.evaluations.length > 0 || r.initiatives.length > 0
+            );
+
             // Sort by Technology category first, then by name
-            rows.sort((a: any, b: any) => {
+            activeRows.sort((a: any, b: any) => {
                 if (a.techCategory !== b.techCategory) {
                     if (!a.techCategory) return 1;
                     if (!b.techCategory) return -1;
@@ -229,7 +244,10 @@ export default class SeniorManagerWorkOverview extends Controller {
                 return a.name.localeCompare(b.name);
             });
 
-            this.allWorkOverviewRows = rows;
+            this.allWorkOverviewRows = activeRows;
+
+            // Populate Manager filter dynamically
+            this.populateManagerFilter(activeRows);
 
             // Set default filter: T5, T4, T3
             const tLevelFilter = this.byId("woTLevelFilter") as MultiComboBox;
@@ -238,7 +256,7 @@ export default class SeniorManagerWorkOverview extends Controller {
             }
 
             // Apply default filter and build table
-            const defaultFiltered = rows.filter((r: any) => r.tLevel === 'T5' || r.tLevel === 'T4' || r.tLevel === 'T3');
+            const defaultFiltered = activeRows.filter((r: any) => r.tLevel === 'T5' || r.tLevel === 'T4' || r.tLevel === 'T3');
             this.buildWorkOverviewTable(defaultFiltered);
 
             if (page?.setBusy) page.setBusy(false);
@@ -256,11 +274,21 @@ export default class SeniorManagerWorkOverview extends Controller {
 
     private mapTechCategory(specialization: string): string {
         if (!specialization) return "";
-        const s = specialization.toLowerCase();
-        if (s.includes("s/4") || s.includes("s4") || s.includes("abap") || s.includes("hana") || s.includes("procurement") || s.includes("ariba") || s.includes("fico") || s.includes("mm ") || s.includes("sd ") || s.includes("successfactor") || s.includes("erp")) return "S/4HANA";
+        const s = specialization.toLowerCase().trim();
+        // Exact match for new dropdown values first
+        if (s === "s4") return "S4";
+        if (s === "btp") return "BTP";
+        if (s === "ds") return "DS";
+        if (s === "delivery") return "Delivery";
+        if (s === "ai") return "AI";
+        // Project technology values
+        if (s === "s4+ai") return "S4";
+        if (s === "btp+ai") return "BTP";
+        if (s === "s4+btp+ai") return "S4";
+        // Legacy mapping for existing data
+        if (s.includes("s/4") || s.includes("s4") || s.includes("abap") || s.includes("hana") || s.includes("rap") || s.includes("procurement") || s.includes("ariba") || s.includes("fico") || s.includes("mm ") || s.includes("sd ") || s.includes("successfactor") || s.includes("erp")) return "S4";
         if (s.includes("btp") || s.includes("fiori") || s.includes("ui5") || s.includes("sapui5") || s.includes("cap") || s.includes("integration") || s.includes("cloud foundry") || s.includes("innovation") || s.includes("full stack") || s.includes("frontend") || s.includes("devops") || s.includes("backend")) return "BTP";
-        if (s.includes("data sci") || s.includes("data scientist") || s.includes("ai") || s.includes("ml") || s.includes("machine learning") || s.includes("analytics") || s.includes("sac")) return "Data Science";
-        if (s.includes("developer") || s.includes("architect") || s.includes("engineer") || s.includes("test") || s.includes("qa")) return "BTP";
+        if (s.includes("data sci") || s.includes("data scientist") || s.includes("machine learning") || s.includes("analytics") || s.includes("sac")) return "DS";
         return "";
     }
 
@@ -767,11 +795,36 @@ export default class SeniorManagerWorkOverview extends Controller {
         ].join("\n");
     }
 
+    private populateManagerFilter(rows: any[]): void {
+        const managerFilter = this.byId("woManagerFilter") as MultiComboBox;
+        if (!managerFilter) return;
+
+        managerFilter.removeAllItems();
+
+        // Collect unique managers from active rows
+        const managerMap: any = {};
+        rows.forEach((r: any) => {
+            if (r.managerId && r.managerName) {
+                managerMap[r.managerId] = r.managerName;
+            }
+        });
+
+        // Sort managers by name and add as items
+        const sortedManagers = Object.entries(managerMap)
+            .sort((a: any, b: any) => a[1].localeCompare(b[1]));
+
+        sortedManagers.forEach(([key, text]: [string, any]) => {
+            managerFilter.addItem(new Item({ key: key, text: text }));
+        });
+    }
+
     private getVisibleWorkRows(): any[] {
         const tLevelMulti = this.byId("woTLevelFilter") as MultiComboBox;
         const selectedTLevels = tLevelMulti?.getSelectedKeys() || [];
         const techMulti = this.byId("woTechFilter") as MultiComboBox;
         const selectedTechs = techMulti?.getSelectedKeys() || [];
+        const managerMulti = this.byId("woManagerFilter") as MultiComboBox;
+        const selectedManagers = managerMulti?.getSelectedKeys() || [];
         const searchField = this.byId("woSearchField") as any;
         const searchQuery = (searchField?.getValue() || "").trim().toLowerCase();
 
@@ -783,6 +836,10 @@ export default class SeniorManagerWorkOverview extends Controller {
 
         if (selectedTechs.length > 0) {
             filtered = filtered.filter((r: any) => selectedTechs.includes(r.techCategory));
+        }
+
+        if (selectedManagers.length > 0) {
+            filtered = filtered.filter((r: any) => selectedManagers.includes(r.managerId));
         }
 
         if (searchQuery) {

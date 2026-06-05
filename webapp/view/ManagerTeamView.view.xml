@@ -60,6 +60,7 @@
                                                     <core:Item key="Frontend Developer" text="Frontend Developer"/>
                                                     <core:Item key="Backend Developer" text="Backend Developer"/>
                                                     <core:Item key="Full Stack Developer" text="Full Stack Developer"/>
+                                                    <core:Item key="Senior Developer" text="Senior Developer"/>
                                                     <core:Item key="Architect" text="Architect"/>
                                                     <core:Item key="Project Manager" text="Project Manager"/>
                                                     <core:Item key="ABAP Developer" text="ABAP Developer"/>

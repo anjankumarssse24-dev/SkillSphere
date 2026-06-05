@@ -2,11 +2,20 @@
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Dialog
-        title="{= ${employeeEditor>/mode} === 'create' ? 'Add Employee' : 'Edit Employee' }"
         contentWidth="920px"
         contentHeight="740px"
         draggable="true"
         resizable="true">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="{= ${employeeEditor>/mode} === 'create' ? 'Add Employee' : 'Edit Employee' }"/>
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://decline" press="onCloseEmployeeProfileDialog" tooltip="Close"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
         <content>
             <IconTabBar class="sapUiResponsiveContentPadding">
                 <items>
@@ -64,6 +73,7 @@
                                                 <Select selectedKey="{employeeEditor>/professionalRole}">
                                                     <core:Item key="" text="-- Select Role --"/>
                                                     <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Senior Developer" text="Senior Developer"/>
                                                     <core:Item key="Architect" text="Architect"/>
                                                     <core:Item key="Backend Developer" text="Backend Developer"/>
                                                     <core:Item key="Frontend Developer" text="Frontend Developer"/>
@@ -112,7 +122,13 @@
                                             </VBox>
                                             <VBox width="32%">
                                                 <Label text="Specialization"/>
-                                                <Input value="{employeeEditor>/specialization}" placeholder="e.g. SAP CAP"/>
+                                                <Select selectedKey="{employeeEditor>/specialization}" width="100%">
+                                                    <core:Item key="" text="-- Select Specialization --"/>
+                                                    <core:Item key="S4" text="S4"/>
+                                                    <core:Item key="BTP" text="BTP"/>
+                                                    <core:Item key="DS" text="DS"/>
+                                                    <core:Item key="Delivery" text="Delivery"/>
+                                                </Select>
                                             </VBox>
                                         </FlexBox>
 

@@ -3573,10 +3573,12 @@ export default class ManagerDashboard extends Controller {
     public onCloseEditSkillDialog(): void {
         if (!this.editSkillDialog) return;
         this.editSkillDialog.close();
-        this.editSkillDialog.attachAfterClose(() => {
-            this.editSkillDialog?.destroy();
-            this.editSkillDialog = undefined;
-        });
+        setTimeout(() => {
+            if (this.editSkillDialog) {
+                this.editSkillDialog.destroy();
+                this.editSkillDialog = undefined;
+            }
+        }, 300);
     }
 
     public async onSaveEditedSkill(): Promise<void> {

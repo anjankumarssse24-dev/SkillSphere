@@ -96,18 +96,6 @@
                       <core:Item key="{model>key}" text="{model>text}" />
                     </ComboBox>
 
-                    <!-- Grade Level -->
-                    <Label text="Grade Level *" design="Bold" />
-                    <ComboBox
-                      id="gradeLevelCombo"
-                      items="{model>/gradeLevelList}"
-                      selectedKey="{model>/gradeLevel}"
-                      placeholder="Select your grade level"
-                      required="true"
-                      width="100%">
-                      <core:Item key="{model>key}" text="{model>text}" />
-                    </ComboBox>
-
                     <!-- T-Level -->
                     <Label text="T-Level *" design="Bold" />
                     <ComboBox
@@ -120,8 +108,20 @@
                       <core:Item key="{model>key}" text="{model>text}" />
                     </ComboBox>
 
+                    <!-- Grade Level -->
+                    <Label text="Grade Level *" design="Bold" />
+                    <ComboBox
+                      id="gradeLevelCombo"
+                      items="{model>/gradeLevelList}"
+                      selectedKey="{model>/gradeLevel}"
+                      placeholder="Select your grade level"
+                      required="true"
+                      width="100%">
+                      <core:Item key="{model>key}" text="{model>text}" />
+                    </ComboBox>
+
                     <!-- Experience -->
-                    <Label text="Years of Experience" design="Bold" />
+                    <Label text="Total years of Experience" design="Bold" />
                     <Input
                       id="experienceInput"
                       value="{model>/experience}"

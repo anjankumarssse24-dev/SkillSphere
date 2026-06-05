@@ -2,8 +2,17 @@
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Dialog
-        title="Add New Project"
         contentWidth="600px">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="Add New Project"/>
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://decline" press="onManagerCloseProjectDialog" tooltip="Close"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
         <content>
             <VBox class="sapUiMediumMargin">
                 <Label text="Project Name:" required="true" />
@@ -36,6 +45,7 @@
                     placeholder="Select employee's role"
                     width="100%">
                     <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Senior Developer" text="Senior Developer"/>
                     <core:Item key="Tech Lead" text="Tech Lead"/>
                     <core:Item key="Solution Architect" text="Solution Architect"/>
                     <core:Item key="Team Member" text="Team Member"/>

@@ -2,8 +2,17 @@
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Dialog
-        title="Assign to Project/Evaluation"
         contentWidth="550px">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="Assign to Project/Evaluation"/>
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://decline" press="onCloseWorkAssignmentDialog" tooltip="Close"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
         <content>
             <VBox class="sapUiMediumMargin">
                 <!-- Info Message -->
@@ -39,6 +48,7 @@
                 <Select selectedKey="{workAssignment>/role}" width="100%">
                     <core:Item key="" text="-- Select Role --"/>
                     <core:Item key="Developer" text="Developer"/>
+                    <core:Item key="Senior Developer" text="Senior Developer"/>
                     <core:Item key="Architect" text="Architect"/>
                     <core:Item key="Backend Developer" text="Backend Developer"/>
                     <core:Item key="Frontend Developer" text="Frontend Developer"/>

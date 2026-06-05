@@ -35,6 +35,9 @@
                                 <core:Item key="Data Science" text="Data Science"/>
                             </m:MultiComboBox>
                             <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
+                            <m:Label text="Manager:" class="sapUiSmallMarginEnd"/>
+                            <m:MultiComboBox id="woManagerFilter" width="14rem" selectionChange="onWorkOverviewFilterChange" placeholder="All Managers"/>
+                            <m:ToolbarSeparator class="sapUiSmallMarginBeginEnd"/>
                             <m:SearchField id="woSearchField" width="18rem" placeholder="Search by name or ID..." search="onSearchWorkOverview" showSearchButton="true"/>
                         </m:OverflowToolbar>
                     </m:headerToolbar>

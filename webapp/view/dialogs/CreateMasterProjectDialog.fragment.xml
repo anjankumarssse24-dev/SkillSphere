@@ -2,8 +2,17 @@
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Dialog
-        title="Create New Master Project"
         contentWidth="600px">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="Create New Master Project"/>
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://decline" press="onCloseMasterProjectDialog" tooltip="Close"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
         <content>
             <VBox class="sapUiMediumMargin">
                 <Label text="Project Name:" required="true" />
@@ -16,9 +25,12 @@
                     selectedKey="{newMasterProject>/technology}"
                     placeholder="Select primary technology"
                     width="100%">
-                    <core:Item key="S/4HANA" text="S/4HANA"/>
-                    <core:Item key="BTP" text="BTP (Business Technology Platform)"/>
-                    <core:Item key="Data Science" text="Data Science"/>
+                    <core:Item key="S4" text="S4"/>
+                    <core:Item key="BTP" text="BTP"/>
+                    <core:Item key="AI" text="AI"/>
+                    <core:Item key="S4+AI" text="S4+AI"/>
+                    <core:Item key="BTP+AI" text="BTP+AI"/>
+                    <core:Item key="S4+BTP+AI" text="S4+BTP+AI"/>
                 </ComboBox>
 
                 <Label text="Start Date:" class="sapUiSmallMarginTop" required="true"/>
@@ -48,13 +60,10 @@
                     placeholder="Enter project description" />
 
                 <Label text="Project Manager:" class="sapUiSmallMarginTop" required="true"/>
-                <ComboBox
-                    selectedKey="{newMasterProject>/projectManager}"
-                    items="{projectManagerList>/managers}"
-                    placeholder="Select project manager"
-                    width="100%">
-                    <core:Item key="{projectManagerList>name}" text="{projectManagerList>name}"/>
-                </ComboBox>
+                <Input
+                    value="{newMasterProject>/projectManager}"
+                    placeholder="Enter project manager name"
+                    width="100%"/>
 
                 <Label text="Project Creator:" class="sapUiSmallMarginTop" required="true"/>
                 <Input
@@ -70,9 +79,19 @@
                 </Select>
 
                 <Label text="Account Executive Manager (AEM):" class="sapUiSmallMarginTop"/>
-                <Input
-                    value="{newMasterProject>/accountExecutiveManager}"
-                    placeholder="Represents business stakeholders" />
+                <ComboBox
+                    selectedKey="{newMasterProject>/accountExecutiveManager}"
+                    placeholder="Select AEM (Line Manager)"
+                    width="100%">
+                    <core:Item key="Sachin Muralidhar Tadse" text="Sachin Muralidhar Tadse"/>
+                    <core:Item key="Fazal Ilahi" text="Fazal Ilahi"/>
+                    <core:Item key="Deepak" text="Deepak"/>
+                    <core:Item key="Abhishek Garg" text="Abhishek Garg"/>
+                    <core:Item key="Hemlata Janawa" text="Hemlata Janawa"/>
+                    <core:Item key="Pawan Jain" text="Pawan Jain"/>
+                    <core:Item key="Puja K" text="Puja K"/>
+                    <core:Item key="Agya Pal Singh" text="Agya Pal Singh"/>
+                </ComboBox>
 
                 <Label text="Project Orchestrator:" class="sapUiSmallMarginTop"/>
                 <Input

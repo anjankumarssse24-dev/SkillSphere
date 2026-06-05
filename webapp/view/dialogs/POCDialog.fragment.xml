@@ -2,8 +2,17 @@
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     <Dialog
-        title="Mark POC Utilization"
         contentWidth="500px">
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="Mark POC Utilization"/>
+                </contentMiddle>
+                <contentRight>
+                    <Button icon="sap-icon://decline" press="onClosePOCDialog" tooltip="Close"/>
+                </contentRight>
+            </Bar>
+        </customHeader>
         <content>
             <VBox class="sapUiMediumMargin">
                 <!-- POC Title -->

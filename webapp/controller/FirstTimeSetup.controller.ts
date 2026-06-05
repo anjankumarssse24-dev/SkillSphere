@@ -28,7 +28,7 @@ export default class FirstTimeSetup extends Controller {
       employeeId: "",
       name: "",
       email: "",
-      team: "CIS",
+      team: "CIS Engineering APAC Build",
       subTeam: "",
       location: "",
       gradeLevel: "",
@@ -37,28 +37,25 @@ export default class FirstTimeSetup extends Controller {
       managerId: "",
       termsAccepted: false,
       subTeamList: [
-        { key: "Team 1", text: "Team 1" },
-        { key: "Team 2", text: "Team 2" },
-        { key: "Team 3", text: "Team 3" },
-        { key: "Team 4", text: "Team 4" },
-        { key: "Team 5", text: "Team 5" },
-        { key: "Team 6", text: "Team 6" },
-        { key: "Team 7", text: "Team 7" },
-        { key: "Team 8", text: "Team 8" },
-        { key: "Team 9", text: "Team 9" },
-        { key: "Nirmala Team", text: "Nirmala Team" }
+        { key: "Team 1 - Sachin Muralidhar Tadse", text: "Team 1 - Sachin Muralidhar Tadse" },
+        { key: "Team 2 - Fazal Ilahi", text: "Team 2 - Fazal Ilahi" },
+        { key: "Team 3 - Deepak", text: "Team 3 - Deepak" },
+        { key: "Team 4 - Abhishek Garg", text: "Team 4 - Abhishek Garg" },
+        { key: "Team 5 - Hemlata Janawa", text: "Team 5 - Hemlata Janawa" },
+        { key: "Team 7 - Pawan Jain", text: "Team 7 - Pawan Jain" },
+        { key: "Team 8 - Puja K", text: "Team 8 - Puja K" },
+        { key: "Team 9 - Agya Pal Singh", text: "Team 9 - Agya Pal Singh" }
       ],
       locationsList: [
         { key: "Whitefield, Bangalore", text: "Whitefield, Bangalore" },
         { key: "Devanahalli, Bangalore", text: "Devanahalli, Bangalore" },
-        { key: "Gurgaon", text: "Gurgaon" }
+        { key: "Gurgaon", text: "Gurgaon" },
+        { key: "Pune", text: "Pune" }
       ],
       gradeLevelList: [
         { key: "L1", text: "L1" },
         { key: "L2", text: "L2" },
-        { key: "L3", text: "L3" },
-        { key: "L4", text: "L4" },
-        { key: "L5", text: "L5" }
+        { key: "L3", text: "L3" }
       ],
       tLevelList: [
         { key: "T1", text: "T1" },
@@ -193,7 +190,7 @@ export default class FirstTimeSetup extends Controller {
         loginEmployeeId: this.userContext?.employeeId,
         employeeId,
         name: this.model.getProperty("/name"),
-        team: "CIS",
+        team: "CIS Engineering APAC Build",
         subTeam: this.model.getProperty("/subTeam"),
         location: this.model.getProperty("/location"),
         gradeLevel: this.model.getProperty("/gradeLevel"),
